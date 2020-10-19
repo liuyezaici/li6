@@ -1,0 +1,40 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//l_r input max min
+<div id="show_bind"></div>
+<br />
+<div id="show_select"></div>
+
+<script>
+    var avatarUrl='//www.baidu.com/img/qxinshouye_a5df87f73cde439ec5d07aeb94e7db72.png';
+    var getParentPowerUrl = '/?s=tool/get_today';
+    //数据绑定
+    $('#show_bind').append(
+        makeDiv({
+            'style': "width: 200px;",
+            data_from: {
+                url: getParentPowerUrl,
+                data_key: 'info',
+                success_key: 'id',
+                success_value: '0038'
+            },
+            value: makeInput({
+                name: 'avatar',
+                value: '今天是:{today_data}',  //图片url
+                success_key: 'code',
+                success_value: '1',
+                style: 'width: 100%;height: 100%; border-radius: 2rem; display:block;',
+                color: '{color}',
+            }),
+            click: function () {
+                location.hash='setting';
+            }
+        }),
+    );
+</script>

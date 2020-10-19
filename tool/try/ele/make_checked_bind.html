@@ -1,0 +1,29 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .demo {
+        width: 240px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 20px 10px;
+        background-color: #c3d4ef;
+    }
+</style>
+<div id="show_div" class="a"></div>
+<div id="show_val"></div>
+<script>
+var items = makeChecked({
+    name:  'demo',
+    value: '777',
+    text: '标题',
+    checked: '1',
+    bind: 'some_val'
+});
+$('#show_div').append(items);
+$('#show_val').append( makeDiv({value: '当前值:{{some_val}}'}) );
+</script>

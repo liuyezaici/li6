@@ -1,0 +1,43 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//一个简单的垂直音量条
+<div id="show_bar"></div>
+<br />
+
+<script>
+//一个简单的数据循环
+//注意：
+// 如果数据是数组: index 作为每个循环的序号 ;
+// value/class 属性支持js语法. 变量用{}括起
+
+var div = makeBar({
+        width: '25px',
+        height: '300px',
+        margin_left: '200px',
+        direction: 'y',
+        max: 600,
+        min: 1,
+        dec: 1,//保留几位小数
+        value: '332',
+        moving: function(xy, icon, obj) {
+            // console.log(icon);
+            // console.log(obj);
+            // console.log(pubobj);
+        },
+        mouse_up: function(xy, icon, obj) {
+        },
+        icon: {
+            // min_top: -2,
+            min_left: -1,
+            width: '30px',
+            // height: '25px',
+        }
+    });
+    $('#show_bar').append(div);
+</script>

@@ -1,0 +1,38 @@
+<table cellpadding="0" cellspacing="0" border="0" class="list_table">
+    <tr class="list_top">
+        <td width="10"></td>
+        <td width="200">签到时间</td>
+        <td width="220">描述</td>
+        <td width="10"></td>
+        <td>
+            金币值
+        </td>
+    </tr>
+    <?php
+        foreach($sign_list as $n => $v) {
+    ?>
+    <tr>
+        <td></td>
+        <td><?=$v['sg_ctime']?></td>
+        <td>
+            <?=(($v['sg_num'] >1) ?"连续签到":"签到").$v['sg_num'] ?>次
+        </td>
+        <td width="10"></td>
+        <td>
+            +<?=$v['sg_code']?>金币
+        </td>
+    </tr>
+    <?php
+        }
+    ?>
+    <tr><td colspan="5" style="padding: 0;height: 5px;"></td></tr>
+    <th id="menu" colspan="10" align="center">
+        <?=$divmenu?>
+    </th>
+</table>
+<script>
+
+    //左则样式切换
+    leftEvent('score');
+
+</script>

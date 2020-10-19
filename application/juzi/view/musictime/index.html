@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+{include file="common/meta" /}
+</head>
+<base target="_parent" />
+<body>
+{include file="common/header" /}
+{include  file="common/banner" currentBanner='musicTime' /}
+<script src="/assets/js/juzi/player.js"></script>
+<div class="front_body container">
+    <div class="panel panel-info">
+        {include  file="common/musicTimeTop"  uid='$uid' keyword='$keyword' /}
+    </div>
+</div>
+<div class="front_body container">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="position: relative;">
+            <?php
+            if($keyword) {
+            ?>搜索歌曲:<?=$keyword;?>
+            <?php
+            } else {
+               echo '最新歌曲';
+            } ?>
+        </div>
+        <div class="panel-body">
+            <table class="table table-striped">
+                <tr>
+                    <th>
+                        歌曲
+                    </th>
+                    <th>
+                        作者
+                    </th>
+                    <th>
+                        时间
+                    </th>
+                </tr>
+                <?php
+                foreach($list as $v) {
+                ?>
+                <tr>
+                    <td>
+                        <a href="/juzi/Musictime/liList/id/<?=$v['id']?>" target="_blank">
+                            <?=$v['songTitle']?>  <?=$v['singer']?>
+                        </a>
+                    </td>
+                    <td>
+                        <?=$v['userName']?>
+                    </td>
+                    <td>
+                        <?=$v['ctime']?>
+                    </td>
+                </tr>
+                <?php
+                }
+                ?>
+                <?php
+                if($nullStr) {
+                ?>
+                <tr>
+                    <td colspan="3">
+                        <div class="alert alert-warning">
+                            <?=$nullStr?>
+                        </div>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+            </table>
+        </div>
+    </div>
+</div>
+{include file="common/footer" /}
+</body>
+</html>

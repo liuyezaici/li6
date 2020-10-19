@@ -1,0 +1,23 @@
+<!-- sidebar: style can be found in sidebar.less -->
+<section class="sidebar">
+    <!-- search form -->
+    <form action="" method="get" class="sidebar-form" onsubmit="return false;">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="{:__('Search menu')}">
+            <span class="input-group-btn">
+                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                </button>
+            </span>
+            <div class="menuresult list-group sidebar-form hide">
+            </div>
+        </div>
+    </form>
+    <!-- /.search form -->
+
+    <!-- sidebar menu: : style can be found in sidebar.less -->
+    <!--如果想始终显示子菜单,则给ul加上show-submenu类即可-->
+    <ul class="sidebar-menu" id="sidebar_menu">
+        {$menulist}
+    </ul>
+</section>
+<!-- /.sidebar -->

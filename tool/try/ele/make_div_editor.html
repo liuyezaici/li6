@@ -1,0 +1,55 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+    <script type="text/javascript" charset="utf-8" src="/include/lib/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/include/lib/ueditor/ueditor.all.min.js"> </script>
+    <!--建议手动加在语言，避免在ie下有时因为加载语言失败导致编辑器加载失败-->
+    <!--这里加载的语言文件会覆盖你在配置项目里添加的语言类型，比如你在配置项目里配置的是英文，这里加载的中文，那最后就是中文-->
+    <script type="text/javascript" charset="utf-8" src="/include/lib/ueditor/lang/zh-cn/zh-cn.js"></script>
+//div渲染服务器的数据
+<div id="show_div"></div>
+<script>
+//一个简单的div
+var getDataUrl = '/?s=tool/get_group';
+    var div = makeDiv({
+        'class': 'well',
+        'width': '600px',
+        data_from: {
+            url: getDataUrl,
+            data_key: 'info',
+            post_data: {},
+            success_key: 'code',
+            success_value: '1',
+            err_func: function (e) {
+                msgTisf(e.msg);
+            }
+        },
+        value:  [makeInput({
+            'value': '{group}',
+            paste: function () {
+                console.log('paste...');
+            }
+
+        }),
+            makeEditor({
+            'value': '{group}',
+            'type': 'uEditor',
+            'width': '500px',
+            'height': '200px',
+            name: 'demo',
+            paste: function () {
+                console.log('paste...');
+            }
+
+        })
+        ]
+    });
+  $('#show_div').append(div);
+
+
+</script>

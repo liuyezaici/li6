@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .demo {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+//创建一个带下级的select框
+
+<div id="show_select1"></div>
+<div id="show_select2"></div>
+<div id="show_select3"></div>
+<div id="show_bind1"></div>
+<div id="show_bind2"></div>
+<br />
+<script>
+    var select = makeSelect({
+        name: 'demo1',
+        'value': 450000, // 支持字符串或数组
+        'default_text': '请选择',
+        'value_key': "s_id",//取值的键名
+        'title_key': "s_name",//取值的键名
+        bind: 'province__id',
+        // bind_text: 'some_val1',
+        menu: {
+            width: '620px',
+            'data': [{"s_id":"110000","s_name":"\u5317\u4eac"},
+                {"s_id":"120000","s_name":"\u5929\u6d25"},
+                {"s_id":"130000","s_name":"\u6cb3\u5317\u7701"},
+                {"s_id":"140000","s_name":"\u5c71\u897f\u7701"},
+                {"s_id":"150000","s_name":"\u5185\u8499\u53e4\u81ea\u6cbb\u533a"},
+                {"s_id":"210000","s_name":"\u8fbd\u5b81\u7701"},
+                {"s_id":"220000","s_name":"\u5409\u6797\u7701"},
+                {"s_id":"230000","s_name":"\u9ed1\u9f99\u6c5f\u7701"},
+                {"s_id":"310000","s_name":"\u4e0a\u6d77"},{"s_id":"320000","s_name":"\u6c5f\u82cf\u7701"},
+                {"s_id":"330000","s_name":"\u6d59\u6c5f\u7701"},{"s_id":"340000","s_name":"\u5b89\u5fbd\u7701"},
+                {"s_id":"350000","s_name":"\u798f\u5efa\u7701"},{"s_id":"360000","s_name":"\u6c5f\u897f\u7701"},
+                {"s_id":"370000","s_name":"\u5c71\u4e1c\u7701"},{"s_id":"410000","s_name":"\u6cb3\u5357\u7701"},
+                {"s_id":"420000","s_name":"\u6e56\u5317\u7701"},
+                {"s_id":"430000","s_name":"\u6e56\u5357\u7701"},{"s_id":"440000","s_name":"\u5e7f\u4e1c\u7701"},
+                {"s_id":"450000","s_name":"\u5e7f\u897f\u58ee\u65cf\u81ea\u6cbb\u533a"},
+                {"s_id":"460000","s_name":"\u6d77\u5357\u7701"},
+                {"s_id":"500000","s_name":"\u91cd\u5e86"},{"s_id":"510000","s_name":"\u56db\u5ddd\u7701"},
+                {"s_id":"520000","s_name":"\u8d35\u5dde\u7701"},
+                {"s_id":"530000","s_name":"\u4e91\u5357\u7701"},{"s_id":"540000","s_name":"\u897f\u85cf\u81ea\u6cbb\u533a"},
+                {"s_id":"610000","s_name":"\u9655\u897f\u7701"},{"s_id":"620000","s_name":"\u7518\u8083\u7701"},
+                {"s_id":"630000","s_name":"\u9752\u6d77\u7701"},{"s_id":"640000","s_name":"\u5b81\u590f\u56de\u65cf\u81ea\u6cbb\u533a"},
+                {"s_id":"650000","s_name":"\u65b0\u7586\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a"},
+                {"s_id":"710000","s_name":"\u53f0\u6e7e"},{"s_id":"810000","s_name":"\u9999\u6e2f\u7279\u522b\u884c\u653f\u533a"},
+                {"s_id":"820000","s_name":"\u6fb3\u95e8\u7279\u522b\u884c\u653f\u533a"}
+            ],
+        },
+        li: {
+            value: "{s_name}",
+            width: '120px'
+        }
+        , son: {
+            //市区
+            name: 'demo2',
+            'class': 'city',
+            value: '450500',
+            need_parent_val: true, //数据来源于父值确认后
+            need_parent_key: 'area_id', //数据来源于父值确认后
+            menu: {
+                width: '500px',
+                data_from: {
+                    url: '/?s=tool/get_area&city', //子数据来源
+                    success_key: 'id',
+                    success_value: '0038',
+                    data_key: 'info'
+                },
+            },
+            li: {
+                value: "{s_name}",
+                width: '100px',
+                click: function (obj, eve, ff) {
+                }
+            }
+            // ,son: {//乡镇
+            //     name: 'towns',
+            //     menu: {
+            //         width: '600px'
+            //     },
+            //     need_parent_val: true, //数据来源于父值确认后
+            //     need_parent_key: 'area_id', //数据来源于父值确认后
+            //     bind_text: 'some_val3',
+            //     // value: '',
+            //     value: '450521',
+            //     data_from: {
+            //         url: '/?s=tool/get_area&town', //子数据来源 有data时可不设置
+            //         success_key: 'id',
+            //         success_value: '0038',
+            //         data_key: 'info'
+            //     },
+            //     li: {
+            //         value: "{s_name}",
+            //         width: '100px',
+            //         click: function (obj, par) {
+            //         }
+            //     }
+            // }
+        }
+    });
+  $('#show_select1').append(select);
+  // $('#show_select2').append(select['son']);
+  $('#show_select2').append(select['son']).append(select['son']['son']);
+  //
+  //   //text数据绑定
+  //   $('#show_bind1').append( makeInput({
+  //       bind: 'province__id',
+  //       value: ''
+  //   }));
+  //   //text数据绑定
+  //   $('#show_bind2').append( makeDiv({
+  //       value: '文本: {{some_val1}} {{some_val2}} {{some_val3}}'
+  //   }));
+</script>

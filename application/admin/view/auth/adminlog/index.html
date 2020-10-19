@@ -1,0 +1,168 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="widget-body no-padding">
+                <div id="show_search_form"></div>
+                <div id="toolbar" class="toolbar">
+                    <?=build_toolbar([
+                        [
+                        'power'=>'index/index',
+                    'title'=>'刷新',
+                    'icon'=>'fa fa-refresh',
+                    'class'=>'btn btn-primary btn-refresh',
+                    'click'=>'refreshAdminLog()'
+                    ]
+                    ]);?>
+                </div>
+                <div id="list_result"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var indexUrl = '/admin/auth/adminlog/';
+
+    //分页框
+    var pageObj = makePage({
+        click: function (obj, newPage) {
+			topSearchForm.findName("page").val(newPage);
+			searchFormGo(topSearchForm, parentListTable, pageObj, false);
+        }
+    });
+    //搜索框
+    var topSearchForm = makeForm({
+        url: indexUrl,
+        submit: function(form_, e) {
+            console.log(e);
+            e.preventDefault();
+            topSearchForm.findName("page").val(1);
+            searchFormGo(topSearchForm, parentListTable, pageObj);
+            return false;
+        },
+        value: makeDiv({
+            'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
+            value: [
+                makeInput({
+                    value: 1,
+                    type: 'hidden',
+                    name: 'page'
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: 'ID:'
+                        }),
+                        makeInput({
+                            'class': 'col-xs-8',
+                            'name': 'id',
+                            value: '',
+                        }),
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '帐号:'
+                        }), makeSpan({
+                            'class': 'col-xs-8',
+                            value:makeInput({
+                                'name': 'username',
+                                value: '',
+                                clear: true
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: makeBtn({
+                        'class': 'btn btn-success',
+                        value: '搜索',
+                        type: 'submit'
+                    })
+                }),
+            ]
+        })
+    });
+    $('#show_search_form').append(topSearchForm);
+    var parentListTable = makeTable({
+        'class': 'table table-striped table-bordered table-hover',
+        tr_top: [
+            {
+                th: [
+                    {
+                        value: 'ID'
+                    },
+                    {
+                        value: '帐号'
+                    },
+                    {
+                        value: '时间'
+                    },
+                    {
+                        value: 'url'
+                    },
+                    {
+                        value: 'title'
+                    },
+                    {
+                        value: 'useragent'
+                    }
+                ]
+            }
+        ],
+        tr_default: [
+            {
+                show: '{{this.length}==0}',
+                td: [
+                    {
+                        colspan: '6',
+                        value: '没有搜索结果'
+                    }
+                ]
+            }
+        ],
+        tr: [
+            {
+                show: '{"{id}" !=""}',
+                td: [
+                    {
+                        value: '{id}'
+                    },
+                    {
+                        value: '{username}'
+                    },
+                    {
+                        value: '{noSecond[run]({createtime})}'
+                    },
+                    {
+                        value: '{url}'
+                    },
+                    {
+                        value: '{title}'
+                    },
+                    {
+                        value: '{useragent}'
+                    }
+                ]
+            }
+        ],
+        data_from: {
+            func: function (tableObj) {
+                searchFormGo(topSearchForm, tableObj, pageObj);
+            }
+        }
+    });
+    $('#list_result').append(parentListTable).append(pageObj);
+
+    //刷新列表
+    function refreshAdminLog() {
+        searchFormGo(topSearchForm, parentListTable, pageObj);
+    }
+</script>

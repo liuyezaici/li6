@@ -1,0 +1,29 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//div渲染服务器的数据
+<div id="show_div"></div>
+<script>
+//一个简单的div
+    var div = makeDiv({
+        data: {
+            s: 1
+        },
+        value: makeDiv({
+            'class': 'well',
+            value: makeDiv({
+                show: '{s}',
+                'class': 'well',
+                value: '有data才显示:{a}'
+            })
+        })
+    });
+  $('#show_div').append(div);
+
+
+</script>

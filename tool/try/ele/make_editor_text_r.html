@@ -1,0 +1,56 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    #show_list .even {
+        background-color: #efefef;
+    }
+    #show_list .odd {
+        background-color: #fff;
+    }
+    #show_list ul {
+        margin: 0;
+        padding: 0;
+    }
+    #show_list ul li {
+        padding: 5px 10px;
+        margin: 0;
+        list-style-type: none;
+    }
+    #show_list .active {
+        color: #c02e00;
+        font-weight: bold;
+    }
+    #show_list .hover {
+        font-style: italic;
+    }
+</style>
+//一个简单的编辑器
+<div id="show_editor"></div>
+<br />
+
+<div id="show_reload_btn"></div>
+
+<script>
+
+    $('#show_editor').append(
+        makeEditor({
+            name: 'message',
+            type: 'text',
+            width: '400px',
+            value: '网址: asassadsda', keyup: function(obj) {
+                var val_ = obj.value;
+                if(val_ && val_.indexOf('\n') !=-1) {
+                    val_ = val_.replace(/\n/g, ',')
+                    obj.value = val_;
+                }
+            }
+        })
+    );
+
+</script>

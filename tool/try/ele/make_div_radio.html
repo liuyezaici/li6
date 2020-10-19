@@ -1,0 +1,49 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//div渲染服务器的数据
+<div id="show_div"></div>
+<script>
+//一个简单的div
+var getDataUrl = '/?s=tool/get_group';
+    var div = makeDiv({
+        data_from: {
+            url: getDataUrl,
+            data_key: 'info',
+            post_data: {},
+            success_key: 'code',
+            success_value: '1',
+            err_func: function (e) {
+                msgTisf(e.msg);
+            }
+        },
+        value: makeRadio({
+            value: '{group}',
+            name: 'demo',
+            'class': 'radios-success',
+            value_key: 'value1',
+            data_valuestr: '{group}',
+            title_key: 'text1',
+            items: {
+                data: [
+                    {value1: 11, text1: 'A组'},
+                    {value1: 1, text1: 'B组'},
+                    {value1: 111, text1: 'C组'},
+                ]
+            },
+            lazyCall: function (itemObj) {
+                console.log('item.value:'+ itemObj.value);
+                console.log(itemObj);
+                console.log(itemObj.data_valuestr);
+            }
+        })
+    });
+  $('#show_div').append(div);
+
+
+</script>

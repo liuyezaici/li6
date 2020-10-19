@@ -1,0 +1,377 @@
+<style>
+    .diy_trees .son_menu li {
+        display: inline-block;
+        width: 150px;
+    }
+</style>
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="widget-body no-padding">
+                <div id="show_search_form"></div>
+                <div id="toolbar" class="toolbar">
+                    <?=build_toolbar([
+                        [
+                        'power'=>'index/index',
+                    'title'=>'刷新',
+                    'icon'=>'fa fa-refresh',
+                    'class'=>'btn btn-primary btn-refresh',
+                    'click'=>'refreshAdminGroup()'
+                    ],
+                    [
+                    'power'=>'index/add',
+                    'title'=>'添加',
+                    'icon'=>'fa fa-plus',
+                    'class'=>'btn btn-success btn-add',
+                    'click'=>'editAdminGroup()'
+                    ]
+                    ]);?>
+                </div>
+                <div id="list_result"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var indexUrl = '/admin/auth/group/';
+    var delUrl = '/admin/auth/group/del/id/';
+    var getUrl = '/admin/auth/group/get/id/';
+    var addUrl = '/admin/auth/group/add/';
+    var editUrl = '/admin/auth/group/edit/id/';
+
+    var allPower = {$allPower};
+    var allTypes = {$allTypes};
+    //分页框
+    var pageObj = makePage({
+        click: function (obj, newPage) {
+            topSearchForm.findName("page").val(newPage);
+            searchFormGo(topSearchForm, parentListTable, pageObj, false);
+        }
+    });
+    //搜索框
+    var topSearchForm = makeForm({
+        url: indexUrl,
+        submit: function(form_, e) {
+            console.log(e);
+            e.preventDefault();
+            topSearchForm.findName("page").val(1);
+            searchFormGo(topSearchForm, parentListTable, pageObj);
+            return false;
+        },
+        value: makeDiv({
+            'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
+            value: [
+                makeInput({
+                    value: 1,
+                    type: 'hidden',
+                    name: 'page'
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: 'ID:'
+                        }),
+                        makeInput({
+                            'class': 'col-xs-8',
+                            'name': 'id',
+                            value: '',
+                        }),
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '组名:'
+                        }),
+                        makeSpan({
+                            'class': 'col-xs-8',
+                            value:  makeInput({
+                                'name': 'title',
+                                value: '',
+                                clear: true
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: makeBtn({
+                        'class': 'btn btn-success',
+                        value: '搜索',
+                        type: 'submit'
+                    })
+                }),
+            ]
+        })
+    });
+    $('#show_search_form').append(topSearchForm);
+    var parentListTable = makeTable({
+        'class': 'table table-striped table-bordered table-hover',
+        tr_top: [
+            {
+                th: [
+                    {
+                        value: 'ID'
+                    },
+                    {
+                        value: '父组'
+                    },
+                    {
+                        value: '组名'
+                    },
+                    {
+                        value: '创建时间'
+                    },
+                    {
+                        value: '系统角色关联'
+                    },
+                    {
+                        value: '状态'
+                    },
+                    {
+                        value: '操作'
+                    }
+                ]
+            }
+        ],
+        tr_default: [
+            {
+                show: '{{this.length}==0}',
+                td: [
+                    {
+                        colspan: '6',
+                        value: '没有搜索结果'
+                    }
+                ]
+            }
+        ],
+        tr: [
+            {
+                show: '{"{id}" !=""}',
+                td: [
+                    {
+                        value: '{id}'
+                    },
+                    {
+                        value: '{title_parent}'
+                    },
+                    {
+                        value: '{title}'
+                    },
+                    {
+                        value: '{noSecond[run]({createtime})}'
+                    },
+                    {
+                        value: '{type_name}'
+                    },
+                    {
+                        value: '{status_name}'
+                    },
+                    {
+                        value: [
+                            makeBtn({
+                                'class': 'btn btn-xs btn-success',
+                                value: '编辑',
+                                click: "editAdminGroup('{id}')"
+                            }),
+                            makeBtn({
+                                'class': 'btn btn-xs btn-danger',
+                                value: '删除',
+                                margin_left: '5px',
+                                click: "delAdminGroup('{id}')"
+                            })
+                        ]
+                    }
+                ]
+            }
+        ],
+        data_from: {
+            func: function (tableObj) {
+                searchFormGo(topSearchForm, tableObj, pageObj);
+            }
+        }
+    });
+    $('#list_result').append(parentListTable).append(pageObj);
+
+    //刷新列表
+    function refreshAdminGroup() {
+        searchFormGo(topSearchForm, parentListTable, pageObj);
+    }
+    //删除分组
+    function delAdminGroup(id) {
+        msgConfirm('您是否确认要删除此分组？', '确定', '取消', function () {
+            hideNewBox();
+            postAndDone({
+                url: delUrl + id,
+                success_key: 'code',
+                success_value: '1',
+                success_func: function () {
+                    refreshAdminGroup();
+                    msgTis('删除成功');
+                },
+                err_func: function (data) {
+                    msgTis(data.msg);
+                }
+            })
+        });
+    }
+
+    //添加编辑分组
+    function editAdminGroup(id) {
+        id = id || 0;
+        var dataFromObj = null;
+        if(id) {
+            dataFromObj = {
+                url: getUrl + id,
+                data_key: 'data'
+            };
+        }
+        var box = makeForm({
+            'type': 'post',
+            url: id > 0 ? editUrl + id : addUrl,
+            submit: function (obj, ev) {
+                console.log(obj.getFormDatas());
+
+            },
+            success_key: 'code',
+            success_value: ['1'],
+            success_func: function (data) {
+                hideNewBox();
+                if(id > 0) {
+                    msgTis('修改成功');
+                } else {
+                    msgTis('添加成功');
+                }
+                refreshAdminGroup();
+            },
+            err_func: function (data) {
+                msg(data.msg);
+            },
+            value: makeTable({
+                'class': 'edit_table',
+                data_from: dataFromObj,
+                tr_1: [
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '上级分组'
+                            }, {
+                                'class': 'td_main',
+                                value: makeSelect({
+                                    name: 'row[pid]',
+                                    value: '{pid}',
+                                    'clear': true,
+                                    value_key: 'id',
+                                    title_key: 'title',
+                                    menu: {
+                                        data_from: {
+                                            url: '/admin/auth/group/index/?selectpage',
+                                            data_key: 'rows'
+                                        },
+                                    },
+                                    li: {
+                                        value: '{title}'
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '系统角色关联'
+                            }, {
+                                'class': 'td_main',
+                                value: makeRadios({
+                                    name: 'row[utype]',
+                                    value: '{"{utype}" ? "{utype}":"0"}',
+                                    text_key: 'text',
+                                    items: {
+                                        data: allTypes
+                                    },
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '组名'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    width: '100%',
+                                    name: 'row[title]',
+                                    value: '{title}',
+                                    null_func: function () {
+                                        msgTis('组名不能为空');
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '状态'
+                            }, {
+                                'class': 'td_main',
+                                value: makeRadios({
+                                    name: 'row[status]',
+                                    value: '{"{status}" ? "{status}":"1"}',
+                                    text_key: 'text',
+                                    items: {
+                                        data: {$allStatus}
+                                    },
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                'valign': 'top',
+                                value: '权限'
+                            }, {
+                                'class': 'td_main',
+                                value: makeTrees({
+                                    //分类数据
+                                    items: {
+                                        'data':  allPower,
+                                        'value_key': 'id',
+                                        'title_key': 'title',//标题的字段名
+                                        'son_key': 'child',//子数据的字段名
+                                    },
+                                    name: "row[rules]",
+                                    value: "{rules}"
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: ''
+                            }, {
+                                'class': 'td_main',
+                                value: makeBtn({
+                                    'class': 'btn btn-success',
+                                    'value': id>0 ? '编辑' : '添加',
+                                    'type': 'submit'
+                                })
+                            }]
+                    }
+                ]
+            })
+        });
+        msgWin(id >0 ? '编辑':'添加', box, 800, 1);
+    }
+</script>

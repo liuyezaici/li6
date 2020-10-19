@@ -1,0 +1,235 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="widget-body no-padding">
+                <div id="show_search_form"></div>
+                <div id="toolbar" class="toolbar">
+                    <?=build_toolbar([
+                        [
+                        'power'=>'index/index',
+                    'title'=>'刷新',
+                    'icon'=>'fa fa-refresh',
+                    'class'=>'btn btn-primary btn-refresh',
+                    'click'=>'refreshFeedback()'
+                    ]
+                    ]);?>
+                </div>
+                <div id="list_result"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var indexUrl = '/adppp/feedback/index/index';
+    var addUrl = '/adppp/feedback/index/add';
+    var getUrl = '/adppp/feedback/index/get/id/';
+    var setStatusUrl = '/adppp/feedback/index/setStatus/id/';
+    var viewDetailsUrl = '/adppp/feedback/index/get/id/';
+
+    //分页框
+    var pageObj = makePage({
+        click: function (obj, newPage) {
+            topSearchForm.findName("page").val(newPage);
+            searchFormGo(topSearchForm, parentListTable, pageObj, false);
+        }
+    });
+    //搜索框
+    var topSearchForm = makeForm({
+        url: indexUrl,
+        submit: function(form_, e) {
+            console.log(e);
+            e.preventDefault();
+            topSearchForm.findName("page").val(1);
+            searchFormGo(topSearchForm, parentListTable, pageObj);
+            return false;
+        },
+        value: makeDiv({
+            'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
+            value: [
+                makeInput({
+                    value: 1,
+                    type: 'hidden',
+                    name: 'page'
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '联系人:'
+                        }), makeSpan({
+                            'class': 'col-xs-8',
+                            value: makeInput({
+                                'name': 'username',
+                                value: '',
+                                clear: true
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '电话:'
+                        }), makeSpan({
+                            'class': 'col-xs-8',
+                            value: makeInput({
+                                'name': 'tel',
+                                value: '',
+                                clear: true
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: makeBtn({
+                        'class': 'btn btn-success',
+                        value: '搜索',
+                        type: 'submit'
+                    })
+                }),
+            ]
+        })
+    });
+    $('#show_search_form').append(topSearchForm);
+    var parentListTable = makeTable({
+        'class': 'table table-striped table-bordered table-hover',
+        tr_top: [
+            {
+                th: [
+                    { value: 'ID'  },
+                    { value: '姓名' },
+                    { value: '电话' },
+                    { value: '创建时间'},
+                    { value: '状态'},
+                    { value: '操作'}
+                ]
+            }
+        ],
+        tr_default: [
+            {
+                show: '{{this.length}==0}',
+                td: [
+                    {
+                        colspan: '10',
+                        value: '没有搜索结果'
+                    }
+                ]
+            }
+        ],
+        tr: [
+            {
+                show: '{"{id}" !=""}',
+                td: [
+                    {
+                        value: '{id}'
+                    },
+                    {
+                        value: '{username}'
+                    },
+                    {
+                        value: '{tel}'
+                    },
+                    {
+                        value: '{noSecond[run]({ctime})}'
+                    },
+                    {
+                        value: '{status_name}'
+                    },
+                    {
+                        value: [
+                            makeBtn({
+                                show: '{{status}==0}',
+                                'class': 'btn btn-xs btn-info',
+                                value: '设为已处理',
+                                click: "setFeedbackStatus\('{id}', 1\)"
+                            }),
+                            makeBtn({
+                                show: '{{status}==1}',
+                                'class': 'btn btn-xs btn-default',
+                                value: '设为未处理',
+                                click: "setFeedbackStatus\('{id}', 0\)"
+                            }),
+                            makeBtn({
+                                'class': 'btn btn-xs btn-success',
+                                value: '查看详情',
+                                margin_left: '5px',
+                                click: "showDetails\('{id}', 0\)"
+                            }),
+                            makeBtn({
+                                'class': 'btn btn-xs btn-danger',
+                                value: '删除',
+                                margin_left: '5px',
+                                click: "delFeedback\('{id}'\)"
+                            })
+                        ]
+                    }
+                ]
+            }
+        ],
+        data_from: {
+            func: function (tableObj) {
+                searchFormGo(topSearchForm, tableObj, pageObj);
+            }
+        }
+    });
+    $('#list_result').append(parentListTable).append(pageObj);
+
+    //刷新列表
+    function refreshFeedback() {
+        searchFormGo(topSearchForm, parentListTable, pageObj);
+    }
+    //删除文章
+    function setFeedbackStatus(id, newVal) {
+        postAndDone({
+            url: setStatusUrl + id,
+            post_data: {'newStatus' : newVal},
+            success_key: 'code',
+            success_value: '1',
+            success_func: function () {
+                refreshFeedback();
+                msgTis('修改成功');
+            },
+            err_func: function (data) {
+                msgTis(data.msg);
+            }
+        })
+    }
+
+    //查看详情
+    function showDetails(id) {
+        var viewObj = makeDiv({
+            data_from: {
+                url: viewDetailsUrl + id,
+                data_key: 'data',
+                success_key: 'code',
+                success_value: '1',
+                err_func: function (e) {
+                    if(wapPubFunc.isLogOut(e.code)) {
+                        wapPubFunc.getWeixinOpenid();
+                        return;
+                    }
+                    msgTisf(e.msg);
+                },
+            },
+            'style': "padding: 0.2rem 0 0.2rem 0.2rem;border-bottom: 0.02rem solid #eee;",
+            value: [
+                makeDiv({
+                    'style': "color: #333; font-size: 0.26rem; margin-bottom: 0.1rem",
+                    value: '内容',
+                }),
+                makeDiv({
+                    'style': "color: #333; font-size: 0.26rem;margin-bottom: 0.1rem ",
+                    value: '{content}',
+                })
+            ]
+        });
+        msgWin('消费详情', viewObj, 500,1);
+    }
+
+</script>

@@ -1,0 +1,54 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//简单带宽度的input
+<div id="show_normal"></div>
+//数据绑定
+<div id="show_bind"></div>
+//只读的input
+<div id="show_readonly"></div>
+//设置背景文字
+<div id="show_place"></div>
+//设置密码
+<div id="show_type"></div>
+//清除按钮
+<div id="show_clear"></div>
+//格式限制  阿拉伯数字
+<div id="show_limit_int"></div>
+//格式限制  浮点小数
+<div id="show_limit_float"></div>
+//限制最长内容 5个字
+<div id="show_maxlen"></div>
+//数字限制大小 最大 10 最小6
+<div id="show_max_min"></div>
+
+<script>
+    //简单带宽度的input
+    $('#show_normal').append(makeInput({value: 'abc',type: 'text', width: 300, bind: 'some_val'}));
+    //数据绑定
+    $('#show_bind').append(makeDiv({
+        value:[
+            makeInput({value: '666',type: 'text', bind: 'some_val', clear: true}),
+            makeDiv({value: '',bind: 'some_val'})
+        ]
+    }));
+    //只读的input
+    $('#show_readonly').append(makeInput({value: 'abc',type: 'text',  width: 220, name: 'for_test', readonly: true}));
+    //设置背景
+    $('#show_place').append(makeInput({place: '这里可以显示背景',type: 'password'}));
+    //设置密码
+    $('#show_type').append(makeInput({place: '这里输入密码',type: 'password'}));
+    //清除按钮
+    $('#show_clear').append(makeInput({value: 'abc', place: '点击x可以清空内容', clear: true}));
+    //格式限制  阿拉伯数字
+    $('#show_limit_int').append(makeInput({value: '', limit: 'int'}));
+    //格式限制  浮点小数
+    $('#show_limit_float').append(makeInput({limit: 'float'}));
+    //限制最长内容 5个字
+    $('#show_maxlen').append(makeInput({maxlen: 5}));
+    //数字限制大小 最大 10 最小6
+    $('#show_max_min').append(makeInput({place: '6< ? <10', min: 6, max: 10, limit: 'float'}));
+</script>

@@ -1,0 +1,56 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的表格 <br />
+// 如需要登录 还需要创建一个form , 参考：<a href="/tool/try/?filename=lr_ele/make_form" target="_blank">makeForm</a>
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+    var getDataUrl = '/?s=tool/get_nick';
+    //js造一个简单的表格
+    var table = makeTable({
+        dataFrom: {
+            url: getDataUrl,
+            data_key: 'info',
+            post_data: {},
+            success_key: 'id',
+            success_value: '0038',
+            err_func: function (e) {
+                msgTis(e.msg);
+            }
+        },
+        tr_1: [
+            {
+                td: {
+                    style: "padding-top: 10px;padding-left: 5px;padding-right: 5px;",
+                    value: [
+                        makeSpan({
+                            'value': '昵称:{nickname}',
+                        })
+                    ]
+                },
+            }]
+    });
+    $('#show_table').append(
+        table
+    );
+</script>

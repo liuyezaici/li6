@@ -1,0 +1,189 @@
+<style type="text/css">
+<!--
+.chongzhi_form {
+    margin: -20px 0 0 -10px;
+}
+.chongzhi_form .hint {
+    line-height: 26px;
+    padding: 10px 10px;
+    background-color: #f5f8fa;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+.chongzhi_form .zfb_table {
+    width: 100%;
+}
+.chongzhi_form td {
+    padding: 2px 0 2px 10px;
+}
+.chongzhi_form .zfb_table .lab {
+    width: 20%;
+    color: #9c4739;
+}
+.chongzhi_form .fee_table {
+    width: 500px;
+}
+-->
+</style>
+<div class="right_list chongzhi_form">
+    <form name="alipayment" action="/?s=user/submit_chongzhi" method="post" target="_blank" id="rechareg_form">
+        <input id="ordermemo" name="ordermemo" type="hidden" value="" />
+        <input id="usermemo" name="usermemo" type="hidden" value="" />
+        <input name="ordertitle" type="hidden" value="<?=$yongtu?>" />
+        <input id="total" name="total" type="hidden" value="" />
+        <div class="hint">
+            <b style="color: #d74c29;">充值须知：</b>充值的手续费以支付宝为准，
+            <?=$GLOBALS['cfg_webname']?>不收取多余手续费,充值若出现问题，请保留付款凭证截图，并请及时与客服联系。
+            <a href="javascript: void(0);" target="_self" onclick="$('#rechareg_form #fee_table').toggle();" style="color: #0000ff;text-decoration: underline;">查看支付宝收费规则</a>
+            [<a href="https://b.alipay.com/order/productDetail.htm?productId=2011060800327555&tabId=3#ps-tabinfo-hash"
+                target="_blank" style="color: #0000ff;text-decoration: underline;">查看原文</a> ]
+            <table id="fee_table" class="fee_table" border="1" bordercolor="#eee" style="border-collapse:collapse;display:none">
+                <tr style="background-color: #e1eff4;">
+                    <td style="font-weight:bold">交易流量</td>
+                    <td style="font-weight:bold">阶梯费率</td>
+                </tr>
+                <tr>
+                    <td>0-6万元</td>
+                    <td>1.20%</td>
+                </tr>
+                <tr>
+                    <td>6万-50万元</td>
+                    <td>1.00%</td>
+                </tr>
+                <tr>
+                    <td>50万-100万元</td>
+                    <td>0.90%</td>
+                </tr>
+                <tr>
+                    <td>100万-200万元</td>
+                    <td>0.80%</td>
+                </tr>
+                <tr>
+                    <td>200万元以上</td>
+                    <td>0.70%</td>
+                </tr>
+            </table>
+        </div>
+        <table class="zfb_table">
+            <tr>
+                <td class="lab">充值途径：</td>
+                <td valign="top">
+                    <input id="chargetype" type="radio" value="1" checked="checked" />
+                    <img src="/resource/pub/images/alipay.gif" title="支付宝即时到账" />
+
+                </td>
+            </tr>
+            <tr>
+                <td class="lab"><?=$GLOBALS['cfg_webname']?>官方账户：</td>
+                <td>
+                    <span style="color: #ff3c00;">支付宝：<?=$GLOBALS['cfg_company_alipay']?></span>
+                </td>
+            </tr>
+             <tr>
+                <td class="lab">充值金额：</td>
+                <td><input id="money" type="text" class="input" value="<?=$money?>" maxlength="10" style="font-size:18px; width:80px;color:#CC0000;" onkeyup="countFee($(this));" onblur="countFee($(this));" />
+                    &nbsp;元
+                <span id="recharge_gongshi" style="color: #ff3c00;"></span> </td>
+            </tr>
+            <tr>
+                <td class="lab" valign="top">描述（附言）：</td>
+                <td><textarea id="memo" style="width:100%;height: 50px;"><?=$memo?></textarea></td>
+            </tr>
+            <tr>
+                <td class="lab">验证码：</td>
+                <td><input id="validate" name="validate" class="input" style="width: 80px;" type="text" value="" />
+                    <img src="/?s=system/code" style="cursor: pointer; height: 30px;vertical-align: bottom;"  id="code_image" onClick="renew_chongzhi_code();" />
+                     [<a href="javascript: void(0);" target="_self" onClick="renew_chongzhi_code();">刷新验证码</a>]
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <a class="button" href="javascript: void(0);" onclick="submitEidt();" target="_self" style="float: left;display: inline-block;">充值</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<script type="text/javascript">
+    function submitEidt() {
+        var form = $('#rechareg_form');
+        var money = $.trim(form.find('#money').val());
+        var memo = '充值金额为：' + money + '元，加手续费：' + form.find("#charge").html() + '元，实际转账金额：' + form.find("#sum").html() + '元';
+        form.find("#ordermemo").val(memo);
+        form.find("#usermemo").val($.trim(form.find('#memo').val())); //描述
+        if(!money || money == 0) {
+            msg('充值金额不能为空，请重新输入');
+			return false;
+        }
+		if (form.find("#validate").val() == ''){
+            msg('验证码不能为空，请重新输入');
+			return false;
+		}
+        if (!confirm('您' + memo + ',您确认核对无误，提交吗？')){
+            return false;
+        }
+        form.submit();
+		msg('请在新打开的窗口中完成充值，充值完成前请不要关闭此窗口。' +
+                '<br /><br /><br />' + "<a class='button' href=\"javascript:endRecharge(1);\" target=\"_self\">已经成功完成充值</a>&nbsp;&nbsp;" +
+                "<a class='button no' href=\"javascript:endRecharge(0);\" style='margin-left: 20px;' target=\"_self\">充值遇到问题</a>");
+        return true;
+    }
+
+	function formatFloat(src, pos){
+		pos = pos || 2;
+		src= Math.round(src*Math.pow(10,pos))/Math.pow(10,pos);  
+		return src;
+	}
+    //计算手续费
+    function countFee(obj){
+        var form = $('#rechareg_form');
+        var money = obj.val();
+        if(!money) {
+            form.find("#recharge_gongshi").html("");
+            form.find('#total').val('');
+            return;
+        }
+
+        var re = new RegExp(/^\d+[\.]?\d{0,2}$/);
+        if (!re.test(money)){
+            msg('输入的金额不合法，请重新输入。');
+            obj.val('');
+            return;
+        }
+        var c = 0;
+        switch($("#rechareg_form").find("#chargetype").val()){
+            case "1":
+                if (money < 60000){
+                    c = money * 0.012;
+                }else if ((money >= 60000) && (money < 500000)){
+                    c = (money - 60000) * 0.010 + 60000 * 0.012;
+                }else if ((money >= 500000) && (money < 1000000)){
+                    c = (money - 500000) * 0.009 + 440000 * 0.010 + 60000 * 0.012;
+                }else if ((money >= 1000000) && (money < 2000000)){
+                    c = (money - 1000000) * 0.008 + 500000 * 0.009 + 440000 * 0.010 + 60000 * 0.012;
+                }else{//大于200w
+                    c = (money - 2000000) * 0.007 + 1000000 * 0.008 + 500000 * 0.009 + 440000 * 0.010 + 60000 * 0.012;
+                }
+                break;
+            case "2":
+                break;
+        }
+        if ((c < 1) && (c != 0)){
+            c = 1;//少于手续费
+        }
+        form.find("#recharge_gongshi").html("手续费:<span style='color: #ff0000;font-size: 18px;' id='charge'> " +
+                formatFloat(c,2) +"</span>元 , 实际转账金额: <span style='color: #ff0000;font-size: 18px;' id='sum'>"+
+                formatFloat(parseFloat(money) + parseFloat(c)) +"</span>元");
+        form.find('#total').val(formatFloat(parseFloat(money) + parseFloat(c)));
+    }
+    //刷新验证码
+    function renew_chongzhi_code() {
+        $('#rechareg_form').find('#code_image').attr('src',function(i,oldsrc){
+            return oldsrc+'&t='+Math.random();
+        })
+    }
+    countFee($('#rechareg_form').find('#money'));
+    renew_chongzhi_code();
+</script>

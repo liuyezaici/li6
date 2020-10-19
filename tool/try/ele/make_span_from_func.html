@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<div id="show_demo"></div>
+<br />
+<script>
+    //获取数据的方法
+    function getData(obj) {
+        setTimeout(function () {
+            obj.data = {
+                'title' : 'aaaaaa'
+            };
+        }, 1000);
+    }
+    var demoSpan = makeSpan({
+        'name': 'demo',
+        'value': '{title}',
+        data_from: {
+            func: function (obj) {
+                return getData(obj);
+            }
+        },
+    });
+  $('#show_demo').append(demoSpan);
+</script>

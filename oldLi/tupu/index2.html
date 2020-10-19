@@ -1,0 +1,70 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8"><link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+    <link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+    <script src="/resource/pub/js/jquery-lr_box.js"></script>
+    <script src="/resource/pub/js/jquery-lr_base.js"></script>
+    <script src="/resource/pub/js/jquery-lr_element.js"></script>
+</head>
+<body>
+<div id="topomap" class=""></div>
+<script type="text/javascript">
+    var options = {
+        selector: "#topomap",
+        width: 1200,
+        height: 840,
+        lineLength: 100,
+//	            textColor:"#000",
+//	            textFontFamily:'',
+        nodesClick: function (t) {
+            //if (t.index == 0 || t.index == 6) t.fixed = 1;
+            t.fixed = 1;
+            if(!t.prop['show_menu']) {
+                t.prop['show_menu'] = true;
+            } else {
+                t.prop['show_menu'] = false;
+            }
+            console.log(t);
+        }
+    };
+    var nodesJson = [
+        {
+            "fixed": true,
+            "id": 221,
+            "index": 0,
+            "prop": {"name": "首页"},
+            "x": 60, "y": 680
+        },
+        {
+            "id": "22",
+            "index": 1,
+            "prop": {"name": "商品列表"}
+        },
+        {
+            "id": 36, "index": 2, "prop": {"name": "商品详情页"}
+        },
+        {
+            "id": 37, "index": 5, "prop": {"name": "购物车"}
+        },
+        {
+            "id": 58, "index": 4, "prop": {"name": "我的订单"}
+        },
+        {
+            "id": 59, "index": 3, "prop": {"name": "撤销订单"}
+        }, {
+            "fixed": true,
+            "x": 1000, "y": 65,
+            "id": 61,
+            "index": 6,
+            "prop": {"name": "退换货"}
+        }];
+//var linksJson = [ {source: from_target, target: thisIndex+1 "1" }, {source: from_target, target: thisIndex+1 "2" } ]
+    var linksJson = [
+        {"source": 0, "target": 1}, {"source": 1, "target": 2},
+        { "source": 2,"target": 3}, {"source": 5, "target": 6},
+        {"source": 4, "target": 5}, {"source": 3, "target": 4}
+        ];
+    loadMap(options, nodesJson, linksJson);
+</script>
+</body>
+</html>

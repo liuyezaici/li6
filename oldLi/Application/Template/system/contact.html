@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>联系我们 - 51眼镜网</title>
+<meta name="keywords" content="51眼镜网">
+<meta name="description" content="51眼镜网，一家专做眼镜的网站">
+<?=$header?>
+<script type="text/javascript" src="/resource/pub/js/jquery.PrintArea.js"></script>
+<style>
+    .contact_wrap {
+        width: 220px;
+        margin: 10px auto;
+        background-color: #fff;
+        border: 1px solid #ccc;
+    }
+</style>
+<div style=" width: 260px;margin: 10px auto;background-color: #fff; border: 1px solid #ccc;" id="contact_wrap">
+    <div style="font-weight: bold;text-indent: 28px;height: 46px;line-height: 46px;color: #4368c7;font-size: 28px;border-bottom: 1px solid #4368c7;">
+        联系我们
+    </div>
+    <div style=" margin: 2px 10px;line-height: 32px;font-size: 18px;">
+        工作时间：周一至周五，上午8:30至下午18:00（法定节假日除外)<br />
+        如果您对我们的网站、服务有任何疑问或建议，请随时联系我们，我们将竭诚为您服务！
+        如果您对我们的网站、服务有任何疑问或建议，请随时联系我们，我们将竭诚为您服务！
+    </div>
+</div>
+<div style="width: 233px; margin: 0 auto; text-align: right;">
+    <input type="button" class="btn" onclick="print_();" value="打印" />
+</div>
+<script>
+    function print_() {
+        $('#contact_wrap').printArea();
+    }
+</script>
+<?=$footer?>

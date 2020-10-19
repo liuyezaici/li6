@@ -1,0 +1,8 @@
+
+CREATE TABLE `__PREFIX__log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `ctime` int(11) DEFAULT NULL COMMENT '方便查看，只显示文本时间',
+  `text` longtext NOT NULL COMMENT '日志内容',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT COMMENT='测试日志表';
+

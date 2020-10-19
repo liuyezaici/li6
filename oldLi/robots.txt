@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /include/
+Disallow: /upload/
+Disallow: /log/
+Disallow: /model/
+Disallow: /temp/
+Disallow: /language/
+
+User-agent: 360Spider
+Disallow: /include/
+Disallow: /upload/
+Disallow: /log/
+Disallow: /model/
+Disallow: /temp/
+Disallow: /language/
+
+

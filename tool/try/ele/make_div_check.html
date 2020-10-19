@@ -1,0 +1,45 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//div渲染服务器的数据
+<div id="show_div"></div>
+<script>
+//一个简单的div
+var getDataUrl = '/?s=tool/get_group';
+    var div = makeDiv({
+        data_from: {
+            url: getDataUrl,
+            data_key: 'info',
+            post_data: {},
+            success_key: 'code',
+            success_value: '1',
+            err_func: function (e) {
+                msgTisf(e.msg);
+            }
+        },
+        value: makeChecked({
+            value: '6',
+            text: '群:{group}',
+            name: 'demo',
+            show1: '{{group}==0}',
+            show: '{{group}==0}',
+            'class': '{{group}==0 ? "checked_info": ""}',
+            checked: '1',//或者填 true 也可以
+            click: function (o, e) {
+                if(o.checked) {
+                    msgTisf('选中我了');
+                } else {
+                    msgTisf('取消选择');
+                }
+            }
+        })
+    });
+  $('#show_div').append(div);
+
+
+</script>

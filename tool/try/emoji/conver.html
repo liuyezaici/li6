@@ -1,0 +1,69 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8"><link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .show_a {display: inline-block}
+</style>
+//emoji转unicode
+
+    <div id="show_box"></div>
+
+<script>
+    var hexToDec = function(str) {
+        if(!str) return '';
+        str=str.replace(/\\/g,"%");
+        return unescape(str);
+    };
+    function _convertStringToUnicodeCodePoints(str) {
+        var surrogate1st = 0,
+            unicodeCodes = [],
+            i = 0,
+            l = str.length;
+
+        for (; i < l; i++) {
+            var utf16Code = str.charCodeAt(i);
+            if (surrogate1st != 0) {
+                if (utf16Code >= 0xDC00 && utf16Code <= 0xDFFF) {
+                    var surrogate2nd = utf16Code,
+                        unicodeCode = (surrogate1st - 0xD800) * (1 << 10) + (1 << 16) + (surrogate2nd - 0xDC00);
+                    unicodeCodes.push(unicodeCode);
+                }
+                surrogate1st = 0;
+            } else if (utf16Code >= 0xD800 && utf16Code <= 0xDBFF) {
+                surrogate1st = utf16Code;
+            } else {
+                unicodeCodes.push(utf16Code);
+            }
+        }
+        return unicodeCodes;
+    }
+    function _escapeToUtf32(str) {
+        var escaped = [],
+            unicodeCodes = _convertStringToUnicodeCodePoints(str),
+            i = 0,
+            l = unicodeCodes.length,
+            hex;
+
+        for (; i < l; i++) {
+            hex = unicodeCodes[i].toString(16);
+            escaped.push('0000'.substr(hex.length) + hex);
+        }
+        return escaped.join('-');
+    }
+     var input1 = makeInput({value: '', name: 'emoji_str1', 'class': 'no_radius_right', place: '粘贴emoji', clear: true});
+     var input2 = makeInput({value: '', name: 'emoji_str2', 'class': 'no_radius_right', place: '结果'});
+     var btn = makeBtn({value: '转换', 'class': 'btn btn-success',
+     click: function () {
+         var str = emoji_str1.value;
+         if(str == '') {
+             msgTisf('请粘贴emoji表情进来');
+             return;
+         }
+         emoji_str2.value = _escapeToUtf32(str);
+     }});
+    $('#show_box').append([input1, input2]).append(btn);
+</script>

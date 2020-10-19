@@ -1,0 +1,873 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8"><link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" media="all" rel="stylesheet" />
+<link href="/resource/pub/css/jquery.lr_box.css" media="all" rel="stylesheet" />
+<link href="/resource/pub/css/jquery.lr_element.css" media="all" rel="stylesheet" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//一个简单的开关
+<div class="well" id="show_demo"></div>
+<script>
+//一个简单的数据循环
+//注意: 
+// 如果数据是数组: index 作为每个循环的序号 ;
+// value/class 属性支持js语法. 变量用{}括起
+    $('#show_demo').append([
+        makeH3({value: 'type:1 文本内置[默认]: '}),
+        makeSwitch({
+        width: '65px',
+        value_key: 'value', //默认data的值的键名
+        text_key: 'text', //默认data的文本的键名
+        showText: true,
+        item: [{
+            value: 1,
+            text: 'boy'
+        },{
+            value: 0,
+            text: 'girl'
+        }],
+        value: 1
+    }),
+        makeDiv({value: '自定义背景色[active_color/inactive_color]: ',style: 'margin-top: 20px;'}),
+        makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            style: 'color:#fff;margin-top: 10px;',
+            showText: true,
+            width: '65px',
+            active_color: "#4462b2",
+            inactive_color: "#dd99c9",
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        makeDiv({value: '不显示文本[showText]: ',style: 'margin-top: 20px;'}),
+        makeSwitch({
+        width: '65px',
+        value_key: 'value', //默认data的值的键名
+        text_key: 'text', //默认data的文本的键名
+        item: [{
+            value: 1,
+            text: 'boy'
+        },{
+            value: 0,
+            text: 'girl'
+        }],
+        value: 1
+    }),
+    makeDiv({value: '不可操作[disabled]: ',style: 'margin-top: 20px;'}),
+    makeSwitch({
+        width: '65px',
+        value_key: 'value', //默认data的值的键名
+        text_key: 'text', //默认data的文本的键名
+        style: 'margin-top: 10px;',
+        disabled: true,
+        item: [{
+            value: 1,
+            text: 'boy'
+        },{
+            value: 0,
+            text: 'girl'
+        }],
+        value: 1
+    }),
+        makeDiv({value: 'bootStrap样式预览: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+        makeSwitch({
+            width: '65px',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }), makeSwitch({
+            width: '65px',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_warning',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }), makeSwitch({
+            width: '65px',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_danger',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }), makeSwitch({
+            width: '65px',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_primary',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),makeSwitch({
+            width: '65px',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_black',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        makeDiv({value: 'size: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+        makeSpan({value: 'xs:'}),makeSwitch({
+            width: '40px',
+            size: 'xs',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        makeSpan({value: 'sm:', style:'margin-left:10px;'}),makeSwitch({
+            width: '60px',
+            size: 'sm',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        makeSpan({value: 'md(默认):', style:'margin-left:10px;'}),makeSwitch({
+            width: '70px',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        makeSpan({value: 'lg:', style:'margin-left:10px;'}),makeSwitch({
+            width: '70px',
+            size: 'lg',
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+    ]).append('<br />').append(
+        [
+            makeH3({value: 'type:2 文本显示于右侧: ',style: 'margin-top: 50px;'}),
+            makeDiv({value: '自定义背景色[active_color/inactive_color]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-top: 10px;',
+                type: 2,
+                showText: true,
+                active_color: "#4462b2",
+                inactive_color: "#dd99c9",
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeDiv({value: '不显示文本[showText]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                 style: 'margin-top: 10px;',
+                'class': 'switch_info',
+                type: 2,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeDiv({value: '不可操作[disabled]: ',style: 'margin-top: 20px;'}),
+        makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            style: 'margin-top: 10px;',
+            disable: true,
+            type: 2,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeDiv({value: 'bootStrap样式预览: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            type: 2,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }), makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            style: 'margin-left: 35px;',
+            'class': 'switch_warning',
+            showText: true,
+            type: 2,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }), makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_danger',
+            style: 'margin-left: 35px;',
+            showText: true,
+            type: 2,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }), makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_primary',
+            style: 'margin-left: 35px;',
+            showText: true,
+            type: 2,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_black',
+            style: 'margin-left: 35px;',
+            showText: true,
+            type: 2,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        makeDiv({value: 'size: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            makeSpan({value: 'xs:'}),makeSwitch({
+            width: '40px',
+            size: 'xs',
+            style: 'margin-left: 35px;',
+            type: 2,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'sm:', style:'margin-left:45px;'}),makeSwitch({
+            width: '60px',
+            size: 'sm',
+            type: 2,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'md(默认):', style:'margin-left:45px;'}),makeSwitch({
+            width: '70px',
+            type: 2,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'lg:', style:'margin-left:45px;'}),makeSwitch({
+            width: '70px',
+            size: 'lg',
+            type: 2,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+    ]).append('<br /> ').append(
+        [
+            makeH3({value: 'type:3 文本显示于右侧: ',style: 'margin-top: 50px;'}),
+            makeDiv({value: '自定义背景色[active_color/inactive_color]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            style: 'margin-top: 10px;',
+            showText: true,
+            type: 3,
+            width: '65px',
+            active_color: "#4462b2",
+            inactive_color: "#dd99c9",
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeDiv({value: '不显示文本[showText]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+                width: '65px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                type: 3,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeDiv({value: '不可操作[disabled]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+                width: '65px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-top: 10px;',
+                type: 3,
+                disabled: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+
+            makeDiv({value: 'bootStrap样式预览: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                'class': 'switch_success',
+                showText: true,
+                type: 3,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_info',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_warning',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                showText: true,
+                type: 3,
+                'class': 'switch_danger',
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_primary',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_black',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeDiv({
+                value: 'bootStrap样式 class: [switch_success/switch_info/switch_warning/switch_danger/switch_primary/switch_black]',
+                style: 'margin-top: 20px;'
+            }),
+            makeDiv({value: 'size: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            makeSpan({value: 'xs:'}),makeSwitch({
+            width: '30px',
+            size: 'xs',
+            style: 'margin-left: 35px;',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'sm:', style:'margin-left:45px;'}),makeSwitch({
+            width: '35px',
+            size: 'sm',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'md(默认):', style:'margin-left:45px;'}),makeSwitch({
+            width: '50px',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'lg:', style:'margin-left:45px;'}),makeSwitch({
+            width: '70px',
+            size: 'lg',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        ]
+    ).append('<br /> ').append(
+        [
+            makeH3({value: 'type:4 文本显示于两侧: ',style: 'margin-top: 20px;'}),
+            makeDiv({value: '自定义背景色[active_color/inactive_color]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            style: 'margin-top: 10px;',
+            showText: true,
+            type: 4,
+            width: '100px',
+            active_color: "#4462b2",
+            inactive_color: "#dd99c9",
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeDiv({value: '不显示文本[showText]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+                width: '65px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                type: 4,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeDiv({value: '不可操作[disabled]: ',style: 'margin-top: 20px;'}),
+            makeSwitch({
+                width: '65px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-top: 10px;',
+                type: 4,
+                showText: true,
+                disabled: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+
+            makeDiv({value: 'bootStrap2立体样式: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            makeSwitch({
+                width: '100px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                'class': 'switch_success',
+                showText: true,
+                type: 4,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                width: '100px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 4,
+                'class': 'switch_info',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                width: '100px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 4,
+                'class': 'switch_warning',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                width: '100px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                showText: true,
+                type: 4,
+                'class': 'switch_danger',
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                width: '100px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                showText: true,
+                type: 4,
+                'class': 'switch_primary',
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeSwitch({
+                width: '100px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 4,
+                'class': 'switch_black',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                },{
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            makeDiv({
+                value: 'bootStrap样式 class: [switch_success/switch_info/switch_warning/switch_danger/switch_primary/switch_black]',
+                style: 'margin-top: 20px;'
+            }),
+            makeDiv({value: 'size: ',style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            makeSpan({value: 'xs:'}),makeSwitch({
+            width: '60px',
+            size: 'xs',
+            style: 'margin-left: 35px;',
+            type: 4,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'sm:', style:'margin-left:45px;'}),makeSwitch({
+            width: '80px',
+            size: 'sm',
+            type: 4,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'md(默认):', style:'margin-left:45px;'}),makeSwitch({
+            width: '100px',
+            type: 4,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            makeSpan({value: 'lg:', style:'margin-left:45px;'}),makeSwitch({
+            width: '120px',
+            size: 'lg',
+            type: 4,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            },{
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        ]
+    );
+
+</script>

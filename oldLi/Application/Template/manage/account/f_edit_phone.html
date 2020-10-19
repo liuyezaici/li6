@@ -1,0 +1,112 @@
+<style type="text/css">
+<!--
+/* 修改手机 */
+.phone_box {
+    margin: -20px 0 0 -10px;
+}
+.phone_box .top_desc {
+    background-color: #f5f8fa;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+.phone_box .top_desc .top {
+    border-bottom: 1px solid #fff;
+    margin: 0 20px;
+}
+.phone_box .top_desc .top h3 {
+    height: 38px;
+    line-height: 38px;
+    border-bottom: 1px solid #d7dddd;
+}
+.phone_box .top_desc .desc {
+    line-height: 26px;
+    padding: 10px 20px;
+    color: #dd7a69;
+}
+.submit_phone_form {
+    margin-top: 10px;
+}
+.submit_phone_form ul li {
+    padding: 5px;
+    line-height: 30px;
+    height: 30px;
+}
+.submit_phone_form ul li em {
+    width: 120px;
+    text-align: right;
+}
+-->
+</style>
+<div class="right_list phone_box">
+    <div class="top_desc">
+        <div class="top">
+            <h3>步骤：</h3>
+        </div>
+        <div class="desc">
+            1、输入当前平台登录密码<br />
+            2、输入您之前绑定的手机 ，首次绑定请留空<br />
+            3、输入新手机号，提交即可绑定
+        </div>
+    </div>
+    <div id="submit_phone_form" class="submit_phone_form">
+    	<ul>
+            <li>
+                <em>平台登录密码：</em>
+                <input id="my_old_pwd" type="password" class="input" style="width: 180px;" value="" maxlength="50" />
+            </li>
+            <li>
+                <em>您的旧手机：</em>
+                <input id="old_phone" type="text" class="input" onkeyup="this.value=this.value.replace(/[^0-9]/gi, '')" style="width: 180px;" value="" maxlength="15" /> [<?=$old_phone?>]
+            </li>
+            <li>
+                <em>您的新手机：</em>
+                <input id="new_phone" type="text" class="input" onkeyup="this.value=this.value.replace(/[^0-9]/gi, '')" style="width: 180px;" value="" maxlength="15" />
+            </li>
+            <li>
+                <a class="new_btn" href="javascript: void(0);" onclick="submitPhoneCode();" target="_self">提交绑定</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    //提交获取手机验证码
+    function submitPhoneCode() {
+        var form = $('#submit_phone_form');
+        var mypwd = form.find('#my_old_pwd').val();
+        var old_phone = form.find('#old_phone').val();
+        var phoneNumber = form.find('#new_phone').val();
+        if(!phoneNumber) {
+            msg('请输入您的新手机号码');
+            return;
+        }
+        if(!mypwd) {
+            msg('请输入您的平台登录密码,至少6位');
+            return;
+        }
+        var patrn = /(^0{0,1}1[3|4|5|6|7|8|9][0-9]{9}$)/;
+        if (!patrn.exec(phoneNumber)) {
+            msg("手机号码格式不正确");
+            return;
+        }
+        post('/?s=account&do=edit_phone&json=true',{mypwd: mypwd, old_phone:old_phone, phone_number: phoneNumber },function(data) {
+            hideNewBox();
+            if(data.id != '0043') {
+                if(data.info) data.msg += data.info;
+                msg(data.msg,3);
+                if(data.id == '0000') {
+                    msg(data.msg,1);
+                    loginIn();
+                    return;
+                }
+            } else {
+                hideAllbox();
+                ajaxOpen('/?s=user/edit_my_info');
+                msg(data.msg,1);
+            }
+        });
+        msg('提交中...');
+    }
+</script>

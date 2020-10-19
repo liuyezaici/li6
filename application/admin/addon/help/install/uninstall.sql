@@ -1,0 +1,2 @@
+-- DROP TABLE `__PREFIX__help`;
+-- DROP TABLE `__PREFIX__help_type`;

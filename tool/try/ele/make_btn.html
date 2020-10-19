@@ -1,0 +1,35 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .simple_btn {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+
+//自定义内容的按钮
+<div id="show_btn_diy"></div>
+
+<script>
+    //创建一个倒计时按钮 发短信用
+    var diyBtn = makeBtn({
+        'show': 1,
+        'class': 'btnLr btn-sm btn-info',
+        value: '付款信息a',
+        data_id: '{id}',
+        margin_left: '5px',
+        click: function (obj_) {
+            var id_ = obj_.attr('data_id');
+        },
+    });
+
+  $('#show_btn_diy').append(diyBtn);
+
+</script>

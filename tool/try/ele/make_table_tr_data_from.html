@@ -1,0 +1,132 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个循环数据的表格 <br />
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+    var getDataUrl = '/?s=tool/get_rows';
+
+    //搜索数据
+    function searchFormGo(listTableObj) {
+
+        loading();
+        postAndDone({
+            url: getDataUrl,
+            success_func: function (responseData) {
+                noLoading();
+                listTableObj['data'] = responseData['info'];
+            },
+        });
+    }
+
+    //js造一个简单的表格
+    var table = makeTable({
+        'class': 'table table-striped table-bordered table-hover',
+        tr_top: [
+            {
+                th: [
+                    { value: 'url' },
+                    { value: '采集名' },
+                    { value: 'sku' },
+                    { value: '创建时间'},
+                    { value: '状态'},
+                    { value: '操作'}
+                ]
+            }
+        ],
+        tr_default: [
+            {
+                show: '{{this.length}==0}',
+                td: [
+                    {
+                        colspan: '7',
+                        value: '没有搜索结果'
+                    }
+                ]
+            }
+        ],
+        tr: [
+            {
+                show: '{"{id}" !=""}',
+                td: [
+                    {
+                        value: '{url}'
+                    },
+                    {
+                        value: '{title}'
+                    },
+                    {
+                        value: '{skus}'
+                    },
+                    {
+                        value: '{noSecond[run]({ctime})}'
+                    },
+                    {
+                        value: makeSpan({
+                            'class': 'btn btn-xs {"{finish}"==1?"btn-success":"btn-default"}',
+                            value: '{"{finish}"==1?"完成":"未采"}'
+                        })
+                    },
+                    {
+                        'class': 'btn-group',
+                        value: [
+                            makeBtn({
+                                'class': 'btn btn-xs btn-primary',
+                                value: '采集',
+                                goodsId: '{id}',
+                                click: function (o) {
+                                    postAndDone({
+                                        url: doCaijiUrl + o.goodsId,
+                                        success_key: 'code',
+                                        success_value: '1',
+                                        success_func: function (e) {
+                                            refreshCaiji();
+                                            msgTis(e.msg);
+                                        },
+                                        err_func: function (data) {
+                                            msgTis(data.msg);
+                                        }
+                                    });
+                                }
+                            }),
+                            makeBtn({
+                                'class': 'btn btn-xs btn-danger',
+                                value: '删除',
+                                margin_left: '35px',
+                                click: "delCaiji\('{id}'\)"
+                            })
+                        ]
+                    }
+                ]
+            }
+        ],
+        data_from: {
+            func: function (tableObj) {
+                searchFormGo(tableObj);
+            }
+        }
+    });
+    $('#show_table').append(
+        table
+    );
+</script>

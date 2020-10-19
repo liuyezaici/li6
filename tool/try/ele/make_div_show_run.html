@@ -1,0 +1,43 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .box_a {
+        width: 240px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+        padding: 20px 0;
+        background-color: #abefad;
+    }
+
+</style>
+<div id="show_div"></div>
+<div id="show_bind"></div>
+<div id="show_input1"></div>
+<div id="show_input2"></div>
+
+<script>
+    var div1 = makeDiv({
+        name: 'demo1',
+        'value': '{{{a}}>=1 && {{b}} >= 2 ? "当a >= 1 且 b>=2 我是红色":"当a < 1 或 b<2 ，我是蓝色"}',
+        'class': 'box_a {12/4-2 <= {{a}} && {{b}} >= (6/3*1) ? "red":"blue"}',
+    });
+    var div2 = makeDiv({
+        name: 'demo2',
+        'show': '{ ({{b}}) === {{a}} }',
+        'value': '当a==b时,我会显示',
+        'class': 'box_a',
+    });
+$('#show_div').append(div1).append(div2);
+$('#show_bind').append(makeDiv({
+    value: "a:{{a}} b:{{b}}"
+}));
+$('#show_input1').append( makeInput({value: '', place:'a', type: 'text', width: 240, bind: 'a', name: 'input3'}) );
+$('#show_input2').append( makeInput({value: '', place: 'b', type: 'text', width: 240, bind: 'b', name: 'input4'}) );
+</script>

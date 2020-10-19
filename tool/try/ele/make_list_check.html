@@ -1,0 +1,87 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    #show_list .even {
+        background-color: #efefef;
+    }
+    #show_list .odd {
+        background-color: #fff;
+    }
+    #show_list ul {
+        margin: 0;
+        padding: 0;
+    }
+    #show_list ul li.item {
+        padding: 5px 10px;
+        margin: 0;
+        list-style-type: none;
+    }
+</style>
+//一个简单的数据循环
+<div id="show_list"></div>
+<br />
+
+<div id="show_reload_btn"></div>
+
+<script>
+    //一个简单的数据循环
+    //注意：
+    // 如果数据是数组: index 作为每个循环的序号 ;
+    // value/class 属性支持js语法. 变量用{}括起
+
+    var liList = makeList({
+        data: [
+            {'id': 1+'.'+ makeRadom(5), 'name': '唵->'+ makeRadom(7)}
+            // ,{'id': 2+'.'+ makeRadom(5), 'name': '嘛->'+ makeRadom(7)}
+            // ,{'id': 3+'.'+ makeRadom(5), 'name': '呢->'+ makeRadom(7)}
+            // ,{'id': 4+'.'+ makeRadom(5), 'name': '叭->'+ makeRadom(7)}
+            // ,{'id': 5+'.'+ makeRadom(5), 'name': '咪->'+ makeRadom(7)}
+            // ,{'id': 6+'.'+ makeRadom(5), 'name': '吽->'+ makeRadom(7)}
+            ],
+        name: 'demo',
+        li:
+            {
+                'class': "item {id} {{index} % 2==0 ? 'even': 'odd'}",
+                value: [
+                    makeSpan({
+                        value: "{id}.<a href=\"#{id}\">{name}</a>"
+                    }),
+                    makeChecked({
+                        value: '{id}',
+                        title: '{title}',
+                        margin_left: '10px',
+                        size: 'md',
+                        checked: '1',
+                        click: function (o_, e) {
+                            msgTisf(o_.value);
+                        }
+                    })
+                ]
+            }
+    });
+    $('#show_list').append(liList);
+
+    $('#show_reload_btn').append(makeA({
+        value: '点此更新数据',
+        'class': 'btnLr btn-success',
+        click: function (e) {
+            liList['data'] = [
+                {'id': 1+'.'+ makeRadom(5), 'name': '唵->'+ makeRadom(7)}
+               //  ,{'id': 2+'.'+ makeRadom(5), 'name': '嘛->'+ makeRadom(7)}
+               //  ,{'id': 3+'.'+ makeRadom(5), 'name': '呢->'+ makeRadom(7)}
+               //  ,{'id': 4+'.'+ makeRadom(5), 'name': '叭->'+ makeRadom(7)}
+               // ,{'id': 5+'.'+ makeRadom(5), 'name': '咪->'+ makeRadom(7)}
+               //  ,{'id': 6+'.'+ makeRadom(5), 'name': '吽->'+ makeRadom(7)}
+            ];
+        }
+    })
+    );
+
+
+</script>

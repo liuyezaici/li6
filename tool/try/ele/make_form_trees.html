@@ -1,0 +1,103 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的搜索表单 <br />
+<div id="show_form"></div>
+<script>
+    //js造一个修改权限的表单
+    var diyForm = makeForm({
+        'type': 'post',
+        value: [
+            makeTrees({
+                //分类数据
+                'data':  [{
+                    'some_id': 123,
+                    'some_title': '大分类A',
+                    'sons': [
+                        {
+                            'some_id': 1231,
+                            'some_title': 'A子类1'
+                        },{
+                            'some_id': 1232,
+                            'some_title': 'A子类2'
+                        }
+                    ]
+                },{
+                    'some_id': 124,
+                    'some_title': '大分类B',
+                    'sons': [
+                        {
+                            'some_id': 1241,
+                            'some_title': 'B子类1'
+                        },{
+                            'some_id': 1242,
+                            'some_title': 'B子类2'
+                        }
+                    ]
+                }],
+                value: [123, 1231],
+                name: 'power_ids',
+                'title_key': 'some_title',//标题的字段名
+                'son_key': 'sons',//子数据的字段名
+                'class': 'diy_power',
+                'li': {//li显示内容
+                    'click': function (o, e) {
+
+                    },
+                    input: {
+                        name: 'pid',
+                        type: 'checkbox',
+                        value: '{some_id}',
+                    },
+                    value: '{some_title}'
+                },
+                'top_tr': {
+                    'value': [
+                        makeSpan({value: '选择权限'})
+                    ]
+                }
+            }),
+            makeBtn({
+                type: 'submit',
+                value: 'search',
+                'class': 'btnLr btn-md btn-success'
+            })
+        ],
+        submit: function (obj, ev) {//提交时回调
+            console.log(obj);
+            console.log(obj.getFormDatas());
+            ev.preventDefault();
+            return false;
+        },
+        success_key: 'id',
+        success_value: ['0043', '0113'],
+        success_func: function (data) {
+            console.log('success');
+        },
+        err_func: function (data) {
+            
+        }
+    });
+    $('#show_form').append(
+        diyForm
+    );
+</script>

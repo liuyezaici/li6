@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {include file="common/meta" /}
+    <link href="__CDN__/assets/css/juzi/index.css" rel="stylesheet">
+    <script src="/assets/js/juzi/search.js"></script>
+</head>
+<body>
+{include file="common/header" /}
+{include file="common/banner" currentBanner='gequshangxi' /}
+<div class="index_body">
+    <div class="container">
+        <form id="searchForm" target="_parent" action="/juzi/search/index/">
+            <div class="inner">
+                <div class="input-group">
+                    <input type="hidden" class="hide_flag" name="t_" value="lr"/>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                id="search_type" data-value="lr">
+                            <span id="current_text">搜索类型</span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a href="javascript: void(0);" target="_self" data-value="lr">全匹配</a></li>
+                            <li><a href="javascript: void(0);" target="_self" data-value="l">左匹配</a></li>
+                            <li><a href="javascript: void(0);" target="_self" data-value="r">右匹配</a></li>
+                        </ul>
+                    </div>
+                    <span id="append_input" data-url="/adppp/juzi/api/index/ajax_search?t=lr"
+                          data-link="/juzi/read/uri/{uri}" data-holder="搜索关键词" data-liauther="{authorName}"
+                          data-liname="{content}">
+                        <input class="form-control"/>
+                    </span>
+                    <div class="input-group-btn">
+                        <button class="btn btn-success">搜索</button>
+                    </div>
+                </div>
+                <div class="panel panel-default"
+                     style="margin-top: 100px; text-align: left; padding: 10px 0 10px 10px;">
+                    <h4>最新句子：
+                        <a href="/juzi/news/index" target="_self" class="label label-success">More</a>
+                    </h4>
+                    <ul class="list-group">
+                    <?php
+                    foreach($lastJuzi as $item) {
+                    ?>
+                    <li class="list-group-item">
+                    <a href="/juzi/read/uri/<?=$item['uri']?>"
+                       title="作者:<?=$item['authorName']?> <?=$item['createtime']?>"
+                       target="_blank"><?=$item['content']?></a>
+                    ——<a href="<?=$item['authorLink']?>"><?=$item['authorName']?></a>
+                        </li>
+                        <?php
+                        }
+                        ?>
+                    </ul>
+                </div>
+                <span class="count_detail">共收录<?=$totalJuzi?>篇句子</span>
+            </div>
+        </form>
+    </div>
+</div>
+{include file="common/footer" /}
+</body>
+</html>

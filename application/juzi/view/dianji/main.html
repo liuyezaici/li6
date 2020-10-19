@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+{include file="common/meta" /}
+</head>
+<base target="_parent" />
+<body>
+{include file="common/header" /}
+{include  file="common/banner" currentBanner='from' /}
+<style>
+    .article_list .list-group-item {
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+</style>
+<div class="front_body container">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="position: relative;">
+            <?=$fromName?> 作者: <?=$authorStr?>  浏览: <?=$rq?>
+        </div>
+        <div class="panel-body">
+            <div style="text-align: right;">
+                <span style="display: inline-block; vertical-align: bottom;">分享:</span>
+                <div class="bdsharebuttonbox" style="display: inline-block; vertical-align: bottom;">
+                    <a href="#" class="bds_more" data-cmd="more"></a>
+                    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+                    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+                    <a href="#" class="bds_isohu" data-cmd="isohu" title="分享到我的搜狐"></a>
+                    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+                    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+                    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+                    <a href="#" class="bds_bdysc" data-cmd="bdysc" title="分享到百度云收藏"></a>
+                    <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+                    <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+                    <a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a>
+                </div>
+            </div>
+            <div class="well-sm">
+                原文:
+                <p style="line-height: 22px;">
+                    <?=$content?>
+                </p>
+            </div>
+            <h4>
+               篇章：
+            </h4>
+            <ul class="list-group article_list">
+                <?php
+                foreach($list as $v) {
+                ?>
+                <li class="list-group-item">
+                    <a href="/juzi/dianji/article/<?=$v['id']?>" target="_blank"><?=$v['title']?></a>
+                </li>
+                <?php
+                }
+                ?>
+            </ul>
+            <?php
+            if($nullStr) {
+            ?>
+            <div class="alert alert-warning">
+                <?=$nullStr?>
+            </div>
+            <?php
+            }
+            ?>
+            <?=$pageMenu?>
+        </div>
+    </div>
+</div>
+<script>window._bd_share_config = {
+    "common": {
+        "bdSnsKey": {},
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": "",
+        "bdStyle": "0",
+        "bdSize": "16"
+    }, "share": {}
+};
+with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = '/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];
+</script>
+{include file="common/footer" /}
+</body>
+</html>

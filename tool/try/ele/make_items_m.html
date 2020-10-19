@@ -1,0 +1,39 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+
+</style>
+<div id="show_div"></div>
+<script>
+var items = makeItems({
+    name:  'demo',
+    'items': {
+        data: [
+            {'id': "1", 'text_3': "单元1"},
+            {'id': "2", 'text_3': "单元2"},
+            {'id': "3", 'text_3': "单元3"},
+            {'id': "4", 'text_3': "单元4"}
+        ],
+        value_key: 'id',
+        title_key: 'text_3',
+        value: '{text_3}',
+        width: '20%',
+        click: function (item_, parent_,  e_, s_) {
+            console.log(item_);
+            console.log(parent_);
+            console.log(parent_.value);
+            console.log(e_);
+            console.log(s_);
+        }
+    },
+    'multi': true,
+    width: '520px'
+});
+$('#show_div').append(items);
+</script>

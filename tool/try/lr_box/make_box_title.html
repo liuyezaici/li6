@@ -1,0 +1,26 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8"><link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+
+
+//定义的提示框的头部标题
+<script>
+    //那么第2个参数就可以不用了 不然看起来会很奇怪
+    var box = msg('上古的宝贝开始换金币了;内家伙是顶级宝物!', '', {
+        title: '欢迎来到德莱联盟'
+    });
+
+    //您也可以去掉属性，简化为msgView/msgt方法 自带
+    var boxWidth = 430;
+    var addTop = 100;
+    var box = msgt('msgt方法,很短', '这些函数方法都是为了快速简单的提示一句话.', boxWidth, addTop);
+    //其中后面的宽度和距离顶部的高度是可以缺省的 默认值分别就是上面定义的值
+    var box = msgView('msgView方法 快速预览', '如果我不写点什么，是不是会以为我文思枯竭?');
+    //{}里可以自定义很多属性
+    //var divId = box.id; //获取box的id
+    //hideNewBox(); //关闭最新的弹窗
+    //removeOneBox(divId);//关闭指定的boxid
+</script>

@@ -1,0 +1,113 @@
+<style>
+/* 会员金币 */
+.score_wrap {
+    margin-top: 10px;
+}
+.top_title {
+    height: 40px;
+    line-height: 35px;
+    font-size: 16px;
+}
+.top_title .icon {
+    width: 21px;
+    height: 20px;
+    display: block;
+    float: left;
+    margin: 8px 8px 0 2px;
+    background: url(/resource/manage/images/css/coins.png);
+}
+.score_wrap .score_list {
+    display: none;
+}
+.score_wrap .list_table {
+    width: 100%;
+    background-color: #fff;
+}
+.score_wrap .list_table td {
+    padding: 10px 0;
+}
+.score_wrap .list_table .list_top td{
+    height: 36px;
+    line-height: 36px;
+    padding: 0;
+    background-color: #dedede;
+    font-weight: bold;
+    color: #555;
+}
+.score_wrap .list_table .memo a,.score_wrap .list_table .memo a:visited {
+    color: #0000ff;
+}
+</style>
+<div class="score_wrap">
+    <h1 class="top_title">
+        <i class="icon"></i> 我的金币
+    </h1>
+    <div class="top_title_new" id="score_menu">
+        <h1>
+            <a href="javascript: void(0);" id="score_tab2" onclick="score_list();" target="_self">金币日志</a>
+            <a href="javascript: void(0);" id="score_tab4" onclick="qiandao_list();" target="_self">签到记录</a>
+        </h1>
+    </div>
+    <div class="right_list new_view_wrap" id="score_main">
+        <div class="score_list" id="score_list">
+        </div>
+        <div class="qiandao_list" id="qiandao_list">
+
+        </div>
+    </div>
+</div>
+<script>
+//领取金币
+function finishTask(flag) {
+    var postData = {
+        flag: flag
+    };
+    post('/?s=user&do=finish_task&json=true',postData,function(data) {
+        if(data.id != '0146') {
+            if(data.info) data.msg += data.info;
+            msg(data.msg,4);
+            if(data.id == '0000') {
+                msg(data.msg,1);
+                loginIn();
+                return;
+            }
+        } else {
+            msg(data.msg,1);
+            return;
+        }
+    });
+}
+//切换到金币日志
+function score_list() {
+    $('#score_main').children().hide();
+    $('#score_list').show();
+    $('#score_menu').find(".active").removeClass('active');
+    $('#score_tab2').addClass('active');
+    view_my_cashlist(1);
+}
+//切换到签到记录
+function qiandao_list() {
+    $('#score_main').children().hide();
+    $('#qiandao_list').show();
+    $('#score_menu').find(".active").removeClass('active');
+    $('#score_tab4').addClass('active');
+    view_my_qiandao(1);
+}
+//金币日志翻页
+function view_my_cashlist(page) {
+    page = page || 1;
+    $('#score_list').show().load('/?s=account/get_score_change&page='+ page);
+}
+//签到记录
+function view_my_qiandao(page) {
+    page = page || 1;
+    $('#qiandao_list').show().load('/?s=sign&page='+page);
+}
+//网址自动切换列表
+var url = window.location.toString();
+if(url.indexOf('sign') !=-1) {
+    qiandao_list();
+}
+score_list();
+leftEvent('my_score');
+</script>

@@ -1,0 +1,29 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<div id="show_div"></div>
+    <div id="show_reload_btn"></div>
+<script>
+var items = makeChecked({
+    data: {i: 3},
+    name:  'demo',
+    value: '{i}',
+    title: '我的值是：{i}',
+    text: '{{i}%2==0 ? "我是偶数":"我是奇数"}',
+    checked: '{{i}%2==0 ? "1":"0"}'
+});
+$('#show_div').append(items);
+$('#show_reload_btn').append(makeA({
+        value: '点此更新数据',
+        'class': 'btnLr btn-success',
+        click: function (obj, ev, scope) {
+            items['data'] =  {i: makeRadom(1)};
+        }
+    })
+);
+</script>

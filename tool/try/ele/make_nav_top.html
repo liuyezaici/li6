@@ -1,0 +1,71 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的Nav切换 <br />
+<div id="show_nav"></div>
+
+<script>
+    //js造一个简单的表格
+    var navObj = makeNav({
+        'width': '500',
+        'class': 'info',
+        'size': 'md',//xs/sm/md/lg
+        'id': 'aaaa',
+        value: 4,
+        ul: [
+            {
+                value: '1',
+                title: '静态html内容',
+                click: function (obj_,e_, val) {
+                    console.log(obj_);
+                    console.log(obj_.value);
+                }
+            },
+            {
+                value: '2',
+                title: '内容来自函数',
+                click: function (obj_,e_) {
+                    console.log(obj_);
+                    console.log(e_);
+                }
+            },
+            {
+                value: '3',
+                title: '内容来自URL',
+                click: function (obj_,e_) {
+                    console.log(obj_);
+                    console.log(e_);
+                }
+            },
+            {
+                value: '4',
+                title: '内容来自list对象',
+                click: function (obj_,e_) {
+                    console.log(obj_);
+                    console.log(e_);
+                }
+            }
+        ]
+    });
+    $('#show_nav').append(
+        navObj
+    );
+</script>

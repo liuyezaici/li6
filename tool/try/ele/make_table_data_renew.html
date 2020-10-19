@@ -1,0 +1,111 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的表格 <br />
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+    //js造一个简单的表格
+    var table = makeTable({
+        'width': '500',
+        'class': 'well js_table',
+        'name': 'demo',
+        data: [],
+        // tr_top: [
+        //     {
+        //         td: [
+        //             {
+        //                 value: 'ID'
+        //             },
+        //             {
+        //                 value: '昵称'
+        //             }
+        //         ]
+        //     }
+        // ],
+        // tr_default: [
+        //     {
+        //         show: '{{this.length} == 0}',
+        //         td: [
+        //             {
+        //                 colspan: '2',
+        //                 value: '没有数据'
+        //             }
+        //         ]
+        //     }
+        // ],
+        tr: [
+            {
+                td: [
+                    {
+                        'class': 'repeat_td_{id}',
+                        value: [
+                            makeSpan({
+                                value: 'id:{id}'
+                            })
+                        ]
+                    },
+                    {
+                        'class': 'two_{id}',
+                        value: [
+                            makeInput({
+                                width: '200px',
+                                name: 'u_nick',
+                                value: '{user_nick}'
+                            })
+                        ]
+                    }
+                ]
+            }
+        ]
+    });
+    $('#show_table').append(
+        table
+    );
+    $('#show_reload_btn').append(makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btn-success  btn-xs',
+            click: function (e) {
+                table['data'] = [
+                    {'id': makeRadom(5), 'user_nick': '啊->'+ makeRadom(6)},
+                    {'id': makeRadom(5), 'user_nick': '啥->'+ makeRadom(6)}
+                    ];
+            }
+        })).append(makeA({
+            value: '点此清空数据1',
+            'class': 'btnLr btnLrDefault btn-xs',
+            'margin_left': '10px',
+            click: function (e) {
+                table['data'] = [
+                    {'id': makeRadom(5), 'user_nick': '啊->'+ makeRadom(6)}
+                ];
+            }
+        })).append(makeA({
+            value: '点此清空数据2',
+            'class': 'btnLr btnLrDefault btn-xs',
+            'margin_left': '10px',
+            click: function (e) {
+                table['data'] = [
+                ];
+            }
+        }));
+</script>

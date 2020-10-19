@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+{include file="common/meta" /}
+</head>
+<base target="_parent" />
+<body>
+{include file="common/header" /}
+{include file="common/banner" currentBanner='musicTime' /}
+
+<link href="/assets/css/juzi/music/markdown.css" rel="stylesheet">
+<div class="front_body container">
+    <div class="panel">
+        <div class="well">
+            关于<a href="/juzi/Musictime/liList/id/<?=$liInfo['musicId']?>" target="_parent">歌曲:<?=$musicInfo['songTitle']?>,<?=$musicInfo['singer']?>] 的心情</a> <?=$id?>
+        </div>
+         <div class="row">
+             <div class="form-group">
+                 <div class="col-sm-12" id="show_editor_box">
+                     <?=$liInfo['content']?>
+                 </div>
+             </div>
+         </div>
+    </div>
+</div>
+<script>
+    (function (global__, $) {
+        $(document).ready(function () {
+        });
+    })(this, jQuery);
+</script>
+{include file="common/footer" /}
+</body>
+</html>

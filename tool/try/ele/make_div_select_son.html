@@ -1,0 +1,99 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//div渲染服务器的数据
+<div id="show_div"></div>
+<script>
+
+
+    var areaSelect = makeSelect({
+        value: '{value1}',
+        name: 'province',
+        'text': '请选择',
+        'value_key': "s_id",//取值的键名
+        title_key: 's_name',
+        bind_text: 'detail_province',
+        menu: {
+            width: '320px',
+            'data_from': {
+                url: '/?s=tool/get_province',
+                null_load: true,
+                success_key: 'code',
+                success_value: '1',
+                post_name: 'area_id', //提交name
+                data_key: 'info.list'
+            }
+        },
+        li: {
+            value: "{s_name}"
+        } ,
+        son: {
+            //市区
+            margin_left: '15px',
+            value: '{value2}',
+            name: 'city',
+            bind_text: 'detail_city',
+            need_parent_val: true, //数据来源于父值确认后
+            need_parent_key: 'area_id', //数据来源于父值确认后
+            menu: {
+                width: '500px',
+                data_from: {
+                    url: '/?s=tool/get_area',
+                    success_key: 'id',
+                    success_value: '0038',
+                    post_name: 'area_id', //提交name
+                    data_key: 'info'
+                }
+            },
+            li: {
+                value: "{s_name}",
+                width: '100px'
+            },
+            son: {
+                //乡镇
+                margin_left: '15px',
+                value: '{value3}',
+                name: 'town',
+                bind_text: 'detail_town',
+                need_parent_val: true, //数据来源于父值确认后
+                need_parent_key: 'area_id', //数据来源于父值确认后
+                menu: {
+                    width: '500px',
+                    data_from: {
+                        url: '/?s=tool/get_area',
+                        success_key: 'id',
+                        success_value: '0038',
+                        post_name: 'area_id', //提交name
+                        data_key: 'info'
+                    },
+                },
+                li: {
+                    value: "{s_name}",
+                    width: '100px'
+                }
+            }
+        }
+    });
+    var getDataUrl = '/?s=tool/get_selects';
+    var box = makeDiv({
+        'type': 'post',
+        data_from: {
+            url: getDataUrl,
+            success_key: 'id',
+            success_val: '0038',
+            data_key: 'info',
+            success_func: function (data) {
+                console.log(data);
+            },
+        },
+        value: [makeSpan({value: '{value1},选择文本:{{detail_province}},{{detail_city}},{{detail_town}}'}),
+            areaSelect, areaSelect['son'], areaSelect['son']['son']]
+    });
+    msgWin('编辑', box, 680, 1);
+
+</script>

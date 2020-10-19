@@ -1,0 +1,110 @@
+@charset "utf-8";
+/* 自定义输入框 */
+#lr_comment .comment_list {
+}
+#lr_comment .comment_list ul li {
+    padding: 8px 0 8px 10px;
+    position: relative;
+}
+#lr_comment .comment_list ul li.no_data {
+    background-color: #fffdfd;
+    color: #ff4400;
+    padding-left: 12px;
+}
+#lr_comment .comment_list ul li+li {
+    border-top: 1px solid #dedede;
+}
+#lr_comment .comment_list ul li .user_cover {
+    display: block;
+    width: 35px;
+    position: absolute;
+    left: 0;
+    overflow: hidden;
+}
+#lr_comment .comment_list ul li .user_cover img {
+    border: 1px solid #dedede;
+    border-radius: 6px;
+}
+#lr_comment .comment_list ul li .right_u_content {
+    display: block;
+    margin-left: 38px;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top {
+    padding: 2px 0 5px 0;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top .u_nick {
+    color: #006dcc;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top .time {
+    font-size: 11px;
+    color: #888;
+    margin-left: 10px;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top .edit_btn {
+    margin-left: 10px;
+    color: #888;
+    cursor: pointer;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top .edit_btn:hover {
+    color: #005bab;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top .del_btn {
+    margin-left: 5px;
+    color: #888;
+    cursor: pointer;
+}
+#lr_comment .comment_list ul li .right_u_content .u_top .del_btn:hover {
+    color: #ab483b;
+}
+#lr_comment .comment_list ul li .right_u_content .u_content {
+    word-break:break-all;
+}
+#lr_comment .pages .page {
+    background-color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    margin-right: 5px;
+    padding: 2px 5px;
+}
+#lr_comment .pages .total {
+    background-color: #fff;
+    display: inline-block;
+    padding: 2px 5px;
+}
+#lr_comment .pages .page.current {
+    background-color: #aaa;
+    color: #fff;
+}
+#lr_comment .comment_post_bar {
+    position: relative;
+    padding: 5px 0 0 10px;
+    height: 116px;
+    background-color: #ffffee;
+    border: 1px solid #f4f1df;
+    margin: 10px 0 0 0;
+}
+
+#lr_comment .editor {
+    display: inline-block;
+    position: absolute;
+    left: 10px;
+    bottom: 0;
+}
+#lr_comment .editor .lr_editor {
+    width: 350px;
+    height: 85px;
+    border: 1px solid #ddd;
+}
+#lr_comment .num_box {
+    display: inline-block;
+    position: absolute;
+    bottom: 40px;
+    left: 370px;
+    color: #999;
+}
+#lr_comment .post_btn {
+    display: inline-block;
+    position: absolute;
+    bottom: 2px;
+    left: 370px;
+}

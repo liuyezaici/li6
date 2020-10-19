@@ -1,0 +1,37 @@
+.continueWriteBtn {
+    position: absolute;
+    right: 68px;
+    bottom: 6px;
+}
+#musicListBox .playBtn {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 20px;
+    border: 1px solid #009b18;
+    background-color: #ddf8dd;
+    position: relative;
+    cursor: pointer;
+    vertical-align: baseline;
+    margin-left: 5px;
+}
+#musicListBox .playBtn:before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    border: 4px solid transparent;
+    border-left-color: #009b18;
+}
+#musicListBox .playBtn:after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    border-left: 1px solid #009806;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    height: 8px;
+    width: 1px;
+    display: block;
+}

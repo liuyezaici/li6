@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!DOCTYPE html> <html> <head> <meta charset="utf-8">
+    <link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+    <script src="/resource/pub/js/jquery-lr_box.js"></script>
+    <script src="/resource/pub/js/jquery-lr_base.js"></script>
+    <script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+    <style>
+        .simple_btn {
+            border: 1px solid #dedede;
+            background-color: #ffffee;
+            margin: 0 5px 5px 5px;
+        }
+    </style>
+    //a simple select box
+
+    <div id="show_select"></div>
+    <br />
+    <script>
+        var getParentPowerUrl = '/?s=tool/get_province';
+
+        //获取数据的方法
+        function getData(obj) {
+            postAndDone({
+                post_url: getParentPowerUrl,
+                success_key: 'id',
+                success_value: '0038',
+                data_key: 'info',
+                success_func: function (response) {
+                    // console.log(obj);
+                    // console.log(response['info']);
+                    obj.data = response['info'];
+                }
+            })
+        }
+        var select = makeSelect({
+            'name': 'diy_select',
+            'value': 450000,
+            'text': 'chose',
+            // 'multi': true,
+            'value_key': "s_id",//取值的键名
+            data_from: {
+                func: function (obj) {
+                    getData(obj);
+                }
+            },
+            menu: {
+                width: '320px'
+            },
+            li: {
+                value: "{s_name}",
+                click: function (obj, eve, ff) {
+                    console.log(obj);
+                    console.log(eve);
+                    console.log(ff);
+                }
+            }
+        });
+        $('#show_select').append(select);
+
+    </script>

@@ -1,0 +1,51 @@
+<!-- Logo -->
+<a href="javascript:;" class="logo hidden-xs">
+    <!-- 迷你模式下Logo的大小为50X50 -->
+    <span class="logo-mini">{$webInfo.web_title}</span>
+    <!-- 普通模式下Logo -->
+    <span class="logo-lg"><b>{$webInfo.web_title}</b></span>
+</a>
+<!-- 顶部通栏样式 -->
+<nav class="navbar navbar-static-top">
+    <!-- 边栏切换按钮-->
+    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <span class="sr-only">{:__('Toggle navigation')}</span>
+    </a>
+
+    <div id="nav" class="pull-left">
+        <!--如果不想在顶部显示角标,则给ul加上disable-top-badge类即可-->
+        <ul class="nav nav-tabs nav-addtabs disable-top-badge" role="tablist">
+        </ul>
+    </div>
+
+    <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+            <!--<li class="dropdown notifications-menu">-->
+                <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">-->
+                    <!--<i class="fa fa-bell-o"></i>-->
+                    <!--<span class="label label-warning"></span>-->
+                <!--</a>-->
+                <!--<ul class="dropdown-menu">-->
+                    <!--<li class="header">{:__('Latest news')}</li>-->
+                    <!--<li>-->
+                        <!--&lt;!&ndash; FastAdmin最新更新信息,你可以替换成你自己站点的信息,请注意修改assets/js/backend/index.js文件 &ndash;&gt;-->
+                        <!--<ul class="menu">-->
+
+                        <!--</ul>-->
+                    <!--</li>-->
+                    <!--<li class="footer"><a href="#" target="_blank">{:__('View more')}</a></li>-->
+                <!--</ul>-->
+            <!--</li>-->
+
+            <li class="user user-menu">
+                <a href="javascript: void(0);" onclick="editMyInfo()" title="设置">
+                    <img src="__CDN__{$admin.avatar}" class="user-image" alt="{$admin.nickname}">
+                    <span class="hidden-xs">{$admin.nickname}</span>
+                </a>
+            </li>
+            <li>
+                <a href="{:url('index/logout')}"> <i class="fa fa-sign-out"></i>退出 </a>
+            </li>
+        </ul>
+    </div>
+</nav>

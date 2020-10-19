@@ -1,0 +1,2 @@
+-- DROP TABLE `__PREFIX__third`;
+-- DROP TABLE `__PREFIX__usercenter_config`;

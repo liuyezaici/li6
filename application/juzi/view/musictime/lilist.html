@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+{include file="common/meta" /}
+</head>
+<base target="_parent" />
+<body>
+{include file="common/header" /}
+{include  file="common/banner" currentBanner='musicTime' /}
+<link href="/assets/css/juzi/liList.css" rel="stylesheet">
+<script src="/assets/js/juzi/player.js"></script>
+<div class="front_body container">
+    <div class="panel panel-info">
+        {include  file="common/musicTimeTop" keyword='$keyword' /}
+    </div>
+</div>
+<div class="front_body container">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="position: relative;">
+            歌曲《<?=$musicInfo['songTitle'] .'-'. $musicInfo['singer'];?>》的歌曲心情
+
+            <?php
+            if($isMine) {?>
+            <a class="btn btn-xs btn-success continueWriteBtn" href="/juzi/Musictime/write/?id=<?=$musicId?>" target="_parent">写心情</a>
+            <?php
+            }?>
+        </div>
+        <div class="panel-body" id="xinqingListBox">
+            <div class="well">
+                作者收藏的文件:
+                <div class="line3"></div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <button class="btn btn-xs"><?=$musicInfo['songSize']?></button>
+                        <button class="btn btn-xs"><?=$musicInfo['songGeshi']?></button>
+                        <button class="btn btn-xs"><?=$musicInfo['songTime']?></button>
+                    </div>
+                </div>
+                <div class="line5"></div>
+                歌词:
+                <div class="row">
+                    <div class="col-sm-12">
+                        <?=$musicInfo['songGeci']?>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-striped">
+                <tr>
+                    <th>
+                        内容
+                    </th>
+                    <th>
+                        公开
+                    </th>
+                    <th>
+                        发布时间
+                    </th>
+                    <th>
+                        操作
+                    </th>
+                </tr>
+                <?php
+                foreach($list as $v) {
+                ?>
+                <tr>
+                    <td>
+                        <a href="/juzi/Musictime/liDetails/id/<?=$v['id']?>" target="_blank"><?=$v['content']?></a>
+                    </td>
+                    <td>
+                        <?=$v['opened']?>
+                    </td>
+                    <td>
+                        <?=$v['ctime']?>
+                    </td>
+                    <td data-id="<?=$v['id']?>">
+                        <?php
+                        if($isMine) {?>
+                        <a class="btn btn-xs btn-default" href="/juzi/Musictime/write/?liId=<?=$v['id']?>" target="_blank">编辑</a>
+                        <button class="btn btn-xs btn-warning delBtn">删除</button>
+                        <?php
+                        } else {?>
+                        <a class="btn btn-xs btn-default" href="/juzi/Musictime/liDetails/id/<?=$v['id']?>" target="_blank">查看</a>
+                        <?php
+                        }?>
+                    </td>
+                </tr>
+                <?php
+                }
+                ?>
+                <?php
+                if($nullStr) {
+                ?>
+                <tr>
+                    <td colspan="4">
+                        <div class="alert alert-warning">
+                            <?=$nullStr?>
+                        </div>
+                    </td>
+                </tr>
+                <?php
+            }
+            ?>
+            </table>
+            <?=$pageMenu?>
+        </div>
+    </div>
+</div>
+<script>
+
+    (function (global__, $) {
+        $(document).ready(function () {
+            var delXinqingUrl = '/juzi/Musictime/removeXinqing/';
+            var listBox = $('#xinqingListBox');
+            //删除按钮
+            listBox.find('.delBtn').click(function () {
+                var tr_ = $(this).closest('tr');
+                var id_ = $(this).closest('td').attr('data-id');
+                msgConfirm('确定要删除此心情吗?', '确定', '取消', function () {
+                    hideNewBox();
+                    loadingSvg(true);
+                    rePost(delXinqingUrl, {
+                        id: id_
+                    }, function (res) {
+                        noLoading();
+                        if(res.code == 1) {
+                            tr_.remove();
+                            msgTis(res.msg);
+                        } else {
+                            msgTis(res.msg);
+                        }
+                    })
+                })
+            });
+
+        });
+    })(this, jQuery);
+</script>
+{include file="common/footer" /}
+</body>
+</html>

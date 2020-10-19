@@ -1,0 +1,37 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//创建单选radio
+<div id="show_normal1">性别：</div>
+<div id="show_normal2">性别：</div>
+<br />
+<script>
+    var sexRadios = makeRadio({
+            value: 1,
+            name: 'radio_v',
+            value_key: 'value1', //默认value
+            text_key: 'text1', //默认text
+            items: {
+                data: [
+                    {value1: 0, text1: '女'},
+                    {value1: '1', text1: '男'},
+                    {value1: 2, text1: '保密'},
+                    {value1: 3, text1: '蓝铝', disabled: true}
+                ]
+            }
+        , click: function (o, parentObj) {
+            console.log(parentObj);
+            console.log(parentObj.value);
+            console.log(parentObj.text);
+        }
+    });
+
+    $('#show_normal1').append(sexRadios); //单独输出单元   //也可以分开输出单个单元 sexRadios[0] sexRadios[1] sexRadios[2]
+
+    $('#show_normal2').append(sexRadios.clone()); //单独输出单元
+</script>

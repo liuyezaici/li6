@@ -1,0 +1,156 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+        #allmap{height:500px;width:100%;}
+        #r-result{width:100%; font-size:14px;}
+    </style>
+    <link href="/assets/css/lr/jquery.lr_box.css" rel="stylesheet">
+    <script src="/assets/libs/jquery/dist/jquery.js"></script>
+    <script src="/assets/js/lr/jquery-lr_base.js"></script>
+    <script src="/assets/js/lr/jquery-lr_box.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak={$baiduApiKey}"></script>
+    <title>寻找附近的网点</title>
+</head>
+<body>
+<div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+    var searchCity = '{$city}';
+    var getStationUrl = '/admin/addon/station/api/index/searchStation/';
+    var viewStationUrl = '/wap#station?id=';
+    var userToken = '{$user_token}';
+    // 百度地图API功能
+    var map = new BMap.Map("allmap");
+    var point = new BMap.Point(116.331398, 39.897445);
+    map.centerAndZoom(point,12);
+
+    if(!searchCity) {
+        //获取用户当前的地理位置
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r) {
+            if(this.getStatus() == BMAP_STATUS_SUCCESS){
+                var mk = new BMap.Marker(r.point);
+                map.addOverlay(mk);
+                map.panTo(r.point);
+                map.enableScrollWheelZoom(true); //允许缩放地图
+                if(parent['getLocation']) {
+                    parent['getLocation'].click(function () {
+                        map.panTo(r.point);
+                    })
+                }
+            }
+            else {
+                alert('failed'+this.getStatus());
+            }
+        },{enableHighAccuracy: true});
+    } else {
+        if(!parent.userToken) {
+            msgTisf('请先登录');
+            parent.wapPubFunc.getWeixinOpenid();
+        }
+        var point = new BMap.Point();
+        map.centerAndZoom(point, 14);
+        map.enableScrollWheelZoom(true); //允许缩放地图
+        var local = new BMap.LocalSearch(map, {
+            renderOptions:{map: map}
+        });
+        local.search(searchCity);
+        map.centerAndZoom(searchCity, 14);      // 用城市名设置地图中心点
+        //获取当前经纬度 提交给服务器 获取附近的场地
+        // 创建地址解析器实例
+        var myGeo = new BMap.Geocoder();
+        // 将地址解析结果显示在地图上,并调整地图视野
+        myGeo.getPoint(searchCity, function(point){
+            if (point) {
+                var postDa = {
+                    lng: point.lng,
+                    lat: point.lat,
+                };
+                if(parent.wapCfg.tokenKey) postDa[parent.wapCfg.tokenKey] = parent.userToken;
+                // msgTisf(lng + '|'+ lat);
+                postData({
+                    url: getStationUrl,
+                    post_data: postDa,
+                    success_key: 'code',
+                    success_value: '1',
+                    success_func: function (e) {
+                        if(!isUndefined(e.data) && !isUndefined(e.data.list)) {
+                            var stationList = e.data.list;
+                            var tmpId, tmpTitle, tmpCity, tmpLng, tmpLat;
+                            $.each(stationList, function (n, data) {
+                                tmpId = data.id;
+                                tmpTitle = data.title;
+                                tmpCity = data.address;
+                                tmpLng = data.lng;
+                                tmpLat = data.lat;
+                                //创建小图标
+                                var pt = new BMap.Point(tmpLng, tmpLat);
+                                var myIcon = new BMap.Icon("/assets/wap/img/shop.png", new BMap.Size(44, 49));
+                                var marker2 = new BMap.Marker(pt,{icon:myIcon});  // 创建标注
+                                marker2.addEventListener("click", function () {
+                                    parent.location = viewStationUrl + tmpId;
+                                });
+                                map.addOverlay(marker2);              // 将标注添加到地图中
+                                //添加文本标题
+                                var point = new BMap.Point(tmpLng, tmpLat);
+                                var opts = {
+                                    position : point,    // 指定文本标注所在的地理位置
+                                    offset   : new BMap.Size(19, -30)    //设置文本偏移量
+                                }
+                                var label = new BMap.Label(tmpTitle, opts);  // 创建文本标注对象
+                                label.setStyle({
+                                    color : "black",
+                                    border : 0,
+                                    fontSize : "12px",
+                                    height : "20px",
+                                    lineHeight : "20px",
+                                    fontFamily:"微软雅黑"
+                                });
+                                label.addEventListener("click", function () {
+                                    parent.location = viewStationUrl + tmpId;
+                                });
+                                map.addOverlay(label);
+                            })
+                            // console.log(stationList);
+                        }
+                    },
+                    err_func: function (e) {
+                        if(parent.wapPubFunc.isLogOut(e.code)) {
+                            parent.wapPubFunc.getWeixinOpenid();
+                            return;
+                        }
+                        msg(e.msg);
+                    },
+
+                });
+            }else{
+                alert("您选择地址没有解析到结果!");
+            }
+        }, searchCity);
+
+        //获取用户当前的地理位置
+        var geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(function(r) {
+            if(this.getStatus() == BMAP_STATUS_SUCCESS){
+                if(parent['getLocation']) {
+                    parent['getLocation'].click(function () {
+                        map.panTo(r.point);
+                    })
+                }
+            }
+            else {
+                alert('failed'+this.getStatus());
+            }
+        },{enableHighAccuracy: true});
+    }
+
+
+    $(window).resize(function (e) {
+        $('#allmap').css('height', $(window).outerHeight());
+    });
+    $('#allmap').css('height', $(window).outerHeight());
+</script>

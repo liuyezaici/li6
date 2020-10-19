@@ -1,0 +1,52 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .test_box {
+        background-color: #efefef;
+        border: 1px solid #ddd;
+        width: 200px;
+        height: 100px;
+        display: block;
+        text-align: center;
+    }
+    .test_box.active {
+        font-weight: bold;
+        font-size: 55px;
+    }
+    .test_box.hover {
+        color: #000cc0;
+    }
+</style>
+//一个简单的div
+<div id="show_div"></div>
+
+<script>
+//一个简单的日历
+    var rili = makeRili({
+        name: 'demo',
+        // from_year: 1900,
+        // place: '选择年月日',
+        // 'value': '2018-12-4',
+        width: '200px',
+        // year_menu_width: '280px',
+        // month_menu_width: '156px',
+        // ym_size: 'sm', //年月日尺寸  xs/sm/md/lg
+        // clear: true,
+        // size: 'normal', //small/normal/large
+        from_year: 1998,
+        to_year: 2012
+    });
+  $('#show_div').append(rili);
+
+   //支持延迟更新值
+   /*div['value'] = 'xxxxxxxxxxxxxxx'; */
+
+// $('#show_div2').append(rili.clone());
+
+</script>

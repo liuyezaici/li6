@@ -1,0 +1,31 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+
+</style>
+<div id="show_div"></div>
+<script>
+var items = makeItems({
+    name:  'demo',
+    data:  {'this_val': [1,2,3]},
+    'items': {
+        data: [
+            {'id': "1", 'title': "单元1"},
+            {'id': "2", 'title': "单元2"},
+            {'id': "3", 'title': "单元3"},
+            {'id': "4", 'title': "单元4"},
+        ],
+        value_key: 'id',
+        title_key: 'title',
+        value: '{title}',
+    },
+    value: '{this_val}'
+});
+$('#show_div').append(items);
+</script>

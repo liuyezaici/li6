@@ -1,0 +1,48 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//创建单选radio
+<div id="show_normal1">性别：</div>
+
+<div id="show_bind1"></div>
+<div id="show_bind2"></div>
+<div id="show_input1"></div>
+<br />
+<script>
+    $('#show_normal1').append([
+        makeRadios({
+            value: 1,
+            name: 'demo',
+            items: {
+                data: [
+                    {value1: 0, text1: '女'},
+                    {value1: 1, text1: '男'},
+                    {value1: 2, text1: '保密'},
+                    {value1: 3, text1: '人妖', disabled: true}
+                ]
+                , click: function (obj_, e_, s_) {
+                    console.log('diy_click');
+                    console.log(e_);
+                    console.log(s_);
+                },
+                value_key: 'value1',
+                title_key: 'text1',
+            }
+        }),
+        makeDiv({
+            value: '------------------',
+            style: 'margin-top: 10px;margin-bottom: 10px;'
+        }),
+        makeA({
+            'class': 'btnLr btn-xs btn-info',
+            value: '查看所有样式',
+            href: '/tool/try/ele/make_radio_type.html'
+        })
+    ]); //单独输出单元   //也可以分开输出单个单元 sexRadios[0] sexRadios[1] sexRadios[2]
+
+</script>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Two-way-data-binding</title>
+</head>
+<body>
+
+<div id="app">
+    <input type="text" v-model="text">
+    <input type="text" v-model="vvv">
+    {{ vvv }}
+    <p id="view"> {{ text }} </p>
+    <p> {{ vvv }} </p>
+</div>
+
+<script>
+    //dom首次获取值时 会声明一个 内容更新器，利用全局变量：临时内容更新器  把它传给 数据监听器
+    // 数据监听器在遍历每个数据时，会一一分配一个空的订阅器
+    // 数据监听器在被取出数据时，根据是否有 临时内容更新器 来判断是否要写入订阅通知器
+    // （在dom初始化时 会为每个dom实例化一个内容更新器，并告诉全局变量“临时内容更新器 ” 指向这个更新器， 在dom赋值即是触发VM数据get动作，get的方法内会判断是否有“临时内容更新器 ”来给当前数据补充所有的订阅者。然后在这个内容更新器结尾立刻注销“临时内容更新器”的这个指向。）
+
+    // 数据监听器会在数据被设置内容时  触发当前数据绑定的订阅通知器 让它告诉对应的订阅者(dom) 执行更新操作。
+
+    //临时内容更新器
+    var tmpUpdater = null;
+
+    //订阅通知器 用于通知订阅者
+    var notifyer = function() {
+        var self = this;
+        this.receivrs= [];
+        this.addReceivrs= function(newReceiver) {
+            self.receivrs.push(newReceiver);
+        };
+        this.notify= function() {
+            self.receivrs.forEach(function(tmpReceiver) {
+                tmpReceiver.update();
+            });
+        }
+    };
+
+    //数据监听器
+    function objAddListener(vm) {
+        var datas = vm.data;
+        Object.keys(datas).forEach(function (key) {
+            listenObj(vm, key, datas[key]);
+        });
+        //监听对象的改变
+        function listenObj (obj, key, val) {
+            var dep = new notifyer();
+            Object.defineProperty(obj, key, {
+                get: function () {
+                    //input等首次取值时 会将input对应的监听器告诉给全局变量tmpUpdater。此时要立刻记录，过时不候。
+                    if(tmpUpdater) dep.addReceivrs(tmpUpdater);
+                    return val;
+                },
+                set: function (newVal) {
+                    if (newVal === val) return;
+                    val = newVal;
+                    // 作为发布者发出通知
+                    dep.notify();
+                }
+            });
+        }
+    }
+
+
+    //内容自动更新器
+    function elementUpdater(vm, node, dataName, nodeType) {
+        tmpUpdater = this;// 利用全局变量 记录当前实例化的通知器 this. 只有初始化当前对象时才会激活 tmpUpdater
+        this.dataName = dataName;
+        this.node = node;
+        this.vm = vm;
+        this.nodeType = nodeType;
+        this.update = function () {
+            this.value = this.vm[this.dataName]; // 触发vm对应属性的 get， 同时通过全局标记tmpUpdater 传递当前通知实例给listener，末尾再去掉全局的标记.
+            if (this.nodeType == 'text') {
+                this.node.nodeValue = this.value; //无标签包裹的文本
+                this.node.innerHTML = this.value; //标签包裹的文本
+            }
+            if (this.nodeType == 'input') {
+                this.node.value = this.value;
+            }
+        };
+        this.update();
+        tmpUpdater = null;
+    }
+
+
+    //打包元素
+    function nodeToFragment (node, vm) {
+        var flag = document.createDocumentFragment();
+        var child;
+        // 循环时，node.firstChild 一直是被剪切后的下一个
+        while (child = node.firstChild) {
+            compile(child, vm);
+            flag.appendChild(child); // 将子节点劫持到文档片段中
+        }
+        function compile (node, vm) {
+            var reg = /\{\{(.*)\}\}/;
+            // 节点类型为元素 <p> <input>
+            if (node.nodeType === 1) {
+                var attr = node.attributes;
+                // 解析属性
+                for (var i = 0; i < attr.length; i++) {
+                    if (attr[i].nodeName == 'v-model') {
+                        var dataName = attr[i].nodeValue; // 获取 v-model 绑定的属性名
+                        node.removeAttribute('v-model');
+                        node.addEventListener('input', function (e) { //input绑定事件 同步修改vm的数据
+                            vm[dataName] = e.target.value;
+                        });
+                    }
+                }
+                new elementUpdater(vm, node, dataName, 'input');//  数据首次同步给input
+                //解析内容
+                if (reg.test(node.innerHTML)) {
+                    var dataName = RegExp.$1; // 获取匹配到的字符串
+                    dataName = dataName.trim();
+                    new elementUpdater(vm, node, dataName, 'text');
+                }
+            }
+            // 节点类型为 text
+            if (node.nodeType === 3) {
+                if (reg.test(node.nodeValue)) {
+                    var dataName = RegExp.$1; // 获取匹配到的字符串
+                    dataName = dataName.trim();
+                    new elementUpdater(vm, node, dataName, 'text');
+                }
+            }
+        }
+        return flag
+    }
+    function Vue (options) {
+        this.data = options.data;
+        objAddListener(this);
+        var id = options.el;
+        var dom = nodeToFragment(document.getElementById(id), this);
+        // 编译完成后，将 dom 返回到 app 中
+        document.getElementById(id).appendChild(dom);
+    }
+    var vm = new Vue({
+        el: 'app',
+        data: {
+            text: 'hello worldss',
+            vvv: '是不是什么内容都可以显示？'
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<style type="text/css">
+<!--
+.cash_box {
+    margin: -15px 10px 0 0px;
+}
+.cash_box .top {
+    border-bottom: 1px solid #ddd;
+}
+.cash_form {
+    background-color: #f5f8fa;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding-bottom: 5px;
+}
+.cash_form .top {
+    border-bottom: 1px solid #fff;
+    margin: 0 10px;
+}
+.cash_form .top h1 {
+    height: 40px;
+    line-height: 40px;
+    padding-left: 5px;
+    border-bottom: 1px solid #d7dddd;
+    font-weight: bold;
+    font-size: 14px;
+    color: #888;
+}
+.cash_form ul {
+    margin: 10px 12px 0 12px;
+}
+.cash_form ul li {
+}
+.cash_form ul li em {
+    width: 80px;
+}
+.submit_form {
+    margin-top: 10px;
+    border-top: 1px solid #ddd;
+}
+.submit_form ul li em {
+    width: 100px;
+}
+.submit_form ul {
+    padding-top: 10px;
+}
+.submit_form ul li {
+    padding: 5px 0;
+    line-height: 25px;
+}
+-->
+</style>
+<div class="right_list cash_box">
+    <div class="cash_form" id="cash_form">
+        <div class="top">
+            <h1>您的账户信息如下：</h1>
+        </div>
+        <ul>
+            <li>
+                <em>账户名：</em> <?=$username?>
+                </li>
+            <li>
+                <em>账户余额：</em> <?=$all_money?> 元
+                    <span class="em">[ 其中流动资金<?=$liudongzijin?>元，冻结资金<?=$dongjiezijin?>元 ]</span>
+            </li>
+            <li>
+                <em>可提现额度：</em> <span id="money"><?=$liudongzijin?>元</span> <span class="em">[ 可提现额度 = 流动资金 ]</span>
+            </li>
+            <li>
+                <em>绑定支付宝：</em> <span id="oldzfb"><?=$zfb?></span>
+                    <span class="em">[ 本站退款只针对此绑定支付宝，请确认此支付宝为您所有 ]</span>
+            </li>
+        </ul>
+    </div>
+    <div class="submit_form" id="submit_form">
+    <ul>
+    	<li><em>请输入提现金额：</em> <input id="tixian_jin" class="input" style="width: 80px;"  type="text" value="" /> &nbsp;元
+            &nbsp;&nbsp; <span class="em">[ 请输入整数 ]</span>
+        <span id="gongshi" style="color: #ff3c00;"></span>
+        </li>
+        <li style="background-color: #faf6ec;height: auto;border-radius: 4px;padding: 2px 10px;">
+            提现收取的手续费请参照
+            <a href="https://b.alipay.com/order/productDetail.htm?productId=2011052500326597&tabId=3#ps-tabinfo-hash" target="_blank" style="text-decoration: underline;color: #0000ff;">淘宝收费标准</a> ,
+            提现申请提交后,4个工作日内可到账。 </li>
+    	<li><em>输入提现支付宝：</em> <input id="zfb" class="input" style="width: 200px;" type="text" value="" /> &nbsp; &nbsp;<span class="em">[ 输入您已绑定的支付宝, 支付宝错误不会返还手续费 ]</span></li>
+        <li><em>网站登录密码：</em> <input id="pwd" class="input" style="width: 200px;" type="password" maxlength="50" />
+        </li>
+        <li><em>验证码：</em> <input id="validate" class="input" style="width: 80px;" type="text" />
+            <img style="cursor: pointer;height: 30px;vertical-align: bottom;" src="/?s=system/code" id="code_image" onclick="renew_tixian_code();" />
+            [<a href="javascript: void(0);" target="_self" onClick="renew_tixian_code();">刷新验证码</a>]
+        </li>
+        <li style="color:#900; font-size:14px; margin-top:10px;">
+            <input id="acp" type="checkbox" value="1" /> 我已核对支付宝准确无误，所有操作均为本人授权许可并承担一切相应后果。
+        </li>
+        <li>
+            <input type="hidden" id="tixian_memo" value="会员申请提现">
+            <a class="button" href="javascript: void(0);" onclick="submitCash();" target="_self" style="float: left;display: inline-block;">提现</a>
+        </li>
+    </ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function formatFloat(src,pos){
+        pos = pos||2;
+        src= Math.round(src*Math.pow(10,pos))/Math.pow(10,pos);
+        return src;
+    }
+    function submitCash(){
+        var form = $('#cash_form');
+        var form2 = $('#submit_form');
+        var zhifubao = $.trim(form2.find('#zfb').val());
+        var money = $.trim(form2.find('#tixian_jin').val()); //当前提取金额 (已扣除手续费)
+        var can_tixian_money = $.trim(form.find('#money').html()); //可提金额
+        var code = $.trim(form2.find('#validate').val());
+        var pwd = $.trim(form2.find('#pwd').val());
+        var memo = $.trim(form2.find('#tixian_memo').val());
+        var acp =  form2.find('#acp');
+        if(!money) {
+            msg('请输入提现金额', 4);
+            return;
+        }
+        var re = new RegExp(/^\d+[\.]?\d{0,2}$/);
+        if (!re.test(money) || isNaN(money) ){
+            msg('输入的金额不合法，请重新输入。');
+            return;
+        }
+        if(money.indexOf(".") !== -1) {
+            msg('提现金额只能是整数', 4);
+            return;
+        }
+        /*if(money < 50) {
+            msg('提现金额至少50元', 4);
+            return;
+        }*/
+        if(!zhifubao) {
+            msg('请输入您的支付宝账号', 4);
+            return;
+        }
+        if(!pwd || pwd.length < 6) {
+            msg('请输入您本站的登录密码', 4);
+            return;
+        }
+        if (money == 0 || (parseFloat(money) > parseFloat(can_tixian_money))){
+            msg('填写的提现金额必须为正整数且不能超过可提现额度【'+can_tixian_money+'】，请重新输入!', 4);
+            return false;
+        }
+        if(!code ) {
+            msg('请输入认证码', 4);
+            return;
+        }
+        if (!acp.attr('checked')){
+            msg('您必须确认信息勾选项', 4);
+            return false;
+        }
+        if (confirm(memo+ ',绑定支付宝：' + zhifubao + '，从提交申请的时间开始后计算，需要4个工作日，确定吗？')){
+            post("/?s=user&do=tixian&json=true",{zfb:zhifubao,money:money,code:code,pwd:pwd,memo:encodeURIComponent(memo)},function(data){
+                if(data.id != '0061') {
+                    if(data.info) data.msg += data.info;
+                    msg(data.msg, 4);
+                    renew_tixian_code();
+                    if(data.id == '0000') {
+                        loginIn();
+                        return;
+                    }
+                } else {
+                    hideAllbox();
+                    ajaxOpen('/?s=user/account');
+                    msg(data.msg,1);
+                }
+            });
+        }
+    }
+//刷新验证码
+function renew_tixian_code() {
+    $('.cash_box').find('#code_image').attr('src',function(i,oldsrc){
+        return oldsrc+'&t='+Math.random();
+    })
+}
+//初始化事件
+function tixianEvent() {
+    var form = $('#submit_form');
+    form.find('#tixian_jin').keyup(function(e) {
+        var money = $(this).val();
+        if(money && !isNaN(money) && money > 0) {
+            var shouxufei = money * 0.005;
+            shouxufei = formatFloat(shouxufei,2);
+            shouxufei = shouxufei < 1 ? 1 : shouxufei;
+            form.find('#gongshi').html("扣除手续费:<span style='color: #ff0000;font-size: 18px;'> " +
+                    shouxufei  + "</span>元 , 实际到账金额: <span style='color: #ff0000;font-size: 18px;'>"+
+                    (money- shouxufei) +"</span>元")
+            var memo = "提现金额:" + money + "元,手续费:"+shouxufei+"元,实际到账:"+(money- shouxufei)+"元";
+            form.find('#tixian_memo').val(memo);
+        } else {
+            form.find('#gongshi').html("");
+            form.find('#tixian_memo').val('');
+        }
+    });
+}
+if($('#cash_form').find('#oldzfb').html().length < 1) {
+    hideAllbox();
+    msg('您还没有绑定支付宝',4);
+    setTimeout(function(){
+        hideAllbox();
+        openMenu(3);
+    },1000);
+};
+tixianEvent();
+renew_tixian_code();
+</script>

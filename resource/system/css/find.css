@@ -1,0 +1,25 @@
+@charset "utf-8";
+/*
+ *重置密码 页面的样式
+ */
+body{
+    background-image: none;
+}
+.reset_body {
+    width: 660px;
+    position: relative;
+}
+.reset_body .page-header {
+    position: relative;
+}
+.reset_body .other {
+    position: absolute;
+    right: 10px;
+    bottom: 5px;
+}
+.reset_body .other a{
+    margin-right: 20px;
+}
+#sms_reset_form {
+    margin-top: 35px;
+}

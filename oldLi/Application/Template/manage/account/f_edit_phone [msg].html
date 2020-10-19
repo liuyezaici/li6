@@ -1,0 +1,142 @@
+<style type="text/css">
+<!--
+/* 修改手机 */
+.phone_box {
+    margin: -20px 0 0 -10px;
+}
+.phone_box .top_desc {
+    background-color: #f5f8fa;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+.phone_box .top_desc .top {
+    border-bottom: 1px solid #fff;
+    margin: 0 20px;
+}
+.phone_box .top_desc .top h3 {
+    height: 38px;
+    line-height: 38px;
+    border-bottom: 1px solid #d7dddd;
+}
+.phone_box .top_desc .desc {
+    line-height: 26px;
+    padding: 10px 20px;
+    color: #dd7a69;
+}
+.submit_phone_form {
+    margin-top: 10px;
+}
+.submit_phone_form ul li {
+    padding: 5px;
+    line-height: 30px;
+    height: 30px;
+}
+.submit_phone_form ul li em {
+    width: 80px;
+}
+-->
+</style>
+<div class="right_list phone_box">
+    <div class="top_desc">
+        <div class="top">
+            <h3>步骤：</h3>
+        </div>
+        <div class="desc">
+            1、输入当前平台登录密码<br />
+            2、输入您的新手机 ，获取验证码<br />
+            3、输入手机验证码，提交绑定到新手机
+        </div>
+    </div>
+    <div id="submit_phone_form" class="submit_phone_form">
+    	<ul>
+            <li>
+                <em>平台登录密码：</em>
+                <input id="my_old_pwd" type="password" class="input" style="width: 180px;" value="" maxlength="50" />
+            </li>
+            <li>
+                <em>您的新手机：</em>
+                <input id="new_phone" type="text" class="input" onkeyup="this.value=this.value.replace(/[^0-9]/gi, '')" style="width: 180px;" value="" maxlength="15" />
+                <a class="new_btn" href="javascript: void(0);" onclick="getMobileCode();" target="_self">获取验证码</a>
+            </li>
+            <li>
+                <em>手机验证码：</em> <input id="phone_code" type="text" class="input" style="width: 100px;" value="" maxlength="50" />
+                <a class="new_btn" href="javascript: void(0);" onclick="submitPhoneCode();" target="_self">提交绑定</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    //提交获取手机验证码
+    function getMobileCode() {
+        var form = $('#submit_phone_form');
+        var mypwd = form.find('#my_old_pwd').val();
+        var phoneNumber = form.find('#new_phone').val();
+        if(!phoneNumber) {
+            msg('请输入您的新手机号码');
+            return;
+        }
+        if(!mypwd) {
+            msg('请输入您的平台登录密码,至少6位');
+            return;
+        }
+        var patrn = /(^0{0,1}1[3|4|5|6|7|8|9][0-9]{9}$)/;
+        if (!patrn.exec(phoneNumber)) {
+            msg("手机号码格式不正确");
+            return;
+        }
+        post('/?s=user&do=get_phone_code&json=true',{mypwd: mypwd, phone_number: phoneNumber },function(data) {
+            hideNewBox();
+            if(data.id != '0376') {
+                if(data.info) data.msg += data.info;
+                msg(data.msg,3);
+                if(data.id == '0000') {
+                    msg(data.msg,1);
+                    loginIn();
+                    return;
+                }
+            } else {
+                msg(data.msg,1);
+                return;
+            }
+        });
+        msg('手机验证短信发送中...');
+    }
+    //验证输入的手机验证码
+    function submitPhoneCode() {
+        var form = $('#submit_phone_form');
+        var code = form.find('#phone_code').val();
+        var newPhone = form.find('#new_phone').val();
+        if(!code) {
+            msg('请输入手机短信验证码');
+            return;
+        }
+        if(!newPhone) {
+            msg('请在左边输入新的手机号码');
+            return;
+        }
+        if(isNaN(code)) {
+            msg('验证码只能是数字');
+            return;
+        }
+        post('/?s=user&do=verify_phone_code&json=true',{ code:code,new_phone:newPhone },function(data) {
+            hideNewBox();
+            if(data.id != '0384') {
+                if(data.info) data.msg += data.info;
+                msg(data.msg,4);
+                if(data.id == '0000') {
+                    msg(data.msg,1);
+                    loginIn();
+                    return;
+                }
+            } else {
+                msg(data.msg,1);
+                setTimeout(function() {
+                    window.location="/?s=user&goto=m%3Duser%26show%3Dedit_my_info&phone_ok#tab=2";
+                }, 500);
+            }
+        });
+    }
+</script>

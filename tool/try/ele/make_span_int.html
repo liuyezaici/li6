@@ -1,0 +1,33 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .simple_span.active {
+        font-weight: bold;
+    }
+    .simple_span.hover {
+        font-style: italic;
+        background-color: #efefef;
+    }
+</style>
+//一个简单span
+
+<div id="show_span"></div>
+
+<script>
+//一个简单的数据循环
+//注意：
+// 如果数据是数组: index 作为每个循环的序号 ;
+// value/class 属性支持js语法. 变量用{}括起
+    var simpleSpan = makeSpan({
+        value: 123,
+       'class': "simple_span"
+    });
+  $('#show_span').append(simpleSpan);
+
+</script>

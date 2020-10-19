@@ -1,0 +1,825 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="widget-body no-padding">
+                <div id="show_search_form"></div>
+                <div id="toolbar" class="toolbar">
+                    <?=build_toolbar([
+                        [
+                        'power'=>'index/index',
+                    'title'=>'刷新',
+                    'icon'=>'fa fa-refresh',
+                    'class'=>'btn btn-primary btn-refresh',
+                    'click'=>'refreshSetting()'
+                    ],
+                    [
+                    'power'=>'index/add',
+                    'title'=>'添加',
+                    'icon'=>'fa fa-plus',
+                    'class'=>'btn btn-success btn-add',
+                    'click'=>'modifySetting()'
+                    ],
+                    [
+                    'power'=>'type/index',
+                    'title'=>'分类',
+                    'class'=>'btn btn-info btn-add',
+                    'click'=>'settingTypes()'
+                    ],
+                    [
+                    'power'=>'type/index/add',
+                    'title'=>'添加分类',
+                    'class'=>'btn btn-info btn-add',
+                    'click'=>'addType()'
+                    ]
+                    ]);?>
+                </div>
+                <div id="list_result"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    var indexUrl = '/adppp/setting/index/index';
+    var addUrl = '/adppp/setting/index/add';
+    var getUrl = '/adppp/setting/index/get/id/';
+    var editUrl = '/adppp/setting/index/edit/id/';
+    var delUrl = '/adppp/setting/index/del/id/';
+    var uploadPicUrl = '/adppp/fujian/index/upload/?addon=setting';
+
+    var typeListUrl = '/adppp/setting/settingtype/index/index';
+    var getTypeUrl = '/adppp/setting/settingtype/get/id/';
+    var addTypeUrl = '/adppp/setting/settingtype/add';
+    var delTypeUrl = '/adppp/setting/settingtype/del/id/';
+    var editTypeUrl = '/adppp/setting/settingtype/edit/id/';
+    var selectTypeUrl = '/adppp/setting/settingtype/index/?selectpage';
+
+    var allValType = {$allValType};//所有值的类型
+    var appendTypeBox = makeDiv();
+    //根据分类类型插入内容
+    function appendValObj(typeName, currentVal) {
+        if(!typeName) return '';
+        //判断值的类型 字符串
+        function valIsString(type_) {
+            return type_ == '{$valTypeWords}';
+        }
+        //判断值的类型 字符串
+        function valIsText(type_) {
+            return type_ == '{$valTypeText}';
+        }
+        //判断值的类型 图片url
+        function valIsPic(type_) {
+            return type_ == '{$valTypePic}';
+        }
+        //判断值的类型 json
+        function valIsJson(type_) {
+            return type_ == '{$valTypeJson}';
+        }
+        appendTypeBox.html('');
+        if(valIsString(typeName)) {
+            var newBox = makeInput({
+                width: '100%',
+                value: currentVal,
+                name: 'row[value]'
+            });
+            appendTypeBox.appendObj(newBox);
+        } else if(valIsText(typeName)) {
+            var newBox = makeEditor({
+                width: '100%',
+                height: '320px',
+                type: 'text',
+                value: currentVal,
+                name: 'row[value]'
+            });
+            appendTypeBox.appendObj(newBox);
+        } else if(valIsPic(typeName)) {
+            var newBox = makeInput({
+                width: '100%',
+                value: currentVal,
+                name: 'row[value]',
+                type: 'file',
+                url: uploadPicUrl, //上传url
+                success_key: 'code',
+                success_value: '1',
+                success_func: function (input_, response) {
+                    msgTisf(response['msg']);
+                    var newPicUrl =  response['data']['url'];
+                    input_['value'] = newPicUrl; //新url
+                    // console.log(input_);
+                    // console.log(newPicUrl);
+                    input_['prev']['value'] = newPicUrl;
+                },
+                err_func: function (data) {
+                    msg(data.msg);
+                },
+                //预览图参数 prev|preview|view
+                prev: {
+                    width: '60px',
+                    height: '60px',
+                    value: currentVal,
+                    pos: 'l',
+                    click: function (img) {
+                        msgViewImg(img.attr('src'), {width: 420, bg: true});
+                    }
+                }
+            });
+            appendTypeBox.appendObj(newBox);
+        } else if(valIsJson(typeName)) {
+            var tableData = [];
+            currentVal = $.trim(currentVal);
+            if(currentVal && currentVal.length>0) {
+                tableData =  JSON.parse(currentVal);
+                // console.log(tableData);
+            }
+            var newBox = makeTable({
+                data: tableData,
+                'class': 'table table-striped table-bordered table-hover',
+               tr_top: {
+                   td: [
+                       {
+                           value: '属性名/标题'
+                       },
+                       {
+                           value: '属性keyname'
+                       },
+                       {
+                           value: '属性value'
+                       },
+                       {
+                           value: '属性上传'
+                       },
+                       {
+                           value: '操作'
+                       }
+                   ]
+               },
+               tr: {
+                   td: [
+                       {
+                           value: makeInput({
+                               width: '100%',
+                               value: '{title}',
+                               name: 'row[value][title][0]'
+                           })
+                       },
+                       {
+                           value: makeInput({
+                               width: '100%',
+                               value: '{keyname}',
+                               name: 'row[value][keyname][0]'
+                           })
+                       },
+                       {
+                           value: makeInput({
+                               width: '100%',
+                               value: '{keyvalue}',
+                               name: 'row[value][keyvalue][0]'
+                           })
+                       },
+                       {
+                           value: makeInput({
+                               width: '100%',
+                               value: '{pic}',
+                               name: 'row[value][pic][0]',
+                               type: 'file',
+                               url: uploadPicUrl, //上传url
+                               success_key: 'code',
+                               success_value: '1',
+                               success_func: function (input_, response) {
+                                   msgTisf(response['msg']);
+                                   var newPicUrl =  response['data']['url'];
+                                   input_['value'] = newPicUrl; //新url
+                                   // console.log(input_);
+                                   // console.log(newPicUrl);
+                                   input_['prev']['value'] = newPicUrl;
+                                   radio.attr('data_value', newPicUrl);//更新静态的value
+                               },
+                               err_func: function (data) {
+                                   msg(data.msg);
+                               },
+                               //预览图参数 prev|preview|view
+                               prev: {
+                                   width: '30px',
+                                   height: '30px',
+                                   value: '{pic}',
+                                   pos: 'l',
+                                   click: function (img) {
+                                       msgViewImg(img.attr('src'), {width: 420, bg: true});
+                                   }
+                               }
+                           })
+                       },
+                       {
+                           value: [
+                               makeBtn({
+                                   'class': 'btn btn-xs btn-info',
+                                   value: '添加1行',
+                                   click: function (obj, even, scope) {
+                                       obj.parent.parent.addline(true);
+                                   }
+                               }),
+                               makeBtn({
+                                   'class': 'btn btn-xs btn-warning',
+                                   margin_left: '10px',
+                                   value: '删除',
+                                   click: function (obj, even, scope) {
+                                       obj.parent.parent.removeObj();
+                                   }
+                               }),
+                               makeBtn({
+                                   value: '移除1行',
+                                   'class': 'btn btn-danger  btn-xs',
+                                   click: function (obj, even, scope) {
+                                       obj.parent.removeObj();
+                                   }
+                               }),
+                               makeBtn({
+                                   'class': 'btn btn-sm btn-default btn-xs',
+                                   value: '拖拽',
+                                   margin_left: '10px',
+                                   move_li: 'parent.parent',
+                                   move_top_li: '1',
+                                   move_box: 'parent.parent.parent'
+                               })
+                           ]
+                       }
+                   ]
+               }
+            });
+            appendTypeBox.appendObj(newBox);
+        }
+    }
+
+    //分页框
+    var pageObj = makePage({
+        click: function (obj, newPage) {
+            topSearchForm.findName("page").val(newPage);
+            searchFormGo(topSearchForm, parentListTable, pageObj, false);
+        }
+    });
+    //搜索框
+    var topSearchForm = makeForm({
+        url: indexUrl,
+        submit: function(form_, e) {
+            console.log(e);
+            e.preventDefault();
+            topSearchForm.findName("page").val(1);
+            searchFormGo(topSearchForm, parentListTable, pageObj);
+            return false;
+        },
+        value: makeDiv({
+            'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
+            value: [
+                makeInput({
+                    value: 1,
+                    type: 'hidden',
+                    name: 'page'
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '分类:'
+                        }), makeSpan({
+                            'class': 'col-xs-8',
+                            value: makeSelect({
+                                name: 'typeid',
+                                value_key: 'id',
+                                'clear': true,
+                                title_key: 'title',
+                                menu: {
+                                    'data_from': {
+                                        success_key: 'code',
+                                        null_load: true,
+                                        success_value: '1',
+                                        url: selectTypeUrl,
+                                        data_key: 'rows'
+                                    },
+                                },
+                                li: {
+                                    value: '{title}'
+                                }
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '配置名:'
+                        }), makeSpan({
+                            'class': 'col-xs-8',
+                            value: makeInput({
+                                'name': 'title',
+                                value: '',
+                                clear: true
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: makeBtn({
+                        'class': 'btn btn-success',
+                        value: '搜索',
+                        type: 'submit'
+                    })
+                }),
+            ]
+        })
+    });
+    $('#show_search_form').append(topSearchForm);
+    var parentListTable = makeTable({
+        'class': 'table table-striped table-bordered table-hover',
+        tr_top: [
+            {
+                th: [
+                    { value: 'ID'  },
+                    { value: '索引名' },
+                    { value: '配置' },
+                    { value: '分类' },
+                    { value: '值'},
+                    { value: '创建时间'},
+                    { value: '创建人'},
+                    { value: '操作'}
+                ]
+            }
+        ],
+        tr_default: [
+            {
+                show: '{{this.length}==0}',
+                td: [
+                    {
+                        colspan: '8',
+                        value: '没有搜索结果'
+                    }
+                ]
+            }
+        ],
+        tr: [
+            {
+                show: '{"{id}" !=""}',
+                td: [
+                    {
+                        value: '{id}'
+                    },
+                    {
+                        value: '{keyname}'
+                    },
+                    {
+                        value: '{title}'
+                    },
+                    {
+                        value: '{typenames}'
+                    },
+                    {
+                        value: '{value}'
+                    },
+                    {
+                        value: '{noSecond[run]({ctime})}'
+                    },
+                    {
+                        value: '{user_name}'
+                    },
+                    {
+                        value: [
+                            makeBtn({
+                                'class': 'btn btn-xs btn-info',
+                                value: '编辑',
+                                click: "modifySetting\('{id}'\)"
+                            }),
+                            makeBtn({
+                                'class': 'btn btn-xs btn-danger',
+                                value: '删除',
+                                margin_left: '5px',
+                                click: "delSetting\('{id}'\)"
+                            })
+                        ]
+                    }
+                ]
+            }
+        ],
+        data_from: {
+            func: function (tableObj) {
+                searchFormGo(topSearchForm, tableObj, pageObj);
+            }
+        }
+    });
+    $('#list_result').append(parentListTable).append(pageObj);
+
+    //刷新列表
+    function refreshSetting() {
+        searchFormGo(topSearchForm, parentListTable, pageObj);
+    }
+    //删除配置
+    function delSetting(id) {
+        msgConfirm('您是否确认要删除此配置？', '确定', '取消', function () {
+            hideNewBox();
+            postAndDone({
+                url: delUrl + id,
+                success_key: 'code',
+                success_value: '1',
+                success_func: function () {
+                    refreshSetting();
+                    msgTis('删除成功');
+                },
+                err_func: function (data) {
+                    msgTis(data.msg);
+                }
+            })
+        });
+    }
+
+
+    //配置分类
+    function settingTypes() {
+        var typelistTable = makeTable({
+            'class': 'table table-striped table-bordered table-hover',
+            data_from: {
+                url: typeListUrl,
+                data_key: 'rows'
+            },
+            tr_top: [
+                {
+                    th: [
+                        {
+                            value: 'ID'
+                        },
+                        {
+                            value: '分类名'
+                        },
+                        {
+                            value: '上级分类'
+                        },
+                        {
+                            value: '操作'
+                        }
+                    ]
+                }
+            ],
+            tr_default: [
+                {
+                    show: '{{this.length}==0}',
+                    td: [
+                        {
+                            colspan: '3',
+                            value: '没有分类'
+                        }
+                    ]
+                }
+            ],
+            tr: [
+                {
+                    show: '{"{id}" !=""}',
+                    td:
+                        [
+                            {
+                                value: '{id}'
+                            },
+                            {
+                                value: '{title}'
+                            },
+                            {
+                                value: '{p_title}'
+                            },
+                            {
+                                value: [
+                                    makeBtn({
+                                        'class': 'btn btn-xs btn-info',
+                                        value: '编辑',
+                                        click: "addType\('{id}'\)"
+                                    }),
+                                    makeBtn({
+                                        'class': 'btn btn-xs btn-danger',
+                                        value: '删除',
+                                        margin_left: '5px',
+                                        click: "delType\('{id}'\)"
+                                    })
+                                ]
+                            }
+                        ]
+                }
+            ]
+        });
+        var settingTypeBox = makeDiv({
+            value: [
+                makeDiv({
+                    'class': 'well text-right',
+                    value: [
+                        makeBtn({
+                            'class': 'btn btn-info btn-xs',
+                            'value': '刷新',
+                            click: function () {
+                                refreshSettingTypes();
+                            }
+                        }),makeBtn({
+                            'class': 'btn btn-success btn-xs',
+                            'margin_left': '10px',
+                            'value': '添加分类',
+                            click: function () {
+                                addType();
+                            }
+                        })
+                    ]
+                }),
+                typelistTable
+            ]
+        });
+        msgWin('配置分类', settingTypeBox, 650, 1);
+
+        //刷新列表
+        window.refreshSettingTypes = function() {
+            typelistTable.renewData();
+        }
+    }
+
+    //删除分类
+    function delType(id) {
+        msgConfirm('您是否确认要删除此分类？', '确定', '取消', function () {
+            hideNewBox();
+            postAndDone({
+                url: delTypeUrl + id,
+                success_key: 'code',
+                success_value: '1',
+                success_func: function () {
+                    refreshSettingTypes();
+                    msgTis('删除成功');
+                },
+                err_func: function (data) {
+                    msgTis(data.msg);
+                }
+            })
+        });
+    }
+
+    //添加/编辑配置
+    function modifySetting(id) {
+        appendTypeBox.html(''); //清空之前编辑的时候选择的值的类型
+        id = id || 0;
+        var dataFromObj = null;
+        if(id) {
+            dataFromObj = {
+                url: getUrl + id,
+                data_key: 'data'
+            };
+        }
+        var box = makeForm({
+            'type': 'post',
+            url: id > 0 ? editUrl + id : addUrl,
+            submit: function (obj, ev) {
+            },
+            success_key: 'code',
+            success_value: ['1'],
+            success_func: function (data) {
+                hideAllBox();
+                if(id > 0) {
+                    msgTis('修改成功');
+                } else {
+                    msgTis('添加成功');
+                }
+                refreshSetting();
+            },
+            err_func: function (data) {
+                msg(data.msg);
+            },
+            value: makeTable({
+                'class': 'edit_table',
+                data_from: dataFromObj,
+                tr_1: [
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '配置名'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    width: '100%',
+                                    name: 'row[title]',
+                                    value: '{title}',
+                                    null_func: function () {
+                                        msgTis('配置名不能为空');
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '所属分类'
+                            }, {
+                                'class': 'td_main',
+                                value: makeSelect({
+                                    name: 'row[typeid]',
+                                    value: '{typeid}',
+                                    'clear': true,
+                                    value_key: 'id',
+                                    title_key: 'title',
+                                    menu: {
+                                        data_from: {
+                                            url: selectTypeUrl,
+                                            data_key: 'rows'
+                                        },
+                                    },
+                                    li: {
+                                        value: '{title}'
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '索引keyname'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    width: '100%',
+                                    value: '{keyname}',
+                                    name: 'row[keyname]'
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '值类型'
+                            }, {
+                                'class': 'td_main',
+                                value: makeRadios({
+                                    name: 'row[keytype]',
+                                    value: '{keytype}',
+                                    data_valuestr: '{value}',
+                                    value_key: 'value',
+                                    title_key: 'text',
+                                    items:{
+                                        data: allValType
+                                    },
+                                    lazyCall: function (itemObj, e) {
+                                        var currentVal = itemObj['value'];
+                                        var valueStr = itemObj.data_valuestr;
+                                        // console.log(itemObj);
+                                        console.log('valueStr:'+valueStr);
+                                        console.log('currentVal:'+currentVal);
+                                        appendValObj(currentVal, valueStr);
+                                    },
+                                    click: function (itemObj, e) {
+                                        var currentVal = itemObj['value'];
+                                        var valueStr = itemObj.attr('data_valuestr');
+                                        // console.log('currentVal:'+ currentVal);
+                                        // console.log(radio);
+                                        // console.log(radio.attr('data_value'));
+                                        appendValObj(currentVal, valueStr);
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                'valign': 'top',
+                                value: '值'
+                            }, {
+                                'class': 'td_main',
+                                value: appendTypeBox
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: ''
+                            }, {
+                                'class': 'td_main',
+                                value: makeBtn({
+                                    'class': 'btn btn-success',
+                                    'value': id>0 ? '编辑' : '添加',
+                                    'type': 'submit'
+                                })
+                            }]
+                    }
+                ]
+            })
+        });
+        msgWin(id >0 ? '编辑配置':'添加配置', box, 820, 1);
+    }
+
+    //添加分类
+    function addType(id) {
+        id = id || 0;
+        var dataFromObj = null;
+        if(id) {
+            dataFromObj = {
+                url: getTypeUrl + id,
+                data_key: 'data'
+            };
+        }
+        var box = makeForm({
+            'type': 'post',
+            url: id > 0 ? editTypeUrl + id : addTypeUrl,
+            submit: function (obj, ev) {
+            },
+            success_key: 'code',
+            success_value: ['1'],
+            success_func: function (data) {
+                hideNewBox();
+                refreshSettingTypes();
+                if(id > 0) {
+                    msgTis('修改成功');
+                } else {
+                    msgTis('添加成功');
+                }
+            },
+            err_func: function (data) {
+                msg(data.msg);
+            },
+            value: makeTable({
+                'class': 'edit_table',
+                data_from: dataFromObj,
+                tr_1: [
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '分类名'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    width: '100%',
+                                    name: 'row[title]',
+                                    value: '{title}',
+                                    null_func: function () {
+                                        msgTis('分类名不能为空');
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '所属分类'
+                            }, {
+                                'class': 'td_main',
+                                value: makeSelect({
+                                    name: 'row[pid]',
+                                    value: '{pid}',
+                                    'clear': true,
+                                    value_key: 'id',
+                                    title_key: 'title',
+                                    menu: {
+                                        data_from: {
+                                            url: selectTypeUrl,
+                                            data_key: 'rows'
+                                        },
+                                    },
+                                    li: {
+                                        value: '{title}'
+                                    }
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '索引keyname'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    width: '100%',
+                                    value: '{keyname}',
+                                    name: 'row[keyname]'
+                                })
+                            }]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: ''
+                            }, {
+                                'class': 'td_main',
+                                value: makeBtn({
+                                    'class': 'btn btn-success',
+                                    'value': id>0 ? '编辑' : '添加',
+                                    'type': 'submit'
+                                })
+                            }]
+                    }
+                ]
+            })
+        });
+        msgWin(id >0 ? '编辑配置':'添加配置', box, 520);
+    }
+</script>

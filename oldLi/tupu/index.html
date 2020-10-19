@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link href="/min/?f=/resource/pub/bootstrap-3.3.7/css/bootstrap.css,/resource/pub/css/jquery.lr_box.css,/resource/pub/css/pub.css,/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/min/?f=/resource/pub/js/jq/jquery-3.2.1.js,/resource/pub/bootstrap-3.3.7/js/bootstrap.js,/resource/pub/js/jquery-lr_base.js,/resource/pub/js/jquery-lr_box.js,/resource/pub/js/jquery-lr_element.js"></script>
+    <script type="text/javascript" src="js/d3.full.js"></script>
+    <script type="text/javascript" src="js/strucMap.min.js"></script>
+    <link rel="stylesheet" href="css/strucMap.min.css"/>
+
+</head>
+<body>
+<div id="topomap" class=""></div>
+<script type="text/javascript">
+    var options = {
+        selector: "#topomap",
+        width: 1200,
+        height: 840,
+        lineLength: 100,
+//	            textColor:"#000",
+//	            textFontFamily:'',
+        nodesClick: function (t) {
+            //if (t.index == 0 || t.index == 6) t.fixed = 1;
+            t.fixed = 1;
+            if(!t.prop['show_menu']) {
+                t.prop['show_menu'] = true;
+            } else {
+                t.prop['show_menu'] = false;
+            }
+            console.log(t);
+        }
+    };
+    var nodesJson = [
+        {
+            "fixed": true,
+            "id": 221,
+            "index": 0,
+            "prop": {"name": "首页"},
+            "x": 260, "y": 680
+        },
+        {
+            "id": "22",
+            "index": 1,
+            "prop": {"name": "商品列表"},
+            "x": 360, "y": 680
+        }];
+    //var linksJson = [ {source: thisIndex, target: targetIndex }, {source: thisIndex, target: targetIndex} ]
+    var linksJson = [
+        {"source": 0, "target": 1}, {"source": 1, "target": 1}
+        ];
+    loadMap(options, nodesJson, linksJson);
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+{include file="common/meta" /}
+</head>
+<body>
+{include file="common/header" /}
+{include file="common/banner" currentBanner='gequshangxi' /}
+<style>
+    .searchLog {
+        max-width: 800px;
+    }
+    .searchLog  li {
+        display: inline-block;
+        margin: 2px 5px;
+        list-style-type: none;
+    }
+    .newsongs {
+        max-width: 800px;
+        margin-top: 10px;
+        position: relative;
+        z-index: 1;
+    }
+    .newsongs ul {
+        margin-bottom: 0;
+    }
+    .newsongs  li {
+        padding: 2px;
+        font-size: 11px;
+    }
+</style>
+<div style="padding-bottom: 100px;">
+    {include file="songs/songs_top_singer" /}
+    {include file="songs/songs_public_top" keyword='' t_='2' /}
+    <div class="container searchLog">
+        <li>搜索记录：</li>
+        <?php
+        foreach($searchList as $v) {
+        ?>
+        <li>
+            <a href="/juzi/songs/search/?t=2&keyword=<?=$v['title']?>" class="label label-default"><?=$v['title']?></a> </li>
+        <?php
+        }?>
+    </div>
+
+</div>
+{include file="common/footer" /}
+</body>
+</html>

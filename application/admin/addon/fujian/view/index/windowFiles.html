@@ -1,0 +1,169 @@
+<div class="widget-body no-padding">
+    <div id="show_files_search_form"></div>
+    <div id="show_files_result"></div>
+</div>
+<script>
+        var indexUrl = '/adppp/fujian/index/windowFiles/?addon={$addon}&sid={$sid}';
+        var delUrl = '/adppp/fujian/index/del/id/';
+        var uploadFujianUrl = '/adppp/fujian/index/upload/?addon={$addon}&addon_source_id={$sid}';
+        //分页框
+        var pageObj = makePage({
+            click: function (obj, newPage) {
+                topSearchFujianForm.findName("page").val(newPage);
+                searchFormGo(topSearchFujianForm, parentListTable, pageObj, false);
+            }
+        });
+        //搜索框
+        var topSearchFujianForm = makeForm({
+            style: 'margin-top: -20px;',
+            url: indexUrl,
+            submit: function(form_, e) {
+                e.preventDefault();
+                topSearchFujianForm.findName("page").val(1);
+                searchFormGo(topSearchFujianForm, parentListTable, pageObj);
+                return false;
+            },
+            value: makeDiv({
+                'class': 'col-md-12',
+                value: [
+                    makeInput({
+                        value: 1,
+                        type: 'hidden',
+                        name: 'page'
+                    }),
+                    makeSpan({
+                        'class': 'input-group',
+                        value: [
+                            makeInput({
+                                'class': 'form-control',
+                                place: '图片名',
+                                'name': 'title',
+                                value: '',
+                                clear: true
+                            }),
+                            makeSpan({
+                                'class': 'input-group-btn',
+                                value: makeBtn({
+                                    'class': 'btn btn-success',
+                                    value: '搜索',
+                                    type: 'submit'
+                                })
+                            }),
+                            makeSpan({
+                                'class': 'input-group-btn',
+                                value: makeInput({
+                                    width: '100%',
+                                    name: 'uploadFujian',
+                                    'class': 'cloud',
+                                    type: 'file',
+                                    style: 'width: 100%; height: 28px; display: inline-block; overflow: hidden; vertical-align: middle;margin-left: 5px;',
+                                    url: uploadFujianUrl, //上传url
+                                    success_key: 'code',
+                                    success_value: '1',
+                                    success_func: function (input_, response) {
+                                        msgTisf(response['msg']);
+                                        topSearchFujianForm.trigger('submit');
+                                    },
+                                    err_func: function (data) {
+                                        msg(data.msg);
+                                    },
+                                })
+                            }),
+                        ]
+                    }),
+                ]
+            })
+        });
+        $('#show_files_search_form').append(topSearchFujianForm);
+        var parentListTable = makeTable({
+            'class': 'table table-striped table-bordered table-hover',
+            tr_top: [
+                {
+                    th: [
+                        { value: '缩略图' },
+                        { value: '图片信息' },
+                        { value: '操作'  }
+                    ]
+                }
+            ],
+            tr_default: [
+                {
+                    show: '{{this.length}==0}',
+                    td: [
+                        {
+                            colspan: '8',
+                            value: '没有搜索结果{id}'
+                        }
+                    ]
+                }
+            ],
+            tr: [
+                {
+                    show: '{"{id}" !=""}',
+                    td: [
+                        {
+                            value: makeImg({
+                                width: '60px',
+                                value: '{fileurl_local}'
+                            })
+                        },
+                        {
+                            value: '{title} <br/> 上传时间:{noSecond[run]({ctime})}<br/> 大小:{filesize}'
+                        },
+                        {
+                            value: [
+                                makeBtn({
+                                    'class': 'btn btn-xs btn-info',
+                                    value: '复制url',
+                                    'data-clipboard-text': "{fileurl_local}",
+                                    hover: function (thisBtn) {
+                                        if(!thisBtn.attr('data-copyEven')) {
+                                            thisBtn.attr('data-copyEven', 1);
+                                            var clipboard = new ClipboardJS(thisBtn[0]);
+                                            clipboard.on('success', function(e) {
+                                                msgTisf('复制成功');
+                                            });
+                                        }
+                                    }
+                                }),
+                                makeBtn({
+                                    'class': 'btn btn-xs btn-danger',
+                                    value: '删除',
+                                    click: "delFujian\('{id}'\)"
+                                })
+                            ]
+                        }
+                    ]
+                }
+            ],
+            data_from: {
+                func: function (tableObj) {
+                    searchFormGo(topSearchFujianForm, tableObj, pageObj);
+                }
+            }
+        });
+        $('#show_files_result').append(parentListTable).append(pageObj);
+
+        //刷新列表
+        function refreshFujian() {
+            searchFormGo(topSearchFujianForm, parentListTable, pageObj);
+        }
+        //删除附件
+        function delFujian(id) {
+            msgConfirm('您是否确认要删除此附件？', '确定', '取消', function () {
+                hideNewBox();
+                postAndDone({
+                    url: delUrl + id,
+                    success_key: 'code',
+                    success_value: '1',
+                    success_func: function () {
+                        refreshFujian();
+                        msgTis('删除成功');
+                    },
+                    err_func: function (data) {
+                        msgTis(data.msg);
+                    }
+                })
+            });
+        }
+</script>

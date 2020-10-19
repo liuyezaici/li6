@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!DOCTYPE html> <html> <head> <meta charset="utf-8">
+    <link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+    <script src="/resource/pub/js/jquery-lr_box.js"></script>
+    <script src="/resource/pub/js/jquery-lr_base.js"></script>
+    <script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+    <style>
+        .simple_btn {
+            border: 1px solid #dedede;
+            background-color: #ffffee;
+            margin: 0 5px 5px 5px;
+        }
+    </style>
+    //a simple select box
+
+    <div id="show_select"></div>
+    <div id="show_bind1"></div>
+    <br />
+    <script>
+        var getDataUrl = '/?s=tool/get_current_province';
+        var getParentPowerUrl = '/?s=tool/get_province';
+        var selectBox = makeSelect({
+            name: 'demo',
+            value: '{province}',
+            'clear': true,
+            menu: {
+                width: '520px',
+                data_from: {
+                    url: getParentPowerUrl,
+                    success_key: 'id',
+                    success_value: '0038',
+                    data_key: 'info.list',
+                },
+            },
+            value_key: 's_id',
+            title_key: 's_name',
+            li: {
+                value: '{s_name}'
+            }
+        });
+        $('#show_select').append(
+            makeDiv({
+                data_from: {
+                    url: getDataUrl,
+                    data_key: 'info',
+                    post_data: {},
+                    success_key: 'id',
+                    success_value: '0038',
+                    err_func: function (e) {
+                        msgTisf(e.msg);
+                    }
+                },
+                value: selectBox
+            }));
+
+    </script>

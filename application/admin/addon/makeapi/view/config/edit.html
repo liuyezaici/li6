@@ -1,0 +1,16 @@
+<form id="edit-form" class="form-horizontal form-ajax" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">访问权限:</label>
+        <div class="col-xs-12 col-sm-8">
+        	{:build_radios('row[config][needlogin]', ['1'=> '需要登录', '0'=> '不需登录'], isset($row['config']['needlogin']) ? $row['config']['needlogin'] : 1 )}
+        </div>
+    </div>
+    <div class="form-group hidden layer-footer">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

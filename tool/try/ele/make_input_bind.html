@@ -1,0 +1,23 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//简单的inut
+<div id="show_normal"></div>
+
+<div id="show_bind1"></div>
+<br />
+
+<script>
+    //数据绑定
+    $('#show_normal').append( makeDiv({value: 'my name is {{some_val1}}'}));//,title:'{{some_val1}}'
+     $('#show_bind1').append( [
+         makeInput({place:'姓名', title:'{{some_val1}}', value:'lilei', type: 'text', width: 240, bind: 'some_val1', name: 'input1'}),
+         makeInput({place:'姓名2', title:'{{some_val1}}', value:'lilei', type: 'text', width: 240, bind: 'some_val1', name: 'input2'}),
+     ]);
+
+</script>

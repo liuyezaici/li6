@@ -1,0 +1,90 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table tr td {
+        padding: 10px 0;
+        background-color: #fefefe;
+    }
+    .js_table .top_tr td {
+        background-color: #eee;
+    }
+</style>
+//js造一个简单的表格 <br />
+// 如需要登录 还需要创建一个form , 参考：<a href="/tool/try/?filename=lr_ele/make_form" target="_blank">makeForm</a>
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+    //js造一个简单的表格
+    var table = makeTable({
+        'width': '500',
+        'class': 'well js_table',
+        'name': 'login_table',
+        data: [{'id': makeRadom(3)},{'id': makeRadom(3)}],
+        tr_top: [
+            {
+                'class': 'top_tr',
+                td: [
+                        {
+                            value: [
+                                makeSpan({
+                                    'margin-left': '10px',
+                                    value: '全选',
+                                    click: function () {
+                                        console.log(table);
+                                        table.selectAll('ids');
+                                    }
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                makeSpan({
+                                    value: '标题'
+                                })
+                            ]
+                        }
+                    ]
+            }
+        ],
+        tr: [
+            {
+                td: [
+                        {
+                            value: [
+                                makeInput({
+                                    'margin-left': '10px',
+                                    'type': 'checkbox',
+                                    'name': 'ids',
+                                    value: '{id}'
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                makeSpan({
+                                    value: 'id: {id}'
+                                })
+                            ]
+                        }
+                    ]
+            }
+        ]
+    });
+    $('#show_table').append(
+        table
+    );
+    $('#show_reload_btn').append(makeA({
+            value: '当前选中',
+            'class': 'btnLr btn-success',
+            click: function (e) {
+                console.log(table.selected('ids'));
+            }
+        })
+    );
+</script>

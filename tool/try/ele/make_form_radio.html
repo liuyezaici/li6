@@ -1,0 +1,96 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的表单 <br />
+<div id="show_form"></div>
+<script>
+
+    //js造一个简单的表格
+    var table = makeTable({
+        'width': '500',
+        'class': 'well js_table',
+        'name': 'login_table',
+        'id': '',
+        tr_1: [{
+            id: 'account_tr',
+            td: [ {
+                value: '兴趣',
+                'class': 'left_em'
+            },
+                {
+                    value: [
+                        makeRadio({
+                            value: 1,
+                            bind: 'some_val',
+                            bind_text: 'some_text',
+                            name: 'radio_v',
+                            value_key: 'value1', //默认value
+                            text_key: 'text1', //默认text
+                            items: {
+                                data: [
+                                {value1: 0, text1: '女'},
+                                {value1: '1', text1: '男'},
+                                {value1: 2, text1: '保密'},
+                                {value1: 3, text1: '蓝铝', disabled: true}
+                            ]}
+                            , click: function (o) {
+                            }
+                        })
+                    ]
+                }
+            ]
+        },{
+            'class': 'submit_tr',
+            td: {
+                    colspan: '2',
+                    'class': 'submit_box',
+                    value: makeBtn({
+                        value: '保存',
+                        type: 'submit',
+                        'class': 'btnLr btn-success'
+                    })
+                }
+        }]
+    });
+    //js造一个简单的表单
+    var diyForm = makeForm({
+        'type': 'post',
+        'url' : '?do=test',
+        value: table,
+        submit: function (obj, ev) {//提交时回调
+            console.log(obj);
+            // console.log(ev);
+            // ev.preventDefault();
+            // console.log('on submit');
+            // return false; 可以让表单停止提交 但要记得 ev.preventDefault();
+        },
+        success_key: 'id',
+        success_value: ['0043', '0113'],
+        success_func: function (data) {
+            console.log('success');
+        },
+        err_func: function (data) {
+        }
+    });
+    $('#show_form').append(
+        diyForm
+    );
+</script>

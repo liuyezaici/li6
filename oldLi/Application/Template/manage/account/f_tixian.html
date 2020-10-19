@@ -1,0 +1,343 @@
+<style type="text/css">
+<!--
+.cash_box {
+    margin: -20px 10px 0 -10px;
+}
+.cash_box .top {
+    border-bottom: 1px solid #ddd;
+}
+.cash_form {
+    background-color: #f5f8fa;
+    border-radius: 4px;
+    margin-top: 5px;
+    padding-bottom: 2px;
+}
+.cash_form .top {
+    border-bottom: 1px solid #fff;
+    margin: 0 10px;
+}
+.cash_form .top h1 {
+    height: 40px;
+    line-height: 40px;
+    padding-left: 5px;
+    border-bottom: 1px solid #d7dddd;
+    font-weight: bold;
+    font-size: 14px;
+    color: #888;
+}
+.cash_form ul {
+    margin: 10px 12px 0 12px;
+}
+.cash_form ul li {
+}
+.cash_form ul li em {
+    width: 80px;
+}
+.cash_box .hint {
+    border: 1px solid #ddd;
+    background-color: #ffe;
+    padding: 8px 0 8px 12px;
+    color: #df2500;
+}
+.submit_tixian_form .gongshi {
+    margin:  5px 0;
+    background-color: #ffe;
+}
+.submit_tixian_form ul li em {
+    width: 100px;
+}
+.submit_tixian_form ul {
+    padding-top: 10px;
+}
+.submit_tixian_form ul li {
+    padding: 5px 0;
+    line-height: 25px;
+    clear: both;
+}
+.tixian_type_table {
+    margin-top: 20px;
+    line-height: 20px;
+}
+.tixian_type_table .desc  {
+    font-size: 12px;
+    color: #666;
+}
+.tixian_type_table label {
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #fff;
+    float: left;
+    padding: 5px 10px;
+}
+.tixian_type_table label.active {
+    border: 1px solid #f14950;
+}
+.tixian_type_table label:hover {
+    border: 1px solid #f79194;
+}
+.tixian_type_table .ico {
+    width: 121px;
+    height: 70px;
+    overflow: hidden;
+    display: block;
+    background: url(/resource/manage/images/tixian/f_tixian.png) no-repeat;
+}
+.tixian_type_table .alipay .ico {
+    background-position: left -109px;
+}
+-->
+</style>
+<div class="right_list cash_box">
+    <div class="cash_form" id="cash_form">
+        <div class="top">
+            <h1>您的账户信息如下：</h1>
+        </div>
+        <ul>
+            <li>
+                <em>姓名：</em> <?=$username?>
+                </li>
+            <li>
+                <em>账户余额：</em> <?=$all_money?> 元
+                    <span class="em">[ 其中流动资金<?=$liudongzijin?>元，冻结资金<?=$dongjiezijin?>元 ]</span>
+            </li>
+            <li>
+                <em>可提现额度：</em> <?=$liudongzijin?>元 <span class="em">[ 可提现额度 = 流动资金 ]</span>
+            </li>
+            <li>
+                <em>绑定支付宝：</em> <span id="oldzfb"><?=$zfb?></span>
+                    <span class="em">[ 提现只能输入此支付宝，并且平台姓名要与支付宝姓名一致 ]</span>
+            </li>
+        </ul>
+    </div>
+    <div class="hint">
+        <b>提现须知</b>：<br />
+        1. 银行卡验证免费，验证通过后首次提现到该银行卡收费2元，之后单笔收取1元<br />
+        2. 提现到支付宝,单笔收取0.5%手续费 [最低1元,最多25元] <br />
+    </div>
+    <table class="tixian_type_table" id="tixian_type_table" cellspacing="0" cellpadding="0" width="100%" border="0">
+        <tr>
+            <td width="50"></td>
+            <td>
+                <!-- 提现方式 1是银联卡 2是支付宝  -->
+                <label class="yinlian" data-id="1">
+                    <span class="ico"></span>
+                    <input type="radio" name="t_type" value="1"  /> 提现到银联卡
+                    [<a href="javascript: void(0);" onclick="chooseMyCard();" target="_self" style="color: #0000ff;">选择我的银行卡</a>] <br />
+                    <span class="desc">未选择银行卡</span>
+                </label>
+            </td>
+            <td>
+                <label class="alipay active" data-id="2">
+                    <span class="ico"></span>
+                    <input type="radio" name="t_type" value="2" checked /> 提现到支付宝：<?=$zfb?> <br />
+                    <span class="desc">支付宝的实名认证姓名必须是:<?=$username?></span>
+                </label>
+            </td>
+        </tr>
+    </table>
+    <div class="submit_tixian_form" id="submit_tixian_form">
+    <ul>
+    	<li>
+            <input id="tixian_type" type="hidden" value="2" /> <!-- 默认是支付宝提现 -->
+            <input id="tixian_card" type="hidden" value="0" /> <!-- 提现到哪张卡 -->
+            <input id="bank_card_fee" type="hidden" value="1" /> <!-- 银行卡手续费 -->
+            <input id="all_ldzj" type="hidden" value="<?=$liudongzijin?>" />
+            <em>请输入提现金额：</em> <input id="tixian_jin" class="input" style="width: 80px;"  type="text" value="" /> &nbsp;元
+        </li>
+        <div id="gongshi" class="gongshi" style="color: #ff3c00;"></div>
+    	<input id="zfb" class="input" type="hidden" value="<?=$zfb?>" />
+        <li>
+            <em>平台登录密码：</em> <input id="pwd" class="input" style="width: 200px;" type="password" maxlength="50" />
+        </li>
+        <li><em>验证码：</em> <input id="validate" class="input" style="width: 80px;" type="text" />
+            <img style="cursor: pointer;height: 30px;vertical-align: bottom;" src="/?s=system/code" id="code_image" onclick="renew_tixian_code();" />
+            [<a href="javascript: void(0);" target="_self" onClick="renew_tixian_code();">刷新验证码</a>]
+        </li>
+        <li style="color:#900; font-size:14px; margin-top:10px;">
+            <label style="cursor: pointer;">
+                <input id="acp" type="checkbox" value="1" /> 我已核对以上信息准确无误，信息如错误不会返还手续费。
+            </label>
+        </li>
+        <li>
+            <input type="hidden" id="tixian_memo" value="会员申请提现">
+            <a class="new_btn new_btn-info" href="javascript: void(0);" onclick="submitCash();" target="_self" style="float: left;display: inline-block;">确定提现</a>
+        </li>
+    </ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+    //提现方式点击事件
+    function tixianTypeClick() {
+        var table = $('#tixian_type_table');
+        table.find('label').click(function() {
+            table.find('.active').removeClass('active');
+            var curentType = $(this).data('id')
+            $('#submit_tixian_form').find('#tixian_type').val(curentType);
+            $(this).addClass('active');
+            $(this).find("input[name='t_type']").attr('checked','checked'); //如果是点击到链接 要让radio选中
+            //重新计算手续费
+            countFee();
+        });
+    }
+    //选择我的银行卡
+    function chooseMyCard() {
+        msgWin('选择我的银行卡','/?s=account/form&form=get_my_card',800,200,"<a target='_self' class='btn' href=\"javascript:hideNewBox();chooseMyCard();\" >刷新</a> ");
+    }
+    //四舍五入
+    function formatFloat(money) {
+        return Math.round(money * Math.pow(10,2))/Math.pow(10,2);
+    }
+    //计算手续费
+    function countFee(){
+        var form = $('#submit_tixian_form');
+        var money = form.find('#tixian_jin').val(); //提现金额
+        var tixianType = form.find('#tixian_type').val();//提现类型
+        var bank_tixian_fee = form.find('#bank_card_fee').val(); //提现费-银行卡
+        money= formatFloat(money);
+        //如果是提现到支付宝
+        if(tixianType == 2) {
+            if(money && !isNaN(money) && money > 0) {
+                var shouxufei = money * 0.005;
+                shouxufei = formatFloat(shouxufei);
+                shouxufei = shouxufei < 1 ? 1 : shouxufei; //最少1元
+                shouxufei = shouxufei >25 ? 25 : shouxufei; //最多25元
+                form.find('#gongshi').html("扣除手续费:<span style='color: #ff0000;font-size: 18px;'> " +
+                        shouxufei  + "</span>元 , 实际到账金额: <span style='color: #ff0000;font-size: 18px;'>"+
+                        (money- shouxufei) +"</span>元");
+                var memo = "提现金额:" + money + "元";
+                form.find('#tixian_memo').val(memo);
+            } else {
+                form.find('#gongshi').html("");
+                form.find('#tixian_memo').val('');
+            }
+        } else {
+
+
+            if(money && !isNaN(money) && money > 0) {
+
+                var shouxufei = bank_tixian_fee;
+                form.find('#gongshi').html("扣除手续费:<span style='color: #ff0000;font-size: 18px;'> " +
+                        shouxufei  + "</span>元 , 实际到账金额: <span style='color: #ff0000;font-size: 18px;'>"+
+                        (money- shouxufei) +"</span>元");
+                var memo = "提现金额:" + money + "元";
+                form.find('#tixian_memo').val(memo);
+
+
+            } else {
+                form.find('#gongshi').html("");
+                form.find('#tixian_memo').val('');
+            }
+        }
+    }
+    //提交提现表单
+    function submitCash(){
+        var form = $('#submit_tixian_form');
+        var tixianType = $.trim(form.find('#tixian_type').val());
+        var tixianCard = $.trim(form.find('#tixian_card').val());
+        var can_tixian_money = $.trim(form.find('#all_ldzj').val()); //可提金额
+        var zhifubao = $.trim(form.find('#zfb').val());
+        var money = $.trim(form.find('#tixian_jin').val()); //当前提取金额 (已扣除手续费)
+        var code = $.trim(form.find('#validate').val());
+        var pwd = $.trim(form.find('#pwd').val());
+        var memo = $.trim(form.find('#tixian_memo').val());
+        var acp =  form.find('#acp');
+        if(!tixianType || tixianType==0) {
+            msg('请选择提现方式', 4);
+            return;
+        }
+        if(tixianType==1 && (!tixianCard || tixianCard==0)) {
+            msg('请选择您的银行卡', 4);
+            return;
+        }
+        if(tixianType==2 && (!zhifubao || zhifubao == '')) {
+            msg('您的支付宝为空', 4);
+            return;
+        }
+        if(money == 0 || !money || money == '') {
+            msg('请输入提现金额', 4);
+            return;
+        }
+        var re = new RegExp(/^\d+[\.]?\d{0,2}$/);
+        if (!re.test(money) || isNaN(money) ){
+            msg('输入的金额不合法，请重新输入。');
+            return;
+        }
+        if(money.indexOf(".") !== -1) {
+            msg('提现金额只能是整数', 4);
+            return;
+        }
+        if(money < 1) {
+            msg('提现金额至少2元', 4);
+            return;
+        }
+        if(money >50000) {
+            msg('单笔提现金额最多5万元', 4);
+            return;
+        }
+        if(!pwd || pwd.length < 6) {
+            msg('请输入您平台的登录密码,至少6位', 4);
+            return;
+        }
+        if (parseFloat(money) > parseFloat(can_tixian_money)){
+            msg('填写的提现金额不能超过可提现额度【'+can_tixian_money+'】，请重新输入!', 4);
+            return false;
+        }
+        if(!code) {
+            msg('请输入认证码', 4);
+            return;
+        }
+        if (!acp.attr('checked')){
+            msg('您必须确认信息勾选项', 4);
+            return false;
+        }
+        var tixianData = {
+            tixian_type:tixianType,
+            tixian_card:tixianCard,
+            zfb:zhifubao,
+            money:money,
+            code:code,
+            pwd:pwd,
+            memo:encodeURIComponent(memo)
+        };
+        if (confirm('您确定所有提现信息无误，确定提现吗？')){
+            post("/?s=account&do=tixian&json=true", tixianData, function(data){
+                if(data.id != '0061') {
+                    if(data.info) data.msg += data.info;
+                    msg(data.msg, 4);
+                    renew_tixian_code();
+                    if(data.id == '0000') {
+                        loginIn();
+                        return;
+                    }
+                } else {
+                    hideAllbox();
+                    ajaxOpen('/?s=account');
+                    msg(data.msg,1);
+                }
+            });
+        }
+    }
+
+    //初始化事件
+    function tixianEvent() {
+        var form = $('#submit_tixian_form');
+        form.find('#tixian_jin').keyup(function(e) {
+            countFee(); //计算手续费
+        });
+    }
+    //刷新验证码
+    function renew_tixian_code() {
+        $('.cash_box').find('#code_image').attr('src',function(i,oldsrc){
+            return oldsrc+'&t='+Math.random();
+        })
+    }
+
+    $(function() {
+        tixianTypeClick(); //提现方式点击事件
+        tixianEvent();
+        renew_tixian_code();
+    })
+
+</script>

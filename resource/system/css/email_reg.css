@@ -1,0 +1,119 @@
+@charset "utf-8";
+/* 邮箱注册页面的新样式  */
+
+/* 全局样式重定义  */
+body {
+   background: #fff;
+}
+.reg_body {
+    margin-top: 60px;
+}
+.reg_body .main {
+    width: 1200px;
+    margin: 0 auto;
+}
+.reg_body .main .reg_top {
+    display: block;
+    border-bottom: 2px solid #eee;
+}
+/* 主体的css */
+#email_reg_form {
+    width: 512px;
+    margin: 10px auto 10px auto;
+    background-color: #fff;
+    padding: 54px 0 40px 0;
+}
+/* 注册 */
+#email_reg_form ul li {
+    height: 60px;
+}
+#email_reg_form ul li #u_email {
+    width: 288px;
+}
+#email_reg_form ul li em {
+    width: 90px;
+    line-height: 50px;
+    display: inline-block;
+    white-space: nowrap;
+    text-align: right;
+    float: left;
+    margin-right: 5px;
+    color: #767676;
+    font-size: 14px;
+}
+#email_reg_form ul li .text {
+    display: inline-block;
+    height: 35px;
+    line-height: 35px;
+    float: left;
+    margin-left: 10px;
+    color: #999;
+    font-size: 12px;
+}
+#email_reg_form ul li .hide {
+    display: none;
+}
+#email_reg_form ul li .input {
+    width: 288px;
+    height: 46px;
+    line-height: 46px;
+    font-size: 16px;
+    outline: none;
+    text-indent: 6px;
+    color: #999;
+}
+#email_reg_form ul li .code_img {
+    width: 98px;
+    height: 45px;
+    float: left;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    margin-left: 20px;
+}
+#email_reg_form li #hint_email {
+    position: absolute;
+    top: 18px;
+    right: -86px;
+    white-space: nowrap;
+}
+#email_reg_form ul li .get_code_btn {
+    float: left;
+    width: 100px;
+    height: 46px;
+    line-height: 46px;
+    border: 1px solid #ddd;
+    text-align: center;
+    margin-left: 2px;
+    font-size: 14px;
+}
+#email_reg_form .submit_btn {
+    width: 310px;
+    height: 40px;
+    line-height: 40px;
+    display: block;
+    background-color: #eb4b00;
+    text-align: center;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 10px 0 0 95px;
+}
+#email_reg_form .leave .login {
+    background-color: #fd9937;
+    color: #fff;
+    padding: 0 5px;
+}
+/* 其他 注册 找回密码 */
+#email_reg_form .other {
+    border-top: 1px solid #dedede;
+    line-height: 35px;
+    text-align: center;
+}
+#email_reg_form .other a {
+    display: inline-block;
+    width: 30%;
+    padding: 0;
+    text-align: center;
+    color: #666;
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {include file="common/meta" /}
+    <link href="__CDN__/assets/css/songs/uri.css" rel="stylesheet">
+    <script src="/assets/js/juzi/uri.js"></script>
+</head>
+<base target="_parent" />
+<body>
+{include file="common/header" /}
+{include file="common/banner" currentBanner='' /}
+{include file="songs/songs_top_singer"  /}
+<div class="uri_body container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            网易云音乐用户: <?=$sInfo['title'];?> , 人气: <?=$sInfo['rq'];?>
+            <br />
+            <img style="height: 45px;border: 1px solid #ddd;" src="<?=$sInfo['avatar']?>">
+            <a href="/juzi/songsuser/myAlbum/?uid={$uid}" target="_self" class="btn btn-xs btn-info">我的歌单</a>
+        </div>
+        <div class="inner">
+            <span class="share_label">分享:</span>
+            <div class="bdsharebuttonbox share_icons">
+                <a href="#" class="bds_more" data-cmd="more"></a>
+                <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+                <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+                <a href="#" class="bds_isohu" data-cmd="isohu" title="分享到我的搜狐"></a>
+                <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+                <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+                <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+                <a href="#" class="bds_bdysc" data-cmd="bdysc" title="分享到百度云收藏"></a>
+                <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+                <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+                <a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a>
+            </div>
+        </div>
+        <div class="panel-body">
+            <h4> 评论记录 </h4>
+            <?=$pageMenu?>
+            <ul class="list-group">
+            <?php
+            foreach($list as $item) {
+            ?>
+            <li class="list-group-item">
+                评论歌曲：<a href="/juzi/songs/uri/<?=$item['songuri'];?>" target="_blank"><?=$item['song_name'];?></a>
+                <span style="font-size: 12px;margin-left: 10px;"><span class="glyphicon glyphicon-thumbs-up"></span> (<?=$item['likecount'];?>) </span>
+                <span style="font-size: 12px;margin-left: 10px;"><?=$item['writetime'];?></span>
+                <div class="alert alert-warning">
+                    <?=$item['content'];?>
+                    <?php
+                    if($item['bereplied'] && $item2 = json_decode($item['bereplied'], true)) {
+                        foreach($item2 as $item2_) {
+                    ?>
+                        <div class="well well-sm">
+                            <a href="/juzi/songsuser/myAlbum/?u=<?=$item2_['useruri'];?>" target="_blank"><?=$item2_['nickname'];?></a> :
+                            <?=$item2_['content'];?>
+                        </div>
+                        <?php
+                        }
+                    }
+                    ?>
+                </div>
+            </li>
+            <?php
+            }
+            ?>
+            </ul>
+            <?=$pageMenu?>
+        </div>
+        <div class="panel-footer">
+            <div class="row">
+                <div class="rol-md-6">
+                    <div class="inner">
+                        <span class="share_label">分享:</span>
+                        <div class="bdsharebuttonbox share_icons">
+                            <a href="#" class="bds_more" data-cmd="more"></a>
+                            <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+                            <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+                            <a href="#" class="bds_isohu" data-cmd="isohu" title="分享到我的搜狐"></a>
+                            <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+                            <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+                            <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+                            <a href="#" class="bds_bdysc" data-cmd="bdysc" title="分享到百度云收藏"></a>
+                            <a href="#" class="bds_youdao" data-cmd="youdao" title="分享到有道云笔记"></a>
+                            <a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+                            <a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>window._bd_share_config = {
+    "common": {
+        "bdSnsKey": {},
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": "",
+        "bdStyle": "0",
+        "bdSize": "16"
+    }, "share": {}
+};
+with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = '/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];</script>
+{include file="common/footer" /}
+</body>
+</html>

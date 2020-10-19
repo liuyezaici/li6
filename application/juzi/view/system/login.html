@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        {include file="common/meta" /}
+        <title> {$webTitle} </title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="login_form" id="append_login_box">
+
+            </div>
+        </div>
+        <script>
+            $(function () {
+                var appendBox = $('#append_login_box');
+                var loginForm = makeDiv({
+                    style: 'text-align: center;',
+                    value: [
+                        makeForm({
+                            'style': 'margin: 0 auto;max-width: 300px; padding: 50px 0;',
+                            url: '/admin/index/login',
+                            success_key: 'code',
+                            success_value: '1',
+                            success_func: function (data) {
+                                msgTisf(data.msg, {top: 200});
+                                window.location = '/admin';
+                            },
+                            err_func: function (data) {
+                                msgTisf(data.msg, {top: 200});
+                            },
+                            value: [
+                                makeDiv({
+                                    'class': 'input-group',
+                                    value: [
+                                        '<div class="input-group-addon"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></div>', makeInput({
+                                            'place': '帐号',
+                                            'class': 'no_radius_left',
+                                            'name': 'username',
+                                            'value': 'admin',
+                                            null_func: function () {
+                                                msgTisf('帐号不能为空', {top: 200});
+                                            }
+                                        })]
+                                })
+                                ,makeDiv({
+                                    'class': 'input-group',
+                                    'margin_top': '15px',
+                                    value: [
+                                        '<div class="input-group-addon"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></div>', makeInput({
+                                            'place': '密码',
+                                            'class': 'no_radius_left',
+                                            'type': 'password',
+                                            'name': 'password',
+                                            'value': '123456',
+                                            null_func: function () {
+                                                msgTisf('密码不能为空', {top: 200});
+                                            }
+                                        })]
+                                }),makeDiv({
+                                    style: 'text-align: right;',
+                                    'margin_top': '15px',
+                                    value:
+                                        makeDiv({
+                                            'class': 'inline',
+                                            style: 'margin: 0 0 0 auto;',
+                                            value: makeCheckbox({
+                                                'name': 'keeplogin',
+                                                'class': 'checked_primary',
+                                                text: '持续登录',
+                                                value: 1
+                                            })
+                                        })
+                                }),makeDiv({
+                                    'class': 'form-group',
+                                    'margin_top': '15px',
+                                    value: makeDiv({
+                                        'class': 'col col-md-12',
+                                        value: makeBtn({
+                                            'value': '登录',
+                                            'type': 'submit',
+                                            'class': 'btn btn-primary btn-lg btn-block no_radius',
+                                        })
+                                    })
+                                })
+                            ]
+                        })
+                    ]
+                });
+                appendBox.append(loginForm);
+            })
+        </script>
+        <footer>
+            <div style="border-bottom: 1px solid #ddd;">
+                <p>{$footContent}</p>
+            </div>
+        </footer>
+
+    </body>
+
+</html>

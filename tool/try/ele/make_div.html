@@ -1,0 +1,39 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .a, .b {
+        width: 240px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+        padding: 20px 0;
+    }
+    .a {
+        background-color: #abefad;
+    }
+    .b {
+        background-color: #c3d4ef;
+    }
+</style>
+//一个简单的div
+<div id="show_div"></div>
+
+<script>
+//一个简单的div
+    var div = makeDiv({
+        'value': '单纯的div',
+        'class': 'a', //支持样式名
+        'style': 'color: #ff0000;font-size: 20px;', //支持style样式
+        'margin_left': '200px',//支持单个css样式
+        'name': 'demo'
+    });
+  $('#show_div').append(div);
+
+
+</script>

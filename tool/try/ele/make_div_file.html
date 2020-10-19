@@ -1,0 +1,53 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+//div渲染服务器的数据
+<div id="show_div"></div>
+<script>
+//一个简单的div
+var getDataUrl = '/?s=tool/get_group';
+    var div = makeDiv({
+        'style': "border-radius: 100%; cursor:pointer;overflow:hidden;background-color: #fff; width: 100px; height: 100px;",
+        data_from: {
+            url: getDataUrl,
+            data_key: 'info',
+            post_data: {},
+            success_key: 'code',
+            success_value: '1',
+            err_func: function (e) {
+                msgTisf(e.msg);
+            }
+        },
+        value:makeInput({
+            width: '100%',
+            name: 'demo',
+            type: 'file',
+            style: 'width: 100%;height: 100%; border-radius: 2rem; display:block; border: 0.01rem solid #ddd;',
+            background: 'url(/resource/system/images/face/{group}.jpg) 0 0 /cover',
+            url:'/?s=tool/upload_file&input_name=demo', //上传url
+            success_key: 'id',
+            success_value: '0388',
+            loading_url: '/resource/pub/images/loading.gif',
+            success_func: function (input_, response) {
+                msgTisf(response['msg']);
+                // var newPicUrl = response['info'];
+                // input_['value'] = newPicUrl; //新url
+                // input_['prev']['value'] = newPicUrl;
+            },
+            change: function() {
+                console.log('change');
+            },
+            err_func: function (data) {
+                msg(data.msg);
+            },
+        })
+    });
+  $('#show_div').append(div);
+
+
+</script>

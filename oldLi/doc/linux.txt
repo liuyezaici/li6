@@ -1,0 +1,508 @@
+ip: 119.23.43.114
+root
+Ygmlxomlg6
+
+mysql目录 /var/lib/mysql
+重启服务器 reboot  /  service mysql stop
+查看进程：ps -ef
+查看端口号：netstat -ln
+重启  nginx
+ nginx -s reload
+service httpd restart 
+查找文件
+ find / -name 'php-cgi.sock'
+ 查看已安装服务 rpm –qa|grep -i mysql 
+CentOS 下安装apt-get  ：  yum install apt
+ 重启mysql  
+service mysqld restart
+service mysql restart 
+service mysqld status  查看mysql启动状态
+------- php.ini----
+/etc/php.ini
+重启PHP
+service php-fpm restart
+
+查看php服务 
+php -m
+
+redis并且配置安装
+wget http://download.redis.io/redis-stable.tar.gz
+tar -zxvf redis-stable.tar.gz
+cd redis-stable
+make
+make install
+
+配置方法一(推荐使用)
+在redis安装目录下进入utils目录，执行自动安装脚本
+cd utils/
+//执行脚本，然后一路回车都按照默认设置执行
+./install_server.sh 
+//执行完脚本后，会出现以下提示：
+Selected config:
+Port           : 6379
+Config file    : /etc/redis/6379.conf
+Log file       : /var/log/redis_6379.log
+Data dir       : /var/lib/redis/6379
+Executable     : /usr/local/bin/redis-server
+Cli Executable : /usr/local/bin/redis-cli
+
+启动/关闭服务命令
+//查看是否启动redis服务
+ps -ef | grep redis
+//启动
+/etc/init.d/redis_6379 start
+//通过配置文件启动
+/usr/local/bin/redis-server /etc/redis/redis.conf
+//关闭
+/etc/init.d/redis_6379 stop
+//关闭，假如是默认端口号，可以省略 -p 参数
+/usr/local/bin/redis-cli -p 6379 shutdown
+
+给redis加密码锁，连接的时候就需要密码
+
+//编辑配置文件 
+vim /etc/redis/6379.conf
+//添加这一行，密码自行设置
+requirepass "redis-pass-xxyyzz"
+//重启redis服务
+/etc/init.d/redis_6379 stop
+/etc/init.d/redis_6379 start
+作者：hellojammyPlus
+链接：https://www.jianshu.com/p/17e4bc176ed7
+ 
+
+
+redis设置密码
+CONFIG SET requirepass "mypass"
+检查是否启动redis 
+无密码登录
+# redis-cli 
+有密码登录
+# redis-cli 
+  127.0.0.1:6379> auth xxxxx(password)
+
+
+或检测：ps -ef | grep redis
+#vi /etc/redis.conf 
+ daemonize no 为 daemonize yes 
+protected-mode yes 为 protected-mode no
+
+# redis-server /etc/redis.conf
+
+firewalld的基本使用
+启动： systemctl start firewalld
+查看状态： systemctl status firewalld 
+停止： systemctl disable firewalld
+禁用： systemctl stop firewalld
+添加
+firewall-cmd --zone=public --add-port=6379/tcp --permanent    （--permanent永久生效，没有此参数重启后失效）
+重新载入
+firewall-cmd --reload
+查看
+firewall-cmd --zone= public --query-port=6379/tcp
+删除
+firewall-cmd --zone= public --remove-port=6379/tcp --permanent
+redis.so 复制
+cd /usr/local/php/lib/php/extensions/no-debug-non-zts-20090626/redis.so
+cp redis.so /usr/lib64/php/modules/
+
+检查端口监听情况
+netstat -tunlp | grep 6379
+tcp        0      0 127.0.0.1:6379          0.0.0.0:*               LISTEN      6251/redis-server 1 
+删除进程： kill -9  pid(6251)
+
+redis.conf配置文件,看到bind 127.0.0.1吗?就是他,搞我们连接不上,注释掉吧
+
+#extension_dir = "/usr/local/php/lib/php/extensions/no-debug-non-zts-20131226"
+extension = "redis.so"
+
+
+在windows系统中打开cmd  输入telnet 47.52.226.100 6379 （telnet ip port）测试是否可以正常连接，如果能连通则表示可以正常连接
+
+命令 netstat -ano
+用于查看服务器对应的端口监听情况。
+
+
+
+--------重置密码------------------
+关闭mysql服务
+service mysql stop
+/usr/bin/mysqld_safe --skip-grant-tables &
+mysql
+mysql> use mysql ;
+mysql> update user set password=password('dlc123456') where user='root';
+mysql> exit
+-----------------------------------
+--------显示数据库列表。  show databases; 
+---------显示库中的数据表：  show tables; 
+
+--------导出数据库 
+（注意:不需要登录mysql再运行）：
+1、导出数据和表结构：
+mysqldump -u用户名 -p密码 数据库名 > 数据库名.sql
+mysqldump -u数据库用户名  -p数据库密码 --add-drop-table --complete-insert 数据库名 | gzip > db_wp.sql.gz
+
+mysqldump -uroot -pdlc123456 --add-drop-table --complete-insert aileitenm | gzip > aileitenm.sql.gz
+mysqldump -uroot -p dbname > dbname .sql
+mysqldump -uroot -p aileitenm > /tmp/dz_bak.sql
+mysqldump -u root -p aileitenm >/tmp/aileitenm.sql;
+mysqldump -uroot -p aileitenm  > /tmp/aileitenm.sql;
+mysqldump -u root -p --all aileitenm  >/tmp/all.sql;
+敲回车后会提示输入密码
+2、只导出表结构
+mysqldump -u用户名 -p密码 -d 数据库名 > 数据库名.sql
+mysqldump -uroot -p -d dbname > dbname .sql
+导入文件:
+登录mysql数据
+#mysql -u root -p  #注意-p就是要用密码登录了，这里登录都是mysql的账户密码#此时会提示输入密码，输入即可登录#mysql>
+2.选择数据库
+#mysql>use database_name  #database_name 替换成需要还原的数据库
+3.选择备份.sql文件，开始导入
+#mysql>source /root/backup-20140807.sql #选择备份数据对应路径即可完成
+
+删除表:
+DROP TABLE xxxx  
+
+
+vim指令
+设置显示行号(为了要了方便到某一行) :set number
+移动到行首 数字键 0 or Shift+6
+移动到行位 $ or Shift+4
+向上\下滚动半屏 ctrl+u\d
+向上\下滚动一屏(这个比较实用，记住) ctrl+b\f
+移动到整个文件最顶部 gg
+移动到整个文件最底部 G
+移动到第 x 行 xG or :x
+移动到当前行字符 x 上(向后搜索，继续移动到下一个 x 的命令按,键，上一个 x 的命令是按;键) fx
+移动到当前行字符 x 上(向前搜索，继续移动到下一个 x 的命令按,键，上一个 x 的命令是按;键) Fx
+
+撤销修改 u
+恢复上一步的撤销内容 ctrl+r
+
+
+.user.ini权限问题
+chattr -i /home/wwwroot/cart/.user.ini
+chattr -i .user.ini
+
+文件夹权限 chown -R -v www:root /www/wwwroot
+文件夹权限 chown -R -v www:www /www/wwwroot
+ chmod -R 777 jxcd
+
+ 文件操作
+rm -rf /aaa/aaa 删除文件夹
+mv /home/ /sss/ 剪切
+cp -rf /home/ /sss/  复制
+mkdir /home/ 创建目录
+ ll  -a 查看文件
+ ls -a 查看隐藏文件
+crontab -l -  列出所有定时任务
+
+ swoole安装
+pecl install -f swoole
+linux php怎样测试swoole是否安装成功
+php --ri swoole
+
+上传文件 rz （yum install lrzsz）
+下载文件
+yum install -y unzip zip
+解压zip unzip xxx.zip
+压缩文件 zip -r ./xahot.zip ./*
+解压.rar:  tar -zxvf xxx.rar   ( yum install unrar / yum -y install rar unrar )
+
+压缩 zip -r -q -o test.zip  /home/test
+
+安装redis
+启动redis
+redis-server /etc/redis.conf
+
+安装git
+yum -y install git
+
+     阿里云跨服务器文件拷贝
+    使用scp命令： 
+    1、将当前一个文件copy到远程另外一台主机上：
+    scp /home/daisy/full.tar.gz root@远程ip:/home/root
+    2、将文件从远程主机copy到当前系统上：
+    scp root@/full.tar.gz 远程ip:/home/root/full.tar.gz home/daisy/full.tar.gz
+    尝试用centos向ubuntu使用scp传输数据失败。
+    安装ssh驱动无果。
+    最终从ubuntu从centos拉数据取得成功。
+    scp root@xxx:/opt/test.tar.gz /tmp/
+
+启动服务 cd /alidata/gitblit/gitblit-1.8.0
+java -jar gitblit.jar 
+http://119.23.43.114:11111/
+lirui lirui
+
+linux 初始化站点 
+git init
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/wz123.git
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/beyond1314.git
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/shcs.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/li6.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/th5shop.git
+git remote rm origin
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/leg.git
+免密码
+https://li6:pwd@gitee.com/li6/pic.git
+git remote origin set-url https://li6:ygmlxomlg@gitee.com/li6/gezigui.git
+git push origin --delete Chapater6  删除远程分支
+
+把push和pull的默认分支设置为dev
+：git branch --set-upstream-to=origin/dev dev
+
+安装mysql : 
+rpm -ivh MySQL-server-5.6.19-1.linux_glibc2.5.x86_64.rpm
+
+ 定时任务
+service crond start
+service crond reload //重新载入配置
+
+命令规则 minutes hour day-of-month month-of-year day-of-week commands
+
+crontab的命令格式
+
+crontab -u //设定某个用户的cron服务，一般root用户在执行这个命令的时候需要此参数
+
+crontab -l 显示当前的crontab 文件（默认编写的crontab文件会保存在 (/var/spool/cron/用户名 例如: /var/spool/cron/roger)
+
+crontab -r 删除当前的crontab (谨慎使用此方法，因为将会把所有的计划任务全部删除）
+
+crontab -e 使用编辑器编辑当前的crontab文件
+
+几分 几点 几号 几月 * echo "Good morning."
+
+每天早上6点
+0 6 * * * echo "Good morning." >> /tmp/test.txt //注意单纯echo，从屏幕上看不到任何输出，因为cron把任何输出都email到root的信箱了。
+ 
+每两个小时(第一个为15，指明每两个小时的第15min中执行一次)
+15 */2 * * * echo "Have a break now." >> /tmp/test.txt
+ 
+晚上11点到早上8点之间每两个小时和早上八点
+0 23-7/2，8 * * * echo "Have a good dream" >> /tmp/test.txt
+ 
+每个月的4号和每个礼拜的礼拜一到礼拜三的早上11点
+0 11 4 * 1-3 command line
+ 
+1月1日早上4点
+0 4 1 1 * command line
+ 
+每小时（第一分钟）执行/etc/cron.hourly内的脚本
+01 * * * * root run-parts /etc/cron.hourly
+ 
+每天（凌晨4：02）执行/etc/cron.daily内的脚本
+02 4 * * * root run-parts /etc/cron.daily
+ 
+每星期（周日凌晨4：22）执行/etc/cron.weekly内的脚本
+22 4 * * 0 root run-parts /etc/cron.weekly
+ 
+每月（1号凌晨4：42）去执行/etc/cron.monthly内的脚本
+42 4 1 * * root run-parts /etc/cron.monthly
+ 
+注意:  "run-parts"这个参数了，如果去掉这个参数的话，后面就可以写要运行的某个脚本名，而不是文件夹名。 　
+ 
+每天的下午4点、5点、6点的5 min、15 min、25 min、35 min、45 min、55 min时执行命令。
+5，15，25，35，45，55 16，17，18 * * * command
+ 
+每周一，三，五的下午3：00系统进入维护状态，重新启动系统。
+00 15 * *1，3，5 shutdown -r +5
+ 
+每小时的10分，40分执行用户目录下的innd/bbslin这个指令：
+10，40 * * * * innd/bbslink
+ 
+每小时的1分执行用户目录下的bin/account这个指令：
+1 * * * * bin/account
+ 
+每天早晨三点二十分执行用户目录下如下所示的两个指令（每个指令以;分隔）：
+203 * * * （/bin/rm -f expire.ls logins.bad;bin/expire$#@62;expire.1st）　　
+ 
+每年的一月和四月，4号到9号的3点12分和3点55分执行/bin/rm -f expire.1st这个指令，并把结果添加在mm.txt这个文件之后（mm.txt文件位于用户自己的目录位置）。
+12,553 4-91,4 * /bin/rm -f expire.1st$#@62;$#@62;mm.txt
+
+*/1 * * * * /usr/bin/php /alidata/www/51yanjing_test/tool/check_scs_mendian_order_balance.php
+
+
+--------err------------------------------
+[error] open() "/usr/local/nginx/logs/nginx.pid" failed
+ /usr/local/nginx/sbin/nginx -c /usr/local/nginx/conf/nginx.conf
+ 
+ tp伪静态
+ 
+ location / {
+            index  index.htm index.html index.php;
+            if (!-e $request_filename){
+                rewrite ^/(.*)$ /index.php?s=$1 last;
+                break;
+            }
+        }
+                location ~ /.*\.php/ {
+                rewrite ^(.*?/?)(.*\.php)(.*)$ /$2?s=$3 last;
+                break;
+        }
+
+老版本防火墙 centos6
+查看状态 service iptables status
+关闭防火墙 
+1） 永久性生效，重启后不会复原
+开启： chkconfig iptables on
+关闭： chkconfig iptables off
+2） 即时生效，重启后复原
+开启： service iptables start
+关闭： service iptables stop
+添加端口
+iptables -A INPUT -p tcp --dport 8080 -j ACCEPT 
+/etc/rc.d/init.d/iptables save
+/etc/init.d/iptables restart
+
+新版防火墙
+启动： systemctl start firewalld
+查看状态： systemctl status firewalld 
+停止： systemctl disable firewalld
+禁用： systemctl stop firewalld
+
+
+SELinux(Security-Enhanced Linux) 是美国国家安全局（NSA）对于强制访问控制的实现，是 Linux历史上最杰出的新安全子系统。在这种访问控制体系的限制下，进程只能访问那些在他的任务中所需要文件。SELinux 默认安装在 Fedora 和 Red Hat Enterprise Linux 上。
+虽然SELinux很好用，但是在多数情况我们还是将其关闭，因为在不了解其机制的情况下使用SELinux会导致软件安装或者应用部署失败。
+
+以下就是关闭SELinux的方法
+系统版本：centos 6.4
+1、查看selinux状态
+查看selinux的详细状态，如果为enable则表示为开启
+# /usr/sbin/sestatus -v
+查看selinux的模式
+# getenforce
+开启模式显示结果：Enforcing
+关闭模式显示结果：Permissive
+2、关闭selinux
+永久性关闭（这样需要重启服务器后生效）
+# sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+临时性关闭（立即生效，但是重启服务器后失效）
+# setenforce 0 #设置selinux为permissive模式（即关闭）
+# setenforce 1 #设置selinux为enforcing模式（即开启）
+这样就关闭SELinux了，当安装软件遇到问题时可以考虑关闭SELinux再进行安装
+
+
+		firewall-cmd --state //查看运行状态
+		// 开放1024的端口
+	   firewall-cmd --add-port=1024/tcp --permanent
+		// 重载生效刚才的端口设置
+		firewall-cmd --reload
+		
+常用命令介绍
+firewall-cmd --state ##查看防火墙状态，是否是running
+firewall-cmd --reload ##重新载入配置，比如添加规则之后，需要执行此命令
+firewall-cmd --get-zones ##列出支持的zone
+firewall-cmd --get-services ##列出支持的服务，在列表中的服务是放行的
+firewall-cmd --query-service ftp ##查看ftp服务是否支持，返回yes或者no
+firewall-cmd --add-service=ftp ##临时开放ftp服务
+firewall-cmd --add-service=ftp --permanent ##永久开放ftp服务
+firewall-cmd --remove-service=ftp --permanent ##永久移除ftp服务
+firewall-cmd --add-port=80/tcp --permanent ##永久添加80端口
+firewall-cmd --remove-port=80/tcp --permanent ##永久添加80端口
+iptables -L -n ##查看规则，这个命令是和iptables的相同的
+man firewall-cmd ##查看帮助
+
+
+xdebug
+php配置
+[xdebug]  
+zend_extension = "D:\xampp\PHP\ext\php_xdebug.dll"
+xdebug.remote_enable = On  
+xdebug.remote_handler = dbgp     
+xdebug.remote_host= localhost  
+xdebug.remote_port = 9000  
+xdebug.idekey = PHPSTORM
+
+
+postman
+XDEBUG_SESSION=PHPSTORM
+
+lnmp 安装ftp
+安装
+
+进入lnmp解压后的目录，如cd lnmp1.4 其他版本的话自行更改和确定目录位置，执行：./pureftpd.sh 
+
+check list:
+
+1. lnmp: config nginx for rewrite:
+wget -c http://soft.vpser.net/lnmp/lnmp1.4.tar.gz && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && ./install.sh lnmp (mysql: 5.7.18, pwd:dlc123456 php:7.0.21)
+2. create database & user, import data
+CREATE DATABASE jxcd CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER 'kaduwawa_root'@'localhost' IDENTIFIED BY 'Kaduwawa@qasw';
+GRANT ALL PRIVILEGES ON *.* TO 'kaduwawa_root'@'localhost';
+
+
+3. swoole
+pecl install -f swoole
+
+4. phpredis: config php to add extension
+git clone https://github.com/phpredis/phpredis.git
+cd phpredis
+phpize
+./configure --with-php-config=/usr/local/php/bin/php-config
+make && make install
+sed -i '1a extension="redis.so"\n' /usr/local/php/etc/php.ini
+
+
+5. redis server & config password 
+yum install -y redis
+
+finish!
+
+modify db config
+
+7. wawaji: 阿里云打开端口： tcp port 5188  5189，  udp 7518
+
+支付宝
+支付需要：
+8. sed -i s/scandir,//g /usr/local/php/etc/php.ini 
+
+确保服务器数据库的服务开启：service mysql start查看服务器mysql服务有没有开启：ps -ef | grep mysql进入Mysql ： mysql -h连接的主机的ip -u数据库用户 -p输入密码（第一次服务器安装好Mysql后会自动生成密码
+
+
+安装screen  yum install -y screen
+
+安装workerman
+wget http://www.workerman.net/download/workermanzip
+unzip workermanzip 
+mv Workerman-master Workerman
+vim start.php
+
+<?php
+use Workerman\Worker;
+require_once __DIR__ . '/Workerman/Autoloader.php';
+// 创建一个Worker监听2345端口，使用http协议通讯 
+$http_worker = new Worker("tcp://0.0.0.0:2345");
+// 启动4个进程对外提供服务 
+$http_worker->count = 4;
+// 接收到浏览器发送的数据时回复hello world给浏览器 
+$http_worker->onMessage = function($connection, $data)
+{
+        $sendStr = '1b0101a1a10d0a';
+    // 向浏览器发送hello world 
+    $connection->send(hex2bin(preg_replace('# #', '', $sendStr)));
+};
+Worker::runAll();
+
+screen -S socket
+php start.php start
+ctrl a + d 切出
+
+安装ffmpeg::::::::::::::::::::::::::
+
+安装 yasm
+yum install yasm
+
+wget https://ffmpeg.org/releases/ffmpeg-4.1.tar.bz2
+tar -xjvf ffmpeg-4.1.tar.bz2
+cd ffmpeg-4.1/
+./configure
+
+
+mysql
+strigger 触发器
+BEGIN
+		INSERT INTO im_err_log VALUES(NULL,'im_noticeSwitch',CONCAT(old.uid,',',old.obj),unix_timestamp(now()));
+END
+
+ 

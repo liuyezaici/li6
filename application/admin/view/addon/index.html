@@ -1,0 +1,282 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div id="myTabContent" class="tab-content">
+            <div class="widget-body no-padding">
+                <div id="show_search_form"></div>
+                <div id="toolbar" class="toolbar">
+                    <?=build_toolbar([
+                        [
+                        'power'=>'index/index',
+                    'title'=>'刷新',
+                    'icon'=>'fa fa-refresh',
+                    'class'=>'btn btn-primary btn-refresh',
+                    'click'=>'refreshAddon()'
+                    ]
+                    ]);?>
+                    <div id="show_group_nav"></div>
+                </div>
+                <div id="list_result"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    var indexUrl = '/admin/addon/';
+    var editConfigUrl = '/admin/addon/config/addonname/';
+    var installUrl = '/admin/addon/install/addonname/';
+    var delUrl = '/admin/addon/uninstall/addonname/';
+    var forbidUrl = '/admin/addon/forbid/addonname/';
+    var allowUrl = '/admin/addon/allow/addonname/';
+    var allGroup = {$allGroup};
+
+    //分页框
+    var pageObj = makePage({
+        click: function (obj, newPage) {
+            var pageObj = topSearchForm.findName("page");
+            if(!pageObj) {
+                console.log('找不到page对象');
+                return;
+            }
+            pageObj.value = (newPage);
+            searchFormGo(topSearchForm, parentListTable, pageObj, false);
+        }
+    });
+    //分组
+    $('#show_group_nav').before(makeNav({
+        'class': 'success',
+        'margin_left': '10px',
+        'size': 'sm', //xs/sm/md/lg
+        'value': '全部',
+        data: allGroup,
+        ul: {
+                value: '{value}',
+                title: '{text}',
+                click: function (obj_,e_) {
+                    var group = obj_.value;
+                    var groupObj = topSearchForm.findName("group");
+                    if(!groupObj) {
+                        console.log('找不到 group 对象');
+                        return;
+                    }
+                    groupObj.value = group;
+                    topSearchForm.findName("page").value = 1;
+                    searchFormGo(topSearchForm, parentListTable, pageObj);
+                }
+            }
+    })).remove();
+    //搜索框
+    var topSearchForm = makeForm({
+        url: indexUrl,
+        name: 'addonForm',
+        submit: function(form_, e) {
+            e.preventDefault();
+            topSearchForm.findName("page").value=1;
+            searchFormGo(topSearchForm, parentListTable, pageObj);
+            return false;
+        },
+        value: makeDiv({
+            'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
+            value: [
+                makeInput({
+                    value: 1,
+                    type: 'hidden',
+                    name: 'page'
+                }),
+                makeInput({
+                    value: '全部',
+                    type: 'hidden',
+                    name: 'group'
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: [
+                        makeSpan({
+                            'class': 'control-label col-xs-4',
+                            value: '组件名:'
+                        }),
+                        makeSpan({
+                            'class': 'col-xs-8',
+                            value:  makeInput({
+                                'name': 'title',
+                                value: '',
+                                clear: true
+                            })
+                        })
+                    ]
+                }),
+                makeSpan({
+                    'class': 'form-group col-md-3',
+                    value: makeBtn({
+                        'class': 'btn btn-success',
+                        value: '搜索',
+                        type: 'submit'
+                    })
+                }),
+            ]
+        })
+    });
+    $('#show_search_form').append(topSearchForm);
+    var parentListTable = makeTable({
+        'class': 'table table-striped table-bordered table-hover',
+        tr_top: [
+            {
+                th: [
+                    {
+                        value: '英文名'
+                    },
+                    {
+                        value: '标题'
+                    },
+                    {
+                        value: '操作'
+                    },
+                    {
+                        value: '介绍'
+                    }
+                ]
+            }
+        ],
+        tr_default: [
+            {
+                show: '{{this.length}==0}',
+                td: [
+                    {
+                        colspan: '5',
+                        value: '没有搜索结果'
+                    }
+                ]
+            }
+        ],
+        tr: [
+            {
+                show: '{"{name}" !=""}',
+                td: [
+                    {
+                        value: '{name}'
+                    },
+                    {
+                        value: '{title}'
+                    },
+                    {
+                        value: [
+                            makeBtn({
+                                'class': '{"{install}"==1 ? \'btn btn-xs btn-danger\':\'btn btn-xs btn-success\'}',
+                                value: '{"{install}"==1 ? \'<i class=\"fa fa-times\"></i> 卸载\':\'<i class=\"fa fa-cloud-download\"></i> 安装\'}',
+                                click: "{\"{install}\"==1 ? \"delAddon('{name}')\" :\"installAddon('{name}')\"}"
+                            }),
+                            makeBtn({
+                                show: '{"{install}"==1}',
+                                'class': '{"{status}" ==1 ? \'btn btn-xs btn-warning\':\'btn btn-xs btn-info\'}',
+                                value: "{'{status}'==1 ? '<i class=\"fa fa-times\"></i> 禁用':'<i class=\"fa fa-check\"></i> 启用'}",
+                                click: "{'{status}'==1 ? \"forbidAddon('{name}')\" :\"allowAddon('{name}')\"}"
+                            }),
+                            makeBtn({
+                                show: '{"{config}" !="" && "{config}" !="0" && "{install}"==1}',
+                                'class': 'btn btn-xs btn-default',
+                                value: "<i class=\"fa fa-pencil\"></i> 配置",
+                                click: "setAddonConfig('{name}')"
+                            }),
+                        ]
+                    },
+                    {
+                        value: '{intro} <br> {author}'
+                    }
+                ]
+            }
+        ],
+        data_from: {
+            func: function (tableObj) {
+                searchFormGo(topSearchForm, tableObj, pageObj);
+            }
+        }
+    });
+    $('#list_result').append(parentListTable).append(pageObj);
+
+    //刷新列表
+    function refreshAddon() {
+        searchFormGo(topSearchForm, parentListTable, pageObj);
+    }
+    //安装组件
+    function installAddon(path) {
+        loading(true);
+        postAndDone({
+            url: installUrl + path,
+            success_key: 'code',
+            success_value: '1',
+            success_func: function () {
+                noLoading();
+                refreshAddon();
+                hideAllBox();
+                msgTis('安装成功');
+            },
+            err_func: function (data) {
+                noLoading();
+                msg(data.msg);
+            }
+        })
+    }
+    //禁用组件
+    function forbidAddon(path) {
+        loading(true);
+        postAndDone({
+            url: forbidUrl + path,
+            success_key: 'code',
+            success_value: '1',
+            success_func: function () {
+                noLoading();
+                refreshAddon();
+                hideAllBox();
+                msgTis('禁止成功');
+            },
+            err_func: function (data) {
+                noLoading();
+                msg(data.msg);
+            }
+        })
+    }
+    //启用组件
+    function allowAddon(path) {
+        loading(true);
+        postAndDone({
+            url: allowUrl + path,
+            success_key: 'code',
+            success_value: '1',
+            success_func: function () {
+                noLoading();
+                refreshAddon();
+                hideAllBox();
+                msgTis('启用成功');
+            },
+            err_func: function (data) {
+                msg(data.msg);
+            }
+        })
+    }
+    //删除组件
+    function delAddon(path) {
+        loading(true);
+        postAndDone({
+            url: delUrl + path,
+            success_key: 'code',
+            success_value: '1',
+            success_func: function () {
+                noLoading();
+                refreshAddon();
+                hideAllBox();
+                msgTis('删除成功');
+            },
+            err_func: function (data) {
+                noLoading();
+                msg(data.msg);
+            }
+        })
+    }
+    //配置组件
+    function setAddonConfig(path) {
+        msgWin('配置组件', editConfigUrl + path , 500, 1);
+    }
+</script>

@@ -1,0 +1,15 @@
+/.idea
+/.svn
+/runtime/temp
+/runtime/log
+/runtime/cache
+/uploads
+/application/database.php
+/runtime/schema
+/install/install.lock
+/assets/wap/img/Thumbs.db
+/.user.ini
+/application/admin/addon/*/config.php
+/sql
+/runtime/cached/*.txt
+.user.ini

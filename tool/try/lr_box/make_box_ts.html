@@ -1,0 +1,28 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8"><link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+
+
+//简单的黑色提示框
+//您可以用中文来定义属性了
+<script>
+    var box = msgTis('提示语', {
+        '速度': 320, //属性：speed:/速度/移动速度/移动时长，动画出现时的动画时长毫秒,默认值120
+        '距离': 200, //属性：distance/距离，移动到屏幕的距离,默认值200
+        '方向': 'x', //属性：移动方向 fx/方向/移动方向/fangxiang/direction，可选值: up/u/top/t/上 right/r/右 down/d/bottom/b/下 left/l/左
+        'wait': 600, //属性：wait/keep/stop/停留时长，提示内容停留N毫秒后执行消失动作,如果提示内容过长 您可以把它设置大些
+        '消失时长': 900, //属性：hide_time/消失时长，消失后执行消失动画持续时间(毫秒)
+        '消失回调': function () { //属性：移动方向 hide_func/消失回调/消失后执行
+            msgTisf('它消失了')
+        },
+        '背景': false //属性：bg/背景/遮罩， 是否需要背景遮挡
+    });
+    //提示1：当方向设置为left或right时，您可以通过top来设置顶部的距离,默认40%
+    //提示2：msgTisf则是以放大的形式提示
+    //var divId = box.id; //获取box的id
+    //hideNewBox(); //关闭最新的弹窗
+    //removeOneBox(divId);//关闭指定的boxid
+</script>

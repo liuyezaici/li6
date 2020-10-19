@@ -1,0 +1,311 @@
+
+<!doctype html>
+<html dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>socket任务转发中心</title>
+    <meta name="keywords" content="socket转发器,socket中转站">
+    <meta name="description" content="socket在线转发器">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/SocketCaiji/Static/Css/bootstrap.min..nofonts.css">
+    <link rel="stylesheet" type="text/css" href="/SocketCaiji/Static/Css/jquery.box.css">
+    <script type="text/javascript" src="/SocketCaiji/Static/Js/jq3.2.1.js"></script>
+    <script type="text/javascript" src="/SocketCaiji/Static/Js/jquery.box.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <h1>转发规则</h1>
+    <p>
+        请求socket接口：ws://socket.li6.cc/wss <br/>
+    </p>
+    <h2>1.提交身份</h2>
+    <p> 发送内容：<br />
+        json_encode({   <br />
+        &nbsp; &nbsp; &nbsp; 'myUserKey': '小明', //收信人的身份标识.最大长度255 <br />
+        &nbsp; &nbsp; &nbsp; 'cmd': 'set',<br />
+        });<br />
+    </p>
+    <h2>2.寄信给某人</h2>
+    <p> 发送内容：<br />
+        json_encode({   <br />
+        &nbsp; &nbsp; &nbsp; 'hisUserKey': '小明', //对方的身份标识  <br />
+        &nbsp; &nbsp; &nbsp; 'cmd': 'notify',//通知命令标识符 <br />
+        &nbsp; &nbsp; &nbsp; 'data': 'string',//您任意定义的加密数据结构，最终解密由 "小明" 处理.  <br />
+        });<br />
+    </p>
+
+    <table style="width: 700px;border: 1px solid #ddd;" class="table table-striped" id="demoTable">
+        <tr>
+            <td valign="top" colspan="2" style="background-color: #dedede; padding: 10px 0 10px 10px;">
+                demo ,socket状态:<span id="socketStatus"></span>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top" style="width: 50%;">
+                <div class="well">
+                    请求身份：<br />
+                    <input type="text" class="form-control" id="userKey" />
+                    <button class="btn btn-default" id="submitUser">连接socket</button>
+                </div>
+            </td>
+            <td valign="top" style="width: 50%;">
+                <div class="well">
+                    接收方身份：<br />
+                    <input type="text" class="form-control" id="hisUserKey" />
+                    信件内容<br />
+                    <textarea class="well" id="msg" style="resize:none;width: 100%;background-color: #fff; "></textarea>
+                    <button class="btn btn-default" id="sendOut">寄出</button>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>
+    $(document).ready(function () {
+
+        (function (global) {
+            var socketUrl = 'ws://socket.li6.cc/wss';
+            var demoTable = $('#demoTable');
+            var hisUserKeyObj = demoTable.find('#hisUserKey');
+            var userKeyObj = demoTable.find('#userKey');
+            var submitUser = demoTable.find('#submitUser');
+            var sendOutBtn = demoTable.find('#sendOut');
+            var msgObj = demoTable.find('#msg');
+            var statusWrap = demoTable.find('#socketStatus');
+            var fadingStatusTimer = null;
+            var lastStatus = null;//重复状态作过滤
+            global.downTasks = {};
+            var caijiing = false;
+            //下一批任务
+            function checkNext() {
+                var keys = Object.keys(downTasks);
+                if(keys.length <=0) {
+                    console.log('已完成所有任务', downTasks);
+                    msgTis('已完成所有任务');
+                    return;
+                }
+                var keyName = keys[0];
+                console.log('下一个', keyName);
+                beginUploadImg(keyName, downTasks[keyName]);
+            }
+            //轮训上传图片
+            function beginUploadImg(keyName, obj) {
+                if(caijiing) return;
+                caijiing = true;
+                var urls = obj.urls;
+                console.log('begin.UploadImg', obj);
+                var uploadOne = function (datum) {
+                    var postData = {datum: JSON.stringify(datum)};
+                    var formData = new FormData();
+                    $.each(postData, function (k, v) {
+                        formData.append(k, v);
+                    });
+                    if(urls.length==1) {
+                        formData.append('finish', 1);
+                        formData.append('caijiid', obj.id);
+                    }
+                    var cfg = {
+                        url: '/tool/upload/downImgs',
+                        type: "POST",
+                        contentType: false,
+                        data: formData,
+                        dataType: 'json',
+                        processData: false,
+                        success: function (e) {
+                            msgTis(e.msg);
+                            if(urls.length>0) {
+                                setTimeout(function () {
+                                    var keyName = urls.shift();
+                                    //删除第一个 继续第1个
+                                    uploadOne(keyName);
+                                }, 300);
+                            } else {
+                                delete downTasks[keyName];
+                                caijiing = false;
+                                msgTis('完成一批');
+                                checkNext();
+                            }
+
+                        },error: function () {
+                            setTimeout(function () {
+                                uploadOne(datum);
+                            }, 8000);
+                        }
+                    };
+                    $.post(cfg);
+                };
+                uploadOne(urls[0]);
+            }
+
+            var setStatus = function(html, hide, wait) {
+                if(lastStatus == html) return;
+                lastStatus = html;
+                wait = wait || 2000;
+                if(fadingStatusTimer) {
+                    clearTimeout(fadingStatusTimer);
+                    statusWrap.show();
+                }
+                statusWrap.show().html(html);
+                if(hide===true) {
+                    fadingStatusTimer = setTimeout(function () {
+                        statusWrap.html('');
+                    }, wait)
+                } else {
+                    clearTimeout(fadingStatusTimer);
+                }
+            };
+            //加入socket
+            // pcLoginSocket
+            var socketObj = {
+                isReLinkSocket: false,     //是否正在重连Socket
+                socketLinkErrMaxSize: 3, //初始化异常最大次数
+                socketLinkErrSize: 0, //socket服务连接错误次数达到一定量之后报错
+                connectBtnHtml: '网络异常, 3秒后重连',
+                socketConn: null,//socket异常处理
+                //重连socket
+                reConnectScoket: function () {
+                    if(this.isReLinkSocket) {
+                        return;
+                    }
+                    this.isReLinkSocket = true;
+                    socketObj.connectSocket();
+                },
+                socketErrTips: function () {
+                    //防止error和close同时请求
+                    if(this.isReLinkSocket == true) {
+                        console.log('is_true');
+                        return;
+                    }
+                    setStatus(socketObj.connectBtnHtml, false);
+                    setTimeout(function () {
+                        socketObj.reConnectScoket();
+                    }, 3000);
+                },
+                //连接成功
+                successLogin: function () {
+                    this.isReLinkSocket = false;
+                    this.socketLinkErrSize = 0;
+                    setStatus('服务器连接成功', false);
+                    //断线重连执行：离线未处理的socket任务
+                    socketCmd.sendMq.optTask();
+                },
+                connectSocket: function () {
+                    setStatus('服务器连接中...', false);
+                    this.socketConn = new WebSocket(socketUrl);
+                    this.socketConn.onopen = function () {
+                        //连接成功清除异常信息
+                        socketObj.successLogin();
+                    };
+                    this.socketConn.onerror = function (event) {
+                        socketObj.isReLinkSocket = false;
+                        socketObj.socketConn = null;
+                        socketObj.socketErrTips();
+                    };
+                    this.socketConn.onclose = function (event) {
+                        socketObj.isReLinkSocket = false;
+                        socketObj.socketConn = null;
+                        socketObj.socketErrTips();
+                    };
+                    this.socketConn.onmessage = function (e) {
+                        //心跳回复
+                        if(typeof e.data =='string' && e.data == 'heartbeat') {
+                            console.log('回复心跳');
+                            socketCmd.sendBeat();
+                            return;
+                        }
+                        //这里写收信人的业务代码
+                        if(typeof e.data =='string' ) {
+                            if( e.data.indexOf('{') !=-1) {
+                                var obj = JSON.parse(e.data);
+                                console.log('get_',obj);
+                                if(obj.urls && obj.urls.length) {
+                                    var radomStr = 'r'+(Math.random(5)*10).toString().substr(10);
+                                    downTasks[radomStr] = (obj);
+                                    console.log('加入一批urls');
+                                    beginUploadImg(radomStr, obj);
+                                }
+                            } else {
+                                setStatus(e.data, false);
+                            }
+                        }
+                    };
+                },
+                close: function () {
+                    socketObj.socketConn.close();
+                    socketObj.socketConn = null;
+                },
+                sendMsg: function (msg) {
+                    if(!socketObj.socketConn) {
+                        socketObj.reConnectScoket();
+                    }
+                    socketObj.socketConn.send(msg);
+                },
+            };
+            global.socketObj = socketObj;
+
+            //socket指令
+            global.socketCmd = {
+                //socket的任务队列
+                sendMq: {
+                    tasks: [],
+                    optTask: function () {
+                        if(!socketCmd.sendMq.tasks.length) return;
+                        this.tasks.forEach(function(task_) {
+                            task_();
+                        });
+                        this.tasks = [];
+                    }
+                },
+                sendUser: function (myUserKey) { //socket统一发送方法
+                    var sendData = {
+                        'myUserKey': myUserKey,
+                        'cmd': 'set',
+                    };
+                    socketObj.sendMsg(JSON.stringify(sendData));
+                },
+                sendString: function (hisKey, string) { //socket统一发送方法
+                    var sendData = {
+                        'hisUserKey': hisKey,
+                        'cmd': 'notify',
+                        'data': string
+                    };
+                    socketObj.sendMsg(JSON.stringify(sendData));
+                },
+                //发送心跳
+                sendBeat:function () {
+                    socketObj.sendMsg(1);
+                },
+            };
+
+            submitUser.click(function () {
+                var userKey = $.trim(userKeyObj.val());
+                if(!userKey.length) {
+                    msgTisf('请输入用户的唯一key');
+                    return;
+                }
+                socketCmd.sendUser(userKey);
+            });
+            sendOutBtn.click(function () {
+                var hisUserKey = $.trim(hisUserKeyObj.val());
+                var msgObjVal = $.trim(msgObj.val());
+                if(!hisUserKey.length) {
+                    msgTisf('请输入接收方的用户唯一key');
+                    return;
+                }
+                if(!msgObjVal.length) {
+                    msgTisf('请输入内容');
+                    return;
+                }
+                socketCmd.sendString(hisUserKey, msgObjVal);
+            });
+
+            //初始化socket
+            global.socketObj.connectSocket();
+            global.checkNext = checkNext;
+        })(window);
+    });
+</script>
+</body>
+</html>

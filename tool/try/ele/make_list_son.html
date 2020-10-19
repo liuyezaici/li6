@@ -1,0 +1,155 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    #show_list_son .even {
+        background-color: #efefef;
+    }
+    #show_list_son .odd {
+        background-color: #fff;
+    }
+    #show_list_son ul {
+        margin: 0;
+        padding: 0;
+    }
+    #show_list_son ul li {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+    }
+    #show_list_son .hover {
+        background-color: #f0faff;
+    }
+    #show_list_son .hover a {
+        color: #4a5e85;
+    }
+    #show_list_son ul li.item {
+        display: inline-block;
+        width: 200px;
+        position: relative;
+        height: 28px;
+        line-height: 28px;
+    }
+    #show_list_son ul li.item .title {
+        position: relative;
+    }
+    #show_list_son ul li.item .title .icon {
+        position: absolute;
+        right: 50px;
+        top: 10px;
+        font-size: 10px;
+        border-width: 5px 5px 0 5px;
+        border-color: #ccc transparent transparent transparent;
+        border-style: solid;
+        -webkit-transition: -webkit-transform 0.2s ease-out;
+        -moz-transition: -moz-transform 0.2s ease-out;
+        transition: transform 0.2s ease-out;
+    }
+    #show_list_son ul li.item .title:hover .icon {
+        color: #aaa;
+        -webkit-transform: rotate(90deg);
+        -moz-transform: rotate(90deg);
+        transform: rotate(90deg);
+    }
+    #show_list_son .son_menu {
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        line-height: 25px;
+    }
+    #show_list_son .active {
+        font-weight: bold;
+        font-size: 15px;
+    }
+    #show_list_son .hover .son_menu {
+        background-color: #fff;
+        border: 1px solid #dedede;
+        display: block;
+        z-index: 1;
+    }
+</style>
+//一个带下级的数据循环 初试下拉菜单
+<div id="show_list_son"></div>
+<br />
+<hr />
+<div id="show_btn"></div>
+<script>
+    //一个简单的数据循环
+    //注意：
+    // 如果数据是数组: index 作为每个循环的序号 ;
+    // value/class 属性支持js语法. 变量用{}括起
+    var liList = makeList({
+        data: [
+             {'id': 1, 'name': 'aaa', son_data: [{'a': '111', 'b': 'uuu1'}, {'a': '112', 'b': 'vvv1'}]}
+              ,{'id': 2, 'name': 'bbb', son_data: [{'a': '222', 'b': 'uuu2'}, {'a': '113', 'b': 'vvv2'}]}
+             , {'id': 3, 'name': 'ccc', son_data: [{'a': '333', 'b': 'uuu3'}, {'a': '114', 'b': 'vvv3'}]},
+             {'id': 4, 'name': 'ddd', son_data: [{'a': '444', 'b': 'uuu4'}, {'a': '115', 'b': 'vvv4'}]},
+             {'id': 5, 'name': 'eee', son_data: [{'a': '555', 'b': 'uuu5'}, {'a': '116', 'b': 'vvv5'}]}
+        ],
+        name: 'test_li',
+        li: {
+            'class': 'item',
+            'data-id': '{id}',
+            value:  [
+                makeP({
+                    'class': 'title',
+                    'data-id': '{id}',
+                    value:  [
+                        makeSpan({
+                            'data-id': '{id}',
+                            value: "{id}.{name}"
+                        }),
+                        makeSpan({
+                            'class': 'icon',
+                            value: ""
+                        })
+                    ]
+                }),
+                makeDiv({
+                    data: "{son_data}",
+                    'class': 'son_menu a_{id}',
+                    value: makeList({
+                        'class': 'menu',
+                        li: {
+                            'value': '{a}.{b}'
+                        }
+                    })
+                })
+            ]
+            , click: function (o) {
+                 o.toggleClass('active');
+                 o.siblings().removeClass('active');
+             }
+             ,hover: function (o) {
+                o.addClass('hover');
+             }
+             ,mouseleave: function (o) {
+                o.removeClass('hover');
+             }
+        }
+    });
+    $('#show_list_son').append(liList);
+
+    $('#show_btn').append(makeBtn({
+        'value': '更新菜单',
+        'class': 'btnLr btn-success',
+        click: function () {
+            liList['data'] = [
+                {'id': 'l_'+ makeRadom(6), 'name': 'Q'+ makeRadom(6), son_data: [{'a': makeRadom(6), 'b': makeRadom(6)}, {'a': makeRadom(6), 'b': makeRadom(6)}]},
+                {'id': '2_'+ makeRadom(6), 'name': 'J'+ makeRadom(6), son_data: [{'a': makeRadom(6), 'b': makeRadom(6)}, {'a': makeRadom(6), 'b': makeRadom(6)}]},
+                {'id': '3_'+ makeRadom(6), 'name': 'K'+ makeRadom(6), son_data: [{'a': makeRadom(6), 'b': makeRadom(6)}, {'a': makeRadom(6), 'b': makeRadom(6)}]},
+                {'id': '4_'+ makeRadom(6), 'name': 'L'+ makeRadom(6), son_data: [{'a': makeRadom(6), 'b': makeRadom(6)}, {'a': makeRadom(6), 'b': makeRadom(6)}]},
+                {'id': '5_'+ makeRadom(6), 'name': 'A'+ makeRadom(6), son_data: [{'a': makeRadom(6), 'b': makeRadom(6)}, {'a': makeRadom(6), 'b': makeRadom(6)}]}
+            ];
+        }
+    }));
+
+</script>

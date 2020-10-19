@@ -1,0 +1,67 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的数据循环表格
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+    //js造一个简单的表格
+    var table = makeTable({
+        'width': '500',
+        'name': 'demo',
+        'class': 'well js_table',
+        // data: [
+        //         {id: '123', 'user_nick': 'lidaye', 'number': '6666666666666666'},
+        //         {id: '456', 'user_nick': 'rui6ye', 'number': '9999999999999999'},
+        //       ],
+        data: [{sons: {a:666}},{sons: {a:777}}],
+        tr: [
+            {
+                td: [
+                        {
+                            data: '{sons}',
+                            value:
+                                makeBtn({
+                                    value: '添加1行:{a}',
+                                    margin_left: '10px',
+                                    'class': 'btnLR btnLrSuccess btnLrXs',
+                                    click: function (obj, even, scope) {
+                                        obj.parent.parent.addline(true);
+                                    }
+                                })
+                        }
+                    ]
+            }
+        ]
+    });
+    $('#show_table').append(
+        table
+    );
+    $('#show_reload_btn').append(makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btn-success',
+            click: function (e) {
+                table['data'] =[{sons: {a:makeRadom(3)}}, {sons: {a:makeRadom(4)}}];
+            }
+        })
+    );
+</script>

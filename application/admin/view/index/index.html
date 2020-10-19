@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="{$config.language}">
+    <head>
+        {include file="common/meta" /}
+    </head>
+    <body class="hold-transition skin-green sidebar-mini fixed" id="tabs">
+        <div class="wrapper">
+
+            <header id="header" class="main-header">
+                {include file='common/header' /}
+            </header>
+            <!-- Left side column. contains the logo and sidebar -->
+            <aside class="left_sidebar">
+                {include file='common/menu' /}
+            </aside>
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper tab-content" id="pjax_container">
+                <div class="hide_content hidden"></div>
+                <div class="right_content"></div>
+            </div>
+
+            <!-- Add the sidebar's background. This div must be placed
+                 immediately after the control sidebar -->
+            <div class="control-sidebar-bg"></div>
+            {include file="common/control" /}
+        </div>
+        <!-- ./wrapper -->
+        <script src="/assets/js/lr/admin.js?v=6"></script>
+    </body>
+</html>

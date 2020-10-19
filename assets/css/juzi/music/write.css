@@ -1,0 +1,25 @@
+
+.row.rowWrap {
+    background-color: #F5F5F5;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-box-shadow: inset 0 1px 13px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: inset 0 1px 13px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 13px rgba(0, 0, 0, 0.1);
+    border: 1px solid #DDDDDD;
+    border-radius: 4px 4px 4px 4px;
+    margin: 15px 0;
+    position: relative;
+    padding: 25px 14px 0;
+}
+.row.rowWrap .openLabel {
+    font-weight: normal;
+    cursor: pointer;
+    display: inline-block;
+    margin-right: 10px;
+    padding-top: 7px;
+}
+.row.rowWrap .openLabel input {
+    margin-right: 3px;
+}

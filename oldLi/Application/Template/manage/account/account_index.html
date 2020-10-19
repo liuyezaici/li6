@@ -1,0 +1,280 @@
+<style>
+<!--
+/* 会员资金页面 */
+.user_account {
+    margin: 12px 25px 5px 0;
+}
+.user_account .money_box {
+    padding: 20px 0 0 20px;
+}
+.user_account .money_box .top_money {
+    font-size: 16px;
+    color: #c11e00;
+    position: relative;
+    height: 100px;
+    overflow: hidden;
+}
+.user_account .money_box .top_money .total_money {
+    float: left;
+}
+.user_account .money_box .top_money .total_money .money {
+    font-size: 42px;
+    color: #dd0800;
+    margin: 0 5px;
+}
+.user_account .money_box .top_money .money_details {
+    font-size: 12px;
+    color: #666;
+    line-height: 14px;
+    float: left;
+    margin: 16px 0 0 15px;
+}
+.user_account .money_box .top_money .account_btn {
+    width: 170px;
+}
+.user_account .money_box .top_money .account_btn .new_btn {
+    margin-right: 6px;
+}
+.user_account .money_box .top_money .account_btn .btn {
+    display: block;
+    float: left;
+    padding: 5px 10px;
+    background-color: #7eb2e7;
+    color: #fff;
+    margin: 8px 5px 0 0;
+}
+.money_log h2 {
+    color: #666;
+    height: 45px;
+    margin-left: 10px;
+    text-indent: 10px;
+}
+.money_log h2 em {
+    float: left;
+    font-size: 16px;
+    color: #f7800c;
+    font-weight: bold;
+}
+
+.money_log .log_menu {
+    margin-left: 10px;
+    width: 755px;
+    display: block;
+    overflow: hidden;
+}
+.money_log .log_menu a {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 4px 4px 0 0;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-right: 2px;
+    float: left;
+}
+.money_log .log_menu a.active {
+    background-color: #ffe4e3;
+    border-bottom: 1px solid #ffe4e3;
+    z-index: 200;
+    color: #ff6b77;
+    font-weight: bold;
+}
+/* 列表 */
+.log_list {
+    border: 1px solid #dedede;
+    border-top: 0;
+    margin-left: 10px;
+}
+.money_log_table {
+    background-color: #fff;
+}
+.money_log_table td {
+    color: #666;
+    height: 28px;
+}
+.money_log_table .bg {
+    background-color: #ebebeb;
+}
+.money_log_table .top_tr td {
+    color: #333;
+    height: 28px;
+    background-color: #ffe4e3;
+}
+.search_moneylog_form {
+    float: right;
+    height: 46px;
+    line-height: 30px;
+}
+.log_list .total {
+    float: left;
+    height: 26px;
+    line-height: 26px;
+    background-color: #f1e2d5;
+    margin: 2px 0 0 5px;
+    padding: 0 6px;
+    font-size: 12px;
+    color: #d5574c;
+    border-radius: 4px;
+}
+-->
+</style>
+<div class="user_account">
+    <div class="money_box">
+        <div class="top_money">
+            <table cellspacing="0" cellpadding="0" width="100%" border="0">
+                <tr>
+                    <td>
+                        <div class="total_money">
+                            余额 <b class="money">￥<?=$mymoney?></b>
+                        </div>
+                        <div class="money_details">
+                            流动资金：￥<?=$myldzj?> <br />
+                            冻结资金：￥<?=$mydjzj?>
+                        </div>
+                    </td>
+                    <td valign="top" width="170">
+                        <div class="account_btn">
+                            <a href="javascript: void(0);" target="_self" onClick="openMenu(1);" class="new_btn new_btn-info">充值</a>
+                            <a href="javascript: void(0);" target="_self" onClick="openMenu(2);" class="new_btn new_btn-success">提现</a>
+                            <a href="javascript: void(0);" target="_self" onClick="openMenu(3);" class="btn btn-default">绑定支付宝</a>
+                            <a href="javascript: void(0);" target="_self" onClick="openMenu(4);" class="btn btn-default">绑定银行卡</a>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="money_log">
+        <h2>
+            <em>
+                我的资金交易记录
+                &nbsp; &nbsp;
+                &nbsp; &nbsp;
+                &nbsp; &nbsp;
+            </em>
+            <form class="search_moneylog_form" id="search_moneylog_form">
+                <input type="hidden" class="page" value="<?=$page?>">
+                <em>&nbsp;筛选月份&nbsp;</em>
+                <select class="input fromtime" style="width: 92px;"><?=$month_from_html?></select>
+                <em>&nbsp;到&nbsp;</em>
+                <select class="input endtime" style="width: 92px;"><?=$month_to_html?></select>
+                <a class="new_btn" href="javascript: void(0);" onclick="$(this).next().click();" target="_self" style="float: left;text-indent: 0;">筛选</a>
+                <input type="submit" value="筛选记录" class="hide_btn" />
+            </form>
+        </h2>
+        <div class="log_menu">
+            <?=$top_menu?>
+        </div>
+        <div class="log_list">
+            <table cellpadding="0" cellspacing="0" border="0" width="100%" class="money_log_table" id="money_log_table">
+                <tr class="top_tr">
+                    <td width="10"></td>
+                    <td width="90">交易号</td>
+                    <td width="128">金额</td>
+                    <td width="80">金额类型</td>
+                    <td width="20"></td>
+                    <td width="100">交易状态</td>
+                    <td width="140">时间</td>
+                    <td>交易备注</td>
+                </tr>
+            <?php
+            if($acchangelist) {
+                foreach($acchangelist as $n => $v) {
+                ?>
+                <tr>
+                    <td></td>
+                    <td><?=$v['ch_id']?></td>
+                    <td>
+                        <span class="red" style="font-size: 14px;"><?=$v['mod']?></span>
+                        ￥<?=$v['ch_money']?></td>
+                    <td><?=$v['zj_lx']?></td>
+                    <td></td>
+                    <td><?=$v['jszt']?></td>
+                    <td><?=$v['ch_ctime']?></td>
+                    <td class="memo" style="padding:4px;"><?=$v['ch_memo']?> </td>
+                </tr>
+                <?php
+                }
+            } else {
+                echo "<tr><td></td><td colspan='10'>没有资金记录</td></tr>";
+                }
+                ?>
+                <th colspan="10" style="padding-bottom: 10px;">
+                    <?=$divmenu?>
+                </th>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    var reason = '<?=$reason?>';
+    //筛选状态
+    function filterLogList(state_) {
+        reason = state_;
+        var form = $('#search_moneylog_form');
+        form.find('.page').val(1);
+        form.submit();
+    }
+    function openMenu(v){
+        hideAllbox();
+        switch (v){
+            case 1:
+                //msg('充值系统正在完善,敬请期待',4);
+                msgWin('即时到账充值','/?s=account/form&form=chongzhi',750,500, "");
+                break;
+            case 2:
+                msgWin('申请提现','/?s=account/form&form=tixian',800,500, "<a target='_self' class='btn' href=\"javascript:hideAllbox();openMenu(2);\" >刷新</a>");
+                break;
+            case 3:
+                msgWin('绑定支付宝账号','/?s=account/form&form=bind_zfb',800,500,'');
+                break;
+            case 4:
+                msgWin('绑定我的银行卡','/?s=account/form&form=bind_card',800, 500, "<a target='_self' class='btn' href=\"javascript:hideAllbox();openMenu(4);\" >刷新</a>");
+                break;
+        }
+    }
+    //完成付款
+    function endRecharge(f){
+        var url = '/?s=user';
+        url +="&goto=%3Fm%3Daccount";
+        //添加一个自动检测支付状态ajax
+        window.location = url;
+    }
+    //修改顶部样式
+    function changeTopActive() {
+       var nav = $('#top_nav');
+        nav.find('.active').removeClass('active');
+        nav.find('.account').addClass('active');
+    }
+    //搜索事件
+    function searchEven() {
+        var form = $('#search_moneylog_form');
+        form.submit(function(e){
+            e.preventDefault();
+            var model = "/?s=account";
+            var fromtime = form.find('.fromtime').val();
+            var endtime = form.find('.endtime').val();
+            var page = form.find('.page').val();
+            var new_url = model+"&fromtime="+ fromtime +"&endtime="+ endtime +"&page="+ page  +"&reason="+ reason;
+            ajaxOpen(new_url);
+        });
+    }
+    //翻页
+    function money_log_page(p, a) {
+        var form = $('#search_moneylog_form');
+        form.find('.page').val(p);
+        form.submit();
+    }
+    $("#money_log_table").find('tr:odd').addClass('bg');
+    $(document).ready(function(){
+        var url = window.location.toString();
+        if(url.indexOf('open_cz') != -1) {
+            openMenu(1);
+        } else if(url.indexOf('open_tx') != -1) {
+            openMenu(2);
+        }
+        searchEven();
+        changeTopActive();//修改顶部样式
+        leftEvent('money_log');
+    });
+
+</script>

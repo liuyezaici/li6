@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+{include file="common/meta" /}
+</head>
+<base target="_parent" />
+<body>
+{include file="common/header" /}
+{include  file="common/banner" currentBanner='author' /}
+<div class="front_body container">
+    <div class="panel panel-info">
+        <div class="panel-heading" style="position: relative;">
+            作者：<?=$authorname?>的句子
+            <span class="label label-success"><a href="/juzi/gushi/index?author=<?=$authorname?>"><?=$authorname?>的文章</a> </span>
+        </div>
+        <div class="panel-body">
+            <ul class="list-group">
+                <?php
+                foreach($list as $v) {
+                ?>
+                <li class="list-group-item">
+                    <a href="/juzi/read/uri/<?=$v['uri']?>" target="_blank"><?=$v['content']?></a>
+                    <?=$v['fromStr']?>
+                </li>
+                <?php
+                }
+                ?>
+            </ul>
+            <?php
+            if($nullStr) {
+            ?>
+            <div class="alert alert-warning">
+                <?=$nullStr?>
+            </div>
+            <?php
+            }
+            ?>
+            <?=$pageMenu?>
+        </div>
+    </div>
+</div>
+{include file="common/footer" /}
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .simple_btn {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+//创建一个select框
+
+<div id="show_select"></div>
+<br />
+<div id="show_reload_btn"></div>
+<script>
+  $('#show_select').append([
+      makeSelect({
+          name: 'demo',
+          'value': 1, // 支持字符串或数组
+          'default_text': '请选择',
+          'value_key': "id",//取值的键名
+          'title_key': "title",//取文本的键名
+          menu: {
+              width: '320px',
+              data: [{id: 1, title: '标题'}, {id: 2, title: '富文本内容'}, {id: 3, title: '图片'}],
+          },
+          li: {
+              value: "{title}",
+          }
+      }),
+      makeSelect({
+          name: 'demo2',
+          'value': [16, 22], // 支持字符串或数组
+          'default_text': '请选择',
+          'value_key': "u_id",//取值的键名
+          'title_key': "u_nick",//取文本的键名
+          menu: {
+              width: '320px',
+              'data': [
+                  {"u_id": "6","u_nick": "阿毛"},
+                  {"u_id": "7", "u_nick": "阿长"},
+                  {"u_id": "11", "u_nick": "阿发"},
+                  {"u_id": "16", "u_nick": "阿四"},
+                  {"u_id": "22", "u_nick": "阿Q"},
+                  {"u_id": "33", "u_nick": "何首乌"}
+              ],
+          },
+          li: {
+              value: "{u_nick}",
+              width: '90px'
+          }
+      })
+  ]);
+
+    $('#show_reload_btn').append(makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btn-success',
+            click: function (e) {
+                demo2['menu_data'] = [
+                    {'u_id': 6, 'u_nick': '唵->'+ makeRadom(6)},
+                    {'u_id': 7, 'u_nick': '嘛->'+ makeRadom(6)},
+                    {'u_id': 11, 'u_nick': '呢->'+ makeRadom(6)},
+                    {'u_id': 16, 'u_nick': '叭->'+ makeRadom(6)},
+                    {'u_id': 22, 'u_nick': '咪->'+ makeRadom(6)},
+                    {'u_id': 33, 'u_nick': '吽->'+ makeRadom(6)}
+                ];
+            }
+        })
+    );
+</script>

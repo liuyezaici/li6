@@ -1,0 +1,220 @@
+<style>
+<!--
+.message_name h2{
+    padding: 8px 0 6px 15px;
+    line-height: 50px;
+    font-weight: bold;
+    font-size: 18px;
+    color: #f7800c;
+}
+.top_title_new .search_form {
+    float: right;
+    display: block;
+    margin-right: 2px;
+}
+.top_title .search_form em {
+    float: left;
+    height: 26px;
+    line-height: 26px;
+    font-weight: normal;
+}
+.new_right .right_content .top_title_new .searchtype {
+    font-weight: normal;
+    color: #666;
+    width: 90px;
+}
+.message_list  {
+    background-color: #fff;
+}
+.message_list .header{
+    background: #dedede;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 22px;
+}
+.message_list td {
+    padding: 6px 0;
+}
+.message_list .messageid {
+    font-weight: bold;
+    color: #7cc2cb;
+}
+.message_list .state_0 {
+    font-weight: bold;
+    color: #666;
+}
+.message_list .state_1 {
+    color: #333;
+}
+.message_list .no {
+    color: #888;
+    padding: 15px 10px;
+}
+.pages{
+    line-height: 40px;
+}
+-->
+</style>
+<div class="message_name">
+    <h2>平台站内信</h2>
+</div>
+<div class="top_title_new">
+    <span class="filter_state">
+        <?=$state_menu?>
+    </span>
+    <form class="search_form" id="message_search_form" target="_self">
+        <select id="search_type" class="input searchtype">
+        <?=$search_type_html?>
+    </select>
+        <input class="input" id="searchkey" style="width: 150px;" maxlength="30" value="<?=$searchkey?>">
+        <input type="submit" value="查找" class="new_btn" />
+    </form>
+
+</div>
+<div class="message_list new_view_wrap" id="message_list">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr class="header">
+            <td width="22"></td>
+            <td width="80">信件编号</td>
+            <td>信息标题</td>
+            <td width="180">发送时间</td>
+            <td width="160">发送人</td>
+            <td>操作
+                [<a href="javascript: void(0);" onclick="delMessages();" target="_self">删除本页信息</a>]
+            </td>
+        </tr>
+        <?php
+        if(count($post_list) > 0) {
+            foreach($post_list as $n => $v) {
+        ?>
+        <tr>
+            <td></td>
+            <td class="messageid">
+                <input type="checkbox" class="checkbox" value="<?=$v['m_id']?>">
+                <?=$v['m_id']?>
+            </td>
+            <td>
+                <a href="javascript: void(0);" onclick="viewMessage('<?=$v['m_id']?>');" target="_self" title="查看详细" class="state_<?=$v['m_state']?>"><?=$v['m_title']?></a>
+            </td>
+            <td>
+                <?=$v['m_ctime']?>
+            </td>
+            <td>
+                <a href="/user-<?=$v['m_from_uid']?>.html"><?=$v['from_uname']?></a>
+            </td>
+            <td>
+                <a href="javascript: void(0);" onclick="viewMessage('<?=$v['m_id']?>');" target="_self">查看详细</a> |
+                <a href="javascript: void(0);" onclick="delMessage('<?=$v['m_id']?>');" target="_self">删除</a>
+            </td>
+        </tr>
+        <?php
+        }
+    } else {
+    ?>
+        <tr><td colspan="10" class="no">
+            您信箱是空的.
+        </td></tr>
+        <?php
+    }
+    ?>
+    </table>
+</div>
+<?=$page_menu?>
+
+<script>
+    var page = '<?=$page?>';
+    var filter_state = '<?=$state?>';
+    //高度选中的
+    function my_nav_select(){
+        var _parent = $('.filter_state');
+        _parent.find('a').each(function(){
+           if( $(this).data('status')==filter_state ){
+               $(this).siblings().removeClass('active')
+               $(this).addClass('active');
+           }
+        });
+    }
+    //切换状态
+    function changeState(state) {
+        filter_state = state;
+        message_page(1);
+    }
+    //翻页格式化
+    function message_page(p) {
+        page = p;
+        $("#message_search_form").submit();
+    }
+
+    //查看试用详细
+    function viewMessage(messageId) {
+        hideAllbox();
+        msgWin('查看信息详情:','/?s=message/form&form=view_message&messageid='+messageId, 860,240,
+               "<a target='_self' class='btn' href=\"javascript:viewMessage('"+ messageId +"');\" >刷新</a>")
+    }
+
+    //搜索信息
+    $("#message_search_form").submit(function(e){
+        e.preventDefault();
+        var form = $(this);
+        var search_type = form.find('#search_type').val();
+        var searchkey = form.find('#searchkey').val();
+        var url = "/?s=message&page="+ page +"&state="+ filter_state +"&search_type="+ search_type +"&searchkey="+encodeURIComponent(searchkey);
+        ajaxOpen(url);
+    })
+    //删除信息
+    function delMessage(messageId) {
+        if (confirm('删除此信息将不能再恢复，您确定要这样做吗？')){
+            var postData = {
+                messageid: messageId
+            };
+            post('/?s=message&do=del_message&json=true',postData,function(data) {
+                if(data.id != 0039) {
+                    msg(data.msg,4);
+                    if(data.id == '0000') {
+                        loginIn();
+                        return;
+                    }
+                } else {
+                    msg(data.msg,1);
+                    message_page(page);
+                    return;
+                }
+            });
+        }
+    }
+    //批量删除信息
+    function delMessages(){
+        $("#message_list").find(".checkbox").attr('checked','checked');
+        //if(!confirm('你确定要批量删除信息吗？删除后不可以撤销')) return;
+        var ids = '';
+        $("#message_list").find(".checkbox").each(function(){
+            var box = $(this);
+            if(box.attr('checked')) {
+                ids += ','+$(this).val();
+            }
+            ids = trim(ids,",");
+        });
+        if( !ids){
+            msg('至少选择1条记录');
+            return false;
+        }
+        var postData = {
+            messageid: ids
+        };
+        post('/?s=message&do=del_message&json=true',postData,function(data) {
+            if(data.id != 0039) {
+                msg(data.msg,4);
+                if(data.id == '0000') {
+                    loginIn();
+                    return;
+                }
+            } else {
+                msgTis(data.msg);
+                message_page(page);
+                return;
+            }
+        });
+    }
+    my_nav_select();
+    leftEvent('my_message');
+</script>

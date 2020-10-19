@@ -1,0 +1,59 @@
+<form id="edit-form" class="form-horizontal form-ajax" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2"> 提现金额:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" id="money" value="￥{$row.money}" readonly />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2"> 收款方式:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" value="{$row.account_type == 'weixin'?'微信':'' }{$row.account_type == 'unionpay'?'银联':'' }{$row.account_type == 'alipay'?'支付宝':'' }" readonly />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="account_name" class="control-label col-xs-12 col-sm-2"> 收款人姓名 :</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" id="account_name" value="{$row.account_name}" readonly />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="account_number" class="control-label col-xs-12 col-sm-2"> 收款帐号:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" id="account_number" value="{$row.account_number}" readonly />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="account_title" class="control-label col-xs-12 col-sm-2"> 账号昵称/支行:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" id="account_title" value="{$row.account_title}" readonly />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="third_number" class="control-label col-xs-12 col-sm-2"> 第三方支付流水号:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" id="third_number" name="row[third_number]" value="{$row.third_number}"  />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="pay_money" class="control-label col-xs-12 col-sm-2"> 转账金额:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input type="text" class="form-control" id="pay_money" name="row[pay_money]" value="{$row.pay_money}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="memo" class="control-label col-xs-12 col-sm-2">备注:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea class="form-control" id="memo" name="row[memo]">{$row.memo}</textarea>
+            <input type="hidden" class="form-control" id="audit_status" name="row[status]" value="{$row.status}" />
+        </div>
+    </div>
+    <div class="form-group hidden layer-footer">
+        <div class="col-xs-2"></div>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" id="agree_tixian" class="btn btn-success btn-embossed">同意 并已打款</button>
+            <button type="submit" id="refuse_tixian" class="btn btn-warning btn-embossed" style="margin-left: 20px;">拒绝提现 退还用户资金</button>
+        </div>
+    </div>
+</form>

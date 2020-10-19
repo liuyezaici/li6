@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {include file="common/meta" /}
+
+        <style type="text/css">
+            body {
+                color:#999;
+                background:url('{$background}');
+                background-size:cover;
+            }
+            a {
+                color:#fff;
+            }
+            .login-panel{margin-top:150px;}
+            .login-screen {
+                max-width:400px;
+                padding:0;
+                margin:100px auto 0 auto;
+
+            }
+            .login-screen .well {
+                border-radius: 3px;
+                -webkit-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                background: rgba(255,255,255, 0.2);
+            }
+            .login-screen .copyright {
+                text-align: center;
+            }
+            @media(max-width:767px) {
+                .login-screen {
+                    padding:0 20px;
+                }
+            }
+            .profile-img-card {
+                width: 100px;
+                height: 100px;
+                margin: 10px auto;
+                display: block;
+                -moz-border-radius: 50%;
+                -webkit-border-radius: 50%;
+                border-radius: 50%;
+            }
+            .profile-name-card {
+                text-align: center;
+            }
+
+            #login-form {
+                margin-top:20px;
+            }
+            #login-form .input-group {
+                margin-bottom:15px;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="login-wrapper">
+                <div class="login-screen">
+                    <div class="well">
+                        <div class="login-form" id="append_login_box">
+
+                        </div>
+                    </div>
+                    <p class="hidden">
+                        <a href="http://li6.cc">Powered By LiRui 2018.8</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    <script>
+        var webLogo = '__CDN__/assets/img/avatar.png';
+        $(function () {
+            var appendBox = $('#append_login_box');
+            var loginForm = makeDiv({
+                style: 'max-width: 400px;',
+                value: [
+                    makeImg({
+                        'class': 'profile-img-card',
+                        src: webLogo
+                    }),
+                    makeForm({
+                        'margin_top': '20px',
+                        url: '/admin/index/login',
+                        success_key: 'code',
+                        success_value: '1',
+                        success_func: function (data) {
+                            msgTisf(data.msg, {top: 200});
+                            window.location = '/admin';
+                        },
+                        err_func: function (data) {
+                            msgTisf(data.msg, {top: 200});
+                        },
+                        value: [
+                            makeDiv({
+                                'class': 'input-group',
+                                value: [
+                                    '<div class="input-group-addon"><span class="glyphicon glyphicon-user" aria-hidden="true"></span></div>', makeInput({
+                                        'place': '帐号',
+                                        'class': 'no_radius',
+                                        'name': 'username',
+                                        'value': 'admin',
+                                        null_func: function () {
+                                            msgTisf('帐号不能为空', {top: 200});
+                                        }
+                                })]
+                            })
+                            ,makeDiv({
+                                'class': 'input-group',
+                                'margin_top': '15px',
+                                value: [
+                                    '<div class="input-group-addon"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></div>', makeInput({
+                                        'place': '密码',
+                                        'class': 'no_radius',
+                                        'type': 'password',
+                                        'name': 'password',
+                                        'value': '',
+                                        null_func: function () {
+                                            msgTisf('密码不能为空', {top: 200});
+                                        }
+                                })]
+                            }),makeDiv({
+                                'class': 'input-group',
+                                'margin_top': '15px',
+                                value:
+                                    makeDiv({
+                                        'class': 'inline white',
+                                        value: makeChecked({
+                                            'name': 'keeplogin',
+                                            text: '持续登录',
+                                            item: [{value: 1}]
+                                        })
+                                })
+                            }),makeDiv({
+                                'class': 'form-group',
+                                'margin_top': '15px',
+                                value: makeDiv({
+                                        'class': 'col col-md-12',
+                                        value: makeBtn({
+                                                'value': '登录',
+                                                'type': 'submit',
+                                                'class': 'btn btn-success btn-lg btn-block no_radius',
+                                            })
+                                        })
+                            })
+                        ]
+                    })
+                ]
+            });
+            appendBox.append(loginForm);
+        })
+    </script>
+    </body>
+</html>

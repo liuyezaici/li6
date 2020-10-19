@@ -1,0 +1,208 @@
+<div id="edit_config_form">loading</div>
+<script>
+    var getSetConfigInfoUrl = '/admin/addon/config/addonname/<?=$addonName?>';
+    $(function() {
+        var dataFromObj = {
+            url: getSetConfigInfoUrl +'?get_info=1',
+            data_key: 'data'
+        };
+        var box = makeForm({
+            'type': 'post',
+            url: getSetConfigInfoUrl,
+            submit: function (obj, ev) {
+                loading(true);
+            },
+            success_key: 'code',
+            success_value: ['1'],
+            success_func: function (data) {
+                noLoading();
+                msgTis('设置成功');
+            },
+            err_func: function (data) {
+                noLoading();
+                msg(data.msg);
+            },
+            value: makeTable({
+                'class': 'edit_table',
+                data_from: dataFromObj,
+                tr_1: [
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '短信方式'
+                            },
+                            {
+                                'class': 'td_main',
+                                value: makeRadios({
+                                    name: 'row[sms_type]',
+                                    value: '{sms_type}',
+                                    value_key: 'value',
+                                    title_key: 'text',
+                                    items:{
+                                        data: [
+                                            {value: 'Ztsms', text: '助通'},
+                                            {value: 'Alisms', text: '阿里云'},
+                                            {value: 'Mingding', text: '铭鼎'}
+                                        ]
+                                    }
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '公司名字'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[company_sign]',
+                                    width: '100%',
+                                    value: '{company_sign}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '助通-帐号'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[zhutong_key]',
+                                    width: '100%',
+                                    value: '{zhutong_key}'
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '助通-密码'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[zhutong_secret]',
+                                    width: '100%',
+                                    value: '{zhutong_secret}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '阿里云-帐号'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[aliyun_key]',
+                                    width: '100%',
+                                    value: '{aliyun_key}'
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '阿里云-密码'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[aliyun_secret]',
+                                    width: '100%',
+                                    value: '{aliyun_secret}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '铭鼎-uid'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[mingding_uid]',
+                                    width: '100%',
+                                    value: '{mingding_uid}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '铭鼎-帐号'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[mingding_account]',
+                                    width: '100%',
+                                    value: '{mingding_account}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '铭鼎-密码'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[mingding_secret]',
+                                    width: '100%',
+                                    value: '{mingding_secret}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: 'register:短信模板'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    name: 'row[register_template]',
+                                    width: '100%',
+                                    value: '{register_template}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: ''
+                            }, {
+                                'class': 'td_main',
+                                value: makeBtn({
+                                    'class': 'btn btn-success',
+                                    'value': '保存',
+                                    'type': 'submit'
+                                })
+                            }
+                        ]
+                    }
+                ]
+            })
+        });
+        $('#edit_config_form').html('').append(box);
+    });
+</script>

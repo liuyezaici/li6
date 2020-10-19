@@ -1,0 +1,142 @@
+.list_data {
+    position: relative;
+    width: 100%;
+}
+.list_data .search_article_form {
+    position: absolute;
+    right: 10px;
+    top: -5px;
+}
+.list_data .search_article_form .glyphicon {
+    color: #888;
+    margin-right: 2px;
+}
+/* 文章列表 */
+.list_data {
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.list_data dt {
+    padding: 6px 0 18px 8px;
+    background: url("/resource/front/images/index_lines.png") left -91px;
+}
+.list_data ul {
+    padding: 3px 0;
+    margin-top: 7px;
+}
+.list_data ul li {
+    display: block;
+    padding: 8px 0;
+    position: relative;
+}
+.list_data ul li .a_cover {
+    display: inline-block;
+    height: 25px;
+    width: 25px;
+    vertical-align: text-bottom;
+    border: 1px solid #eee;
+    margin-right: 5px;
+}
+.list_data ul li .cate {
+    overflow: hidden;
+    display: block;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+    text-align: right;
+    color: #ccc;
+    font-weight: bold;
+    margin-right: -15px;
+    margin-left: -15px;
+    font-size: 12px;
+}
+.list_data ul li .cate a {
+    color: #888;
+    font-weight: bold;
+}
+.list_data ul li .col-xs-12 .cate {
+    text-align: center;
+}
+.list_data .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: baseline;
+    display: block;
+    margin: 0 -15px;
+}
+.list_data .title a {
+    color: #888;
+}
+.list_data .add_time {
+    font-size: 10px;
+    color: #aaa;
+    display: block;
+    padding-right: 5px;
+}
+.list_data ul li .col-xs-12 .add_time {
+    text-align: right;
+}
+.list_data ul li:nth-child(odd) {
+    background-color:#f8f8f8;
+}
+.list_data ul li:nth-child(even) {
+    background-color:#fff;
+}
+
+.right_bar {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+.right_bar dl {
+    display: block;
+    clear: both;
+    margin-bottom: 10px;
+}
+.right_bar dl dt {
+    height: 40px;
+    background: url(../images/index_right_lines.png);
+    color: #777;
+    font-size: 16px;
+    padding-left: 14px;
+}
+.right_bar dt.line1 {
+    background-position: left 16px;
+    position: relative;
+}
+.right_bar dt.line2 {
+    background-position: left -176px;
+    position: relative;
+}
+.right_bar dt.line3 {
+    background-position: left -307px;
+    position: relative;
+}
+.rightContent {
+    padding-top: 10px;
+    padding-left: 12px;
+}
+/* 分类 */
+.cateList li {
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+.cateList li a {
+    font-size: 14px;
+}
+/* 评论 */
+.toolList {
+    padding-top: 10px;
+}
+.toolList li {
+    position: relative;
+    margin-bottom: 5px;
+}
+.toolList li .btn {
+    margin-bottom: 5px;
+}
+.toolList a:hover {
+    color: #333;
+}

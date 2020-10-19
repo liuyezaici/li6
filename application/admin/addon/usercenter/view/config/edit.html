@@ -1,0 +1,81 @@
+<div id="edit_config_form">loading</div>
+<script>
+    var getSetConfigInfoUrl = '/admin/addon/config/addonname/<?=$addonName?>';
+    $(function() {
+        var dataFromObj = {
+            url: getSetConfigInfoUrl +'?get_info=1',
+            data_key: 'data'
+        };
+        var box = makeForm({
+            'type': 'post',
+            url: getSetConfigInfoUrl,
+            submit: function (obj, ev) {
+                loading(true);
+            },
+            success_key: 'code',
+            success_value: ['1'],
+            success_func: function (data) {
+                noLoading();
+                msgTis('设置成功');
+            },
+            err_func: function (data) {
+                noLoading();
+                msg(data.msg);
+            },
+            value: makeTable({
+                'class': 'edit_table',
+                data_from: dataFromObj,
+                tr_1: [
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '微信登录appid'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    data: '{wechat}',
+                                    name: 'row[wechat][app_id]',
+                                    width: '100%',
+                                    value: '{app_id}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: '微信登录appsecret'
+                            }, {
+                                'class': 'td_main',
+                                value: makeInput({
+                                    data: '{wechat}',
+                                    name: 'row[wechat][app_secret]',
+                                    width: '100%',
+                                    value: '{app_secret}',
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                'class': 'td_em',
+                                value: ''
+                            }, {
+                                'class': 'td_main',
+                                value: makeBtn({
+                                    'class': 'btn btn-success',
+                                    'value': '保存',
+                                    'type': 'submit'
+                                })
+                            }
+                        ]
+                    }
+                ]
+            })
+        });
+        $('#edit_config_form').html('').append(box);
+    });
+</script>

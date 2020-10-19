@@ -1,0 +1,19 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+<style>
+    .simple_btn {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+    <input type="button" class="btnLr btnLrSuccess" value="默认" onclick="hideAllBox(); msgTis('默认提示语.');">
+    <input type="button" class="btnLr btnLrSuccess" value="向上跑" onclick="hideAllBox(); msgTis('向上跑的提示语 也只是手机用的比较多.', {'bg':false,'speed': 160, 'bottom': 220, 'wait': 1000, 'hide_time': 183});">
+    <input type="button" class="btnLr btnLrSuccess" value="向下跑" onclick="hideAllBox(); msgTis('向下跑的提示语 也只是手机用的比较多.', {'bg':false,'speed': 200, 'top': 220, 'wait': 1200, 'hide_time': 520});">
+//自定义内容的按钮

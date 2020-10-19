@@ -1,0 +1,48 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script src="/resource/pub/js/jquery-lr_box.js"></script>
+<script src="/resource/pub/js/jquery-lr_base.js"></script>
+<script src="/resource/pub/js/jquery-lr_element.js"></script>
+
+
+//makeDiv的value支持字符串、单个对象、多个对象的数组, 当然其他makeSpan,makeForm,makeTable也一样支持
+// value里可以用{}写语法
+<div id="show_div"></div>
+<div id="show_reload_btn"></div>
+<script>
+//一个简单的div
+    var div = makeDiv({
+        'name': 'div_data',
+        'class':'panel',
+         data: {'title': '插件名字', 'status': '1'},
+         value: makeDiv({
+             'class': 'panel-body bg-success',
+             value: [
+                 makeBtn({
+                     margin_left: '5px',
+                     'class': 'btnLr btn-xs {{status}==1 ? \'btn-success\' : \'btn-default\'}',
+                     value: "{{status}==1 ? '已装' : '未装'}",
+                 }),
+                 makeBtn({
+                     margin_left: '5px',
+                     'class': 'btnLr btn-warning btn-xs',
+                     value: "状态: {status}",
+                 }),
+             ]
+         })
+     });
+  $('#show_div').append(div);
+
+$('#show_reload_btn').append(makeA({
+        value: '更新数据',
+        target: '_self',
+        'class': 'btnLr btn-info btn-sm',
+        click: function (obj, ev) {
+            var lastStatus = div['data']['status'];
+            div['data'] =  {'status': lastStatus == 1 ? 0:1};
+        }
+    })
+);
+</script>

@@ -1,0 +1,93 @@
+{notempty name="addonCustomTable"}
+{notempty name="addonCustomTable.[table]"}
+{foreach $addonCustomTable.[table] as $addonCustomTableItem}
+    <div class="form-group">
+        <label for="{$addonCustomTableItem.name}" class="control-label col-xs-12 col-sm-2">{$addonCustomTableItem.title}:</label>
+        <div class="col-xs-12 col-sm-8">
+			{switch $addonCustomTableItem.type}
+            {case text}
+            <textarea name="row[{$addonCustomTableItem.name}]" class="form-control" data-rule="{$addonCustomTableItem.rule}" rows="5" data-tip="{$addonCustomTableItem.tip}" {$addonCustomTableItem.extend}>{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}</textarea>
+            {/case}
+            {case editor}
+            <textarea name="row[{$addonCustomTableItem.name}]" class="form-control editor" data-rule="{$addonCustomTableItem.rule}" rows="5" data-tip="{$addonCustomTableItem.tip}" {$addonCustomTableItem.extend}>{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}</textarea>
+            {/case}
+            {case array}
+            {php}
+            $addonCustomContent = isset($row[$addonCustomTableItem['name']])?$row[$addonCustomTableItem['name']]:$addonCustomTableItem['value'];
+            if(!$addonCustomContent)$addonCustomContent = [];
+            if(!is_array($addonCustomContent))$addonCustomContent = json_decode($addonCustomContent, true);
+            {/php}
+            <dl class="fieldlist" rel="{$addonCustomContent|count}" data-name="row[{$addonCustomTableItem.name}]">
+                <dd>
+                    <ins>{:__('Array key')}</ins>
+                    <ins>{:__('Array value')}</ins>
+                </dd>
+                {notempty name="addonCustomContent.value"}
+                {foreach $addonCustomContent.value as $addonCustomKey => $addonCustomVo}
+                <dd class="form-inline">
+                    <input type="text" name="row[{$addonCustomTableItem.name}][field][{$addonCustomKey}]" class="form-control" value="{$addonCustomContent.field[$addonCustomKey]}" size="10" />
+                    <input type="text" name="row[{$addonCustomTableItem.name}][value][{$addonCustomKey}]" class="form-control" value="{$addonCustomVo}" size="40" />
+                    <span class="btn btn-sm btn-danger btn-remove"><i class="fa fa-times"></i></span>
+                    <span class="btn btn-sm btn-primary btn-dragsort"><i class="fa fa-arrows"></i></span>
+                </dd>
+                {/foreach}
+                {/notempty}
+                <dd><a href="javascript:;" class="append btn btn-sm btn-success"><i class="fa fa-plus"></i> {:__('Append')}</a></dd>
+            </dl>
+            {/case}
+            {case date}
+            <input type="text" name="row[{$addonCustomTableItem.name}]" value="{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}" class="form-control datetimepicker" data-format="YYYY-MM-DD" data-tip="{$addonCustomTableItem.tip}" data-rule="{$addonCustomTableItem.rule}" {$addonCustomTableItem.extend} />
+            {/case}
+            {case datetime}
+            <input type="text" name="row[{$addonCustomTableItem.name}]" value="{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}" class="form-control datetimepicker" data-tip="{$addonCustomTableItem.tip}" data-rule="{$addonCustomTableItem.rule}" {$addonCustomTableItem.extend} />
+            {/case}
+            {case number}
+            <input type="number" name="row[{$addonCustomTableItem.name}]" value="{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}" class="form-control" data-tip="{$addonCustomTableItem.tip}" data-rule="{$addonCustomTableItem.rule}" {$addonCustomTableItem.extend} />
+            {/case}
+            {case checkbox}
+            {foreach name="addonCustomTableItem.content" item="addonCustomVo"}
+            <label for="row[{$addonCustomTableItem.name}][]-{$key}"><input id="row[{$addonCustomTableItem.name}][]-{$key}" name="row[{$addonCustomTableItem.name}][]" type="checkbox" value="{$key}" data-tip="{$addonCustomTableItem.tip}" {in name="key" value=":isset($row[$addonCustomTableItem.name])?$row[$addonCustomTableItem.name]:$addonCustomTableItem.value"}checked{/in} /> {$addonCustomVo}</label>
+            {/foreach}
+            {/case}
+            {case radio}
+            {foreach name="addonCustomTableItem.content" item="addonCustomVo"}
+            <label for="row[{$addonCustomTableItem.name}]-{$key}"><input id="row[{$addonCustomTableItem.name}]-{$key}" name="row[{$addonCustomTableItem.name}]" type="radio" value="{$key}" data-tip="{$addonCustomTableItem.tip}" {in name="key" value=":isset($row[$addonCustomTableItem.name])?$row[$addonCustomTableItem.name]:$addonCustomTableItem.value"}checked{/in} /> {$addonCustomVo}</label>
+            {/foreach}
+            {/case}
+            {case value="select" break="0"}{/case}
+            {case value="selects"}
+            <select name="row[{$addonCustomTableItem.name}]{$addonCustomTableItem.type=='selects'?'[]':''}" class="form-control selectpicker" data-tip="{$addonCustomTableItem.tip}" {$addonCustomTableItem.type=='selects'?'multiple':''}>
+                {foreach name="addonCustomTableItem.content" item="addonCustomVo"}
+                <option value="{$key}" {in name="key" value=":isset($row[$addonCustomTableItem.name])?$row[$addonCustomTableItem.name]:$addonCustomTableItem.value"}selected{/in}>{$addonCustomVo}</option>
+                {/foreach}
+            </select>
+            {/case}
+            {case value="image" break="0"}{/case}
+            {case value="images"}
+            <div class="form-inline">
+                <input id="c-{$addonCustomTableItem.name}" class="form-control" size="50" name="row[{$addonCustomTableItem.name}]" type="text" value="{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}" data-tip="{$addonCustomTableItem.tip}">
+                <span><button type="button" id="plupload-{$addonCustomTableItem.name}" class="btn btn-danger plupload" data-input-id="c-{$addonCustomTableItem.name}" data-mimetype="image/*" data-multiple="{$addonCustomTableItem.type=='image'?'false':'true'}" data-preview-id="p-{$addonCustomTableItem.name}"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                <span><button type="button" id="fachoose-{$addonCustomTableItem.name}" class="btn btn-primary fachoose" data-input-id="c-{$addonCustomTableItem.name}" data-mimetype="image/*" data-multiple="{$addonCustomTableItem.type=='image'?'false':'true'}"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                <ul class="row list-inline plupload-preview" id="p-{$addonCustomTableItem.name}"></ul>
+            </div>
+            {/case}
+            {case value="file" break="0"}{/case}
+            {case value="files"}
+            <div class="form-inline">
+                <input id="c-{$addonCustomTableItem.name}" class="form-control" size="50" name="row[{$addonCustomTableItem.name}]" type="text" value="{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}" data-tip="{$addonCustomTableItem.tip}">
+                <span><button type="button" id="plupload-{$addonCustomTableItem.name}" class="btn btn-danger plupload" data-input-id="c-{$addonCustomTableItem.name}" data-multiple="{$addonCustomTableItem.type=='file'?'false':'true'}"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                <span><button type="button" id="fachoose-{$addonCustomTableItem.name}" class="btn btn-primary fachoose" data-input-id="c-{$addonCustomTableItem.name}" data-multiple="{$addonCustomTableItem.type=='file'?'false':'true'}"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+            </div>
+            {/case}
+            {case bool}
+            <label for="row[{$addonCustomTableItem.name}]-yes"><input id="row[{$addonCustomTableItem.name}]-yes" name="row[{$addonCustomTableItem.name}]" type="radio" value="1" {:(isset($row[$addonCustomTableItem.name])&&$row[$addonCustomTableItem.name])||$addonCustomTableItem.value?'checked':''} data-tip="{$addonCustomTableItem.tip}" /> {:__('Yes')}</label> 
+            <label for="row[{$addonCustomTableItem.name}]-no"><input id="row[{$addonCustomTableItem.name}]-no" name="row[{$addonCustomTableItem.name}]" type="radio" value="0" {:(isset($row[$addonCustomTableItem.name])&&$row[$addonCustomTableItem.name])||$addonCustomTableItem.value?'':'checked'} data-tip="{$addonCustomTableItem.tip}" /> {:__('No')}</label>
+            {/case}
+            {default /}
+            <input type="text" name="row[{$addonCustomTableItem.name}]" value="{$row[$addonCustomTableItem.name]?:$addonCustomTableItem.value}" class="form-control" data-rule="{$addonCustomTableItem.rule}" data-tip="{$addonCustomTableItem.tip}" {$addonCustomTableItem.extend} />
+            {/switch}
+        </div>
+    </div>
+{/foreach}
+{/notempty}
+{/notempty}
