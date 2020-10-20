@@ -1,65 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
-    {include file="common/meta" /}
-    <link href="__CDN__/assets/css/juzi/index.css" rel="stylesheet">
-    <script src="/assets/js/juzi/search.js"></script>
-</head>
-<body>
-{include file="common/header" /}
-{include file="common/banner" currentBanner='gequshangxi' /}
-<div class="index_body">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>LR主页</title>
+    <meta name="keywords" content="LR个人主页">
+    <meta name="description" content="李大爷个人主页">
+    <link href="/resource/front/css/index.css" rel="stylesheet" media="all" />
+    <?=$header?>
     <div class="container">
-        <form id="searchForm" target="_parent" action="/juzi/search/index/">
-            <div class="inner">
-                <div class="input-group">
-                    <input type="hidden" class="hide_flag" name="t_" value="lr"/>
-                    <div class="input-group-btn">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                                id="search_type" data-value="lr">
-                            <span id="current_text">搜索类型</span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="javascript: void(0);" target="_self" data-value="lr">全匹配</a></li>
-                            <li><a href="javascript: void(0);" target="_self" data-value="l">左匹配</a></li>
-                            <li><a href="javascript: void(0);" target="_self" data-value="r">右匹配</a></li>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="list_data">
+                        <dt>
+                            <?php
+                            if($typeId) echo '<a href="/" target="_self">首页</a> &raquo;';
+                            ?> <?=$topTitle?>
+                        </dt>
+                        <ul>
+                            <?php
+                            foreach($articleList as $n=>$v) {
+                            ?>
+                            <li>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-6 col-xs-12"> <span class="cate">『<a  href="/?type=<?=$v['typeid']?>" target="_self"> <?=$v['typeName']?> </a>』</span> </div>
+                                    <div class="col-md-7 col-sm-6 col-xs-12"> <span class="title">  <a href="/?s=article/read&id=<?=$v['id']?>"> <?=$v['title']?></a> </span> </div>
+                                    <div class="col-md-3 col-sm-12 col-xs-12"> <span class="add_time"><?=$v['ctime']?></span> </div>
+                                </div>
+                            </li>
+                            <?php
+                            }
+                            ?>
                         </ul>
-                    </div>
-                    <span id="append_input" data-url="/adppp/juzi/api/index/ajax_search?t=lr"
-                          data-link="/juzi/read/uri/{uri}" data-holder="搜索关键词" data-liauther="{authorName}"
-                          data-liname="{content}">
-                        <input class="form-control"/>
-                    </span>
-                    <div class="input-group-btn">
-                        <button class="btn btn-success">搜索</button>
+                        <div class="index_page_bar">
+                            <?=$pageMenu?>
+                        </div>
                     </div>
                 </div>
-                <div class="panel panel-default"
-                     style="margin-top: 100px; text-align: left; padding: 10px 0 10px 10px;">
-                    <h4>最新句子：
-                        <a href="/juzi/news/index" target="_self" class="label label-success">More</a>
-                    </h4>
-                    <ul class="list-group">
-                    <?php
-                    foreach($lastJuzi as $item) {
-                    ?>
-                    <li class="list-group-item">
-                    <a href="/juzi/read/uri/<?=$item['uri']?>"
-                       title="作者:<?=$item['authorName']?> <?=$item['createtime']?>"
-                       target="_blank"><?=$item['content']?></a>
-                    ——<a href="<?=$item['authorLink']?>"><?=$item['authorName']?></a>
-                        </li>
-                        <?php
-                        }
-                        ?>
-                    </ul>
-                </div>
-                <span class="count_detail">共收录<?=$totalJuzi?>篇句子</span>
             </div>
-        </form>
+            <div class="col-md-4">
+                <div class="row">
+                    <div class="right_bar">
+                        <dl>
+                            <dt class="line2">关键词</dt>
+                            <div class="rightContent">
+                                <form action="/" method="get" class="input-group" target="_self">
+                                    <input name="keyword" class="form-control" value="<?=$keyword?>" />
+                                    <span class="input-group-btn">
+                                       <button type="submit" class="btn btn-md btn-default">搜索</button>
+                                   </span>
+                                </form>
+                            </div>
+                        </dl>
+                        <dl>
+                            <dt class="line2">category</dt>
+                            <div class="rightContent">
+                                <ul class="cateList">
+                                    <?php
+                                    foreach($allTypes as $n=>$tmpType) {
+                                    ?>
+                                    <li>
+                                        <a href="/?type=<?=$tmpType['t_id']?>" target="_self" class="btn btn-xs"> <?=$tmpType['t_title']?></a>
+                                    </li>
+                                    <?php
+                                    }
+                                    ?>
+                                </ul>
+                            </div>
+                        </dl>
+                        <dl>
+                            <dt class="line3">工具</dt>
+                            <div class="rightContent">
+                                <ul class="toolList">
+                                    <li>
+                                        <span class="btn btn-md btn-info">
+                                            <a href="/tool/code.html" class="badge">特殊符号</a>
+                                        </span>
+                                        <span class="btn btn-md btn-success">
+                                            <a href="/tool/color.html" class="badge">颜色表</a>
+                                        </span>
+                                        <span class="btn btn-md btn-warning">
+                                            <a href="https://cs.li6.cc" class="badge">生活常识</a>
+                                        </span>
+                                        <span class="btn btn-md btn-primary">
+                                            <a href="https://wz123.cc" class="badge">网址123</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-{include file="common/footer" /}
-</body>
-</html>
+    <?=$footer?>

@@ -5,11 +5,7 @@ namespace app\index\controller;
 use app\admin\addon\fujian\model\Fujian;
 use app\common\controller\Frontend;
 use fast\File;
-use think\Config;
-use think\Db;
 use fast\Addon;
-use app\admin\library\Auth;
-use app\common\model\Users;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
 
@@ -19,12 +15,14 @@ class Index extends Frontend
     protected $noNeedLogin = ['details', 'index'];
     protected $noNeedRight = '*';
     protected $layout = '';
+    protected $keyword = '';
     protected $allTypes = [];
 
     public function _initialize()
     {
         parent::_initialize();
         $this->allTypes = ArticleTypesModel::select();
+        $this->keyword = input('keyword', '', 'trim');
     }
     //写一篇
     public function write() {
@@ -289,31 +287,24 @@ class Index extends Frontend
 
     //文章首页
     public function index(){
-        $tab = input('tab', 0, 'int');
+        $typeId = input('typeId', 0, 'int');
         $page = input('page', 1, 'int');
-        $keyword = input('keyword', '', 'trim');
         $topTitle = '最新文章';
         $noResultText = '还没有文章';
         $where = [];
         $where['status'] = 1;
-        if($tab) {
-            $where['typeId'] = $tab;
-            $topTitle = '分类:'. ArticleTypesModel::getFieldById($tab, 'title') ;
+        if($typeId) {
+            $where['typeid'] = $typeId;
+            $topTitle = '分类:'. ArticleTypesModel::getFieldById($typeId, 'title') ;
             $noResultText = '分类没有文章';
 
         }
-
-        $articleHeader = $this->view->fetch('top', [
-            'allTypes' => $this->allTypes,
-            'tab' => $tab,
-            'keyword' => $keyword
-        ]);
-        if($keyword) {
-            $where['title'] = ['like', "%{$keyword}%"];
-            $topTitle = '搜索文章:'. $keyword;
+        if($this->keyword) {
+            $where['title'] = ['like', "%{$this->keyword}%"];
+            $topTitle = '搜索文章:'. $this->keyword;
             $noResultText = '没有搜索结果';
         }
-        $path = "/uc/article/index/?keyword={$keyword}&tab={$tab}&page=[PAGE]";
+        $path = "/index/?keyword={$this->keyword}&typeId={$typeId}&page=[PAGE]";
         $result = ArticleModel::where($where)->order('id', 'Desc')->paginate(10, false,
             [
                 'page' => $page,
@@ -322,20 +313,19 @@ class Index extends Frontend
         );
         $articleList = json_decode(json_encode($result), true)['data'];
         foreach ($articleList as &$v) {
-            $v['thatDate'] = \fast\Date::toYMD($v['thatDate']);
-            $v['typeName'] = $v['typeId'] ? ArticleTypesModel::getFieldById($v['typeId'], 'title') : '';
+            $v['ctime'] = \fast\Date::toYMD($v['ctime']);
         }
         unset($v);
         $pageMenu = $result->render();
-        $rightHtml = $this->view->fetch('indexRight', [
-            'articleHeader' =>  $articleHeader,
-            'topTitle' =>  $topTitle,
-            'articleList' =>  $articleList,
-            'pageMenu' =>  $pageMenu,
-            'noResultText' =>  $noResultText,
-        ]);
-        $this->view->assign('webTitle',   'beyond资料、歌迷文章、周边讯息');
-        $this->view->assign('right',   $this->view->fetch('common/right', ['rightHtml' =>  $rightHtml]));
+
+        $this->view->assign('webTitle',   '文章');
+        $this->view->assign('typeId',   $typeId);
+        $this->view->assign('topTitle',   $topTitle);
+        $this->view->assign('articleList',   $articleList);
+        $this->view->assign('keyword',   $this->keyword);
+        $this->view->assign('pageMenu',   $pageMenu);
+        $this->view->assign('allTypes',   $this->allTypes);
+        $this->view->assign('noResultText',   $noResultText);
         print_r($this->view->fetch());
     }
 }

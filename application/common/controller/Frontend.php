@@ -42,9 +42,6 @@ class Frontend extends Controller
     {
         //移除HTML标签
         $this->request->filter('strip_tags');
-        $modulename = $this->request->module();
-        $controllername = strtolower($this->request->controller());
-        $actionname = strtolower($this->request->action());
 
         // 如果有使用模板布局
         if ($this->layout)
@@ -120,8 +117,10 @@ class Frontend extends Controller
         Hook::listen("config_init", $config);
         // 加载当前控制器语言包
         $this->loadlang($controllername);
-        $this->assign('site', $site);
-        $this->assign('config', $config);
+
+        $this->view->assign('header',   $this->view->fetch(APP_PATH . 'index/view/header.php'));
+        $this->view->assign('footer',   $this->view->fetch(APP_PATH . 'index/view/footer.php'));
+
     }
 
     /**
