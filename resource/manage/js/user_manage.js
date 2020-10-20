@@ -39,7 +39,6 @@ function ajaxBindWindowHash() {
         window.location.hash = hash;
         hashChangeFromUs = true;
         var gotoUrl = url;
-        if(gotoUrl.indexOf('load_text') == -1) gotoUrl += "&load_text=1";//强制要求带上加载内容的标记
         $('#root_right').find('.right_content').load(gotoUrl,function() {
             noLoading();
             hashChangeFromUs = false;
