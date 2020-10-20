@@ -1,0 +1,96 @@
+<style type="text/css">
+    <!--
+    .edit_face_wrap {
+    }
+    /* 头像修改 */
+    .select_face_menu ul li {
+        float: left;
+        height: 60px;
+        overflow: hidden;
+        margin: 0 8px 8px 0;
+    }
+    .select_face_menu ul li img {
+        width: 60px;
+    }
+    .edit_face_wrap ul li {
+        margin-bottom: 15px;
+    }
+    .edit_face_wrap ul li #upload_face_box input {
+        cursor: pointer;
+    }
+    -->
+</style>
+<div class="edit_face_wrap">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td valign="top">
+                <img id="user_head_logo" src="<?=$userLogo?>?r=<?=Str::getRam(10);?>" width="100">
+            </td>
+            <td width="30"></td>
+            <td valign="top">
+                <div>
+                    <ul>
+                        <li>
+                            <em>您可以直接：</em>
+                            <a href="javascript:void(0);" class="btn btn-default" onclick="selectFace('select_face_btn');" target="_self" id="select_face_btn">选择系统头像</a>
+                        </li>
+                        <li>
+                            <em>或上传图片：</em>
+                            <span id="upload_face_box"></span>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>
+//选择系统头像
+function selectFace(linkid) {
+    var obj = $('#'+linkid)
+    var zb = obj.offset();
+    var face_htm = '';
+    var onepage = 53;
+    for( var d = 1; d< (onepage + 1); d++) {
+        face_htm += "<li><img src='/resource/system/images/face/"+ d +".jpg' style='cursor:pointer;' alt='选择头像' onclick='choseface("+d+");' title='选此头像'></li>";
+    }
+    var facemenu = '<div class="select_face_menu">' +
+            '<ul class="clearfix">'+face_htm +"</ul>"+
+    '</div>';
+    msgView('选择头像',facemenu, 872);
+}
+//选择头像
+function choseface(faceid) {
+    rePost('/?s=user&do=chose_face&json=true',{faceid:faceid},function(data) {
+        hideNewBox();
+        if(data.id != '0267') {
+            if(data.info) data.msg += data.info;
+            if(data.id == '0000') {
+                loginIn();
+                return;
+            }
+            msg(data.msg);
+        } else {
+            hideNewBox();
+            msgTis(data.msg);
+            $('#user_head_logo').attr('src', data.info +"?r="+ Math.random());
+            $('#header').find('.userface').attr('src', data.info +"?r="+ Math.random());
+        }
+    });
+    msg( '头像设置中,请稍等 &nbsp;<img src="/resource/pub/images/loading2.gif" />');
+}
+
+$(function() {
+    $('#upload_face_box').append(
+        makeInput({
+            name:'face_url', type:'file',width: 255,
+            upload: {
+                url: '/?s=user&do=upload_face',
+                view:true,
+                id:'0388',
+                view_tag: '#header .userface,#user_head_logo'
+            }
+        })
+    )
+});
+</script>

@@ -1,0 +1,196 @@
+<style type="text/css">
+<!--
+/* 资金交易日志 按日期搜索 */
+.new_right .right_content .top_title_new a.active {
+    background-color: #f1a38a;
+    border-bottom: 1px solid #f1a38a;
+}
+.money_log_top {
+    margin-top: 10px;
+    font-size: 16px;
+}
+.money_log_top h1 {
+    overflow: hidden;
+}
+.money_log_top em {
+    float: left;
+}
+
+/* 列表 */
+.moneylog_wrap {
+    border: 1px solid #dedede;
+    border-top: 0;
+}
+.money_log_table {
+    background-color: #fff;
+}
+.money_log_table .top_tr {
+    color: #555;
+    font-weight: bold;
+    color: #999;
+    height: 28px;
+    background-color: #ffebe6;
+}
+.money_log_table td {
+    color: #666;
+    line-height: 20px;
+}
+.money_log_table .bg {
+    background-color: #f9f9f9;
+}
+.search_moneylog_form {
+    height: 46px;
+    line-height: 30px;
+    font-size: 13px;
+}
+.money_log_top .count_shouru {
+    height: 30px;
+    line-height: 14px;
+    overflow: hidden;
+    font-size: 10px;
+    float: left;
+    margin-left: 16px;
+    border: 1px dashed #f1ad9e;
+    padding: 0 6px;
+    background-color: #f1d8d8;
+}
+.money_log_top .count_shouru b {
+    color: #d55423;
+}
+.money_log_top .count_shouru a {
+    font-size: 10px;
+}
+.moneylog_wrap .total {
+    float: left;
+    height: 26px;
+    line-height: 26px;
+    background-color: #f1e2d5;
+    margin: 2px 0 0 5px;
+    padding: 0 6px;
+    font-size: 12px;
+    color: #d5574c;
+    border-radius: 4px;
+}
+.moneylog_wrap .pages {
+    float: left;
+    border-radius: 4px;
+    margin-left: 10px;
+    background-color: #f1e2d5;
+}
+.moneylog_wrap .pages a {
+    border: 0;
+}
+.moneylog_wrap .pages a.current {
+    background-color: #f1a38a;
+}
+-->
+</style>
+<div class="money_log_top">
+    <h1>
+        <form class="search_moneylog_form" id="search_moneylog_form">
+            <em>
+                我的资金交易记录
+                &nbsp; &nbsp;
+                &nbsp; &nbsp;
+            </em>
+            <input type="hidden" class="page" value="<?=$page?>">
+            <em>&nbsp;筛选月份&nbsp;</em>
+            <select class="new_btn fromtime" style="width: 92px;padding-left:0;float: left;"><?=$month_from_html?></select>
+            <em>&nbsp;到&nbsp;</em>
+            <select class="new_btn endtime" style="width: 92px;padding-left:0;float: left;"><?=$month_to_html?></select>
+            <a class="new_btn new_btn-info" href="javascript: void(0);" onclick="$(this).next().click();" target="_self" style="float: left;">筛选</a>
+            <input type="submit" value="筛选记录" class="hide_btn" />
+            <span class="count_shouru">
+                收入:<b>￥<?=$moneyIn?></b> &nbsp; 支出:<b>￥<?=$moneyOut?></b>
+                <br/>
+                <a href="javascript: void(0);" onclick="down_money_log();" target="_blank">下载账单Excel</a>
+            </span>
+        </form>
+    </h1>
+
+    <div class="top_title_new">
+        <?=$top_menu?>
+    </div>
+</div>
+<div class="moneylog_wrap">
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" class="money_log_table" id="money_log_table">
+    <tr class="top_tr">
+        <td width="10"></td>
+        <td width="100">交易号</td>
+        <td width="20"></td>
+        <td width="80">金额</td>
+        <td width="20"></td>
+        <td width="100">交易状态</td>
+        <td width="140">时间</td>
+        <td>交易备注</td>
+    </tr>
+    <?php
+    if($acchangelist) {
+        foreach($acchangelist as $n => $v) {
+    ?>
+    <tr>
+        <td></td>
+        <td><?=$v['ch_id']?></td>
+        <td></td>
+        <td>
+            <span class="red" style="font-size: 14px;"><?=$v['mod']?></span>
+            ￥<?=$v['ch_money']?></td>
+        <td></td>
+        <td><?=$v['jszt']?></td>
+        <td><?=$v['ch_ctime']?></td>
+        <td class="memo" style="padding:4px;"><?=$v['ch_memo']?> </td>
+    </tr>
+    <?php
+        }
+    } else {
+        echo "<tr><td></td><td colspan='10'>没有资金记录</td></tr>";
+    }
+    ?>
+    <th colspan="10" style="padding-bottom: 10px;">
+        <div class="total">总计：￥<?=$total_money?></div>
+        <?=$divmenu?>
+    </th>
+    </table>
+</div>
+<script>
+    var reason = '<?=$reason?>';
+    //筛选状态
+    function filterLogList(state_) {
+        reason = state_;
+        var form = $('#search_moneylog_form');
+        form.find('.page').val(1);
+        form.submit();
+    }
+    //下载资金记录
+    function down_money_log() {
+        var form = $('#search_moneylog_form');
+        var model = "/?s=user/down_money_log";
+        var fromtime = form.find('.fromtime').val();
+        var endtime = form.find('.endtime').val();
+        var new_url = model+"&fromtime="+ fromtime +"&endtime="+ endtime +"&reason="+ reason;
+        window.open(new_url);
+    }
+    //翻页
+    function money_log_page(page) {
+        var form = $('#search_moneylog_form');
+        form.find('.page').val(page);
+        form.submit();
+    }
+    $(function() {
+        var form = $('#search_moneylog_form');
+        form.submit(function(e){
+            e.preventDefault();
+            var model = "/?s=user/new_money_log";
+            var fromtime = form.find('.fromtime').val();
+            var endtime = form.find('.endtime').val();
+            var page = form.find('.page').val();
+            var new_url = model+"&fromtime="+ fromtime +"&endtime="+ endtime +"&page="+ page +"&reason="+ reason;
+            ajaxOpen(new_url);
+        });
+        //默认回到第一页
+        form.mouseenter(function() {
+            form.find('.page').val(1);
+        }); 
+        $("#money_log_table").find('tr:odd').addClass('bg');
+    });
+</script>

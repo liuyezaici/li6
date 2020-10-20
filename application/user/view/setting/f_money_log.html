@@ -1,0 +1,133 @@
+<style type="text/css">
+<!--
+/* 资金交易日志 */
+.money_log_form {
+    border-radius: 4px;
+    background-color: #f8fbfd;
+    margin: -20px -15px 0 -20px;
+}
+.money_log_form .top_title {
+    height: 40px;
+}
+.money_log_form .title {
+    font-weight: bold;
+    color: #2eae39;
+    font-size: 14px;
+    line-height: 30px;
+    margin-left: 10px;
+}
+.money_log_form .reason {
+    width: 160px;
+}
+/* 搜索框 */
+.search_date_bar {
+    float: right;
+    margin: 4px 2px 0 0;
+}
+.search_date_bar .input {
+    font-weight: normal;
+    font-size: 12px;
+}
+.search_date_bar em{
+    float: left;
+    font-style: normal;
+    margin: 0 5px;
+    line-height: 26px;
+    height: 26px;
+}
+.list_table {
+    background-color: #fff;
+}
+.list_table .top_tr {
+    background-color: #ebf4f2;
+    color: #555;
+    font-weight: bold;
+    color: #999;
+    height: 28px;
+}
+.list_table td {
+    color: #666;
+    line-height: 20px;
+}
+.list_table .bg {
+    background-color: #f9f9f9;
+}
+-->
+</style>
+<div class="money_log_form" id="money_log_form">
+    <div class="top_title">
+        <form class="search_date_bar" id="search_date_bar">
+            <input type="hidden" class="page" value="<?=$page?>">
+            <em>&nbsp;资金类型：</em>
+            <select class="input reason">
+                <option value="0">全部</option>
+                <option value="1">发布活动</option>
+                <option value="2">活动核算结款</option>
+                <option value="3">会员账户间转账</option>
+                <option value="4">会员在线充值</option>
+                <option value="5">会员提现</option>
+                <option value="6">管理员手动充值</option>
+                <option value="7">手续费</option>
+                <option value="8">开通VIP</option>
+            </select>
+            <a class="button" href="javascript: void(0);" onclick="$(this).next().click();" target="_self">筛选记录</a>
+            <input type="submit" value="筛选记录" class="hide_btn" />
+        </form>
+    </div>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" class="list_table">
+        <tr class="top_tr">
+            <td width="10"></td>
+            <td width="50">交易号</td>
+            <td align="center" width="160">发起人</td>
+            <td width="80">金额</td>
+            <td width="140">时间</td>
+            <td>交易备注</td>
+        </tr>
+        <?php
+        foreach($acchangelist as $n => $v) {
+        ?>
+        <tr>
+            <td></td>
+            <td><?=$v['ch_id']?></td>
+            <td align="center" ><?=$v['u_nick']?></td>
+            <td>
+                <span class="red" style="font-size: 14px;"><?=$v['mod']?></span>
+                <?=$v['ch_money']?></td>
+            <td><?=$v['ch_ctime']?></td>
+            <td class="memo" style="padding:4px;"><?=$v['ch_memo']?> </td>
+        </tr>
+        <?php
+    }
+    ?>
+        <th colspan="10">
+            <?=$divmenu?>
+        </th>
+    </table>
+</div>
+<script>
+    //翻页
+    function money_log_page(page) {
+        var form = $('#search_date_bar');
+        form.find('.page').val(page);
+        form.submit();
+    }
+    $(function() {
+        var form = $('#search_date_bar');
+        form.submit(function(e){
+            e.preventDefault();
+            var form = $(this);
+            var model = "/?s=user/form&form=money_log";
+            var page = form.find('.page').val();
+            var reason = form.find('.reason').val();
+            hideNewBox();
+            var new_url = model+"&page="+ page +"&reason="+ reason;
+            msgWin('资金记录', new_url,1000,1);
+        });
+        form.find(".reason").val('<?=$reason?>');
+        //默认回到第一页
+        form.mouseenter(function() {
+            form.find('.page').val(1);
+        });
+        $("#money_log_form").find(".list_table").find('tr:odd').addClass('bg');
+    });
+</script>
