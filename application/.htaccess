@@ -1,6 +1,0 @@
-Order deny,allow
-Deny from all
-<filesmatch "\.(gif|png|jpg|css|js)$">
-	Order allow,deny
-	allow from all
-</filesmatch>
