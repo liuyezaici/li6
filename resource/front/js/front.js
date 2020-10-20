@@ -157,7 +157,7 @@ function forget() {
 function checkLogin() {
     var topMenu = $('#navigation');
     var stateBox = topMenu.find('.status_box');
-    rePost('/?s=system/check_login',{}, function(data){
+    rePost('/index/system/checkLogin',{}, function(data){
         if( data.nick && data.nick!= '' ){
             if(data.local_uid) {
                 window.local_uid = data.local_uid;

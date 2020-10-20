@@ -5,6 +5,7 @@ namespace app\index\controller;
 use app\admin\addon\fujian\model\Fujian;
 use app\common\controller\Frontend;
 use fast\File;
+use fast\Date;
 use fast\Addon;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
@@ -197,8 +198,8 @@ class Index extends Frontend
             'tab' =>  '',
             'keyword' =>  '',
         ]);
-        $info['ctime'] = \fast\Date::toYMD($info['ctime']);
-        if($info['thatDate']) $info['thatDate'] = \fast\Date::toYMD($info['thatDate']);
+        $info['ctime'] = Date::toYMD($info['ctime']);
+        if($info['thatDate']) $info['thatDate'] = Date::toYMD($info['thatDate']);
         $info['typeName'] = $info['typeId'] ? ArticleTypesModel::getFieldById($info['typeId'], 'title') : '';
         //markdown
         include_once(ROOT_PATH . 'assets/libs/markdown/Markdown.php');
@@ -268,7 +269,6 @@ class Index extends Frontend
         );
         $articleList = json_decode(json_encode($result), true)['data'];
         foreach ($articleList as &$v) {
-            $v['thatDate'] = \fast\Date::toYMD($v['thatDate']);
             $v['typeName'] = $v['typeId'] ? ArticleTypesModel::getFieldById($v['typeId'], 'title') : '';
         }
         unset($v);
@@ -292,7 +292,6 @@ class Index extends Frontend
         $topTitle = '最新文章';
         $noResultText = '还没有文章';
         $where = [];
-        $where['status'] = 1;
         if($typeId) {
             $where['typeid'] = $typeId;
             $topTitle = '分类:'. ArticleTypesModel::getFieldById($typeId, 'title') ;
@@ -311,9 +310,10 @@ class Index extends Frontend
                 'path' => $path,
             ]
         );
+//        print_r(ArticleModel::getlastsql());exit;
         $articleList = json_decode(json_encode($result), true)['data'];
         foreach ($articleList as &$v) {
-            $v['ctime'] = \fast\Date::toYMD($v['ctime']);
+            $v['typeName'] = $v['typeid'] ? ArticleTypesModel::getFieldById($v['typeid'], 'title') : '';
         }
         unset($v);
         $pageMenu = $result->render();
