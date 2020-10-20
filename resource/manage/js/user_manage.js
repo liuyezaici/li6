@@ -38,12 +38,7 @@ function ajaxBindWindowHash() {
         hash = encodeURIComponent(url);
         window.location.hash = hash;
         hashChangeFromUs = true;
-        //去掉local_uid
-        if(url.indexOf('%26local_uid') != -1) {
-            url = url.split('%26local_uid')[0];
-        }
         var gotoUrl = url;
-        if(local_uid) gotoUrl += "&local_uid="+local_uid;
         if(gotoUrl.indexOf('load_text') == -1) gotoUrl += "&load_text=1";//强制要求带上加载内容的标记
         $('#root_right').find('.right_content').load(gotoUrl,function() {
             noLoading();
@@ -114,7 +109,9 @@ function cloudEven() {
                     mouseWasOnBg = false;
                     downPosX = 0;
                     bg.removeClass('move');
-                    postAndDone({post_url:'/?s=user&do=save_bg_pos', post_data:{bg_x: bgPosX},loading: false,msg: false});
+                    rePost('/user/index/save_bg_pos', {bg_x: bgPosX} , function (res) {
+                        if(res.msg) msgTisf(res.msg);
+                    });
                 }
             });
         });
@@ -132,7 +129,9 @@ function cloudEven() {
                     mouseWasOnBg = false;
                     downPosX = 0;
                     bg.removeClass('move');
-                    postAndDone({post_url:'/?s=user&do=save_bg_pos', post_data:{bg_x: bgPosX},loading: false,msg: false});
+                    rePost('/user/index/save_bg_pos', {bg_x: bgPosX} , function (res) {
+                        if(res.msg) msgTisf(res.msg);
+                    });
                 }
             },
             'mouseout': function (event) {

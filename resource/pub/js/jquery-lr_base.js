@@ -22,8 +22,7 @@ var isPc = function () {
 //格式化全站的 ajax post
 function rePost(url, postData, callBack) {
     if(!url) return;
-    if (typeof local_uid != 'undefined') url += "&local_uid=" + local_uid;
-    $.post(url + '&_=' + Math.random(), postData, callBack, 'json');
+    $.post(url, postData, callBack, 'json');
 }
 //js trim去左右字符(空格) 去4次左右两边符号
 function trim(str, node) {
