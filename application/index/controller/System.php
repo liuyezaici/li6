@@ -198,15 +198,13 @@ class System extends Frontend
             $username = $this->request->post('u_nick');
             $password = $this->request->post('u_pwd');
             $keeplogin = 1;
-            $captcha = $this->request->post('captcha');
             $status = Users::adminLogin([
                 'username'  => $username,
                 'password'  => $password,
                 'keeplogin'  => $keeplogin,
-                'captcha'  => $captcha,
             ]);
             if($status === true) {
-                $this->success('登录成功');
+                $this->success('登录成功', '', ['token' => $this->auth->getToken()['token']]);
             } else {
                 $this->error($status);
             }
@@ -225,7 +223,7 @@ class System extends Frontend
             $uid = $this->auth->id;
             if(!$uid){
                 $outputData = [
-                    'username' => '-',
+                    'account' => '-',
                     'nickname' => '-',
                     'avatar' => '-',
                     'token' => '-',
@@ -236,7 +234,7 @@ class System extends Frontend
                 //读取用户的nick
                 $uInfo = Users::get($uid);
                 $outputData = [
-                    'username' => $uInfo['username'],
+                    'account' => $uInfo['account'],
                     'nickname' => $uInfo['nickname'],
                     'avatar' => $uInfo['avatar'],
                     'token' => $uInfo['token'],

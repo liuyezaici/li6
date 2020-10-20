@@ -4,6 +4,7 @@ namespace app\index\controller;
 
 use app\admin\addon\fujian\model\Fujian;
 use app\common\controller\Frontend;
+use app\common\model\Users;
 use fast\File;
 use fast\Date;
 use fast\Addon;
@@ -180,57 +181,30 @@ class Index extends Frontend
         }
         $myUid = $this->auth->id;
         ArticleModel::updateRq($id);
-        $addonName = AppAddon::$addonSourceTypeArticle;
-        $commentClass = Addon::getModel('comment');
-        $comments = $commentClass->countComment($addonName, $id);
-        if(!$comments) $comments = '';
-        $zanClass = Addon::getModel('zan');
-        $zans = $zanClass->countZan($addonName, $id);
-        $zaned = $myUid ? $zanClass->hasZan($addonName, $id, $myUid) : 0;
-        if(!$zans) $zans = '';
-        $collectClass = Addon::getModel('collect');
-        $collects = $collectClass->countCollect($addonName, $id);
-        $collected = $myUid ? $collectClass->hasCollected($addonName, $id, $myUid) : 0;
-        if(!$collects) $collects = '';
-
-        $articleHeader = $this->view->fetch('top', [
-            'allTypes' =>  $this->allTypes,
-            'tab' =>  '',
-            'keyword' =>  '',
-        ]);
-        $info['ctime'] = Date::toYMD($info['ctime']);
-        if($info['thatDate']) $info['thatDate'] = Date::toYMD($info['thatDate']);
-        $info['typeName'] = $info['typeId'] ? ArticleTypesModel::getFieldById($info['typeId'], 'title') : '';
+        $info['typeName'] = $info['typeid'] ? ArticleTypesModel::getFieldById($info['typeid'], 'title') : '';
         //markdown
         include_once(ROOT_PATH . 'assets/libs/markdown/Markdown.php');
         include_once(ROOT_PATH . 'assets/libs/markdown/MarkdownExtra.php');
         $info['content'] = \MarkdownExtra::defaultTransform( $info['content']);
         $info['content'] = preg_replace("/<img(.+)src=\"([^\"]+)\"(.+)>/", '<img class="lazy"$1data-original=\'$2\' src=\'/assets/img/loading2.gif\'$3>',$info['content']);
         //上一篇 下一篇
-        $prevArticle = ArticleModel::getPrevNextArticle($info['typeId'], $id, '<');
-        $nextArticle = ArticleModel::getPrevNextArticle($info['typeId'], $id, '>');
+        $prevArticle = ArticleModel::getPrevNextArticle($info['typeid'], $id, '<');
+        $nextArticle = ArticleModel::getPrevNextArticle($info['typeid'], $id, '>');
 
         $myUid = $this->auth->id;
         $showEdit = false;
-        if($myUid == $info['uid']) {
+        if($myUid == $info['adduid']) {
             $showEdit = true;
         }
-        $rightHtml = $this->view->fetch('detailsRight', [
-            'articleHeader' =>  $articleHeader,
+        $info['author'] = Users::getfieldbyid($info['adduid'], 'username');
+        $rightHtml = $this->view->fetch('', [
+            'webTitle' =>  $info['title'],
             'info' =>  $info,
             'showEdit' =>  $showEdit,
             'prevArticle' =>  $prevArticle,
             'nextArticle' =>  $nextArticle,
-            'zaned' =>  $zaned,
-            'zans' =>  $zans,
-            'comments' =>  $comments,
-            'collected' =>  $collected,
-            'collects' =>  $collects,
-            'addonName' =>  $addonName,
         ]);
-        $this->view->assign('webTitle',   $info['title'].',beyond资料、歌迷文章、周边讯息');
-        $this->view->assign('right',   $this->view->fetch('common/right', ['rightHtml' =>  $rightHtml]));
-        print_r($this->view->fetch());
+        print_r($rightHtml);
     }
 
     //我的文章
@@ -244,7 +218,7 @@ class Index extends Frontend
         $myUid = $this->auth->id;
         $where['uid'] = $myUid;
         if($tab) {
-            $where['typeId'] = $tab;
+            $where['typeid'] = $tab;
             $topTitle = '分类:'. ArticleTypesModel::getFieldById($tab, 'title') ;
             $noResultText = '分类没有文章';
 
@@ -269,7 +243,7 @@ class Index extends Frontend
         );
         $articleList = json_decode(json_encode($result), true)['data'];
         foreach ($articleList as &$v) {
-            $v['typeName'] = $v['typeId'] ? ArticleTypesModel::getFieldById($v['typeId'], 'title') : '';
+            $v['typeName'] = $v['typeid'] ? ArticleTypesModel::getFieldById($v['typeid'], 'title') : '';
         }
         unset($v);
         $pageMenu = $result->render();
@@ -317,7 +291,7 @@ class Index extends Frontend
         }
         unset($v);
         $pageMenu = $result->render();
-
+        $pageMenu = str_replace('', '', $pageMenu);
         $this->view->assign('webTitle',   '文章');
         $this->view->assign('typeId',   $typeId);
         $this->view->assign('topTitle',   $topTitle);

@@ -24,8 +24,8 @@
                             ?>
                             <li>
                                 <div class="row">
-                                    <div class="col-md-2 col-sm-6 col-xs-12"> <span class="cate">『<a  href="/?type=<?=$v['typeid']?>" target="_self"> <?=$v['typeName']?> </a>』</span> </div>
-                                    <div class="col-md-7 col-sm-6 col-xs-12"> <span class="title">  <a href="/?s=article/read&id=<?=$v['id']?>"> <?=$v['title']?></a> </span> </div>
+                                    <div class="col-md-2 col-sm-6 col-xs-12"> <span class="cate">『<a  href="/?typeId=<?=$v['typeid']?>" target="_self"> <?=$v['typeName']?> </a>』</span> </div>
+                                    <div class="col-md-7 col-sm-6 col-xs-12"> <span class="title">  <a href="/index/index/details/id/<?=$v['id']?>"> <?=$v['title']?></a> </span> </div>
                                     <div class="col-md-3 col-sm-12 col-xs-12"> <span class="add_time"><?=$v['ctime']?></span> </div>
                                 </div>
                             </li>
@@ -33,9 +33,9 @@
                             }
                             ?>
                         </ul>
-                        <div class="index_page_bar">
-                            <?=$pageMenu?>
-                        </div>
+                    </div>
+                    <div class="index_page_bar">
+                        <?=$pageMenu?>
                     </div>
                 </div>
             </div>
@@ -61,7 +61,7 @@
                                     foreach($allTypes as $n=>$tmpType) {
                                     ?>
                                     <li>
-                                        <a href="/?type=<?=$tmpType['id']?>" target="_self" class="btn btn-xs"> <?=$tmpType['title']?></a>
+                                        <a href="/?typeId=<?=$tmpType['id']?>" target="_self" class="btn btn-xs"> <?=$tmpType['title']?></a>
                                     </li>
                                     <?php
                                     }

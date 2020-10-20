@@ -157,23 +157,18 @@ function forget() {
 function checkLogin() {
     var topMenu = $('#navigation');
     var stateBox = topMenu.find('.status_box');
-    rePost('/index/system/checkLogin',{}, function(data){
-        if( data.nick && data.nick!= '' ){
-            if(data.local_uid) {
-                window.local_uid = data.local_uid;
-            }
-            var model = 'user';
-            if(data.uType == 3) model = 'employee';
+    rePost('/index/system/checkLogin',{}, function(res){
+        var my_menu = '';
+        if( res.data.account !== '' && res.data.nickname !== '' ){
             if(stateBox.length > 0 ) {
-                var my_menu = "user：<a target='_self' href='/?s="+ model +"'>"+ data.nick +"</a>   <em></em>  <a  href=\"javascript: void(0);\" onclick=\"logOut();\" target=\"_self\">out</a><em></em> ";
-                stateBox.html(my_menu );
+                my_menu = "user：<a target='_self' href='/user/?token="+ res.data.token +"'>"+ res.data.nickname +"</a>   <em></em>  <a  href=\"javascript: void(0);\" onclick=\"logOut();\" target=\"_self\">out</a><em></em> ";
             }
         } else {
             if(stateBox.length > 0 ) {
-                var my_menu = '<a class="login" onclick="loginIn();" target="_self" href="javascript: void(0);">登录</a>';
-                stateBox.html( my_menu );
+                my_menu = '<a class="login" onclick="loginIn();" target="_self" href="javascript: void(0);">登录</a>';
             }
         }
+        stateBox.html(my_menu);
     });
 }
 
@@ -206,7 +201,7 @@ window.loginIn = function (requestUrl) {
     var diyForm = makeForm({
         'name': '',
         'type': 'post',
-        'url' : '/?s=system/pwd_login',
+        'url' : '/index/system/idLogin',
         value:  [
             makeInput({
                 name: 'request',
@@ -260,12 +255,12 @@ window.loginIn = function (requestUrl) {
             // console.log('on submit');
             // return false;// 可以让表单停止提交 但要记得 ev.preventDefault();
         },
-        success_key: 'id',
-        success_value: '0001',
-        success_func: function (data) {
+        success_key: 'code',
+        success_value: '1',
+        success_func: function (res) {
             hideNewBox();
             checkLogin();
-            msgTis(data.msg);
+            msgTis(res.msg);
         },
         err_func: function (data) {
             msgTis(data.msg);

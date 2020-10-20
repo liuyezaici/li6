@@ -35,16 +35,16 @@ pre.code {
     background-color: #efefef;
     border: 1px solid #ddd;
 }
-.index_page_bar a .page_0,
-.index_page_bar a .page_1,
-.index_page_bar a .page_2,
-.index_page_bar a .page_3,
-.index_page_bar a .page_4,
-.index_page_bar a .page_5,
-.index_page_bar a .page_6,
-.index_page_bar a .page_7,
-.index_page_bar a .page_8,
-.index_page_bar a .page_9 {
+.index_page_bar .page_0,
+.index_page_bar .page_1,
+.index_page_bar .page_2,
+.index_page_bar .page_3,
+.index_page_bar .page_4,
+.index_page_bar .page_5,
+.index_page_bar .page_6,
+.index_page_bar .page_7,
+.index_page_bar .page_8,
+.index_page_bar .page_9 {
     background: url("/resource/pub/images/pages_num.png") no-repeat;
     width: 11px;
     height: 18px;
@@ -54,31 +54,31 @@ pre.code {
     white-space: nowrap;
     vertical-align: bottom;
 }
-.index_page_bar a .page_1 {
+.index_page_bar .page_1 {
     background-position: -13px bottom;
 }
-.index_page_bar a .page_2 {
+.index_page_bar .page_2 {
     background-position: -30px bottom;
 }
-.index_page_bar a .page_3 {
+.index_page_bar .page_3 {
     background-position: -42px 2px;
 }
-.index_page_bar a .page_4 {
+.index_page_bar .page_4 {
     background-position: -59px bottom;
 }
-.index_page_bar a .page_5 {
+.index_page_bar .page_5 {
     background-position: -72px bottom;
 }
-.index_page_bar a .page_6 {
+.index_page_bar .page_6 {
     background-position: -86px bottom;
 }
-.index_page_bar a .page_7 {
+.index_page_bar .page_7 {
     background-position: -100px bottom;
 }
-.index_page_bar a .page_8 {
+.index_page_bar .page_8 {
     background-position: -114px bottom;
 }
-.index_page_bar a .page_9 {
+.index_page_bar .page_9 {
     background-position: -125px bottom;
 }
 

@@ -185,7 +185,7 @@ class Users Extends Model
         $password = $data['password'];
         $keeplogin = $data['keeplogin'];
         $rule = [
-            'username'  => 'require|length:3,30',
+            'username'  => 'require|length:2,30',
             'password'  => 'require|length:3,30',
         ];
         if (Config::get('fastadmin.login_captcha'))

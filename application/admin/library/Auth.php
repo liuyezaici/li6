@@ -170,7 +170,7 @@ class Auth extends \fast\Power
      */
     public function login($username, $password, $keeptime = 0, $checkPwd=true)
     {
-        $admin = Users::get(['username' => $username]);
+        $admin = Users::get(['account' => $username]);
         if (!$admin)
         {
             $this->setError('帐号不存在:'. $username);
