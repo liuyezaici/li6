@@ -136,6 +136,13 @@ class View
     }
 
     /**
+     *  检测模板是否存在
+     * */
+    public function exists($template = '') {
+        return $this->engine->exists($template);
+    }
+
+    /**
      * 解析和获取模板内容 用于输出
      * @param string    $template 模板文件名或者内容
      * @param array     $vars     模板输出变量
@@ -148,7 +155,8 @@ class View
     public function fetch($template = '', $vars = [], $replace = [], $config = [], $renderContent = false)
     {
         $this->engine->layout(false);
-//        print_r('77777777777777777,md:');
+//        print_r('md:'.$template);
+//        var_dump($this->engine->exists($template));
 //        exit;
         // 模板变量
         $vars = array_merge(self::$var, $this->data, $vars);

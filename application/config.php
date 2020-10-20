@@ -58,11 +58,11 @@ return [
     // | 模块设置
     // +----------------------------------------------------------------------
     // 默认模块名
-    'default_module'         => 'juzi',
+    'default_module'         => 'index',
     // 禁止访问模块
     'deny_module_list'       => ['common'],
     // 默认控制器名
-    'default_controller'     => 'Juzi',
+    'default_controller'     => 'Index',
     // 默认操作名
     'default_action'         => 'index',
     // 默认验证器

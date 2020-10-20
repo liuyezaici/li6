@@ -1,2 +1,0 @@
--- DROP TABLE `__PREFIX__juzi`;
--- DROP TABLE `__PREFIX__juzi_type`;
