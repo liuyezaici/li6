@@ -1019,7 +1019,7 @@ function regCodeAddGang(str) {
                 var oldExtendClass = getOptVal(opt, 'class_extend', '');
                 if(oldExtendClass) {
                         newAttr['class'] = classAddSubClass(newAttr['class'], oldExtendClass, ' ');
-                
+
                 }
                 //如果更新了可见，则之前的hidden要去掉
                 if(setHidden===true && hidden == false) {
@@ -5477,7 +5477,6 @@ function regCodeAddGang(str) {
             } else {
                 newVal = sourceVal;
             }
-            console.log('setRealInputVal:', renewBind);
             obj.setRealInputVal(newVal, renewBind, true, [obj]);
             if(obj.setLrBtnDisable) obj.setLrBtnDisable();
             if(obj.lazyCall) {
@@ -8569,7 +8568,6 @@ function regCodeAddGang(str) {
             opt = opt || [];
             var sourceVal = opt['source_value'] || opt['value'];
             var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
-            var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';//editormd
             var newVal = sourceVal;
             //console.log('format__Val:'+ sourceVal, obj);
             if(strHasKuohao(sourceVal, 'public')) {
@@ -8587,18 +8585,6 @@ function regCodeAddGang(str) {
                 //console.log('value change');
                 valueStrFormatdSuccess = true;
             }
-            var lazySet = function (editor_, newVal) {
-                if(editor_.setContent) {
-                    editor_.setContent(newVal);
-                } else {
-                    setTimeout(function () {
-                        lazySet(editor_, newVal);
-                    }, 400);
-                }
-            };
-            if(!isUndefined(obj[editorOut])) {
-                lazySet(obj[editorOut], newVal);
-            }
             var renewBind = strHasKuohao(sourceVal);
             if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
                 updateBindObj($.trim(options['bind']), newVal, [obj]);
@@ -8608,6 +8594,7 @@ function regCodeAddGang(str) {
                     obj.lazyCall(obj, opt['data'] || {}, livingObj);
                 }
             }
+            obj.formatPlugs(opt);
         };
         obj.renewVal = function(newVal) {
             //console.log('editor.format_val:'+ newVal);
@@ -8624,82 +8611,77 @@ function regCodeAddGang(str) {
             //上面设置了读写属性 下面才能设置
             //先设定options参数 下面才可以修改options
             if(strInArray(editorType, ['xheditor', 'xhEditor']) !=-1) {
-                setTimeout(function () {
-                    //这里可以统一设置编辑器样式
-                    newEditorObj = obj.xheditor({
-                        'plugins':  {
-                            Code:{
-                                c:'btnCode',t:'插入代码', h:1, e: function() {
-                                    var _this=this;
-                                    var htmlCode="<div>编程语言<select id='xheCodeType'>" +
-                                        "<option value='html'>HTML/XML</option>" +
-                                        "<option value='js'>Javascript</option>" +
-                                        "<option value='css'>CSS</option>" +
-                                        "<option value='php'>PHP</option>" +
-                                        "<option value='java'>Java</option>" +
-                                        "<option value='py'>Python</option>" +
-                                        "<option value='pl'>Perl</option>" +
-                                        "<option value='rb'>Ruby</option>" +
-                                        "<option value='cs'>C#</option>" +
-                                        "<option value='c'>C++/C</option>" +
-                                        "<option value='vb'>VB/ASP</option>" +
-                                        "<option value=''>其它</option>" +
-                                        "</select></div><div>";
-                                    htmlCode+="<textarea id='xheCodeValue' wrap='soft' spellcheck='false' style='width:300px;height:100px;' />";
-                                    htmlCode+="</div><div style='text-align:right;'><input type='button' id='xheSave' value='确定' /></div>";
-                                    var jCode=$(htmlCode),jType=$('#xheCodeType',jCode),jValue=$('#xheCodeValue',jCode),jSave=$('#xheSave',jCode);
-                                    jSave.click(function(){
-                                        _this.loadBookmark();
-                                        _this.pasteHTML('<pre class="prettyprint lang-'+jType.val()+'">'+_this.domEncode(jValue.val())+'</pre> ');
-                                        _this.hidePanel();
-                                        return false;
-                                    });
-                                    _this.saveBookmark();
-                                    _this.showDialog(jCode);
-                                }
+                //这里可以统一设置编辑器样式
+                newEditorObj = obj.xheditor({
+                    'plugins':  {
+                        Code:{
+                            c:'btnCode',t:'插入代码', h:1, e: function() {
+                                var _this=this;
+                                var htmlCode="<div>编程语言<select id='xheCodeType'>" +
+                                    "<option value='html'>HTML/XML</option>" +
+                                    "<option value='js'>Javascript</option>" +
+                                    "<option value='css'>CSS</option>" +
+                                    "<option value='php'>PHP</option>" +
+                                    "<option value='java'>Java</option>" +
+                                    "<option value='py'>Python</option>" +
+                                    "<option value='pl'>Perl</option>" +
+                                    "<option value='rb'>Ruby</option>" +
+                                    "<option value='cs'>C#</option>" +
+                                    "<option value='c'>C++/C</option>" +
+                                    "<option value='vb'>VB/ASP</option>" +
+                                    "<option value=''>其它</option>" +
+                                    "</select></div><div>";
+                                htmlCode+="<textarea id='xheCodeValue' wrap='soft' spellcheck='false' style='width:300px;height:100px;' />";
+                                htmlCode+="</div><div style='text-align:right;'><input type='button' id='xheSave' value='确定' /></div>";
+                                var jCode=$(htmlCode),jType=$('#xheCodeType',jCode),jValue=$('#xheCodeValue',jCode),jSave=$('#xheSave',jCode);
+                                jSave.click(function(){
+                                    _this.loadBookmark();
+                                    _this.pasteHTML('<pre class="prettyprint lang-'+jType.val()+'">'+_this.domEncode(jValue.val())+'</pre> ');
+                                    _this.hidePanel();
+                                    return false;
+                                });
+                                _this.saveBookmark();
+                                _this.showDialog(jCode);
                             }
-                        },
-                        tools: "Link,Unlink,Source,Removeformat,Code,Img,|Fullscreen",
-                        skin: 'nostyle'
+                        }
+                    },
+                    tools: "Link,Unlink,Source,Removeformat,Code,Img,|Fullscreen",
+                    skin: 'nostyle'
+                });
+                //支持外部取值
+                if(!obj.hasOwnProperty('value')) {
+                    Object.defineProperty(obj, 'value', {
+                        get: function () {
+                            return obj.val();
+                        }
                     });
-                    //支持外部取值
-                    if(!obj.hasOwnProperty('value')) {
-                        Object.defineProperty(obj, 'value', {
-                            get: function () {
-                                return obj.val();
-                            }
-                        });
-                    }
-                    obj[editorOut] = newEditorObj;
-                },  500);
+                }
+                obj[editorOut] = newEditorObj;
             }
             else if(strInArray(editorType, ['uEditor', 'ueditor']) !=-1) {
-                setTimeout(function () {
-                    UE.delEditor(editorId);//防止已经实例化过此编辑器
-                    var defToolbars = [[
-                        'fullscreen', 'source', '|', 'undo', 'redo', '|',
-                        'bold', 'italic', 'underline', 'fontborder', 'strikethrough',  'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', 'insertimage', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
-                        'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
-                        'customstyle', 'paragraph', 'fontfamily', 'fontsize', 'link', 'unlink', 'horizontal', 'spechars', '|',
-                        'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|',
-                        'print', 'preview', 'searchreplace', 'drafts', 'help'
-                    ]];
-                    var toolbars = getOptVal(options, ['toolbars'], defToolbars);
-                    newEditorObj = UE.getEditor(editorId, {toolbars: toolbars});
-                    //支持外部取值
-                    if(!obj.hasOwnProperty('value')) {
-                        Object.defineProperty(obj, 'value', {
-                            get: function () {
-                                return newEditorObj.getContent();
-                            }
-                        });
-                    }
-                    obj[editorOut] = newEditorObj;
-                    obj[editorOut].pasteHTML = function (newContent) {
-                        newEditorObj.setContent(newContent, true);
-                    }
-                },  500);
-
+                UE.delEditor(editorId);//防止已经实例化过此编辑器
+                var defToolbars = [[
+                    'fullscreen', 'source', '|', 'undo', 'redo', '|',
+                    'bold', 'italic', 'underline', 'fontborder', 'strikethrough',  'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', 'insertimage', '|', 'forecolor', 'backcolor', 'insertorderedlist', 'insertunorderedlist', 'selectall', 'cleardoc', '|',
+                    'rowspacingtop', 'rowspacingbottom', 'lineheight', '|',
+                    'customstyle', 'paragraph', 'fontfamily', 'fontsize', 'link', 'unlink', 'horizontal', 'spechars', '|',
+                    'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|',
+                    'print', 'preview', 'searchreplace', 'drafts', 'help'
+                ]];
+                var toolbars = getOptVal(options, ['toolbars'], defToolbars);
+                newEditorObj = UE.getEditor(editorId, {toolbars: toolbars});
+                //支持外部取值
+                if(!obj.hasOwnProperty('value')) {
+                    Object.defineProperty(obj, 'value', {
+                        get: function () {
+                            return newEditorObj.getContent();
+                        }
+                    });
+                }
+                obj[editorOut] = newEditorObj;
+                obj[editorOut].pasteHTML = function (newContent) {
+                    newEditorObj.setContent(newContent, true);
+                }
             } else if(strInArray(editorType, ['umEditor', 'umeditor']) !=-1) {
                 UM.delEditor(editorId);//防止已经实例化过此编辑器
                 var defToolbars = [
@@ -8724,41 +8706,39 @@ function regCodeAddGang(str) {
                     newEditorObj.setContent(newContent, true);
                 }
             } else if(strInArray(editorType, ['editormd', 'editorMd']) !=-1) {
-                setTimeout(function () {
-                    var opt_ = {
-                        width: "100%",
-                        height: 540,
-                        syncScrolling: "single",
-                        toolbarIcons: function () {
-                            // Or return editormd.toolbarModes[name]; // full, simple, mini
-                            // Using "||" set icons align right.
+                var opt_ = {
+                    width: "100%",
+                    height: 540,
+                    syncScrolling: "single",
+                    toolbarIcons: function () {
+                        // Or return editormd.toolbarModes[name]; // full, simple, mini
+                        // Using "||" set icons align right.
 
-                            return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
-                                "code", "preformatted-text", "code-block", "table", "datetime", "hr", "|", "file", "||", "watch", "preview"]
+                        return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
+                            "code", "preformatted-text", "code-block", "table", "datetime", "hr", "|", "file", "||", "watch", "preview"]
+                    },
+                    path: "../lib/"
+                };
+                if (editorOpt) {
+                    opt_ = $.extend({}, opt_, editorOpt);
+                }
+                editorId = !isUndefined(editorOpt['id']) ? editorOpt['id'] : 'editormd';//实例化以父div的id为准
+                newEditorObj = editormd(editorId, opt_);
+                //支持外部取值editormd
+                if (!obj.hasOwnProperty('value')) {
+                    Object.defineProperty(obj, 'value', {
+                        get: function () {
+                            return newEditorObj.getValue();
                         },
-                        path: "../lib/"
-                    };
-                    if (editorOpt) {
-                        opt_ = $.extend({}, opt_, editorOpt);
-                    }
-                    editorId = !isUndefined(editorOpt['id']) ? editorOpt['id'] : 'editormd';//实例化以父div的id为准
-                    newEditorObj = editormd(editorId, opt_);
-                    //支持外部取值editormd
-                    if (!obj.hasOwnProperty('value')) {
-                        Object.defineProperty(obj, 'value', {
-                            get: function () {
-                                return newEditorObj.getValue();
-                            },
-                            set: function (newVal) {
-                                newEditorObj.setValue(newVal);
-                            }
-                        });
-                    }
-                    obj[editorOut] = newEditorObj;
-                    obj[editorOut].pasteHTML = function (newContent) {
-                        newEditorObj.setValue(newContent);
-                    }
-                }, 100);//内容更新后 需要等待几毫秒 才能将内容初始化到新的编辑器
+                        set: function (newVal) {
+                            newEditorObj.setValue(newVal);
+                        }
+                    });
+                }
+                obj[editorOut] = newEditorObj;
+                obj[editorOut].pasteHTML = function (newContent) {
+                    newEditorObj.setValue(newContent);
+                }
             }
         };
         //外部设置val
@@ -8802,9 +8782,6 @@ function regCodeAddGang(str) {
                         });
                     }
                 }
-
-                obj.formatPlugs(options);
-
 
                 if(editorType == 'text') {
                     //支持外部取值

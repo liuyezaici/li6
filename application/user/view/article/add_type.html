@@ -1,18 +1,20 @@
 <div id="modify_article_type_form"></div>
 <script>
     $('#modify_article_type_form').append(makeForm({
-        'url': '/?s=uarticles/modify_type&json&modify=<?=$modify?>&t_id=<?=$t_id?>',
-        'success_value': ['0043', '0113'],
-        'success_key': 'id',
-        success_func: function () {
-            hideNewBox();
-            hideNewBox();
+        'url': '/user/article/add_type',
+        'success_value': '1',
+        'success_key': 'code',
+        success_func: function (res) {
+            msgTisf(res.msg);
+        },
+        error_func: function (res) {
+            msgTisf(res.msg);
         },
         'value': makeDiv({
                 'class': 'input-group',
                 value: [
                     makeSpan({'class': 'btn btn-default', value: '分类名'}),
-                    makeInput({name:'t_title', width: '150px', value: '<?=$t_title?>'}),
+                    makeInput({name:'title', width: '150px', value: ''}),
                     makeBtn({type:'submit', value:'保存', 'class': 'btn btn-info'})
                 ]
         })

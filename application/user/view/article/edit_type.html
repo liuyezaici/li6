@@ -1,0 +1,22 @@
+<div id="modify_article_type_form"></div>
+<script>
+    $('#modify_article_type_form').append(makeForm({
+        'url': '/user/article/edit_type?id=<?=$id?>',
+        'success_value': '1',
+        'success_key': 'code',
+        success_func: function (res) {
+            msgTisf(res.msg);
+        },
+        error_func: function (res) {
+            msgTisf(res.msg);
+        },
+        'value': makeDiv({
+                'class': 'input-group',
+                value: [
+                    makeSpan({'class': 'btn btn-default', value: '分类名'}),
+                    makeInput({name:'title', width: '150px', value: '<?=$title?>'}),
+                    makeBtn({type:'submit', value:'保存', 'class': 'btn btn-info'})
+                ]
+        })
+    }));
+</script>

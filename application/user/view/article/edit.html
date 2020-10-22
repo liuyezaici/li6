@@ -59,7 +59,7 @@
 </style>
 <div id="modify_article_form"></div>
 <script>
-    var id = parseInt('<?=$id?>');
+    var articleSid = parseInt('<?=$id?>');
     var typeSelect = makeSelect({
         name: 'typeid',
         'text': '选择分类',
@@ -82,7 +82,7 @@
     $('#modify_article_form').append(makeForm({
         'url': '/user/article/submitEditArticle&modify=<?=$modify?>',
         data_from: {
-            url: '/user/article/get/id/'+ id,
+            url: '/user/article/get/id/'+ articleSid,
             success_key: 'code',
             success_value: ['1'],
             data_key: 'data',
@@ -146,7 +146,9 @@
                                 padding_top: '15px',
                                 value:  [
                                     typeSelect,
-                                    makeBtn({value: '管理分类', 'class': 'btn btn-default', margin_left: '5px', click: 'viewAllTypes();'})
+                                    makeBtn({value: '管理分类', 'class': 'btn btn-default', margin_left: '5px', click: function () {
+                                            msgWin('文章分类管理','[url]/user/article/manageAllTypes', 580, 1);
+                                        }})
                                 ]
                             }
                         ]
@@ -179,7 +181,7 @@
                                                 return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
                                                     "code",  "preformatted-text", "code-block", "table", "datetime","hr", "|", "image", "||", "watch", "preview"]
                                             },
-                                            path: '/include/lib/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
+                                            path: '/assets/libs/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
                                         },
                                         value: '{content}'
                                     })
@@ -224,8 +226,7 @@
         page = page || 1;
         currentFilePage = page;
         var form = $('#modify_article_form');
-        console.log('page', currentFilePage);
-        rePost("/user/article/load_article_fujians?page="+ page, {sid: id},function(res) {
+        rePost("/user/article/load_article_fujians?page="+ page, {sid: articleSid},function(res) {
             if(res.code !=1) {
                 msg(res.msg);
             } else {
@@ -269,7 +270,7 @@
                         var uploadForm = batchUploadForm({
                             'url' : '/?s=Uarticlefujian/upload_files',
                             'post': {
-                                'id': id,
+                                'id': articleSid,
                                 'save_path': '<?=$savePath?>',
                                 'path_safe_hash': '<?=$upload_safe_code?>',
                             },
@@ -299,7 +300,7 @@
         postAndDone({
             success_value: '0043',
             post_url: '/user/article/move_post_fujian',
-            post_data: {id: id, direction: direction},
+            post_data: {id: articleSid, direction: direction},
             load_bg: false,
             success_func: 'reLoadThisArticleFujian();',
             'msg': false
