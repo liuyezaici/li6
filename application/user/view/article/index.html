@@ -2,9 +2,9 @@
 </script>
 <script>
     var pageOpt = {
-        page: <?=$pageInfo['pagenow']?>,
-        total: <?=$pageInfo['total']?>,
-        pagesize: <?=$pageInfo['pagesize']?>,
+        page: parseInt("<?=$pageInfo['pagenow']?>"),
+        total: parseInt("<?=$pageInfo['total']?>"),
+        pagesize: parseInt("<?=$pageInfo['pagesize']?>"),
         click: function (obj, newPage) {
             searchForm.findName("page").value=(newPage);
             reFreshArticle();
@@ -40,7 +40,7 @@
     });
     var dataHtmlObj = makeTable({
         'class': 'table table-bordered',
-        data:  <?=$articleList?>,
+        data:  JSON.parse('<?=$articleList?>'),
         tr_1:
             {
                 td: [
@@ -57,6 +57,13 @@
                         value: [
                             makeSpan({
                                 value: '标题'
+                            })
+                        ]
+                    },
+                    {
+                        value: [
+                            makeSpan({
+                                value: '分类'
                             })
                         ]
                     },
@@ -85,6 +92,14 @@
                             makeSpan({
                                 'style': 'padding-left: 20px;',
                                 value: '{id}'
+                            })
+                        ]
+                    },
+                    {
+                        show: '{id}',
+                        value: [
+                            makeSpan({
+                                value: '{typeName}'
                             })
                         ]
                     },
@@ -154,11 +169,11 @@
     //编辑文章图片
     function editArticlePics(articleid) {
         hideNewBox();
-        msgWin('编辑文章图片','[url]/user/article/article_pic_list&id='+ articleid, 1200, 1);
+        msgWin('编辑文章图片','[url]/user/article/article_pic_list?id='+ articleid, 1200, 1);
     }
     //编辑文章信息
     function editArticle(articleid) {
-        msgWin('编辑文章','[url]/user/article/edit_article&id='+ articleid, 1200, 1);
+        msgWin('编辑文章','[url]/user/article/edit/id/'+ articleid, 1200, 1);
     }
     //刷新列表
     function reFreshArticle() {

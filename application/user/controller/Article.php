@@ -10,6 +10,7 @@ use fast\Date;
 use fast\Addon;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
+use think\Db;
 
 class Article extends Frontend
 {
@@ -77,12 +78,12 @@ class Article extends Frontend
             $fullFileNames = $matches[3];
             foreach ($fullUrls as $index=>$url_) {
                 if(file_exists(ROOT_PATH . ltrim($url_, '/'))) {
-                    $newFilePath = '/uploads/article/'. $myUid .'/' . $sid . '/'. $fullFileNames[$index];
-                    File::creatdir(dirname(ROOT_PATH . ltrim($newFilePath, '/')));
-                    @copy(ROOT_PATH . ltrim($url_, '/'), ROOT_PATH . ltrim($newFilePath, '/'));
-                    @unlink(ROOT_PATH . ltrim($url_, '/'));
-                    $content = str_replace($url_, $newFilePath , $content);
-                    Fujian::editFilePath('article', MD5($url_), $newFilePath, $sid);
+                     $newFilePath = '/uploads/article/'. $myUid .'/' . $sid . '/'. $fullFileNames[$index];
+                     File::creatdir(dirname(ROOT_PATH . ltrim($newFilePath, '/')));
+                     @copy(ROOT_PATH . ltrim($url_, '/'), ROOT_PATH . ltrim($newFilePath, '/'));
+                     @unlink(ROOT_PATH . ltrim($url_, '/'));
+                     $content = str_replace($url_, $newFilePath , $content);
+                     Fujian::editFilePath('article', MD5($url_), $newFilePath, $sid);
                 } else {
 //                    print_r(ROOT_PATH . ltrim($url_, '/'));exit;
                 }
@@ -109,6 +110,78 @@ class Article extends Frontend
         print_r($this->view->fetch());
     }
 
+    //移动附件文件
+    final function move_post_fujian() {
+        $userId = $this->userClass->getUserAttrib('userId');
+        $id = input('id');
+        $direction = input('direction'); //l r
+        if(!$id) return $this->error('no id');
+        if(!in_array($direction, ['l', 'r'])) {
+            return $this->error('error direction');
+        }
+        $fileInfo = ArticleModel::getFileById($id);
+        if(!$fileInfo) {
+            return $this->error('文件不存在');
+        }
+        $pid = $fileInfo['sid'];
+        $order = $fileInfo['order'];
+        if($fileInfo['status'] !=0 ) {
+            return $this->error('文件已删除，请刷新!');
+        }
+        if($direction == 'l') {
+            $leftFileInfo = ArticleModel::getPostFileLeft($pid, $order, "id,order");
+            if(!$leftFileInfo) return $this->error('最左边了');
+            ArticleModel::editFile($id, ['order'=> $leftFileInfo['order']]);
+            ArticleModel::editFile($leftFileInfo['id'], ['order'=> $order]);
+        } else {
+            $rightFileInfo = ArticleModel::getPostFileRight($pid, $order, "id,order");
+            if(!$rightFileInfo) return $this->error('最右边了');
+            ArticleModel::editFile($id, ['order'=> $rightFileInfo['order']]);
+            ArticleModel::editFile($rightFileInfo['id'], ['order'=> $order]);
+        }
+        return  $this->success('修改成功');
+    }
+
+    //加载当前分享的附件
+    public function load_article_fujians() {
+        $page = input('page', 1, 'intval');
+        $sid = input('sid', 0, 'intval');
+        if(!$sid) {
+            return $this->error('缺少sid');
+        }
+        $fileids = ArticleModel::getfieldbyid($sid, 'fileids');
+        $fileDatas = [];
+        $pageInfo = [];
+        if($fileids) {
+            $fileids = trim($fileids, ',');
+            $where = [
+                'id' => ['in', $fileids],
+                'status' => 0,
+            ];
+            $pagesize = 10;
+            $result = Db('articleFujian')->where($where)->order('order', 'Desc')->paginate($pagesize, false,
+                [
+                    'page' => $page,
+                ]
+            );
+            $fileDatas = json_decode(json_encode($result), true)['data'];
+            $pageInfo = [
+                'pagenow' => $page,
+                'total' => $result->total(),
+                'pagesize' => $pagesize,
+            ];
+            foreach ($fileDatas as $n => &$fileVal) {
+                $fileVal['filesize'] = File::formatBytes($fileVal['filesize']);
+                $fileurl = $fileVal['fileurl'];
+//              $fileurl = func::ossUrlEncode($fileurl);
+                $fileVal['fileurl'] = $fileurl;
+                $fileVal['downUrl'] = $fileurl;
+                $fileVal['is_img'] = File::isImg($fileVal['geshi']);
+            }
+        }
+        return $this->success('获取成功', ['fileDatas' => $fileDatas, 'pageInfo' => $pageInfo]);
+    }
+
     //删除
     public function del($id=NULL){
         $id = intval($id);
@@ -128,12 +201,22 @@ class Article extends Frontend
         $this->success('删除成功');
     }
 
-    //文章详情
+    //获取所有分类
+    public function getAllTypes($id=NULL){
+        $list = ArticleTypesModel::field('id,title')->select();
+        $this->success('获取成功', '', ['list' => $list]);
+    }
+    //获取详情
+    public function get($id=NULL) {
+        $info = ArticleModel::getbyid($id);
+        $this->success('获取成功', '', $info);
+    }
+
+    //编辑详情
     public function edit($id=NULL){
         $info = ArticleModel::getbyid($id);
         $myUid = $this->auth->id;
-        if(!$myUid) $this->error('请先登录');
-        if($myUid != $info['uid']) $this->error('身份已经切换');
+        if($myUid != $info['cuid']) $this->error('身份已经切换:'.$myUid . '!='. $info['cuid']);
         if($this->request->isPost()) {
             $rows = input('post.row/a');
             if(!$rows) {
@@ -148,23 +231,14 @@ class Article extends Frontend
             if(!$content) $this->error('请输入内容');
             ArticleModel::where('id', $id)->update($rows);
             $this->success('编辑成功');
-
         }
-        $articleHeader = $this->view->fetch('top', [
-            'allTypes' => $this->allTypes,
-            'tab' => '',
-            'keyword' => ''
-        ]);
-        $allTypeOption = ArticleTypesModel::select();
-        $rightHtml = $this->view->fetch('editDetails', [
-            'articleHeader' =>  $articleHeader,
-            'allTypeOption' =>  $allTypeOption,
+        $mainHtml = $this->view->fetch('', [
+            'modify' =>  'edit',
             'id' =>  $id,
-            'info' =>  $info,
+            'savePath' =>  'upload/post_files/',
+            'upload_safe_code' =>  \fast\Str::makeSafeUploadCode('upload/post_files/', $myUid), //生成安全码 防止上传路径被手动篡改
         ]);
-        $this->view->assign('webTitle',   '编辑文章');
-        $this->view->assign('right',   $this->view->fetch('common/right', ['rightHtml' =>  $rightHtml]));
-        print_r($this->view->fetch());
+        print_r($mainHtml);
     }
 
 
@@ -190,7 +264,7 @@ class Article extends Frontend
             $noResultText = '没有搜索结果';
         }
         $path = "/user/article/?keyword={$keyword}&typeid={$typeid}&page=[PAGE]";
-        $result = ArticleModel::where($where)->order('id', 'Desc')->paginate($pagesize, false,
+        $result = ArticleModel::field('id,title,rq,typeid')->where($where)->order('id', 'Desc')->paginate($pagesize, false,
             [
                 'page' => $page,
                 'path' => $path,

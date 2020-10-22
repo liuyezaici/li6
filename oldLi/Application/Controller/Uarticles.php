@@ -217,7 +217,7 @@ class Uarticles extends Api
             'a_content' => '',
             'modify' => 'add',
         );
-        $arr['savePath'] = 'upload/post_files/';;
+        $arr['savePath'] = 'upload/post_files/';
         $arr['userId'] = $this->userId;
         $arr['editData'] = json_encode([]);
         $arr['uhash'] = $this->userClass->getUserAttrib('safe_hash');

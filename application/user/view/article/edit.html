@@ -59,33 +59,37 @@
 </style>
 <div id="modify_article_form"></div>
 <script>
-    var editData = <?=$editData?>;
-    var uploadUserHash = '<?=$uhash?>';
+    var id = parseInt('<?=$id?>');
     var typeSelect = makeSelect({
-        name: 'a_typeid',
+        name: 'typeid',
         'text': '选择分类',
-        value_key: 'value',
+        value: '{typeid}',
+        value_key: 'id',
         title_key: 'title',
-        value: '{a_typeid}',
         menu: {
             width: '400px',
             data_from: {
-                url: '/?s=uarticles/get_all_types',
-                success_key: 'id',
-                success_value: '0038',
-                data_key: 'info'
+                url: '/user/article/getAllTypes',
+                success_key: 'code',
+                success_value: '1',
+                data_key: 'data.list'
             }
         },
         li: {
             value: '{title}'
         }
-    }); 
+    });
     $('#modify_article_form').append(makeForm({
-        'url': '/?s=uarticles/submitEditArticle&modify=<?=$modify?>',
-        data: editData,
+        'url': '/user/article/submitEditArticle&modify=<?=$modify?>',
+        data_from: {
+            url: '/user/article/get/id/'+ id,
+            success_key: 'code',
+            success_value: ['1'],
+            data_key: 'data',
+        },
         name: 'modifyForm',
         success_key: 'id',
-        success_value: ['0043', '0113'],
+        success_value: '1',
         success_func: function (e) {
             if('<?=$modify?>'=='add') {
                 hideAllBox();
@@ -98,7 +102,7 @@
         },
         value: [
             makeInput({
-                name: 'a_id', value: '{a_id}', type: 'hidden'
+                name: 'id', value: '{id}', type: 'hidden'
             }),
             makeTable({
                 tr_1: [
@@ -108,14 +112,14 @@
                                 width: '100px',
                                 value: makeSpan({value: '文章标题'})
                             },{
-                                value: makeInput({name:'a_title', width: '455px', value: '{a_title}', blur: function (o, e) {
+                                value: makeInput({name:'title', width: '455px', value: '{title}', blur: function (o, e) {
                                         var form = o.findParent('modifyForm');
-                                        var aidObj = form.findName("a_id");
-                                        var a_id = aidObj.value;
-                                        var title = form.find("input[name='a_title']").val();
+                                        var aidObj = form.findName("id");
+                                        var id = aidObj.value;
+                                        var title = form.find("input[name='title']").val();
                                         if(title.length<=1)  return;
-                                        if(a_id>0) return; //已经有分配编号 不需要再生成临时问题 比如编辑时
-                                        rePost("/?s=uarticles/make_tmp_article", {a_title: title},function(data) {
+                                        if(id>0) return; //已经有分配编号 不需要再生成临时问题 比如编辑时
+                                        rePost("/?s=uarticles/make_tmp_article", {title: title},function(data) {
                                             if(!data || !data.id) return;
                                             if($.inArray(data.id, ['0113']) == -1) {
                                                 if(data.info) data.msg += data.info;
@@ -158,7 +162,7 @@
                                 value: makeDiv({
                                     id:'article_editor_parent',
                                     value: makeEditor({
-                                        name:'a_content',
+                                        name:'content',
                                         'class': 'editor',
                                         width: '500px',
                                         height: '450px',
@@ -177,7 +181,7 @@
                                             },
                                             path: '/include/lib/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
                                         },
-                                        value: '{a_content}'
+                                        value: '{content}'
                                     })
                                 })
                             }
@@ -207,7 +211,6 @@
     );
     //重新加载分类
     function refreshArticlesTypes() {
-        console.log('typeSelect', typeSelect);
         typeSelect.menu.renewData();
     }
 
@@ -221,19 +224,12 @@
         page = page || 1;
         currentFilePage = page;
         var form = $('#modify_article_form');
-        var a_id = form.find("input[name='a_id']").val();
-        if(!a_id || a_id==0) return;
-        rePost("/?s=Uarticlefujian/load_article_fujians&page="+ page, {a_id: a_id},function(data) {
-            if(!data || !data.id) return;
-            if($.inArray(data.id, ['0038']) == -1) {
-                if(data.info) data.msg += data.info;
-                if(data.id == '0000') {
-                    loginIn();
-                    return;
-                }
-                msg(data.msg,4);
+        console.log('page', currentFilePage);
+        rePost("/user/article/load_article_fujians?page="+ page, {sid: id},function(res) {
+            if(res.code !=1) {
+                msg(res.msg);
             } else {
-                var responses = data.info;
+                var responses = res.data;
                 var filesData = responses.fileDatas;
                 var filesPageMenu = responses.pageInfo;
                 var fileHtml= '', tmpFileFid, tmpFileName, tmpFileSize, tmpFileGeshi, tmpFileOrder;
@@ -273,10 +269,9 @@
                         var uploadForm = batchUploadForm({
                             'url' : '/?s=Uarticlefujian/upload_files',
                             'post': {
-                                'a_id': a_id,
+                                'id': id,
                                 'save_path': '<?=$savePath?>',
-                                'path_safe_hash': '<?=\Func\Func::makeSafeUploadCode($savePath, $userId)?>',
-                                'uhash': uploadUserHash
+                                'path_safe_hash': '<?=$upload_safe_code?>',
                             },
                             'one_finish': function () {
 
@@ -303,8 +298,8 @@
     function moveThisFile(f_id, direction) {
         postAndDone({
             success_value: '0043',
-            post_url: '/?s=Uarticlefujian&do=move_post_fujian',
-            post_data: {f_id: f_id, direction: direction},
+            post_url: '/user/article/move_post_fujian',
+            post_data: {id: id, direction: direction},
             load_bg: false,
             success_func: 'reLoadThisArticleFujian();',
             'msg': false
@@ -314,12 +309,12 @@
     //将附件插入到内容
     function enterThisFile(url) {
         var pushHtml = "["+ url +"]("+ url +")";
-        a_content.editArticleEditor.insertValue(pushHtml);
+        content.editArticleEditor.insertValue(pushHtml);
     }
     //将图片插入到内容
     function enterThisImage(url) {
         var pushHtml = "![]("+ url +")";
-        a_content.editArticleEditor.insertValue(pushHtml);
+        content.editArticleEditor.insertValue(pushHtml);
     }
     //删除附件
     function delThisFile(code) {

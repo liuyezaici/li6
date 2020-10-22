@@ -51,10 +51,10 @@ class Index extends Frontend
 
         $myUid = $this->auth->id;
         $showEdit = false;
-        if($myUid == $info['adduid']) {
+        if($myUid == $info['cuid']) {
             $showEdit = true;
         }
-        $info['author'] = Users::getfieldbyid($info['adduid'], 'username');
+        $info['author'] = Users::getfieldbyid($info['cuid'], 'username');
         $rightHtml = $this->view->fetch('', [
             'webTitle' =>  $info['title'],
             'info' =>  $info,
