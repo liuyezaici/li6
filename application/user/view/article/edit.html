@@ -80,7 +80,7 @@
         }
     });
     $('#modify_article_form').append(makeForm({
-        'url': '/user/article/submitEditArticle&modify=<?=$modify?>',
+        'url': '/user/article/submitEditArticle?modify=<?=$modify?>',
         data_from: {
             url: '/user/article/get/id/'+ articleSid,
             success_key: 'code',
@@ -88,7 +88,7 @@
             data_key: 'data',
         },
         name: 'modifyForm',
-        success_key: 'id',
+        success_key: 'code',
         success_value: '1',
         success_func: function (e) {
             if('<?=$modify?>'=='add') {
@@ -98,7 +98,7 @@
             msgTis(e.msg);
         },
         err_func: function (e) {
-            msgTis(e.msg + ':'+ e.info);
+            msgTis(e.msg);
         },
         value: [
             makeInput({
@@ -119,17 +119,12 @@
                                         var title = form.find("input[name='title']").val();
                                         if(title.length<=1)  return;
                                         if(id>0) return; //已经有分配编号 不需要再生成临时问题 比如编辑时
-                                        rePost("/?s=uarticles/make_tmp_article", {title: title},function(data) {
-                                            if(!data || !data.id) return;
-                                            if($.inArray(data.id, ['0113']) == -1) {
-                                                if(data.info) data.msg += data.info;
-                                                if(data.id == '0000') {
-                                                    loginIn();
-                                                    return;
-                                                }
-                                                msg(data.msg,4);
+                                        rePost("/?s=uarticles/make_tmp_article", {title: title},function(res) {
+                                            if(!res || !res.code) return;
+                                            if($.inArray(res.code, ['1']) == -1) {
+                                                msg(res.msg);
                                             } else {
-                                                aidObj.value=(data.info);
+                                                aidObj.value=(res.data.id);
                                                 reLoadThisArticleFujian();
                                             }
                                         });

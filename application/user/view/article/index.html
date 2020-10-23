@@ -158,8 +158,8 @@
         msgConfirm('你确定要删除此文章吗？', '确定', '取消', function () {
            hideNewBox();
             postAndDone({
-                post_url: '/user/article/del_article',
-                post_data: {id: articleid},
+                post_url: '/user/article/del/id/'+ articleid,
+                post_data: {},
                 success_key: 'id',
                 success_value: '0039',
                 success_func: 'hideNewBox();reFreshArticle();msgTis("删除成功");'

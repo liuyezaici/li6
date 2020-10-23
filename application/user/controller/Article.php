@@ -3,7 +3,7 @@
 namespace app\user\controller;
 
 use app\admin\addon\fujian\model\Fujian;
-use app\common\controller\Frontend;
+use app\common\controller\Backend;
 use app\common\model\Users;
 use fast\File;
 use fast\Date;
@@ -12,7 +12,7 @@ use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
 use think\Db;
 
-class Article extends Frontend
+class Article extends Backend
 {
 
     protected $noNeedLogin = [];
@@ -25,6 +25,81 @@ class Article extends Frontend
     {
         parent::_initialize();
     }
+
+
+//每次发布 自动添加临时文章
+    final function make_tmp_article() {
+        $title = input('title');
+        if(!$title) {
+            $this->error('请输入标题');
+        }
+        $newData['title'] = $title;
+        $tmpInfo = ArticleModel::where( ['cuid', $this->auth->id, 'tmp'=>1])->find();
+        if($tmpInfo) {
+            $this->success('生成成功', '', ['id'=> $tmpInfo['id']]);
+        }
+        $newData['cuid'] = $this->auth->id;
+        $newData['addtime'] = time();
+        $newData['tmp'] = 1;
+        if(!$newId = ArticleModel::insertGetId($newData)) {
+            $this->error('生成失败');
+        }
+        $this->success('生成成功', '', ['id'=> $newId]);
+    }
+
+    //修改文章信息
+    final function submitEditArticle() {
+        set_time_limit(0);
+        $id = input('id');
+        $title = input('title');
+        $typeid = input('typeid');
+        $modify = input('modify');
+        $content = input('content');
+        if(!$id) {
+            $this->error('noid');
+        }
+        //过滤正文内容外链图片
+//                $content = Str::tohtml($content);
+//                $savePath = "content_img/{$this->auth->id}/article/{$id}";
+//                $content = Str::filterImages($content, $this->auth->id, $savePath, $id, 'article');
+        $articleInfo = ArticleModel::where('id', $id)->field('cuid,status,tmp')->find();
+        if(!$articleInfo) {
+            $this->error('数据不存在');
+        }
+        $oldStatus = $articleInfo['status'];
+        $tmp = $articleInfo['tmp'];
+
+        if($oldStatus == -1) {
+            $this->error('文章已经删除，请刷新');
+        }
+        //获取智能分词系统 分割的关键词
+        $newData['title'] = $title;
+        $newData['typeid'] = $typeid;
+        $newData['content'] = $content;
+        $newData['tmp'] = 0;//每次编辑 添加 要将 临时变为正规
+        if($modify =='add') {
+            if($tmp !=1) {//如果发布时使用的数据不再是临时的（被其他窗口同时执行发布了），必须新增数据，防止覆盖其他数据。
+                $newData['cuid'] = $this->auth->id;
+                $newData['addtime'] = $this->myTime;
+                if(ArticleModel::insertGetId($newData)) {
+                    $this->error('写入失败');
+                }
+            } else { //发布时 其实是将临时的数据改为正规的数据。
+                if(ArticleModel::where('id', $id)->update($newData)) {
+                    $this->error('更新失败');
+                }
+            }
+        } else {
+            $articleInfo = ArticleModel::where('id', $id)->find();
+            if(!$articleInfo) {
+                $this->error('文章不存在');
+            }
+            ArticleModel::where('id', $id)->update($newData);
+        }
+        if($modify=='add') $this->success('发布成功');
+        $this->success('编辑成功');
+    }
+
     //写一篇
     public function write() {
         $myUid = $this->auth->id;
@@ -115,27 +190,27 @@ class Article extends Frontend
         $userId = $this->userClass->getUserAttrib('userId');
         $id = input('id');
         $direction = input('direction'); //l r
-        if(!$id) return $this->error('no id');
+        if(!$id) $this->error('no id');
         if(!in_array($direction, ['l', 'r'])) {
-            return $this->error('error direction');
+            $this->error('error direction');
         }
         $fileInfo = ArticleModel::getFileById($id);
         if(!$fileInfo) {
-            return $this->error('文件不存在');
+            $this->error('文件不存在');
         }
         $pid = $fileInfo['sid'];
         $order = $fileInfo['order'];
         if($fileInfo['status'] !=0 ) {
-            return $this->error('文件已删除，请刷新!');
+            $this->error('文件已删除，请刷新!');
         }
         if($direction == 'l') {
             $leftFileInfo = ArticleModel::getPostFileLeft($pid, $order, "id,order");
-            if(!$leftFileInfo) return $this->error('最左边了');
+            if(!$leftFileInfo) $this->error('最左边了');
             ArticleModel::editFile($id, ['order'=> $leftFileInfo['order']]);
             ArticleModel::editFile($leftFileInfo['id'], ['order'=> $order]);
         } else {
             $rightFileInfo = ArticleModel::getPostFileRight($pid, $order, "id,order");
-            if(!$rightFileInfo) return $this->error('最右边了');
+            if(!$rightFileInfo) $this->error('最右边了');
             ArticleModel::editFile($id, ['order'=> $rightFileInfo['order']]);
             ArticleModel::editFile($rightFileInfo['id'], ['order'=> $order]);
         }
@@ -147,7 +222,7 @@ class Article extends Frontend
         $page = input('page', 1, 'intval');
         $sid = input('sid', 0, 'intval');
         if(!$sid) {
-            return $this->error('缺少sid');
+            $this->error('缺少sid');
         }
         $fileids = ArticleModel::getfieldbyid($sid, 'fileids');
         $fileDatas = [];
@@ -179,7 +254,7 @@ class Article extends Frontend
                 $fileVal['is_img'] = File::isImg($fileVal['geshi']);
             }
         }
-        return $this->success('获取成功', '', ['fileDatas' => $fileDatas, 'pageInfo' => $pageInfo]);
+        $this->success('获取成功', '', ['fileDatas' => $fileDatas, 'pageInfo' => $pageInfo]);
     }
 
     //删除
@@ -209,7 +284,7 @@ class Article extends Frontend
             if(ArticleTypesModel::where(['title' => $title])->find()) $this->error('分类已经存在');
             $newData = [
                 'title' => $title,
-                'adduid' => $myUid,
+                'cuid' => $myUid,
                 'addtime' => time(),
             ];
             ArticleTypesModel::insert($newData);
