@@ -174,7 +174,7 @@ class Api
             print_r("no_temp:".$this->templatefile);
             exit;
         }
-        include(RootPath .APP . '/'. trim($this->templatefile, '/'));
+        include(ROOT_PATH .APP . '/'. trim($this->templatefile, '/'));
         return ob_get_clean();
     }
 
@@ -185,7 +185,7 @@ class Api
         $tempPath = \Config::get('router.sysPathes.tempPath');
         if(!$appPath) die('未配置 router.sysPathes.appPath');
         if(!$tempPath) die('未配置 router.sysPathes.tempPath');
-        $readTempPath = RootPath . '/'. $appPath . '/'. $tempPath .'/'.  $this->ctrl .'/'. $tempName;
+        $readTempPath = ROOT_PATH . '/'. $appPath . '/'. $tempPath .'/'.  $this->ctrl .'/'. $tempName;
         ob_start();
         //整个页面的数据都可以带入给模版，比如页头数据需要赋值给页脚
         if($this->temp_data) {

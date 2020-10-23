@@ -24,13 +24,13 @@ class Autoloader
 {
     // 应用的初始化目录，作为加载类文件的参考目录
     protected static $_appInitPath = '';
-    
+
     /**
      * 设置应用初始化目录
      * @param string $root_path
      * @return void
      */
-    public static function setRootPath($root_path)
+    public static function setROOT_PATH($root_path)
     {
           self::$_appInitPath = $root_path;
     }
@@ -49,7 +49,7 @@ class Autoloader
         {
             $class_file = __DIR__.substr($class_path, strlen('Workerman')).'.php';
         }
-        else 
+        else
         {
             // 先尝试在应用目录寻找文件
             if(self::$_appInitPath)
@@ -62,7 +62,7 @@ class Autoloader
                 $class_file = __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR . "$class_path.php";
             }
         }
-       
+
         // 找到文件
         if(is_file($class_file))
         {

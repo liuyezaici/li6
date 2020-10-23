@@ -37,12 +37,12 @@ class Article extends Api
         if(substr($articleInfo['a_content'], 0, 4) =='[md]') {
             $articleInfo['a_content'] = substr($articleInfo['a_content'], 4);
             //markdown
-            include_once(RootPath.'/include/lib/markdown/Markdown.php');
-            include_once(RootPath.'/include/lib/markdown/MarkdownExtra.php');
+            include_once(ROOT_PATH.'/include/lib/markdown/Markdown.php');
+            include_once(ROOT_PATH.'/include/lib/markdown/MarkdownExtra.php');
             $articleInfo['a_content'] = MarkdownExtra::defaultTransform($articleInfo['a_content']);
         } else {
             //html to markdown
-            $savePath = RootPath .'/include/lib/HTMLToMarkdown/';
+            $savePath = ROOT_PATH .'/include/lib/HTMLToMarkdown/';
             include_once($savePath.'/ElementInterface.php');
             include_once($savePath.'/Element.php');
             include_once($savePath.'/Environment.php');

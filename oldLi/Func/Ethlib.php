@@ -18,7 +18,7 @@ use EthTool\Credential;
 use EthTool\Callback;
 use GuzzleHttp\Client;
 
-require_once(RootPath.'/Vendor/autoload.php');
+require_once(ROOT_PATH.'/Vendor/autoload.php');
 
 class Ethlib
 {
@@ -306,7 +306,7 @@ class Ethlib
     /* 查询钱包的交易记录 */
     public static function getAddressTransactions($address='', $callBack) {
 
-      
+
 //        $res = file_get_contents($host);
 //        $res_json = json_decode($res, true);
 //        $callBack($res_json);

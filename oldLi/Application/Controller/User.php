@@ -200,11 +200,11 @@ class User extends Api
                 //判断系统文件是否存在
                 $fileUrl = '/resource/system/images/face/' . $faceid . '.jpg';
                 $target_url = Users::createUserFaceUrl($this->userId);
-                if (!file_exists(RootPath. $fileUrl)) {
+                if (!file_exists(ROOT_PATH. $fileUrl)) {
                     return Message::getMsgJson('0502', '本地图片不存在:' . $fileUrl); //图片文件不存在
                 }
-                $file_url_local = RootPath . trim($fileUrl, '/');
-                $myUrl = RootPath . trim($target_url, '/');
+                $file_url_local = ROOT_PATH . trim($fileUrl, '/');
+                $myUrl = ROOT_PATH . trim($target_url, '/');
                 //检测目录是否存在，不存在则创建
                 if(!file_exists(dirname($myUrl))){
                     mkdir (dirname($myUrl), 0755, true );
@@ -484,12 +484,12 @@ class User extends Api
     //修改手机
     final function edit_phone() {
         $htmlname = 'manage/account/f_edit_phone';
-        
+
     }
     //修改邮箱
     final function edit_email() {
         $htmlname = 'manage/account/f_edit_email';
-        
+
     }
     //修改头像
     final function edit_my_face() {

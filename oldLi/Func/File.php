@@ -117,7 +117,7 @@ class File
             if(!Ip::isLocal() && $needRemote) {
                 $filebackurl_no_root = $savePath."/".$imginfo[0]['saveName'];//同步到新的图片服务器 -- 【本地站点除外】
                 $file_url_server = $filebackurl_no_root;
-                $webUploadData = self::uploadToHttpOss(RootPath. $filebackurl_no_root, trim($file_url_server, "/"));
+                $webUploadData = self::uploadToHttpOss(ROOT_PATH. $filebackurl_no_root, trim($file_url_server, "/"));
                 if(!in_array($webUploadData['id'], array('0364'))) {
                     return  array('0502', $webUploadData['msg'], $fileInfo);//返回‘图片上传失败’
                 }
@@ -323,9 +323,9 @@ class File
     public static function resizeImage($pic_url1, $newSize = 265, $newFileName = '') {
         //生成的小图文件名
         $newResizeFileName = $newFileName ? $newFileName : self::urlToMin($pic_url1);
-        if(!file_exists(RootPath. $pic_url1)) return; //文件不存在要退出 不然页面会停止
+        if(!file_exists(ROOT_PATH. $pic_url1)) return; //文件不存在要退出 不然页面会停止
         //取得源图片的宽度和高度
-        $size_src = getimagesize(RootPath. $pic_url1);
+        $size_src = getimagesize(ROOT_PATH. $pic_url1);
         $old_width = $size_src['0'];
         $old_height = $size_src['1'];
         //指定缩放出来的最大的宽度（也有可能是高度）
@@ -337,15 +337,15 @@ class File
                 $new_width1 = $old_width * ($newSize / $old_height);
             }
             if (class_exists('imagick')) {
-                $im = new imagick(RootPath. $pic_url1);
+                $im = new imagick(ROOT_PATH. $pic_url1);
                 $im->thumbnailImage($new_width1, 0);
-                $im->writeImage(RootPath.  "/".$newResizeFileName);
+                $im->writeImage(ROOT_PATH.  "/".$newResizeFileName);
             }
         } else {//图片太小 也要复制成小图/*
              if (class_exists('imagick')) {
-                $im = new imagick(RootPath. $pic_url1);
+                $im = new imagick(ROOT_PATH. $pic_url1);
                  $im->thumbnailImage($old_width, 0);
-                 $im->writeImage(RootPath. "/".$newResizeFileName);
+                 $im->writeImage(ROOT_PATH. "/".$newResizeFileName);
             }
         }
         return $newResizeFileName;
@@ -355,7 +355,7 @@ class File
         if(!$pic_url) return '';
         //生成的小图文件名
         $newResizeFileName = self::urlToMin($pic_url);
-        $defauleUrl = RootPath. share::$shareFilesDefaultCover;
+        $defauleUrl = ROOT_PATH. share::$shareFilesDefaultCover;
         copy($defauleUrl, root.$newResizeFileName);
         return $newResizeFileName;
     }

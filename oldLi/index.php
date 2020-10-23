@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 ini_set('display_errors','On');
 
 
-define('RootPath', __DIR__);
+define('ROOT_PATH', __DIR__);
 require_once("Config.php");//系统参数配置
 require_once 'Func/Loader.php';
 //页面初始化

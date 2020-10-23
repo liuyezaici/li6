@@ -15,7 +15,7 @@ namespace Func;
 use ReflectionClass;
 class Core
 {
- 
+
 
     /**
      * Go constructor.
@@ -61,7 +61,7 @@ class Core
 //        print_r("get \n");
 //        var_dump($_GET);
         //加載控制器或模型
-        if(!file_exists($controlFile = RootPath.'/'. $sysPathes['appPath'] .'/'. $sysPathes['ctrlPath'] .'/' . ucfirst($ctroller) . '.php'))
+        if(!file_exists($controlFile = ROOT_PATH.'/'. $sysPathes['appPath'] .'/'. $sysPathes['ctrlPath'] .'/' . ucfirst($ctroller) . '.php'))
         {
             return('类文件不存在:'. '/'. $sysPathes['appPath'] .'/'. $sysPathes['ctrlPath'] .'/' . ucfirst($ctroller) . '.php');
         }

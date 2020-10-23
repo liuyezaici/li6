@@ -263,17 +263,17 @@ class PHPExcel_Writer_Excel2007 extends PHPExcel_Writer_Abstract implements PHPE
 				$tmpRibbonTarget=$this->_spreadSheet->getRibbonXMLData('target');
 				$objZip->addFromString($tmpRibbonTarget, $this->_spreadSheet->getRibbonXMLData('data'));
 				if($this->_spreadSheet->hasRibbonBinObjects()){
-					$tmpRootPath=dirname($tmpRibbonTarget).'/';
+					$tmpROOT_PATH=dirname($tmpRibbonTarget).'/';
 					$ribbonBinObjects=$this->_spreadSheet->getRibbonBinObjects('data');//the files to write
 					foreach($ribbonBinObjects as $aPath=>$aContent){
-						$objZip->addFromString($tmpRootPath.$aPath, $aContent);
+						$objZip->addFromString($tmpROOT_PATH.$aPath, $aContent);
 					}
 					//the rels for files
-					$objZip->addFromString($tmpRootPath.'_rels/'.basename($tmpRibbonTarget).'.rels',
+					$objZip->addFromString($tmpROOT_PATH.'_rels/'.basename($tmpRibbonTarget).'.rels',
 						$this->getWriterPart('RelsRibbonObjects')->writeRibbonRelationships($this->_spreadSheet));
 				}
 			}
-			
+
 			// Add relationships to ZIP file
 			$objZip->addFromString('_rels/.rels', 					$this->getWriterPart('Rels')->writeRelationships($this->_spreadSheet));
 			$objZip->addFromString('xl/_rels/workbook.xml.rels', 	$this->getWriterPart('Rels')->writeWorkbookRelationships($this->_spreadSheet));

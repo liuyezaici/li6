@@ -96,7 +96,7 @@ class Gateway extends Worker
      * @var string
      */
     public $pingData = '';
-    
+
     /**
      * 秘钥
      *
@@ -221,7 +221,7 @@ class Gateway extends Worker
      * @var AsyncTcpConnection
      */
     protected $_registerConnection = null;
-    
+
     /**
      * connectionId 记录器
      * @var int
@@ -248,7 +248,7 @@ class Gateway extends Worker
         $this->router = array("\\GatewayWorker\\Gateway", 'routerBind');
 
         $backrace                = debug_backtrace();
-        $this->_autoloadRootPath = dirname($backrace[0]['file']);
+        $this->_autoloadROOT_PATH = dirname($backrace[0]['file']);
     }
 
     /**
@@ -326,7 +326,7 @@ class Gateway extends Worker
 
         $this->sendToWorker(GatewayProtocol::CMD_ON_CONNECTION, $connection);
     }
-    
+
     /**
      * 生成connection id
      * @return int
@@ -478,7 +478,7 @@ class Gateway extends Worker
         $this->_innerTcpWorker->listen();
 
         // 重新设置自动加载根目录
-        Autoloader::setRootPath($this->_autoloadRootPath);
+        Autoloader::setROOT_PATH($this->_autoloadROOT_PATH);
 
         // 设置内部监听的相关回调
         $this->_innerTcpWorker->onMessage = array($this, 'onWorkerMessage');

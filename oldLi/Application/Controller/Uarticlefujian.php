@@ -31,7 +31,7 @@ class Uarticlefujian extends Api
         if($fileInfo['f_adduid'] != $userId) return $this->error('文件不属于您，请刷新!');
         if(!Article::updateFile($f_id, array('f_status'=> -1))) return  Message::getMsgJson('0044');
         //更新文章的附件
-        if(file_exists(RootPath . $fileurl)) unlink(RootPath. $fileurl);
+        if(file_exists(ROOT_PATH . $fileurl)) unlink(ROOT_PATH. $fileurl);
         Article::refreshArticleFujians($f_sid);
         if(!File::isLocalFile($fileurl)) File::delHttpFile($fileurl);
         return  Message::getMsgJson('0039');
@@ -196,7 +196,7 @@ class Uarticlefujian extends Api
             //得到文件原名
             $fileName = Str::getRandChar(16). '.'. $geshi;
             $parthUrl = $savePath .'/'. $fileName;
-            $saveRoot = RootPath. trim($savePath, "/");
+            $saveRoot = ROOT_PATH. trim($savePath, "/");
             File::creatdir($saveRoot);
             $targetUrl = $saveRoot. '/'. $fileName;
             if (move_uploaded_file($tempFile, $targetUrl)){

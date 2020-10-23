@@ -64,7 +64,7 @@ class BusinessWorker extends Worker
      * @var callable
      */
     public $processTimeoutHandler = '\\Workerman\\Worker::log';
-    
+
     /**
      * 秘钥
      *
@@ -92,7 +92,7 @@ class BusinessWorker extends Worker
      * @var callback
      */
     protected $_onWorkerReload = null;
-    
+
     /**
      * 保存用户设置的 workerStop 回调
      *
@@ -166,7 +166,7 @@ class BusinessWorker extends Worker
     {
         parent::__construct($socket_name, $context_option);
         $backrace                = debug_backtrace();
-        $this->_autoloadRootPath = dirname($backrace[0]['file']);
+        $this->_autoloadROOT_PATH = dirname($backrace[0]['file']);
     }
 
     /**
@@ -199,7 +199,7 @@ class BusinessWorker extends Worker
         if ($this->_onWorkerStart) {
             call_user_func($this->_onWorkerStart, $this);
         }
-        
+
         if (is_callable($this->eventHandler . '::onWorkerStart')) {
             call_user_func($this->eventHandler . '::onWorkerStart', $this);
         }
@@ -248,7 +248,7 @@ class BusinessWorker extends Worker
             call_user_func($this->_onWorkerReload, $this);
         }
     }
-    
+
     /**
      * 当进程关闭时一些清理工作
      *
@@ -266,7 +266,7 @@ class BusinessWorker extends Worker
 
     /**
      * 连接服务注册中心
-     * 
+     *
      * @return void
      */
     public function connectToRegister()
@@ -378,7 +378,7 @@ class BusinessWorker extends Worker
         if ($this->processTimeout) {
             pcntl_alarm(0);
         }
-        
+
         // session 必须是数组
         if ($_SESSION !== null && !is_array($_SESSION)) {
             throw new \Exception('$_SESSION must be an array. But $_SESSION=' . var_export($_SESSION, true) . ' is not array.');
@@ -430,7 +430,7 @@ class BusinessWorker extends Worker
             $gateway_data         = GatewayProtocol::$empty;
             $gateway_data['cmd']  = GatewayProtocol::CMD_WORKER_CONNECT;
             $gateway_data['body'] = json_encode(array(
-                'worker_key' =>"{$this->name}:{$this->id}", 
+                'worker_key' =>"{$this->name}:{$this->id}",
                 'secret_key' => $this->secretKey,
             ));
             $gateway_connection->send($gateway_data);

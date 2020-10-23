@@ -107,7 +107,7 @@
                         show: '{id}',
                         value: [
                             makeA({
-                                href: '/index/index/details/id/{id}',
+                                href: '/index/article/details/id/{id}',
                                 value: '{title}'
                             })
                         ]
@@ -182,7 +182,7 @@
 
     //文章分类
     function viewAllTypes() {
-        msgWin('文章分类管理','[url]/user/article/all_types', 580, 1);
+        msgWin('文章分类管理','[url]/user/article/manageAllTypes', 580, 1);
     }
     $('#root_right .right_content').append(searchForm).append(dataHtmlObj).append(pageObj);
 </script>
