@@ -1,0 +1,31 @@
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+#RewriteCond %{HTTP_HOST} !^51yanjing.com$
+#RewriteCond %{HTTP_HOST} !^www.51yanjing.com$
+#RewriteCond %{HTTP_HOST} !^wap.51yanjing.com$
+#RewriteRule ^(.*)$ error/400.html [L,R=400]
+
+#RewriteCond %{HTTP_HOST} !^(www|wap) [NC]
+#RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [L,R]
+
+#RewriteCond %{HTTP_REFERER} !^http://www.51yanjing.com [NC]
+#RewriteRule ^(.*)\.(gif|jpg|jpeg|png|avi|bmp|ram|rmvb|rm|rar|zip)$ favicon2.ico
+
+
+RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+RewriteRule .* - [F]
+
+#for protect
+RewriteRule ^temp/(.*) /favicon\.ico
+RewriteRule ^log/(.*) /favicon\.ico
+RewriteRule ^language/(.*) /favicon\.ico
+#RewriteRule ^model/(.*) /favicon\.ico
+
+#all rewrite
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^/article/read/(\d+)$ index.php\?s=article/read&id=$1 [QSA,L]
+</IfModule>
