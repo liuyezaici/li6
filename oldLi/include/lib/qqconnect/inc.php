@@ -1,2 +1,0 @@
-<?php die('forbidden'); ?>
-{"appid":"101385905","appkey":"b96de6e86601b0e222b80d1ee84dcfad","callback":"http://www.li6.cc/qqlogin","scope":"get_user_info,add_share,list_album,add_topic,add_one_blog,add_weibo,add_t,get_info","errorReport":true,"storageType":"file","host":"localhost","user":"root","password":"root","database":"test"}
