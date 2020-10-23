@@ -8600,7 +8600,7 @@ function regCodeAddGang(str) {
             obj.formatPlugs(opt);
         };
         obj.renewVal = function(newVal) {
-            //console.log('editor.format_val:'+ newVal);
+            // console.log('renewVal:', newVal);
             obj.val(newVal);
         };
         //渲染插件
@@ -8734,7 +8734,7 @@ function regCodeAddGang(str) {
                         // console.log('editormd set_val');
                         Object.defineProperty(obj, 'value', {
                             get: function () {
-                                return newEditorObj.getValue();
+                                return newEditorObj.markdownTextarea.val();
                             },
                             set: function (newVal) {
                                 newEditorObj.setValue(newVal);
