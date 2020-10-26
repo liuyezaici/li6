@@ -282,7 +282,6 @@ class Auth extends \fast\Power
         $data = [$this->id, $keeptime, $expiretime, $key];
         Cookie::set('keeplogin', implode('|', $data), $expiretime);
         return true;
-        return false;
     }
 
     //判断管理员身份类型
