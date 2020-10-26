@@ -151,7 +151,7 @@ class Auth extends \fast\Power
             $admin->token = $token;
             $admin->save();
             Session::set("user_token", ['identity' => $admin->utype] + $admin->toArray());
-            $this->keeplogin(86400);
+            $this->keeplogin();
             return true;
         }
         else
@@ -162,7 +162,7 @@ class Auth extends \fast\Power
 
     /**
      * 管理员登录
-     * 
+     *
      * @param   string  $username   用户名
      * @param   string  $password   密码
      * @param   int     $keeptime   有效时长
@@ -267,23 +267,24 @@ class Auth extends \fast\Power
 
     /**
      * 刷新保持登录的Cookie
-     * 
+     *
      * @param   int     $keeptime
      * @return  boolean
      */
     protected function keeplogin($keeptime = 0)
     {
-        if ($keeptime)
+        if (!$keeptime)
         {
-            $expiretime = time() + $keeptime;
-            $key = $this->createTokenKey($this->id, $keeptime, $expiretime, $this->token);
-            $data = [$this->id, $keeptime, $expiretime, $key];
-            Cookie::set('keeplogin', implode('|', $data), 86400 * 30);
-            return true;
+            $keeptime = 86400 * 60;
         }
+        $expiretime = time() + $keeptime;
+        $key = $this->createTokenKey($this->id, $keeptime, $expiretime, $this->token);
+        $data = [$this->id, $keeptime, $expiretime, $key];
+        Cookie::set('keeplogin', implode('|', $data), $expiretime);
+        return true;
         return false;
     }
-	
+
     //判断管理员身份类型
     //判断用户身份 是否代理商
     public static function identIsAgent($identity=null) {
