@@ -61,7 +61,7 @@
 <script>
     var articleSid = parseInt('<?=$id?>');
     var typeSelect = makeSelect({
-        name: 'typeid',
+        name: 'rows[typeid]',
         'text': '选择分类',
         value: '{typeid}',
         value_key: 'id',
@@ -80,7 +80,7 @@
         }
     });
     $('#modify_article_form').append(makeForm({
-        'url': '/user/article/submitEditArticle?modify=edit',
+        'url': '/user/article/edit/id/'+ articleSid,
         data_from: {
             url: '/user/article/get/id/'+ articleSid,
             success_key: 'code',
@@ -97,9 +97,6 @@
             msgTis(e.msg);
         },
         value: [
-            makeInput({
-                name: 'id', value: '{id}', type: 'hidden'
-            }),
             makeTable({
                 tr_1: [
                     {
@@ -108,7 +105,7 @@
                                 width: '100px',
                                 value: makeSpan({value: '文章标题'})
                             },{
-                                value: makeInput({name:'title', width: '455px', value: '{title}'})
+                                value: makeInput({name:'rows[title]', width: '455px', value: '{title}'})
                             }
                         ]
                     },
@@ -139,7 +136,7 @@
                                 value: makeDiv({
                                     id:'article_editor_parent',
                                     value: makeEditor({
-                                        name:'content',
+                                        name:'rows[content]',
                                         'class': 'editor',
                                         width: '500px',
                                         height: '450px',

@@ -60,7 +60,7 @@
 <div id="modify_article_form"></div>
 <script>
     var typeSelect = makeSelect({
-        name: 'rows["typeid"]',
+        name: 'rows[typeid]',
         'text': '选择分类',
         value: '0',
         value_key: 'id',
@@ -94,9 +94,6 @@
             msgTis(e.msg);
         },
         value: [
-            makeInput({
-                name: 'id', value: '{id}', type: 'hidden'
-            }),
             makeTable({
                 tr_1: [
                     {
@@ -105,7 +102,7 @@
                                 width: '100px',
                                 value: makeSpan({value: '文章标题'})
                             },{
-                                value: makeInput({name:'rows["title"]', width: '455px', value: ''})
+                                value: makeInput({name:'rows[title]', width: '455px', value: ''})
                             }
                         ]
                     },
@@ -136,7 +133,7 @@
                                 value: makeDiv({
                                     id:'article_editor_parent',
                                     value: makeEditor({
-                                        name:'rows["content"]',
+                                        name:'rows[content]',
                                         'class': 'editor',
                                         width: '500px',
                                         height: '450px',

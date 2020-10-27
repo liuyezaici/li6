@@ -585,9 +585,7 @@ function regCodeAddGang(str) {
                         return;//continue
                     }
                     if(thisObj.formatVal) {
-                        var sourceVal = getOptVal(options, ['source_value', 'value'], '');
-                        if(sourceVal !=='') thisObj.formatVal(options);;//未定义value 不需要格式化
-
+                        thisObj.formatVal(options);
                     }
                     return;//continue
                 }
@@ -8569,7 +8567,7 @@ function regCodeAddGang(str) {
             var sourceVal = opt['source_value'] || opt['value'];
             var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
             var newVal = sourceVal;
-            //console.log('format__Val:'+ sourceVal, obj);
+            console.log('format__Val:'+ sourceVal, obj);
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;

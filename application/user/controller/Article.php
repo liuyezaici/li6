@@ -47,58 +47,6 @@ class Article extends Backend
         $this->success('生成成功', '', ['id'=> $newId]);
     }
 
-    //修改文章信息
-    final function submitEditArticle() {
-        set_time_limit(0);
-        $id = input('id');
-        $title = input('title');
-        $typeid = input('typeid');
-        $modify = input('modify');
-        $content = input('content');
-        if(!$id) {
-            $this->error('noid');
-        }
-        //过滤正文内容外链图片
-//                $content = Str::tohtml($content);
-//                $savePath = "content_img/{$this->auth->id}/article/{$id}";
-//                $content = Str::filterImages($content, $this->auth->id, $savePath, $id, 'article');
-        $articleInfo = ArticleModel::where('id', $id)->field('cuid,status,tmp')->find();
-        if(!$articleInfo) {
-            $this->error('数据不存在');
-        }
-        $oldStatus = $articleInfo['status'];
-        $tmp = $articleInfo['tmp'];
-
-        if($oldStatus == -1) {
-            $this->error('文章已经删除，请刷新');
-        }
-        //获取智能分词系统 分割的关键词
-        $newData['title'] = $title;
-        $newData['typeid'] = $typeid;
-        $newData['content'] = $content;
-        $newData['tmp'] = 0;//每次编辑 添加 要将 临时变为正规
-        if($modify =='add') {
-            if($tmp !=1) {//如果发布时使用的数据不再是临时的（被其他窗口同时执行发布了），必须新增数据，防止覆盖其他数据。
-                $newData['cuid'] = $this->auth->id;
-                $newData['addtime'] = $this->myTime;
-                if(ArticleModel::insertGetId($newData)) {
-                    $this->error('写入失败');
-                }
-            } else { //发布时 其实是将临时的数据改为正规的数据。
-                if(ArticleModel::where('id', $id)->update($newData)) {
-                    $this->error('更新失败');
-                }
-            }
-        } else {
-            $articleInfo = ArticleModel::where('id', $id)->find();
-            if(!$articleInfo) {
-                $this->error('文章不存在');
-            }
-            ArticleModel::where('id', $id)->update($newData);
-        }
-        if($modify=='add') $this->success('发布成功');
-        $this->success('编辑成功');
-    }
 
     //写一篇
     public function add() {
@@ -110,61 +58,14 @@ class Article extends Backend
             }
             $title = isset($rows['title']) ? trim($rows['title']) : '';
             $content = isset($rows['content']) ? trim($rows['content']) : '';
-            $typeId = isset($rows['typeId']) ? intval($rows['typeId']) : 0;
+            $typeId = isset($rows['typeid']) ? intval($rows['typeid']) : 0;
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
             if(!$content) $this->error('请输入内容');
             //过滤内容的附件
-            $rows['uid'] = $myUid;
+            $rows['cuid'] = $myUid;
             $rows['ctime'] = time();
             $sid = ArticleModel::insertGetId($rows);
-            //     /uploads/article/2020-09-21/uid_1/
-             preg_match_all('/\/uploads\/article\/([^\/]+)\/uid_([\d]+)\/([^\)]+)/i', $content, $matches);
-             //Array
-            //(
-            //    [0] => Array
-            //        (
-            //            [0] => /uploads/article/2020-09-21/uid_1/20200921003851drWNdd.png)
-            //            [1] => /uploads/article/2020-09-21/uid_1/202009210052nW6opJoi.png)
-            //        )
-            //
-            //    [1] => Array
-            //        (
-            //            [0] => 2020-09-21
-            //            [1] => 2020-09-21
-            //        )
-            //
-            //    [2] => Array
-            //        (
-            //            [0] => 1
-            //            [1] => 1
-            //        )
-            //
-            //    [3] => Array
-            //        (
-            //            [0] => 20200921003851drWNdd.png
-            //            [1] => 202009210052nW6opJoi.png
-            //        )
-            //
-            //)
-            $fullUrls = $matches[0];
-            $fullDates = $matches[1];
-            $fullFileNames = $matches[3];
-            foreach ($fullUrls as $index=>$url_) {
-                if(file_exists(ROOT_PATH . ltrim($url_, '/'))) {
-                     $newFilePath = '/uploads/article/'. $myUid .'/' . $sid . '/'. $fullFileNames[$index];
-                     File::creatdir(dirname(ROOT_PATH . ltrim($newFilePath, '/')));
-                     @copy(ROOT_PATH . ltrim($url_, '/'), ROOT_PATH . ltrim($newFilePath, '/'));
-                     @unlink(ROOT_PATH . ltrim($url_, '/'));
-                     $content = str_replace($url_, $newFilePath , $content);
-                     Fujian::editFilePath('article', MD5($url_), $newFilePath, $sid);
-                } else {
-//                    print_r(ROOT_PATH . ltrim($url_, '/'));exit;
-                }
-            }
-            ArticleModel::where('id', $sid)->update([
-                'content' => $content
-            ]);
             $this->success('发布成功');
         }
         print_r($this->view->fetch());
@@ -344,14 +245,13 @@ class Article extends Backend
         $myUid = $this->auth->id;
         if($myUid != $info['cuid']) $this->error('身份已经切换:'.$myUid . '!='. $info['cuid']);
         if($this->request->isPost()) {
-            $rows = input('post.row/a');
+            $rows = input('post.rows/a');
             if(!$rows) {
                 $this->error('no rows');
             }
-            $id = intval($rows['id']);
             $title = isset($rows['title']) ? trim($rows['title']) : '';
             $content = isset($rows['content']) ? trim($rows['content']) : '';
-            $typeId = isset($rows['typeId']) ? intval($rows['typeId']) : 0;
+            $typeId = isset($rows['typeid']) ? intval($rows['typeid']) : 0;
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
             if(!$content) $this->error('请输入内容');
