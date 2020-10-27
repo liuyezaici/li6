@@ -4,13 +4,9 @@ namespace app\user\controller;
 
 use app\admin\addon\fujian\model\Fujian;
 use app\common\controller\Backend;
-use app\common\model\Users;
 use fast\File;
-use fast\Date;
-use fast\Addon;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
-use think\Db;
 
 class Article extends Backend
 {
@@ -25,28 +21,6 @@ class Article extends Backend
     {
         parent::_initialize();
     }
-
-
-//每次发布 自动添加临时文章
-    final function make_tmp_article() {
-        $title = input('title');
-        if(!$title) {
-            $this->error('请输入标题');
-        }
-        $newData['title'] = $title;
-        $tmpInfo = ArticleModel::where( ['cuid', $this->auth->id, 'tmp'=>1])->find();
-        if($tmpInfo) {
-            $this->success('生成成功', '', ['id'=> $tmpInfo['id']]);
-        }
-        $newData['cuid'] = $this->auth->id;
-        $newData['addtime'] = time();
-        $newData['tmp'] = 1;
-        if(!$newId = ArticleModel::insertGetId($newData)) {
-            $this->error('生成失败');
-        }
-        $this->success('生成成功', '', ['id'=> $newId]);
-    }
-
 
     //写一篇
     public function add() {
@@ -71,77 +45,7 @@ class Article extends Backend
         print_r($this->view->fetch());
     }
 
-    //移动附件文件
-    final function move_post_fujian() {
-        $userId = $this->userClass->getUserAttrib('userId');
-        $id = input('id');
-        $direction = input('direction'); //l r
-        if(!$id) $this->error('no id');
-        if(!in_array($direction, ['l', 'r'])) {
-            $this->error('error direction');
-        }
-        $fileInfo = ArticleModel::getFileById($id);
-        if(!$fileInfo) {
-            $this->error('文件不存在');
-        }
-        $pid = $fileInfo['sid'];
-        $order = $fileInfo['order'];
-        if($fileInfo['status'] !=0 ) {
-            $this->error('文件已删除，请刷新!');
-        }
-        if($direction == 'l') {
-            $leftFileInfo = ArticleModel::getPostFileLeft($pid, $order, "id,order");
-            if(!$leftFileInfo) $this->error('最左边了');
-            ArticleModel::editFile($id, ['order'=> $leftFileInfo['order']]);
-            ArticleModel::editFile($leftFileInfo['id'], ['order'=> $order]);
-        } else {
-            $rightFileInfo = ArticleModel::getPostFileRight($pid, $order, "id,order");
-            if(!$rightFileInfo) $this->error('最右边了');
-            ArticleModel::editFile($id, ['order'=> $rightFileInfo['order']]);
-            ArticleModel::editFile($rightFileInfo['id'], ['order'=> $order]);
-        }
-        return  $this->success('修改成功');
-    }
 
-    //加载当前分享的附件
-    public function load_article_fujians() {
-        $page = input('page', 1, 'intval');
-        $sid = input('sid', 0, 'intval');
-        if(!$sid) {
-            $this->error('缺少sid');
-        }
-        $fileids = ArticleModel::getfieldbyid($sid, 'fileids');
-        $fileDatas = [];
-        $pageInfo = [];
-        if($fileids) {
-            $fileids = trim($fileids, ',');
-            $where = [
-                'id' => ['in', $fileids],
-                'status' => 0,
-            ];
-            $pagesize = 10;
-            $result = Db('articleFujian')->where($where)->order('order', 'Desc')->paginate($pagesize, false,
-                [
-                    'page' => $page,
-                ]
-            );
-            $fileDatas = json_decode(json_encode($result), true)['data'];
-            $pageInfo = [
-                'pagenow' => $page,
-                'total' => $result->total(),
-                'pagesize' => $pagesize,
-            ];
-            foreach ($fileDatas as $n => &$fileVal) {
-                $fileVal['filesize'] = File::formatBytes($fileVal['filesize']);
-                $fileurl = $fileVal['fileurl'];
-//              $fileurl = func::ossUrlEncode($fileurl);
-                $fileVal['fileurl'] = $fileurl;
-                $fileVal['downUrl'] = $fileurl;
-                $fileVal['is_img'] = File::isImg($fileVal['geshi']);
-            }
-        }
-        $this->success('获取成功', '', ['fileDatas' => $fileDatas, 'pageInfo' => $pageInfo]);
-    }
 
     //删除
     public function del($id=NULL){

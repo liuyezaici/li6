@@ -46,30 +46,10 @@ class Article extends Model
         ])->value('uid');
     }
 
-    //获取靠前的附件信息
-    public static function getPostFileLeft($postId='', $orderId=0, $fields='*') {
-        return Db('articleFujian')->field($fields)->where([
-            'sid'=> $postId,
-            'order'=> ['<', $orderId],
-            'status'=>0
-        ])->order('order', 'DESC')->find()->limit(1);
-    }
-    //获取靠前的附件信息
-    public static function getPostFileRight($postId='', $orderId=0, $fields='*') {
-        return Db('articleFujian')->field($fields)->where([
-            'sid'=> $postId,
-            'order'=> ['>', $orderId],
-            'status'=>0
-        ])->order('order', 'DESC')->find()->limit(1);
-    }
-    //获取文件
-    public static function getFileById($id, $fields='*') {
-        return Db('articleFujian')->field($fields)->where('id', $id)->find();
-    }
-
-    //修改附件信息
-    public static function editFile($fid=0, $editData=[]) {
-        if(!$fid) return false;
-        return Db('articleFujian')->where('id', $fid)->update($editData);
+    public static function refreshArticleFujians($sid) {
+        $list = ArticleFujian::field('id')->where('sid', $sid)->order('order', 'desc')->select();
+        $fids = array_column($list, 'id');
+        $fids = join(',', $fids);
+        return self::where('id', $sid)->update(['fileids' => $fids]);
     }
 }

@@ -198,7 +198,7 @@
         page = page || 1;
         currentFilePage = page;
         var form = $('#modify_article_form');
-        rePost("/user/article/load_article_fujians?page="+ page, {sid: articleSid},function(res) {
+        rePost("/user/articlefujian/load_article_fujians?page="+ page, {sid: articleSid},function(res) {
             if(res.code !=1) {
                 msg(res.msg);
             } else {
@@ -240,7 +240,7 @@
                     value: '<em class="glyphicon glyphicon-picture"></em> 上传文件',
                     click: function () {
                         var uploadForm = batchUploadForm({
-                            'url' : '/?s=Uarticlefujian/upload_files',
+                            'url' : '/user/articlefujian/upload_files',
                             'post': {
                                 'id': articleSid,
                                 'save_path': '<?=$savePath?>',
@@ -271,7 +271,7 @@
     function moveThisFile(f_id, direction) {
         postAndDone({
             success_value: '0043',
-            post_url: '/user/article/move_post_fujian',
+            post_url: '/user/articlefujian/move_post_fujian',
             post_data: {id: articleSid, direction: direction},
             load_bg: false,
             success_func: 'reLoadThisArticleFujian();',
