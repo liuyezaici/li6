@@ -91,10 +91,6 @@
         success_key: 'code',
         success_value: '1',
         success_func: function (e) {
-            if('<?=$modify?>'=='add') {
-                hideAllBox();
-                reFreshArticle();
-            }
             msgTis(e.msg);
         },
         err_func: function (e) {

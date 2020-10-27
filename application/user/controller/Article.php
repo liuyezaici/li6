@@ -168,20 +168,6 @@ class Article extends Backend
             ]);
             $this->success('发布成功');
         }
-        $articleHeader = $this->view->fetch('top', [
-            'allTypes' => $this->allTypes,
-            'tab' => '',
-            'keyword' => ''
-        ]);
-        $allTypeOption = ArticleTypesModel::select();
-        $rightHtml = $this->view->fetch('writeDetails', [
-            'articleHeader' =>  $articleHeader,
-            'allTypeOption' =>  $allTypeOption,
-            'id' =>  0,
-            'uid' =>  $myUid,
-        ]);
-        $this->view->assign('webTitle',   '写文章');
-        $this->view->assign('right',   $this->view->fetch('common/right', ['rightHtml' =>  $rightHtml]));
         print_r($this->view->fetch());
     }
 
@@ -374,7 +360,6 @@ class Article extends Backend
             $this->success('编辑成功');
         }
         $mainHtml = $this->view->fetch('', [
-            'modify' =>  'edit',
             'id' =>  $id,
             'savePath' =>  'upload/post_files/',
             'upload_safe_code' =>  \fast\Str::makeSafeUploadCode('upload/post_files/', $myUid), //生成安全码 防止上传路径被手动篡改
