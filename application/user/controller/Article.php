@@ -104,7 +104,7 @@ class Article extends Backend
     public function add() {
         $myUid = $this->auth->id;
         if($this->request->isPost()) {
-            $rows = input('post.row/a');
+            $rows = input('post.rows/a');
             if(!$rows) {
                 $this->error('no rows');
             }
@@ -118,7 +118,6 @@ class Article extends Backend
             $rows['uid'] = $myUid;
             $rows['ctime'] = time();
             $sid = ArticleModel::insertGetId($rows);
-
             //     /uploads/article/2020-09-21/uid_1/
              preg_match_all('/\/uploads\/article\/([^\/]+)\/uid_([\d]+)\/([^\)]+)/i', $content, $matches);
              //Array
