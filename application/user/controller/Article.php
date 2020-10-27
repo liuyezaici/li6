@@ -101,7 +101,7 @@ class Article extends Backend
     }
 
     //写一篇
-    public function add_article() {
+    public function add() {
         $myUid = $this->auth->id;
         if($this->request->isPost()) {
             $rows = input('post.row/a');
