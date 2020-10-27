@@ -79,7 +79,7 @@
         }
     });
     $('#modify_article_form').append(makeForm({
-        'url': '/user/article/submitEditArticle?modify=add',
+        'url': '/user/article/add',
         data_from: {
         },
         name: 'modifyForm',
@@ -105,21 +105,7 @@
                                 width: '100px',
                                 value: makeSpan({value: '文章标题'})
                             },{
-                                value: makeInput({name:'title', width: '455px', value: '', blur: function (o, e) {
-                                        var form = o.findParent('modifyForm');
-                                        var aidObj = form.findName("id");
-                                        var title = form.find("input[name='title']").val();
-                                        if(title.length<=1)  return;
-                                        rePost("/?s=uarticles/make_tmp_article", {title: title},function(res) {
-                                            if(!res || !res.code) return;
-                                            if($.inArray(res.code, ['1']) == -1) {
-                                                msg(res.msg);
-                                            } else {
-                                                aidObj.value=(res.data.id);
-                                                reLoadThisArticleFujian();
-                                            }
-                                        });
-                                    }})
+                                value: makeInput({name:'title', width: '455px', value: ''})
                             }
                         ]
                     },
@@ -169,6 +155,7 @@
                                             },
                                             path: '/assets/libs/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
                                         },
+                                        value: '',
                                     })
                                 })
                             }
