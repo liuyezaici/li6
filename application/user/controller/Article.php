@@ -3,15 +3,12 @@
 namespace app\user\controller;
 
 use app\admin\addon\fujian\model\Fujian;
-use app\common\controller\Frontend;
-use app\common\model\Users;
+use app\common\controller\Backend;
 use fast\File;
-use fast\Date;
-use fast\Addon;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
 
-class Article extends Frontend
+class Article extends Backend
 {
 
     protected $noNeedLogin = [];
@@ -24,90 +21,31 @@ class Article extends Frontend
     {
         parent::_initialize();
     }
+
     //写一篇
-    public function write() {
+    public function add() {
         $myUid = $this->auth->id;
         if($this->request->isPost()) {
-            $rows = input('post.row/a');
+            $rows = input('post.rows/a');
             if(!$rows) {
                 $this->error('no rows');
             }
             $title = isset($rows['title']) ? trim($rows['title']) : '';
             $content = isset($rows['content']) ? trim($rows['content']) : '';
-            $typeId = isset($rows['typeId']) ? intval($rows['typeId']) : 0;
+            $typeId = isset($rows['typeid']) ? intval($rows['typeid']) : 0;
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
             if(!$content) $this->error('请输入内容');
             //过滤内容的附件
-            $rows['uid'] = $myUid;
+            $rows['cuid'] = $myUid;
             $rows['ctime'] = time();
             $sid = ArticleModel::insertGetId($rows);
-
-            //     /uploads/article/2020-09-21/uid_1/
-             preg_match_all('/\/uploads\/article\/([^\/]+)\/uid_([\d]+)\/([^\)]+)/i', $content, $matches);
-             //Array
-            //(
-            //    [0] => Array
-            //        (
-            //            [0] => /uploads/article/2020-09-21/uid_1/20200921003851drWNdd.png)
-            //            [1] => /uploads/article/2020-09-21/uid_1/202009210052nW6opJoi.png)
-            //        )
-            //
-            //    [1] => Array
-            //        (
-            //            [0] => 2020-09-21
-            //            [1] => 2020-09-21
-            //        )
-            //
-            //    [2] => Array
-            //        (
-            //            [0] => 1
-            //            [1] => 1
-            //        )
-            //
-            //    [3] => Array
-            //        (
-            //            [0] => 20200921003851drWNdd.png
-            //            [1] => 202009210052nW6opJoi.png
-            //        )
-            //
-            //)
-            $fullUrls = $matches[0];
-            $fullDates = $matches[1];
-            $fullFileNames = $matches[3];
-            foreach ($fullUrls as $index=>$url_) {
-                if(file_exists(ROOT_PATH . ltrim($url_, '/'))) {
-                    $newFilePath = '/uploads/article/'. $myUid .'/' . $sid . '/'. $fullFileNames[$index];
-                    File::creatdir(dirname(ROOT_PATH . ltrim($newFilePath, '/')));
-                    @copy(ROOT_PATH . ltrim($url_, '/'), ROOT_PATH . ltrim($newFilePath, '/'));
-                    @unlink(ROOT_PATH . ltrim($url_, '/'));
-                    $content = str_replace($url_, $newFilePath , $content);
-                    Fujian::editFilePath('article', MD5($url_), $newFilePath, $sid);
-                } else {
-//                    print_r(ROOT_PATH . ltrim($url_, '/'));exit;
-                }
-            }
-            ArticleModel::where('id', $sid)->update([
-                'content' => $content
-            ]);
             $this->success('发布成功');
         }
-        $articleHeader = $this->view->fetch('top', [
-            'allTypes' => $this->allTypes,
-            'tab' => '',
-            'keyword' => ''
-        ]);
-        $allTypeOption = ArticleTypesModel::select();
-        $rightHtml = $this->view->fetch('writeDetails', [
-            'articleHeader' =>  $articleHeader,
-            'allTypeOption' =>  $allTypeOption,
-            'id' =>  0,
-            'uid' =>  $myUid,
-        ]);
-        $this->view->assign('webTitle',   '写文章');
-        $this->view->assign('right',   $this->view->fetch('common/right', ['rightHtml' =>  $rightHtml]));
         print_r($this->view->fetch());
     }
+
+
 
     //删除
     public function del($id=NULL){
@@ -127,44 +65,109 @@ class Article extends Frontend
         ArticleModel::where('id', $id)->delete();
         $this->success('删除成功');
     }
+    //添加分类
+    final function add_type() {
+        $myUid = $this->auth->id;
+        if($this->request->isPost()) {
+            $title = input('title', '', 'trim');
+            if(!$title) $this->error('no title');
+            if(ArticleTypesModel::where(['title' => $title])->find()) $this->error('分类已经存在');
+            $newData = [
+                'title' => $title,
+                'cuid' => $myUid,
+                'addtime' => time(),
+            ];
+            ArticleTypesModel::insert($newData);
+            $this->success('添加成功');
+        }
+        $arr = array(
+            'id' => 0,
+            'title' => '',
+            'modify' => 'add'
+        );
+        $mainHtml = $this->view->fetch('', $arr);
+        print_r($mainHtml);
+    }
 
-    //文章详情
+    //编辑文章分类
+    final function edit_type() {
+        $id = input('id', 0, 'int');
+        //id参数是否为空
+        if( !$id ){
+            $this->error('no id');
+        }
+        $classInfo = ArticleTypesModel::where('id', $id)->find();
+        if(!$classInfo) $this->error('分类不存在');
+        if($this->request->isPost()) {
+            $title = input('title', '', 'trim');
+            if(!$title) $this->error('no title');
+            if(ArticleTypesModel::where(['title' => $title, 'id'=>['<>', $id]])->find()) $this->error('分类已经存在');
+            $editData = [
+                'title' => $title,
+            ];
+            ArticleTypesModel::where('id', $id)->update($editData);
+            $this->success('添加成功');
+        }
+        $mainHtml = $this->view->fetch('', json_decode(json_encode($classInfo), true));
+        print_r($mainHtml);
+    }
+
+    //编辑文章分类
+    final function del_type() {
+        $id = input('id', 0, 'int');
+        //id参数是否为空
+        if( !$id ){
+            $this->error('no id');
+        }
+        ArticleTypesModel::where('id', $id)->delete();
+        $this->error('删除成功');
+    }
+
+    //管理所有分类
+    public function manageAllTypes(){
+        $list = ArticleTypesModel::field('id,title')->order('id', 'desc')->select();
+        //获取分类树形菜单
+        $mainHtml = $this->view->fetch('', [
+          'class_list' => json_encode($list)
+        ]);
+        print_r($mainHtml);
+    }
+    //获取所有分类
+    public function getAllTypes($id=NULL){
+        $list = ArticleTypesModel::field('id,title')->select();
+        $this->success('获取成功', '', ['list' => $list]);
+    }
+    //获取详情
+    public function get($id=NULL) {
+        $info = ArticleModel::getbyid($id);
+        $this->success('获取成功', '', $info);
+    }
+
+    //编辑详情
     public function edit($id=NULL){
         $info = ArticleModel::getbyid($id);
         $myUid = $this->auth->id;
-        if(!$myUid) $this->error('请先登录');
-        if($myUid != $info['uid']) $this->error('身份已经切换');
+        if($myUid != $info['cuid']) $this->error('身份已经切换:'.$myUid . '!='. $info['cuid']);
         if($this->request->isPost()) {
-            $rows = input('post.row/a');
+            $rows = input('post.rows/a');
             if(!$rows) {
                 $this->error('no rows');
             }
-            $id = intval($rows['id']);
             $title = isset($rows['title']) ? trim($rows['title']) : '';
             $content = isset($rows['content']) ? trim($rows['content']) : '';
-            $typeId = isset($rows['typeId']) ? intval($rows['typeId']) : 0;
+            $typeId = isset($rows['typeid']) ? intval($rows['typeid']) : 0;
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
             if(!$content) $this->error('请输入内容');
             ArticleModel::where('id', $id)->update($rows);
             $this->success('编辑成功');
-
         }
-        $articleHeader = $this->view->fetch('top', [
-            'allTypes' => $this->allTypes,
-            'tab' => '',
-            'keyword' => ''
-        ]);
-        $allTypeOption = ArticleTypesModel::select();
-        $rightHtml = $this->view->fetch('editDetails', [
-            'articleHeader' =>  $articleHeader,
-            'allTypeOption' =>  $allTypeOption,
+        $mainHtml = $this->view->fetch('', [
             'id' =>  $id,
-            'info' =>  $info,
+            'savePath' =>  'upload/post_files/',
+            'upload_safe_code' =>  \fast\Str::makeSafeUploadCode('upload/post_files/', $myUid), //生成安全码 防止上传路径被手动篡改
         ]);
-        $this->view->assign('webTitle',   '编辑文章');
-        $this->view->assign('right',   $this->view->fetch('common/right', ['rightHtml' =>  $rightHtml]));
-        print_r($this->view->fetch());
+        print_r($mainHtml);
     }
 
 
@@ -190,7 +193,7 @@ class Article extends Frontend
             $noResultText = '没有搜索结果';
         }
         $path = "/user/article/?keyword={$keyword}&typeid={$typeid}&page=[PAGE]";
-        $result = ArticleModel::where($where)->order('id', 'Desc')->paginate($pagesize, false,
+        $result = ArticleModel::field('id,title,rq,typeid')->where($where)->order('id', 'Desc')->paginate($pagesize, false,
             [
                 'page' => $page,
                 'path' => $path,

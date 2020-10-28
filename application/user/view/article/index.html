@@ -2,9 +2,9 @@
 </script>
 <script>
     var pageOpt = {
-        page: <?=$pageInfo['pagenow']?>,
-        total: <?=$pageInfo['total']?>,
-        pagesize: <?=$pageInfo['pagesize']?>,
+        page: parseInt("<?=$pageInfo['pagenow']?>"),
+        total: parseInt("<?=$pageInfo['total']?>"),
+        pagesize: parseInt("<?=$pageInfo['pagesize']?>"),
         click: function (obj, newPage) {
             searchForm.findName("page").value=(newPage);
             reFreshArticle();
@@ -28,7 +28,7 @@
             }),
             makeBtn({
                 'value': '写文章', margin_left: '122px','type': 'button', 'class': 'btn btn-success', click: function () {
-                    msgWin('添加文章','[url]/user/article/add_article', 800, 50);
+                    msgWin('添加文章','[url]/user/article/add', 800, 50);
                 }
             }),
             makeBtn({
@@ -40,7 +40,7 @@
     });
     var dataHtmlObj = makeTable({
         'class': 'table table-bordered',
-        data:  <?=$articleList?>,
+        data:  JSON.parse('<?=$articleList?>'),
         tr_1:
             {
                 td: [
@@ -57,6 +57,13 @@
                         value: [
                             makeSpan({
                                 value: '标题'
+                            })
+                        ]
+                    },
+                    {
+                        value: [
+                            makeSpan({
+                                value: '分类'
                             })
                         ]
                     },
@@ -91,8 +98,16 @@
                     {
                         show: '{id}',
                         value: [
+                            makeSpan({
+                                value: '{typeName}'
+                            })
+                        ]
+                    },
+                    {
+                        show: '{id}',
+                        value: [
                             makeA({
-                                href: '/index/index/details/id/{id}',
+                                href: '/index/article/details/id/{id}',
                                 value: '{title}'
                             })
                         ]
@@ -143,8 +158,8 @@
         msgConfirm('你确定要删除此文章吗？', '确定', '取消', function () {
            hideNewBox();
             postAndDone({
-                post_url: '/user/article/del_article',
-                post_data: {id: articleid},
+                post_url: '/user/article/del/id/'+ articleid,
+                post_data: {},
                 success_key: 'id',
                 success_value: '0039',
                 success_func: 'hideNewBox();reFreshArticle();msgTis("删除成功");'
@@ -154,11 +169,11 @@
     //编辑文章图片
     function editArticlePics(articleid) {
         hideNewBox();
-        msgWin('编辑文章图片','[url]/user/article/article_pic_list&id='+ articleid, 1200, 1);
+        msgWin('编辑文章图片','[url]/user/article/article_pic_list?id='+ articleid, 1200, 1);
     }
     //编辑文章信息
     function editArticle(articleid) {
-        msgWin('编辑文章','[url]/user/article/edit_article&id='+ articleid, 1200, 1);
+        msgWin('编辑文章','[url]/user/article/edit/id/'+ articleid, 1200, 1);
     }
     //刷新列表
     function reFreshArticle() {
@@ -167,7 +182,7 @@
 
     //文章分类
     function viewAllTypes() {
-        msgWin('文章分类管理','[url]/user/article/all_types', 580, 1);
+        msgWin('文章分类管理','[url]/user/article/manageAllTypes', 580, 1);
     }
     $('#root_right .right_content').append(searchForm).append(dataHtmlObj).append(pageObj);
 </script>

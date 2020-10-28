@@ -2,7 +2,7 @@
 
 namespace app\index\controller;
 
-use app\common\controller\Frontend; 
+use app\common\controller\Frontend;
 use app\admin\library\Auth;
 use app\common\model\Users;
 use think\Config;
@@ -223,10 +223,10 @@ class System extends Frontend
             $uid = $this->auth->id;
             if(!$uid){
                 $outputData = [
-                    'account' => '-',
-                    'nickname' => '-',
-                    'avatar' => '-',
-                    'token' => '-',
+                    'account' => '',
+                    'nickname' => '',
+                    'avatar' => '',
+                    'token' => '',
                     'local_uid' => 0,
                 ];
                 $this->error('nologin', '', $outputData);
@@ -372,7 +372,7 @@ class System extends Frontend
                 $this->error('please post me');
             }
         }
-  
+
     }
 
 }

@@ -1082,7 +1082,7 @@ class Str
         return preg_split('/(?<!^)(?!$)/u', $str );
     }
 
-    //根据熟练分页
+    //根据数量分页
     public static function makeNumPage($url, $currentPage=1, $totalPage=1, $pageShowNum=5, $activerCss='current') {
         $fromPage = $currentPage - intval($pageShowNum/2);
         if($fromPage<1)  {
@@ -1125,5 +1125,11 @@ class Str
         }
         $li .= '</ul>';
         return $li;
+    }
+
+
+    //上传文件目录加安全校验
+    public static function makeSafeUploadCode($pathUrl, $uid_) {
+        return self::getMD5($pathUrl."[save_hash_lr]".$uid_);
     }
 }

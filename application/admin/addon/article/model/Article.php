@@ -45,4 +45,11 @@ class Article extends Model
             'id' => $id,
         ])->value('uid');
     }
+
+    public static function refreshArticleFujians($sid) {
+        $list = ArticleFujian::field('id')->where('sid', $sid)->order('order', 'desc')->select();
+        $fids = array_column($list, 'id');
+        $fids = join(',', $fids);
+        return self::where('id', $sid)->update(['fileids' => $fids]);
+    }
 }

@@ -585,9 +585,7 @@ function regCodeAddGang(str) {
                         return;//continue
                     }
                     if(thisObj.formatVal) {
-                        var sourceVal = getOptVal(options, ['source_value', 'value'], '');
-                        if(sourceVal !=='') thisObj.formatVal(options);;//未定义value 不需要格式化
-
+                        thisObj.formatVal(options);
                     }
                     return;//continue
                 }
@@ -1019,7 +1017,7 @@ function regCodeAddGang(str) {
                 var oldExtendClass = getOptVal(opt, 'class_extend', '');
                 if(oldExtendClass) {
                         newAttr['class'] = classAddSubClass(newAttr['class'], oldExtendClass, ' ');
-                
+
                 }
                 //如果更新了可见，则之前的hidden要去掉
                 if(setHidden===true && hidden == false) {
@@ -5477,7 +5475,6 @@ function regCodeAddGang(str) {
             } else {
                 newVal = sourceVal;
             }
-            console.log('setRealInputVal:', renewBind);
             obj.setRealInputVal(newVal, renewBind, true, [obj]);
             if(obj.setLrBtnDisable) obj.setLrBtnDisable();
             if(obj.lazyCall) {
@@ -8569,9 +8566,8 @@ function regCodeAddGang(str) {
             opt = opt || [];
             var sourceVal = opt['source_value'] || opt['value'];
             var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
-            var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';//editormd
             var newVal = sourceVal;
-            //console.log('format__Val:'+ sourceVal, obj);
+            console.log('format__Val:'+ sourceVal, obj);
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
@@ -8587,18 +8583,6 @@ function regCodeAddGang(str) {
                 //console.log('value change');
                 valueStrFormatdSuccess = true;
             }
-            var lazySet = function (editor_, newVal) {
-                if(editor_.setContent) {
-                    editor_.setContent(newVal);
-                } else {
-                    setTimeout(function () {
-                        lazySet(editor_, newVal);
-                    }, 400);
-                }
-            };
-            if(!isUndefined(obj[editorOut])) {
-                lazySet(obj[editorOut], newVal);
-            }
             var renewBind = strHasKuohao(sourceVal);
             if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
                 updateBindObj($.trim(options['bind']), newVal, [obj]);
@@ -8608,9 +8592,13 @@ function regCodeAddGang(str) {
                     obj.lazyCall(obj, opt['data'] || {}, livingObj);
                 }
             }
+            if(obj[editorOut] && obj[editorOut].setContent) {
+                obj[editorOut].setContent(newVal);
+            }
+            obj.formatPlugs(opt);
         };
         obj.renewVal = function(newVal) {
-            //console.log('editor.format_val:'+ newVal);
+            // console.log('renewVal:', newVal);
             obj.val(newVal);
         };
         //渲染插件
@@ -8623,8 +8611,9 @@ function regCodeAddGang(str) {
             var newEditorObj;
             //上面设置了读写属性 下面才能设置
             //先设定options参数 下面才可以修改options
-            if(strInArray(editorType, ['xheditor', 'xhEditor']) !=-1) {
-                setTimeout(function () {
+            //id需要在页面种才能渲染编辑器
+            setTimeout(function () {
+                if(strInArray(editorType, ['xheditor', 'xhEditor']) !=-1) {
                     //这里可以统一设置编辑器样式
                     newEditorObj = obj.xheditor({
                         'plugins':  {
@@ -8671,10 +8660,8 @@ function regCodeAddGang(str) {
                         });
                     }
                     obj[editorOut] = newEditorObj;
-                },  500);
-            }
-            else if(strInArray(editorType, ['uEditor', 'ueditor']) !=-1) {
-                setTimeout(function () {
+                }
+                else if(strInArray(editorType, ['uEditor', 'ueditor']) !=-1) {
                     UE.delEditor(editorId);//防止已经实例化过此编辑器
                     var defToolbars = [[
                         'fullscreen', 'source', '|', 'undo', 'redo', '|',
@@ -8698,33 +8685,30 @@ function regCodeAddGang(str) {
                     obj[editorOut].pasteHTML = function (newContent) {
                         newEditorObj.setContent(newContent, true);
                     }
-                },  500);
-
-            } else if(strInArray(editorType, ['umEditor', 'umeditor']) !=-1) {
-                UM.delEditor(editorId);//防止已经实例化过此编辑器
-                var defToolbars = [
-                    'fullscreen', 'source', 'undo', 'redo','bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript',
-                    'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'forecolor',
-                    'backcolor', 'insertorderedlist', 'insertunorderedlist'
-                ];
-                var toolbars = getOptVal(options, ['toolbars', 'toolbar'], defToolbars);
-                newEditorObj = UM.getEditor(editorId, {
-                    toolbar: toolbars}
-                );
-                //支持外部取值
-                if(!obj.hasOwnProperty('value')) {
-                    Object.defineProperty(obj, 'value', {
-                        get: function () {
-                            return newEditorObj.getContent();
-                        }
-                    });
-                }
-                obj[editorOut] = newEditorObj;
-                obj[editorOut].pasteHTML = function (newContent) {
-                    newEditorObj.setContent(newContent, true);
-                }
-            } else if(strInArray(editorType, ['editormd', 'editorMd']) !=-1) {
-                setTimeout(function () {
+                } else if(strInArray(editorType, ['umEditor', 'umeditor']) !=-1) {
+                    UM.delEditor(editorId);//防止已经实例化过此编辑器
+                    var defToolbars = [
+                        'fullscreen', 'source', 'undo', 'redo','bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript',
+                        'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'forecolor',
+                        'backcolor', 'insertorderedlist', 'insertunorderedlist'
+                    ];
+                    var toolbars = getOptVal(options, ['toolbars', 'toolbar'], defToolbars);
+                    newEditorObj = UM.getEditor(editorId, {
+                        toolbar: toolbars}
+                    );
+                    //支持外部取值
+                    if(!obj.hasOwnProperty('value')) {
+                        Object.defineProperty(obj, 'value', {
+                            get: function () {
+                                return newEditorObj.getContent();
+                            }
+                        });
+                    }
+                    obj[editorOut] = newEditorObj;
+                    obj[editorOut].pasteHTML = function (newContent) {
+                        newEditorObj.setContent(newContent, true);
+                    }
+                } else if(strInArray(editorType, ['editormd', 'editorMd']) !=-1) {
                     var opt_ = {
                         width: "100%",
                         height: 540,
@@ -8745,21 +8729,25 @@ function regCodeAddGang(str) {
                     newEditorObj = editormd(editorId, opt_);
                     //支持外部取值editormd
                     if (!obj.hasOwnProperty('value')) {
+                        // console.log('editormd set_val');
                         Object.defineProperty(obj, 'value', {
                             get: function () {
-                                return newEditorObj.getValue();
+                                return newEditorObj.markdownTextarea.val();
                             },
                             set: function (newVal) {
                                 newEditorObj.setValue(newVal);
                             }
                         });
+                    } else {
+                        // console.log('editormd has_val');
                     }
                     obj[editorOut] = newEditorObj;
                     obj[editorOut].pasteHTML = function (newContent) {
                         newEditorObj.setValue(newContent);
                     }
-                }, 100);//内容更新后 需要等待几毫秒 才能将内容初始化到新的编辑器
-            }
+                }
+            }, 500);
+
         };
         //外部设置val
         obj.extend({
@@ -8792,6 +8780,7 @@ function regCodeAddGang(str) {
                     options['class'] = isUndefined(options['class']) ? 'form-control' : options['class'] + ' form-control';
                     //支持外部取值
                     if(!obj.hasOwnProperty('value')) {
+                        // console.log('set_text val');
                         Object.defineProperty(obj, 'value', {
                             set: function (n) {
                                 return obj.val(n);
@@ -8800,29 +8789,15 @@ function regCodeAddGang(str) {
                                 return obj.val();
                             }
                         });
-                    }
-                }
-
-                obj.formatPlugs(options);
-
-
-                if(editorType == 'text') {
-                    //支持外部取值
-                    if(!obj.hasOwnProperty('value')) {
-                        Object.defineProperty(obj, 'value', {
-                            set: function (n) {
-                                return obj.val(n);
-                            },
-                            get: function () {
-                                return obj.val();
-                            }
-                        });
+                    } else {
+                        // console.log('has_text val');
                     }
                     obj[editorOut] = obj;
                     obj[editorOut].pasteHTML = function (newContent) {
                         obj.val(newContent);
                     }
                 }
+
                 optionGetSet(this, options);
                 //console.log('options');
                 //console.log(options);

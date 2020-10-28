@@ -1,0 +1,188 @@
+<style>
+    /* 附件管理 */
+    .manage_files {
+        background-color: #fff;
+    }
+    .manage_files ul li {
+        padding: 5px 0;
+        display: inline-block;
+        width: 25%;
+    }
+    .manage_files ul li .cover {
+        margin: 0 5px;
+        overflow: hidden;
+        border: 1px solid #dedede;
+        cursor: pointer;
+        display: block;
+        height: 56px;
+    }
+    .manage_files ul li .cover img {
+        width: 100%;
+        height: 100%;
+    }
+    .manage_files ul li .title {
+        margin: 0 5px;
+        padding: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+    .manage_files ul li .title input {
+        width: 100%;
+        border: 1px solid #fff;
+        text-indent: 2px;
+    }
+    .manage_files ul li .title input:hover {
+        border: 1px solid #ccc;
+    }
+    .manage_files ul li .operat {
+        display: block;
+        padding-top: 5px;
+    }
+    .manage_files ul li .operat .item {
+        width: 33.33%;
+        display: inline-block;
+        text-align: center;
+        float: left;
+    }
+    .manage_files ul li .operat .glyphicon {
+        color: #bbb;
+    }
+    .manage_files ul li .operat .glyphicon:hover {
+        color: #999;
+    }
+    #modify_article_form .lr_editor {
+        width: 555px;
+        height: 120px;
+    }
+</style>
+<div id="modify_article_form"></div>
+<script>
+    var typeSelect = makeSelect({
+        name: 'rows[typeid]',
+        'text': '选择分类',
+        value: '0',
+        value_key: 'id',
+        title_key: 'title',
+        menu: {
+            width: '400px',
+            data_from: {
+                url: '/user/article/getAllTypes',
+                success_key: 'code',
+                success_value: '1',
+                data_key: 'data.list'
+            }
+        },
+        li: {
+            value: '{title}'
+        }
+    });
+    $('#modify_article_form').append(makeForm({
+        'url': '/user/article/add',
+        data_from: {
+        },
+        name: 'modifyForm',
+        success_key: 'code',
+        success_value: '1',
+        success_func: function (e) {
+            hideAllBox();
+            reFreshArticle();
+            msgTis(e.msg);
+        },
+        err_func: function (e) {
+            msgTis(e.msg);
+        },
+        value: [
+            makeTable({
+                tr_1: [
+                    {
+                        td: [
+                            {
+                                width: '100px',
+                                value: makeSpan({value: '文章标题'})
+                            },{
+                                value: makeInput({name:'rows[title]', width: '455px', value: ''})
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                padding_top: '15px',
+                                value: makeSpan({value: '文章分类'})
+                            },{
+                                padding_top: '15px',
+                                value:  [
+                                    typeSelect,
+                                    makeBtn({value: '管理分类', 'class': 'btn btn-default', margin_left: '5px', click: function () {
+                                            msgWin('文章分类管理','[url]/user/article/manageAllTypes', 580, 1);
+                                        }})
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                padding_top: '15px',
+                                valign: 'top',
+                                value: makeSpan({value: '正文'})
+                            },{
+                                padding_top: '15px',
+                                value: makeDiv({
+                                    id:'article_editor_parent',
+                                    value: makeEditor({
+                                        name:'rows[content]',
+                                        'class': 'editor',
+                                        width: '500px',
+                                        height: '450px',
+                                        type: 'editormd',
+                                        editorObj: 'editArticleEditor',
+                                        editorOpt: {
+                                            id:'article_editor_parent',
+                                            width   : "100%",
+                                            height  : 440,
+                                            syncScrolling : "single",
+                                            toolbarIcons : function() {
+                                                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                                                // Using "||" set icons align right.
+                                                return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
+                                                    "code",  "preformatted-text", "code-block", "table", "datetime","hr", "|", "image", "||", "watch", "preview"]
+                                            },
+                                            path: '/assets/libs/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
+                                        },
+                                        value: '',
+                                    })
+                                })
+                            }
+                        ]
+                    },
+                    {
+                        td: [
+                            {
+                                padding_top: '10px',
+                                value: makeSpan({value: '附件'})
+                            },{
+                                padding_top: '10px',
+                                value: makeDiv({id: 'manage_article_fujian', 'class': 'manage_files', value: ''})
+                            }
+                        ]
+                    },
+                    {
+                        td: [{}, {
+                            padding_top: '10px',
+                            value: makeBtn({type:'submit', value:'保存', 'class': 'btn btn-info'})
+                        }]
+                    }
+                ]
+            })
+        ]
+    })
+    );
+    //重新加载分类
+    function refreshArticlesTypes() {
+        typeSelect.menu.renewData();
+    }
+
+</script>

@@ -100,19 +100,13 @@
     }
     //选择系统头像
     function choseThisSystemface(faceid) {
-        rePost('/user/setting/chose_face',{faceid:faceid},function(data) {
+        rePost('/user/setting/chose_face',{faceid:faceid},function(res) {
             noLoading();
             hideNewBox();
-            if(data.id != '0267') {
-                if(data.info) data.msg += data.info;
-                if(data.id == '0000') {
-                    loginIn();
-                    return;
-                }
-                msgTis(data.msg);
+            if(res.code != '1') {
+                msgTis(res.msg);
             } else {
-                msgTis(data.msg);
-                window.location.reload();
+                msgTis(res.msg);
             }
         });
         loading();

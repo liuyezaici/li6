@@ -415,4 +415,9 @@ class File
         unset($arr_[count($arr_)-1]);
         return join('.', $arr_);
     }
+
+    //判断文件格式是不是图片
+    public static function isImg($geshi='') {
+        return in_array($geshi, ['jpg', 'jpeg', 'png', 'gif']);
+    }
 }
