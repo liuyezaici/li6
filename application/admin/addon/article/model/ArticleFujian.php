@@ -28,17 +28,17 @@ class ArticleFujian extends Model
     public static function getPostFileLeft($postId='', $orderId=0, $fields='*') {
         return self::field($fields)->where([
             'sid'=> $postId,
-            'order'=> ['<', $orderId],
+            'order'=> ['>', $orderId],
             'status'=>0
-        ])->order('order', 'DESC')->find()->limit(1);
+        ])->order('order', 'DESC')->limit(1)->find();
     }
     //获取靠前的附件信息
     public static function getPostFileRight($postId='', $orderId=0, $fields='*') {
         return self::field($fields)->where([
             'sid'=> $postId,
-            'order'=> ['>', $orderId],
+            'order'=> ['<', $orderId],
             'status'=>0
-        ])->order('order', 'DESC')->find()->limit(1);
+        ])->order('order', 'DESC')->limit(1)->find();
     }
     //获取文件
     public static function getFileById($id, $fields='*') {
@@ -49,5 +49,14 @@ class ArticleFujian extends Model
     public static function editFile($fid=0, $editData=[]) {
         if(!$fid) return false;
         return self::where('id', $fid)->update($editData);
+    }
+    //修改附件信息
+    public static function getLastOrder($sid=0) {
+        $lastOrder = self::field('order')->where([
+            'sid'=> $sid,
+            'status'=>0
+        ])->order('order', 'DESC')->limit(1)->value('order');
+        if(!$lastOrder) $lastOrder = 10;
+        return $lastOrder;
     }
 }

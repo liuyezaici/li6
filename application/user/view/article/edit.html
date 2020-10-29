@@ -79,6 +79,28 @@
             value: '{title}'
         }
     });
+    var editorObj = makeEditor({
+        name:'rows[content]',
+        'class': 'editor',
+        width: '500px',
+        height: '450px',
+        type: 'editormd',
+        editorObj: 'editArticleEditor',
+        editorOpt: {
+            id:'article_editor_parent',
+            width   : "100%",
+            height  : 440,
+            syncScrolling : "single",
+            toolbarIcons : function() {
+                // Or return editormd.toolbarModes[name]; // full, simple, mini
+                // Using "||" set icons align right.
+                return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
+                    "code",  "preformatted-text", "code-block", "table", "datetime","hr", "|", "image", "||", "watch", "preview"]
+            },
+            path: '/assets/libs/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
+        },
+        value: '{content}'
+    });
     $('#modify_article_form').append(makeForm({
         'url': '/user/article/edit/id/'+ articleSid,
         data_from: {
@@ -135,28 +157,7 @@
                                 padding_top: '15px',
                                 value: makeDiv({
                                     id:'article_editor_parent',
-                                    value: makeEditor({
-                                        name:'rows[content]',
-                                        'class': 'editor',
-                                        width: '500px',
-                                        height: '450px',
-                                        type: 'editormd',
-                                        editorObj: 'editArticleEditor',
-                                        editorOpt: {
-                                            id:'article_editor_parent',
-                                            width   : "100%",
-                                            height  : 440,
-                                            syncScrolling : "single",
-                                            toolbarIcons : function() {
-                                                // Or return editormd.toolbarModes[name]; // full, simple, mini
-                                                // Using "||" set icons align right.
-                                                return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
-                                                    "code",  "preformatted-text", "code-block", "table", "datetime","hr", "|", "image", "||", "watch", "preview"]
-                                            },
-                                            path: '/assets/libs/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
-                                        },
-                                        value: '{content}'
-                                    })
+                                    value: editorObj
                                 })
                             }
                         ]
@@ -204,20 +205,21 @@
             } else {
                 var responses = res.data;
                 var filesData = responses.fileDatas;
-                var filesPageMenu = responses.pageInfo;
-                var fileHtml= '', tmpFileFid, tmpFileName, tmpFileSize, tmpFileGeshi, tmpFileOrder;
+                console.log('filesData', filesData);
+                var filesPageMenu = makePage(responses.pageInfo);
+                var fileHtml= '', tmpFileFid, tmpFileName, tmpFileSize, tmpFileGeshi;
                 fileHtml += "<ul>";
                 var fileIcon = '';
                 if(filesData.length>0) {
                     $.each(filesData, function (n, v) {
-                        tmpFileFid = v['f_id'];
-                        tmpFileName = v['f_filename'];
-                        tmpFileGeshi = v['f_geshi'];
+                        tmpFileFid = v['id'];
+                        tmpFileName = v['filename'];
+                        tmpFileGeshi = v['geshi'];
                         tmpFileSize = v['filesize'];
                         if($.inArray(tmpFileGeshi.toLowerCase(), ['gif','png','jpg', 'jpeg']) !=-1) {
-                            fileIcon ="<img src=\""+ v['f_fileurl'] +"\" width='100%' onclick=\"enterThisImage('"+ v['f_fileurl'] +"');\" title='插入使用' />";
+                            fileIcon ="<img src=\""+ v['fileurl'] +"\" width='100%' onclick=\"enterThisImage('"+ v['fileurl'] +"');\" title='插入使用' />";
                         } else {
-                            fileIcon ="<span onclick=\"enterThisFile('"+ v['f_fileurl'] +"');\">插入使用</span>";
+                            fileIcon ="<span onclick=\"enterThisFile('"+ v['fileurl'] +"');\">插入使用</span>";
                         }
                         fileHtml += "<li>" +
                             "<span class='cover' title='格式:"+ tmpFileGeshi +",大小:"+ tmpFileSize +"'> " +
@@ -234,7 +236,7 @@
                     fileHtml += "<li> </li>";
                 }
 
-                fileHtml += "</ul>" + filesPageMenu;
+                fileHtml += "</ul>";
                 var uploadBtn = makeBtn({
                     'class': 'btn alert-info',
                     value: '<em class="glyphicon glyphicon-picture"></em> 上传文件',
@@ -242,7 +244,7 @@
                         var uploadForm = batchUploadForm({
                             'url' : '/user/articlefujian/upload_files',
                             'post': {
-                                'id': articleSid,
+                                'aid': articleSid,
                                 'save_path': '<?=$savePath?>',
                                 'path_safe_hash': '<?=$upload_safe_code?>',
                             },
@@ -263,40 +265,57 @@
                         msgView('上传文件', uploadForm, 820, 10, false);
                     }
                 });
-                form.find('#manage_article_fujian').html(fileHtml).append(makeDiv({'class': 'upload_btn_box', value: uploadBtn}));
+                form.find('#manage_article_fujian').html(fileHtml).append([
+                    filesPageMenu,
+                    makeDiv({'class': 'upload_btn_box', value: uploadBtn})
+                ]);
             }
         });
     }
     //移动附件
     function moveThisFile(f_id, direction) {
+        loadingSvg();
         postAndDone({
-            success_value: '0043',
+            success_value: '1',
+            success_key: 'code',
             post_url: '/user/articlefujian/move_post_fujian',
-            post_data: {id: articleSid, direction: direction},
-            load_bg: false,
-            success_func: 'reLoadThisArticleFujian();',
-            'msg': false
-
+            post_data: {id: f_id, direction: direction},
+            success_func: function () {
+                noLoading();
+                reLoadThisArticleFujian();
+            },
+            error_func: function (res) {
+                noLoading();
+                msgTisf(res.msg);
+            },
         });
     }
     //将附件插入到内容
     function enterThisFile(url) {
         var pushHtml = "["+ url +"]("+ url +")";
-        content.editArticleEditor.insertValue(pushHtml);
+        editorObj.editArticleEditor.insertValue(pushHtml);
     }
     //将图片插入到内容
     function enterThisImage(url) {
         var pushHtml = "![]("+ url +")";
-        content.editArticleEditor.insertValue(pushHtml);
+        editorObj.editArticleEditor.insertValue(pushHtml);
     }
     //删除附件
     function delThisFile(code) {
+        loadingSvg();
         postAndDone({
-            success_value: '0039',
-            post_url: '/?s=Uarticlefujian&do=remove_article_fujians',
+            success_value: '1',
+            success_key: 'code',
+            post_url: '/user/articlefujian/remove_article_fujians',
             post_data: {fid: code},
-            msg: false,
-            success_func: 'reLoadThisArticleFujian();'
+            success_func: function () {
+                noLoading();
+                reLoadThisArticleFujian();
+            },
+            error_func: function (res) {
+                noLoading();
+                msgTisf(res.msg);
+            },
         });
     }
     reLoadThisArticleFujian();//加载附件

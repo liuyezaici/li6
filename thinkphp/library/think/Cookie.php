@@ -101,8 +101,8 @@ class Cookie
         }
 
         $expire = !empty($config['expire']) ?
-        $_SERVER['REQUEST_TIME'] + intval($config['expire']) :
-        0;
+        $_SERVER['REQUEST_TIME'] + intval($config['expire']) : 0;
+        $expire = intval($expire);
 
         if ($config['setcookie']) {
             setcookie(
