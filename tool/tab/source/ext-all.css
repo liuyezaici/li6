@@ -1,0 +1,259 @@
+@charset "gb2312";
+/*
+ * Ext JS Library 1.0.1
+ * Copyright(c) 2006-2007, Ext JS, LLC.
+ * licensing@extjs.com
+ * 
+ * http://www.extjs.com/license
+ */
+ 
+
+/* 阴影效果° 6rui 修改 */
+
+.x-ie-shadow {
+    display: none;
+    position: absolute;
+    overflow: hidden;
+    left:0;
+    top:0;
+    background:#3b3b4c;
+    zoom:1;
+}
+ 
+ 
+.x-dlg-proxy {  /* 移动过程的浅色框*/
+
+	background-color:#c3daf9;
+	border:1px solid #6593cf;
+	z-index:10001;
+	overflow:hidden;
+	position:absolute;
+	left:0;top:0;
+}
+
+.x-dlg{
+	z-index: 10001;
+	overflow:hidden;
+	position:absolute;
+}
+.x-dlg .x-dlg-hd {
+	background: url(hd-sprite.gif) repeat-x 0 -82px;
+	background-color:navy;
+	color:#FFF;
+	font:bold 13px "sans serif", tahoma, verdana, helvetica;
+	overflow:hidden;
+	padding:5px;
+    white-space: nowrap;
+}
+.x-dlg .x-dlg-hd-left {
+	background: url(hd-sprite.gif) no-repeat 0 -41px;
+	padding-left:3px;
+	margin:0;
+}
+.x-dlg .x-dlg-hd-right {
+	background: url(hd-sprite.gif) no-repeat right 0;
+	padding-right:3px;
+}
+
+
+.x-dlg .x-dlg-ft .x-dlg-btns-right table{
+	float:right;
+	clear:none;
+}
+.x-dlg .x-dlg-ft .x-dlg-btns-left table{
+	float:left;
+	clear:none;
+}
+
+.x-dlg-toolbox {
+    position:absolute;
+	top:4px;
+	right:4px;
+	z-index:6;
+    width:40px;
+    cursor:default;
+    height:15px;
+    background:transparent;
+}
+.x-dlg .x-dlg-close{
+    float:right;
+    height:15px;
+	width:15px;
+	margin:0;
+    margin-left:2px;
+    padding:0;
+	line-height:1px;
+	font-size:1px;
+	background-repeat:no-repeat;
+	cursor:pointer;
+	visibility:inherit;
+} 
+
+/*
+ * Ext JS Library 1.1 Beta 1
+ * Copyright(c) 2006-2007, Ext JS, LLC.
+ * licensing@extjs.com
+ * 
+ * http://www.extjs.com/license
+ */
+
+
+/*Tabs*/
+.x-tabs-wrap, .x-layout-panel .x-tabs-top .x-tabs-wrap {
+	background: #deecfd;
+	border: 1px solid #8db2e3;
+	padding-bottom: 2px;
+	padding-top: 0;
+}
+
+.
+/*
+* Basic-Dialog 
+*/
+.x-dlg-proxy {
+	background: #c7dffc;
+	border: 1px solid #a5ccf9;
+}
+
+.x-dlg-shadow{
+	background: #cccccc;
+	opacity: .3;
+	-moz-opacity: .3;
+	filter: alpha(opacity=90);
+}
+
+.x-dlg {
+	background: transparent;
+}
+
+.x-dlg .x-dlg-hd {
+	background: url(hd-sprite.gif) repeat-x 0 -82px;
+	background-color: #aabaca;
+	color: #15428b;
+	zoom: 1;
+	padding-top: 7px;
+}
+
+.x-dlg .x-dlg-hd-left {
+	opacity: .85;
+	-moz-opacity: .85;
+	filter: alpha(opacity=80);
+	background: url(hd-sprite.gif) no-repeat 0 -41px;
+	zoom: 1;
+}
+
+.x-dlg-modal .x-dlg-hd-left {
+	opacity: .75;
+	-moz-opacity: .75;
+	filter: alpha(opacity=70);
+}
+
+.x-dlg .x-dlg-hd-right {
+	background: url(hd-sprite.gif) no-repeat right 0;
+	zoom: 1;
+}
+
+.x-dlg .x-dlg-dlg-body{
+	padding: 0 0 0;
+	position: absolute;
+	top: 24px;
+	left: 0;
+	z-index: 1;
+	border: 0 none;
+	background: transparent;
+}
+
+.x-dlg .x-dlg-bd{
+	background: #ffffff;
+	border: 1px solid #96b9e6;
+}
+
+.x-dlg .x-dlg-ft{
+	border: 0 none;
+	background: transparent;
+	padding-bottom: 8px;
+}
+
+.x-dlg .x-dlg-bg{
+	filter: alpha(opacity=80);
+	opacity: .85;
+	-moz-opacity: .85;
+	zoom: 1;
+}
+
+.x-dlg-modal .x-dlg-bg {
+	opacity: .75;
+	-moz-opacity: .75;
+	filter: alpha(opacity=90);
+}
+
+.x-dlg .x-dlg-bg-center {
+	padding: 2px 7px 7px 7px;
+	background: transparent url(bg-center.gif) repeat-x bottom;
+	zoom: 1;
+}
+
+.x-dlg .x-dlg-bg-left{
+	padding-left: 7px;
+	background: transparent url(l_r.gif) no-repeat bottom left;
+	zoom: 1;
+}
+
+.x-dlg .x-dlg-bg-right{
+	padding-right: 7px;
+	background: transparent url(l_r.gif) no-repeat bottom right;
+	zoom: 1;
+}
+
+.x-dlg-auto-tabs .x-dlg-dlg-body, .x-dlg-auto-layout .x-dlg-dlg-body{
+	background: transparent;
+	border: 0 none;
+}
+
+.x-dlg-auto-tabs .x-dlg-bd, .x-dlg-auto-layout .x-dlg-bd{
+	background: #ffffff;
+	border: 1px solid #e9f3f5;
+}
+
+.x-dlg-auto-tabs .x-tabs-top .x-tabs-body,.x-dlg-auto-tabs .x-tabs-bottom .x-tabs-body{
+	border-color: #8db2e3;
+}
+
+.x-dlg-auto-tabs .x-tabs-top .x-tabs-wrap,.x-dlg-auto-tabs .x-tabs-bottom .x-tabs-wrap{
+	border-color: #8db2e3;
+}
+
+.x-dlg .x-dlg-toolbox {
+	width: 50px;
+	height: 20px;
+	right: 5px;
+	top: 5px;
+}
+
+.x-dlg .x-dlg-close, .x-dlg .x-dlg-collapse {
+	width: 21px;
+	height: 20px;
+	margin: 0;
+}
+
+.x-dlg .x-dlg-close {
+	background-image: url(close.gif); background-position: 0 3px;
+}
+
+.x-dlg .x-dlg-collapse {
+	background-image: url(/koma/js//tab/collapse.gif);
+}
+
+.x-dlg-collapsed {
+	border-bottom: 1px solid #96b9e6;
+}
+
+.x-dlg .x-dlg-close-over {
+	background-image:url(close.gif); background-position: 0 -20px;
+	height: 19px;
+}
+
+.x-dlg .x-dlg-collapse-over {
+	background-image: url(collapse-over.gif);
+}
+

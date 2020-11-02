@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>优酷早期后台的弹窗特效</title>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link href="/min/?f=/resource/pub/bootstrap-3.3.7/css/bootstrap.css,/resource/pub/css/jquery.lr_box.css,/resource/pub/css/pub.css" rel="stylesheet" media="all">
+    <link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all">
+    <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+
+    <link href="/tool/tab/source/ext-all.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/tool/tab/source/prototype.js"></script>
+    <script type="text/javascript" src="/tool/tab/source/ext.js"></script>
+    <script type="text/javascript" src="/tool/tab/source/myFriend.js" ></script>
+</head>
+
+<body>
+<div class="container">
+    <button onclick="openWin();" id="btnId">点击弹窗</button>
+</div>
+
+<div id="windowId" style="display:none">
+    <div class="x-dlg-hd">标题</div>
+    <div class="x-dlg-bd">
+        <div style="width: 400px; height: 200px;display: block;">
+            内容
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function openWin() {
+        myFriend.openWin('btnId', 'windowId', 420, 380);
+    }
+</script>
+</body>
+</html>
