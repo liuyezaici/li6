@@ -26,10 +26,6 @@ class Article extends Frontend
         $this->allTypes = ArticleTypesModel::select();
         $this->keyword = input('keyword', '', 'trim');
     }
-    public function times() {
-        print_r(Date::toYMDS() .'|');
-        print_r(time());
-    }
 
     //文章详情
     public function details($id=NULL){
