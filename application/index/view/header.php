@@ -11,6 +11,13 @@
 <script type="text/javascript" src="/resource/pub/js/jquery-lr_element.js"></script> <!-- LR element -->
 <script type="text/javascript" src="/resource/front/js/front.js"></script><!-- 前端js-->
 <link href="/resource/front/css/front.css" rel="stylesheet" media="all" /> <!-- 模版样式 -->
+<meta property="og:image" content="/resource/front/images/logo.png"/>
+<meta property="og:title" content="李瑞个人主页"/>
+<meta property="og:description" content="李瑞个人主页:记录我的生活、工作、心得"/>
+<meta property="og:locale" content="zh_CN"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="李瑞的主页"/>
+
 <base target="_blank">
 </head>
 <body>

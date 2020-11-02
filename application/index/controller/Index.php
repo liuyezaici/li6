@@ -27,6 +27,10 @@ class Index extends Frontend
         $this->keyword = input('keyword', '', 'trim');
     }
 
+    public function times() {
+        print_r(Date::toYMDS() .'|');
+        print_r(time());
+    }
     //文章首页
     public function index(){
         $typeId = input('typeId', 0, 'int');

@@ -4,7 +4,7 @@ namespace app\user\controller;
 
 use app\admin\addon\fujian\model\Fujian;
 use app\common\controller\Backend;
-use fast\File;
+use fast\Date;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
 
@@ -38,7 +38,7 @@ class Article extends Backend
             if(!$content) $this->error('请输入内容');
             //过滤内容的附件
             $rows['cuid'] = $myUid;
-            $rows['ctime'] = time();
+            $rows['ctime'] = Date::toYMDS();
             $sid = ArticleModel::insertGetId($rows);
             $this->success('发布成功');
         }
