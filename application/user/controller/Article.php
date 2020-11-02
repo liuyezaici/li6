@@ -38,7 +38,7 @@ class Article extends Backend
             if(!$content) $this->error('请输入内容');
             //过滤内容的附件
             $rows['cuid'] = $myUid;
-            $rows['ctime'] = Date::toYMDS(time());
+            $rows['ctime'] = Date::toYMDS();
             $sid = ArticleModel::insertGetId($rows);
             $this->success('发布成功');
         }
