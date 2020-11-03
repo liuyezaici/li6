@@ -1,0 +1,9 @@
+{
+    "require": {
+        "league/commonmark": "^1.5",
+        "topthink/think-image": "^1.0",
+        "topthink/think-helper": ">=1.0.4",
+        "topthink/think-installer": ">=1.0.10",
+        "karsonzhang/fastadmin-addons": "1.2.0"
+    }
+}
