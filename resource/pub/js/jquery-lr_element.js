@@ -5429,7 +5429,6 @@ function regCodeAddGang(str) {
             var newVal;
             var newData = opt['data'];
             if(strHasKuohao(sourceReadonly, 'public')) {
-                //console.log('strHasKuohao public:', sourceVal);
                 newVal = strObj.formatStr(sourceReadonly, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
             } else if(strHasKuohao(sourceReadonly, 'data')) {
@@ -5446,7 +5445,7 @@ function regCodeAddGang(str) {
         };
         //更新input插件val
         obj.formatVal = function (opt) {
-            var sourceVal = opt['value'];
+            var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
             var newData = opt['data'];
             var sourceValIsPub = strHasKuohao(sourceVal, 'public');
@@ -6359,13 +6358,18 @@ function regCodeAddGang(str) {
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var newVal = opt['value'];
-            var newData = opt['data'];
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newData = opt['data']||{};
+            var newVal ;
+            // console.log('newData', newData);
+            // console.log('sourceVal', sourceVal);
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
             } else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, newData||{}, 0, obj, 'value');
+                // console.log('newData', newData);
+                newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
+                // console.log('newVal', newVal);
                 obj[objAttrHasKh] = true;
             } else {
                 newVal = sourceVal;
@@ -6782,26 +6786,26 @@ function regCodeAddGang(str) {
         var autoRenewMenuText = false;//当前对象的menu的text和val是否同时渲染完成
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
-            //console.log('format Val:');
-            //console.log(obj);
             opt = opt || [];
-            var val = opt['value'];
-            //console.log(val);
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newVal;
             //每次格式化 优先取格式化前的source value
-            if(strHasKuohao(val, 'public')) {
-                val = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
+            if(strHasKuohao(sourceVal, 'public')) {
+                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
-            }else if(strHasKuohao(val, 'data')) {
-                val = strObj.formatStr(sourceVal, opt['data']||{}, 0, obj, 'value');
+            }else if(strHasKuohao(sourceVal, 'data')) {
+                newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, obj, 'value');
                 obj[objAttrHasKh] = true;
+            } else {
+                newVal = sourceVal;
             }
-            opt['value'] = val; //参数要改变 防止外部取出来的仍是括号
+            opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             obj.valueSeted = true;
-            obj.setItemVal(val);
+            obj.setItemVal(newVal);
             if(!autoRenewMenuText) renewMenuTextByVal();
             //console.log('format_val');
             //如果值是数组 并且多个值 并且未定义是否多选，则默认支持多选
-            if($.isArray(val) && val.length>0 && obj['multi'] == undefined) {
+            if($.isArray(newVal) && newVal.length>0 && obj['multi'] == undefined) {
                 obj['multi'] = true;
             }
             if(obj.lazyCall) {
@@ -7262,18 +7266,19 @@ function regCodeAddGang(str) {
         };
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
-            //console.log(obj);
-            // console.log('format Val,opt:'+ JSON.stringify(opt['data']));
             opt = opt || [];
-            var newVal = opt['value'];
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newVal;
             //每次格式化 优先取格式化前的source value
             var newData = {};
             if(strHasKuohao(sourceVal, 'public')) {
                 newData = livingObj['data'];
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-            } else if(strHasKuohao(sourceVal, 'data')) {
+            } else if(strHasKuohao(newVal, 'data')) {
                 newData = opt['data'] || {};
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
+            } else {
+                newVal = sourceVal;
             }
             if(obj.menu.menuXuanranSuccess === true && !obj.hasRenewSonObj) {
                 if(obj[sonSelectKey]) {
@@ -7651,21 +7656,21 @@ function regCodeAddGang(str) {
         }
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
-            console.log('checked formatVal');
             opt = opt || [];
-            var newVal = opt['value'];
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newVal;
             //每次格式化 优先取格式化前的source value
             if (strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
             } else if (strHasKuohao(sourceVal, 'data')) {
-                //console.log('has data kuohao');
                 newVal = strObj.formatStr(sourceVal, opt['data'] || {}, 0, obj, 'value');
                 obj[objAttrHasKh] = true;
+            } else {
+                newVal = sourceVal;
             }
             if ($.isArray(newVal)) newVal = newVal.join(',');
-            var renewBind = strHasKuohao(sourceVal, 'public');
-            console.log('check formatVal',renewBind);
+            var renewBind = strHasKuohao(newVal, 'public');
             obj.callRenewBind(newVal, [obj], renewBind);
             if(obj.lazyCall) {
                 obj.lazyCall(obj, opt['data'] || {}, livingObj);
@@ -7913,15 +7918,17 @@ function regCodeAddGang(str) {
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var newVal = opt['value'];
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newVal;
             //每次格式化 优先取格式化前的source value
             if (strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
             } else if (strHasKuohao(sourceVal, 'data')) {
-                //console.log('has data kuohao');
                 newVal = strObj.formatStr(sourceVal, opt['data'] || {}, 0, obj, 'value');
                 obj[objAttrHasKh] = true;
+            } else {
+                newVal = sourceVal;
             }
 
             if (!optionIsSame(obj, opt, 'value')) {
@@ -7934,7 +7941,7 @@ function regCodeAddGang(str) {
                 }
             }
             //console.log(obj);
-            var renewBind = strHasKuohao(sourceVal);
+            var renewBind = obj[objAttrHasKh] == true;
             // console.log('radio renewBind', renewBind);
             obj.callRenewBind(newVal, [obj], renewBind);
             if(obj.lazyCall) {
@@ -8544,15 +8551,16 @@ function regCodeAddGang(str) {
         obj.formatVal = function (opt) {
             opt = opt || [];
             var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
-            var newVal = opt['value'];
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newVal;
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
             }else if(strHasKuohao(sourceVal, 'data')) {
-                //console.log('has kuohao:'+sourceVal);
-                //console.log(opt['data']);
                 newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, obj, 'value');
                 obj[objAttrHasKh] = true;
+            } else {
+                newVal = sourceVal;
             }
             opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             obj.renewVal(newVal);
@@ -8560,7 +8568,7 @@ function regCodeAddGang(str) {
                 //console.log('value change');
                 valueStrFormatdSuccess = true;
             }
-            var renewBind = strHasKuohao(sourceVal);
+            var renewBind = obj[objAttrHasKh]==true;
             if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
                 updateBindObj($.trim(options['bind']), newVal, [obj]);
             }
@@ -9309,6 +9317,7 @@ function regCodeAddGang(str) {
         bar['last_options'] = [];
         bar[objValIsNode] = false;
         bar[objAttrHasKh] = false;
+        var valueStrFormatdSuccess = false;
         //console.log('makedom:');
         //console.log(obj);
         // //支持外部设置值
@@ -9324,13 +9333,31 @@ function regCodeAddGang(str) {
         });
         //更新val
         bar.formatVal = function (opt) {
-            var oldVal = opt['value'];
-            var newData = opt['data'];
-            if(strHasKuohao(oldVal)) {//计算v中的公式 {1+2 > 3}
-                if(strHasKuohao(oldVal)) oldVal = strObj.formatStr(oldVal, newData, 0, bar, 'value'); //计算v中的公式 {1+2 > 3}
-                bar.returnVal = oldVal;
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newVal;
+            if(strHasKuohao(sourceVal, 'public')) {
+                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, bar, 'value');
+                bar[objAttrHasKh] = true;
+            }else if(strHasKuohao(sourceVal, 'data')) {
+                newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, bar, 'value');
+                bar[objAttrHasKh] = true;
+            } else {
+                newVal = sourceVal;
             }
-            bar.moveBtnByVal(oldVal);
+            bar.returnVal = newVal; //参数要改变 防止外部取出来的仍是括号
+            if (!optionIsSame(bar, opt, 'value')) {
+                valueStrFormatdSuccess = true;
+            }
+            var renewBind = bar[objAttrHasKh]==true;
+            if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
+                updateBindObj($.trim(options['bind']), newVal, [bar]);
+            }
+            if(valueStrFormatdSuccess) {
+                if(bar.lazyCall) {
+                    bar.lazyCall(bar, opt['data'] || {}, livingObj);
+                }
+            }
+            bar.moveBtnByVal(newVal);
         };
 
         //外部设置val
@@ -9699,7 +9726,7 @@ function regCodeAddGang(str) {
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['value'];
+            var sourceVal = opt['source_value'] || opt['value'];
             //每次格式化 优先取格式化前的source value
             var newVal;
             if(strHasKuohao(sourceVal, 'public')) {
