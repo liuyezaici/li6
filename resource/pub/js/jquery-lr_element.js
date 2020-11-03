@@ -1921,8 +1921,8 @@ function regCodeAddGang(str) {
         var lastVal = lastOption[attrName] || '';
         if(isUndefined(index)) {
             var same =  !isUndefined(lastOption[attrName]) && lastVal === option[attrName];
-            // if(attrName=='value' && same) {
-            //console.log(attrName+'last_val:'+ lastVal + ',opt:'+ option[attrName]);
+            // if(attrName=='value') {
+            //     console.log('same:',lastOption, option);
             // }
             return same;
         } else {
@@ -2408,30 +2408,18 @@ function regCodeAddGang(str) {
         //console.log('callRewObj.StringVal');
         //console.log(obj_);
         if(obj_[objValIsNode]) {
-            //console.log('is node');
-            //console.log(obj_);
-            //console.log(options['value']);
             //未渲染
-            if(options['source_value'] == options['value']) {
-                //console.log('未渲染 node');
-                if(strHasKuohao(options['value'], 'data') && !dataIsSame(obj_['last_options']['data'], options['data'])) {//局部的data变了 才格式化
-                    //console.log('formatObj.NodesVal', obj_['last_options']['data'], options['data']);
-                    //console.log(options['data']);
-                    formatObjNodesVal(obj_, options['data']);
-                } else if(strHasKuohao(options['value'], 'public')) {//全局的data不变化 无须格式化
-                    formatObjNodesVal(obj_, options['data']);
-                } else {
-                    //console.log('data.未变');
-                }
-                //console.log('source_val no change');
-                return ;
+            if(strHasKuohao(options['value'], 'data') && !dataIsSame(obj_['last_options']['data'], options['data'])) {//局部的data变了 才格式化
+                //console.log('formatObj.NodesVal', obj_['last_options']['data'], options['data']);
+                //console.log(options['data']);
+                formatObjNodesVal(obj_, options['data']);
+            } else if(strHasKuohao(options['value'], 'public')) {//全局的data不变化 无须格式化
+                formatObjNodesVal(obj_, options['data']);
             } else {
                 //console.log('已渲染 node');
-                //console.log('not node');
-                //console.log(options);
-                //console.log('source_val change');
                 domAppendNode(obj_, options);
             }
+
         } else {
             //console.log('callRew ObjStringVal');
             //console.log(obj_);
@@ -2629,9 +2617,9 @@ function regCodeAddGang(str) {
                 },
                 set: function (newVal) {
                     options[opt_] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
-                    //console.log('set::'+opt_ );
-                    //console.log(thisObj);
-                    //console.log(newVal);
+                    // console.log('set::'+opt_ );
+                    // console.log(thisObj);
+                    // console.log(newVal);
                     //name 等自动更新的参数无需触发更新
                     if($.inArray(opt_, optionsChangeNoRenew) != -1) { //系统属性改变 无须触发更新
                         //console.log('sys no renew:'+ opt_);
@@ -2652,9 +2640,9 @@ function regCodeAddGang(str) {
                     //console.log(thisObj);
                     //console.log(options);
                     if(opt_ =='data') {
-                        //console.log('set::'+opt_ );
-                        //console.log(thisObj);
-                        //console.log(newVal);
+                        // console.log('set::'+opt_ );
+                        // console.log(thisObj);
+                        // console.log(newVal);
                         renewObjData(thisObj, newVal); //直接更新data 里面已经 更新属性  format AttrVals(thisObj, options);
                         options[opt_] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
                         //console.log('renew::data');
@@ -4008,6 +3996,8 @@ function regCodeAddGang(str) {
     function domAppendNode(obj_, opt) {
         var optValStr = opt['value'] || opt['son'] || '';
         var optData = opt['data'] || makeNullData();
+        // console.log('optValStr', optValStr);
+        // console.log('optData', optData);
         if(isStrOrNumber(optData)) { //optData : {son_v}
             optData = strObj.formatStr(optData, [], 0, obj_, 'data');
         }
@@ -4049,6 +4039,7 @@ function regCodeAddGang(str) {
             formatObjNodesVal(obj_, optData); //value的改变 也要重新格式化
         };
         //当值的文本发生变化时 要一起更新静态节点内容
+        // console.log('optionIsSame', optionIsSame(obj_, opt, 'value'));
         if(!optionIsSame(obj_, opt, 'value') || obj_.nodeObj.length == 0 )
         {
             _renewNodeVal(optValStr);//更新node
@@ -4370,16 +4361,15 @@ function regCodeAddGang(str) {
         //当外部修改obj的val时，直接更新
         //when value is changed by outside
         obj.renewVal = function(newV, opt_) {
-            //console.log('renew val');
-            //console.log(obj);
-            //console.log(newV);
-            //console.log(opt_);
+            // console.log('renew val');
+            // console.log(newV);
             if(isUndefined(opt_)) opt_ = obj['options'];
             //console.log(obj);
             opt_['value'] = newV;
             //console.log(newV);
             //console.log(opt_);
-            if(isStrOrNumber(newV) && obj[newV]) {
+            if(isStrOrNumber(newV)) {
+                // console.log('objValIsNode');
                 obj[objValIsNode] = true; //修改obj的内容类型
                 domAppendNode(obj, opt_);
             } else {  //value is obj
@@ -5415,8 +5405,6 @@ function regCodeAddGang(str) {
         obj.prev = null;
         obj.hasCreateLrBtn = false; //是否已实例化左右按钮 防止二次生成
         obj['last_options'] = getOptVal(options, 'last_options', {});
-        //console.log(options);
-        //console.log(obj['last_options']);
         obj[objValIsNode] = false;
         //支持外部设置 取值
         Object.defineProperty(obj, 'value', {
@@ -5458,7 +5446,7 @@ function regCodeAddGang(str) {
         };
         //更新input插件val
         obj.formatVal = function (opt) {
-            var sourceVal = opt['source_value'] || opt['value'];
+            var sourceVal = opt['value'];
             var newVal;
             var newData = opt['data'];
             var sourceValIsPub = strHasKuohao(sourceVal, 'public');
@@ -6185,6 +6173,7 @@ function regCodeAddGang(str) {
         if(lrBtnSizeClass) {
             options['class_extend'] = lrBtnSizeClass;
         }
+        var sourceVal = options['value'];
         //console.log(optData);
         var funcAfterCreate = function (thisObj, option_) {
             //设置倒计时初始化剩余数字
@@ -6194,14 +6183,16 @@ function regCodeAddGang(str) {
                 } else {
                     thisObj.attr('disabled', true);
                 }
-                var showTimer = (restTime <= minNum) ? '': '('+ restTime +')';
                 var optData = !isUndefined(option_['data']) ? cloneData(option_['data']) : {};
-                //console.log('setRestNum');
                 //console.log(optData);
                 //console.log(thisObj);
-                optData['rest_time'] = showTimer;
+                optData['rest_time'] = restTime;
                 //console.log(optData);
                 thisObj['data'] = optData;
+                option_.value = sourceVal + '{{rest_time}>0?"({rest_time})":""}';
+                thisObj['last_options']['value'] = option_.value;
+                var newStr = strObj.formatStr(option_.value, optData, 0, thisObj, 'value');
+                thisObj.renewVal(newStr);
             };
             //外部使用的倒计时触发方法
             thisObj.subTime = function (restTime) { //倒计时
@@ -6216,28 +6207,22 @@ function regCodeAddGang(str) {
                     //1秒后触发btn内容更新
                     setTimeout(function () {
                         rest_time -= parseFloat(option_.step);
-                        //console.log('sub_1:'+ rest_time);
-                        //console.log(thisObj['last_options']['data']);
-                        optData['rest_time'] = '('+ rest_time +')';
-                        //console.log(thisObj['last_options']['data']);
+                        optData['rest_time'] = rest_time;
+                        var newStr = strObj.formatStr(option_.value, optData, 0, thisObj, 'value');
+                        thisObj.renewVal(newStr);
                         if(rest_time == 0) {
                             //renewObjData
-                            optData['rest_time'] = '';
-                            thisObj['data'] = optData;
+                            optData['rest_time'] = 0;
+                            thisObj['last_options']['value'] = sourceVal;//恢复默认的value
                             thisObj.removeAttr('disabled');
-                            return;
+                        } else {
+                            thisObj.__inSubTime(rest_time);
                         }
-                        //console.log(optData);
-                        thisObj['data'] = optData;
-                        thisObj.__inSubTime(rest_time);
                     }, 1000);
                     thisObj.attr('disabled', true);
                 } else {
                     //要等按钮渲染好data属性 才能重置它的data
                     setTimeout(function() {
-                        //console.log('clear__num2:'+ rest_time);
-                        //console.log('optData');
-                        //console.log(optData);
                         thisObj['data'] = optData;
                         thisObj.removeAttr('disabled');
                     }, 50);
@@ -6374,8 +6359,7 @@ function regCodeAddGang(str) {
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal = sourceVal;
+            var newVal = opt['value'];
             var newData = opt['data'];
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
@@ -6801,9 +6785,7 @@ function regCodeAddGang(str) {
             //console.log('format Val:');
             //console.log(obj);
             opt = opt || [];
-            //console.log(opt['data']);
-            var sourceVal = opt['source_value'] || opt['value'];
-            var val = sourceVal;
+            var val = opt['value'];
             //console.log(val);
             //每次格式化 优先取格式化前的source value
             if(strHasKuohao(val, 'public')) {
@@ -7283,8 +7265,7 @@ function regCodeAddGang(str) {
             //console.log(obj);
             // console.log('format Val,opt:'+ JSON.stringify(opt['data']));
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal = sourceVal;
+            var newVal = opt['value'];
             //每次格式化 优先取格式化前的source value
             var newData = {};
             if(strHasKuohao(sourceVal, 'public')) {
@@ -7672,8 +7653,7 @@ function regCodeAddGang(str) {
         obj.formatVal = function (opt) {
             console.log('checked formatVal');
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal = sourceVal;
+            var newVal = opt['value'];
             //每次格式化 优先取格式化前的source value
             if (strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
@@ -7933,8 +7913,7 @@ function regCodeAddGang(str) {
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal = sourceVal;
+            var newVal = opt['value'];
             //每次格式化 优先取格式化前的source value
             if (strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
@@ -8564,10 +8543,8 @@ function regCodeAddGang(str) {
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
             var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
-            var newVal = sourceVal;
-            console.log('format__Val:'+ sourceVal, obj);
+            var newVal = opt['value'];
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
@@ -9722,10 +9699,9 @@ function regCodeAddGang(str) {
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
+            var sourceVal = opt['value'];
             //每次格式化 优先取格式化前的source value
             var newVal;
-            //console.log('sourceVal:'+ sourceVal);
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
