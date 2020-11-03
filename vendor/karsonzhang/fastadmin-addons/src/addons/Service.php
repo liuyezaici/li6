@@ -19,52 +19,45 @@ class Service
     /**
      * 远程下载插件
      *
-     * @param   string  $name   插件名称
-     * @param   array   $extend 扩展参数
+     * @param string $name   插件名称
+     * @param array  $extend 扩展参数
      * @return  string
      * @throws  AddonException
      * @throws  Exception
      */
     public static function download($name, $extend = [])
     {
-        $addonTmpDir = \fast\Addon::getAddonPathUrl();
-        if (!is_dir($addonTmpDir))
-        {
+        $addonTmpDir = RUNTIME_PATH . 'addons' . DS;
+        if (!is_dir($addonTmpDir)) {
             @mkdir($addonTmpDir, 0755, true);
         }
         $tmpFile = $addonTmpDir . $name . ".zip";
         $options = [
-            CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_CONNECTTIMEOUT => 30,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER     => [
                 'X-REQUESTED-WITH: XMLHttpRequest'
             ]
         ];
         $ret = Http::sendRequest(self::getServerUrl() . '/addon/download', array_merge(['name' => $name], $extend), 'GET', $options);
-        if ($ret['ret'])
-        {
-            if (substr($ret['msg'], 0, 1) == '{')
-            {
-                $json = (array) json_decode($ret['msg'], true);
+        if ($ret['ret']) {
+            if (substr($ret['msg'], 0, 1) == '{') {
+                $json = (array)json_decode($ret['msg'], true);
                 //如果传回的是一个下载链接,则再次下载
-                if ($json['data'] && isset($json['data']['url']))
-                {
+                if ($json['data'] && isset($json['data']['url'])) {
                     array_pop($options);
                     $ret = Http::sendRequest($json['data']['url'], [], 'GET', $options);
-                    if (!$ret['ret'])
-                    {
+                    if (!$ret['ret']) {
                         //下载返回错误，抛出异常
                         throw new AddonException($json['msg'], $json['code'], $json['data']);
                     }
-                }
-                else
-                {
+                } else {
                     //下载返回错误，抛出异常
                     throw new AddonException($json['msg'], $json['code'], $json['data']);
                 }
             }
-            if ($write = fopen($tmpFile, 'w'))
-            {
+            if ($write = fopen($tmpFile, 'w')) {
                 fwrite($write, $ret['msg']);
                 fclose($write);
                 return $tmpFile;
@@ -77,23 +70,20 @@ class Service
     /**
      * 解压插件
      *
-     * @param   string  $name   插件名称
+     * @param string $name 插件名称
      * @return  string
      * @throws  Exception
      */
     public static function unzip($name)
     {
-        $file = \fast\Addon::getAddonPathUrl(). $name . '.zip';
+        $file = RUNTIME_PATH . 'addons' . DS . $name . '.zip';
         $dir = ADDON_PATH . $name . DS;
-        if (class_exists('ZipArchive'))
-        {
+        if (class_exists('ZipArchive')) {
             $zip = new ZipArchive;
-            if ($zip->open($file) !== TRUE)
-            {
+            if ($zip->open($file) !== true) {
                 throw new Exception('Unable to open the zip file');
             }
-            if (!$zip->extractTo($dir))
-            {
+            if (!$zip->extractTo($dir)) {
                 $zip->close();
                 throw new Exception('Unable to extract the file');
             }
@@ -104,26 +94,54 @@ class Service
     }
 
     /**
+     * 备份插件
+     * @param string $name 插件名称
+     * @return bool
+     * @throws Exception
+     */
+    public static function backup($name)
+    {
+        $file = RUNTIME_PATH . 'addons' . DS . $name . '-backup-' . date("YmdHis") . '.zip';
+        $dir = ADDON_PATH . $name . DS;
+        if (class_exists('ZipArchive')) {
+            $zip = new ZipArchive;
+            $zip->open($file, ZipArchive::CREATE);
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($files as $fileinfo) {
+                $filePath = $fileinfo->getPathName();
+                $localName = str_replace($dir, '', $filePath);
+                if ($fileinfo->isFile()) {
+                    $zip->addFile($filePath, $localName);
+                } elseif ($fileinfo->isDir()) {
+                    $zip->addEmptyDir($localName);
+                }
+            }
+            $zip->close();
+            return true;
+        }
+        throw new Exception("无法执行压缩操作，请确保ZipArchive安装正确");
+    }
+
+    /**
      * 检测插件是否完整
      *
-     * @param   string  $name   插件名称
+     * @param string $name 插件名称
      * @return  boolean
      * @throws  Exception
      */
     public static function check($name)
     {
-        if (!$name || !is_dir(ADDON_PATH . $name))
-        {
+        if (!$name || !is_dir(ADDON_PATH . $name)) {
             throw new Exception('Addon not exists');
         }
         $addonClass = get_addon_class($name);
-        if (!$addonClass)
-        {
+        if (!$addonClass) {
             throw new Exception("插件主启动程序不存在");
         }
         $addon = new $addonClass();
-        if (!$addon->checkInfo())
-        {
+        if (!$addon->checkInfo()) {
             throw new Exception("配置文件不完整");
         }
         return true;
@@ -132,7 +150,7 @@ class Service
     /**
      * 是否有冲突
      *
-     * @param   string  $name   插件名称
+     * @param string $name 插件名称
      * @return  boolean
      * @throws  AddonException
      */
@@ -140,8 +158,7 @@ class Service
     {
         // 检测冲突文件
         $list = self::getGlobalFiles($name, true);
-        if ($list)
-        {
+        if ($list) {
             //发现冲突文件，抛出异常
             throw new AddonException("发现冲突文件", -3, ['conflictlist' => $list]);
         }
@@ -150,34 +167,28 @@ class Service
 
     /**
      * 导入SQL
-     * 
-     * @param   string    $name   插件名称
-     * @param   string    $file   sql文件名
+     *
+     * @param string $name 插件名称
      * @return  boolean
      */
-    public static function importsql($name, $file = 'install.sql')
+    public static function importsql($name)
     {
-        $sqlFile = ADDON_PATH . $name . DS . $file;
-        if (is_file($sqlFile))
-        {
+        $sqlFile = ADDON_PATH . $name . DS . 'install.sql';
+        if (is_file($sqlFile)) {
             $lines = file($sqlFile);
             $templine = '';
-            foreach ($lines as $line)
-            {
-                if (substr($line, 0, 2) == '--' || $line == '' || substr($line, 0, 2) == '/*')
+            foreach ($lines as $line) {
+                if (substr($line, 0, 2) == '--' || $line == '' || substr($line, 0, 2) == '/*') {
                     continue;
+                }
 
                 $templine .= $line;
-                if (substr(trim($line), -1, 1) == ';')
-                {
+                if (substr(trim($line), -1, 1) == ';') {
                     $templine = str_ireplace('__PREFIX__', config('database.prefix'), $templine);
                     $templine = str_ireplace('INSERT INTO ', 'INSERT IGNORE INTO ', $templine);
-                    try
-                    {
+                    try {
                         Db::getPdo()->exec($templine);
-                    }
-                    catch (\PDOException $e)
-                    {
+                    } catch (\PDOException $e) {
                         //$e->getMessage();
                     }
                     $templine = '';
@@ -198,24 +209,14 @@ class Service
         //刷新addons.js
         $addons = get_addon_list();
         $bootstrapArr = [];
-        foreach ($addons as $name => $addon)
-        {
+        foreach ($addons as $name => $addon) {
             $bootstrapFile = ADDON_PATH . $name . DS . 'bootstrap.js';
-            if ($addon['state'] && is_file($bootstrapFile))
-            {
+            if ($addon['state'] && is_file($bootstrapFile)) {
                 $bootstrapArr[] = file_get_contents($bootstrapFile);
             }
         }
-		/*$packages = get_package_addon();
-		foreach ($packages as $name => $addon){
-            $bootstrapFile = APP_PATH . 'admin' .DS . $addon['package'] . DS . $name . DS . 'bootstrap.js';
-			if ($addon['install'] == 1){
-                $bootstrapArr[] = file_get_contents($bootstrapFile);
-			}
-		}*/
-        $addonsFile = ROOT_PATH . str_replace("/", DS, "assets/js/addons.js");
-        if ($handle = fopen($addonsFile, 'w'))
-        {
+        $addonsFile = ROOT_PATH . str_replace("/", DS, "public/assets/js/addons.js");
+        if ($handle = fopen($addonsFile, 'w')) {
             $tpl = <<<EOD
 define([], function () {
     {__JS__}
@@ -223,30 +224,25 @@ define([], function () {
 EOD;
             fwrite($handle, str_replace("{__JS__}", implode("\n", $bootstrapArr), $tpl));
             fclose($handle);
-        }
-        else
-        {
+        } else {
             throw new Exception("addons.js文件没有写入权限");
         }
 
-        $file = APP_PATH . 'extra' . DS . '/addons.php';
+        $file = APP_PATH . 'extra' . DS . 'addons.php';
 
         $config = get_addon_autoload_config(true);
-        if ($config['autoload'])
+        if ($config['autoload']) {
             return;
+        }
 
-        if (!is_really_writable($file))
-        {
+        if (!is_really_writable($file)) {
             throw new Exception("addons.php文件没有写入权限");
         }
 
-        if ($handle = fopen($file, 'w'))
-        {
-            fwrite($handle, "<?php\n\n" . "return " . var_export($config, TRUE) . ";");
+        if ($handle = fopen($file, 'w')) {
+            fwrite($handle, "<?php\n\n" . "return " . var_export($config, true) . ";");
             fclose($handle);
-        }
-        else
-        {
+        } else {
             throw new Exception("文件没有写入权限");
         }
         return true;
@@ -255,55 +251,39 @@ EOD;
     /**
      * 安装插件
      *
-     * @param   string  $name   插件名称
-     * @param   boolean $force  是否覆盖
-     * @param   array   $extend 扩展参数
+     * @param string  $name   插件名称
+     * @param boolean $force  是否覆盖
+     * @param array   $extend 扩展参数
      * @return  boolean
      * @throws  Exception
      * @throws  AddonException
      */
     public static function install($name, $force = false, $extend = [])
     {
-        if (!$name)// || (is_dir(ADDON_PATH . $name) && !$force))
-        {
+        if (!$name || (is_dir(ADDON_PATH . $name) && !$force)) {
             throw new Exception('Addon already exists');
         }
-		
-		if(!is_dir(ADDON_PATH . $name) || $force){
-			// 远程下载插件
-			$tmpFile = Service::download($name, $extend);
-	
-			// 解压插件
-			$addonDir = Service::unzip($name);
-	
-			// 移除临时文件
-			@unlink($tmpFile);
-		}else{
-			$addonDir = ADDON_PATH . $name . DS;
-		}
-		if(is_dir($addonDir . 'public' . DS . 'assets')){
-			@rmdirs($addonDir . 'assets');
-			@rename($addonDir . 'public' . DS . 'assets', $addonDir . 'assets');
-			@rmdirs($addonDir . 'public');
-		}
 
-        try
-        {
+        // 远程下载插件
+        $tmpFile = Service::download($name, $extend);
+
+        // 解压插件
+        $addonDir = Service::unzip($name);
+
+        // 移除临时文件
+        @unlink($tmpFile);
+
+        try {
             // 检查插件是否完整
             Service::check($name);
 
-            if (!$force)
-            {
+            if (!$force) {
                 Service::noconflict($name);
             }
-        }
-        catch (AddonException $e)
-        {
+        } catch (AddonException $e) {
             @rmdirs($addonDir);
             throw new AddonException($e->getMessage(), $e->getCode(), $e->getData());
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             @rmdirs($addonDir);
             throw new Exception($e->getMessage());
         }
@@ -311,36 +291,30 @@ EOD;
         // 复制文件
         $sourceAssetsDir = self::getSourceAssetsDir($name);
         $destAssetsDir = self::getDestAssetsDir($name);
-        if (is_dir($sourceAssetsDir))
-        {
+        if (is_dir($sourceAssetsDir)) {
             copydirs($sourceAssetsDir, $destAssetsDir);
         }
-        foreach (self::getCheckDirs() as $k => $dir)
-        {
-            if (is_dir($addonDir . $dir))
-            {
+        foreach (self::getCheckDirs() as $k => $dir) {
+            if (is_dir($addonDir . $dir)) {
                 copydirs($addonDir . $dir, ROOT_PATH . $dir);
             }
         }
 
-        try
-        {
+        try {
             // 默认启用该插件
             $info = get_addon_info($name);
-			$info['state'] = 1;
-			$info['install'] = 1;
-			set_addon_info($name, $info);
+            if (!$info['state']) {
+                $info['state'] = 1;
+                set_addon_info($name, $info);
+            }
 
             // 执行安装脚本
             $class = get_addon_class($name);
-            if (class_exists($class))
-            {
+            if (class_exists($class)) {
                 $addon = new $class();
                 $addon->install();
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
 
@@ -355,70 +329,48 @@ EOD;
     /**
      * 卸载插件
      *
-     * @param   string  $name
-     * @param   boolean $force  是否强制卸载
+     * @param string  $name
+     * @param boolean $force 是否强制卸载
      * @return  boolean
      * @throws  Exception
      */
     public static function uninstall($name, $force = false)
     {
-        if (!$name || !is_dir(ADDON_PATH . $name))
-        {
+        if (!$name || !is_dir(ADDON_PATH . $name)) {
             throw new Exception('Addon not exists');
         }
 
-        if (!$force)
-        {
+        if (!$force) {
             Service::noconflict($name);
         }
 
         // 移除插件基础资源目录
         $destAssetsDir = self::getDestAssetsDir($name);
-        if (is_dir($destAssetsDir))
-        {
+        if (is_dir($destAssetsDir)) {
             rmdirs($destAssetsDir);
         }
 
         // 移除插件全局资源文件
-        if ($force)
-        {
-			$dirs = array();
+        if ($force) {
             $list = Service::getGlobalFiles($name);
-            foreach ($list as $k => $v)
-            {	
+            foreach ($list as $k => $v) {
                 @unlink(ROOT_PATH . $v);
-				$dirs[] = dirname(ROOT_PATH . $v);
             }
-			foreach ($dirs as $v){
-				$dir = basename($v);
-				if($dir == $name)@rmdirs($v, true, true);
-			}
         }
 
         // 执行卸载脚本
-        try
-        {
-            $info = get_addon_info($name);
-			$info['install'] = 0;
-			set_addon_info($name, $info);
-
+        try {
             $class = get_addon_class($name);
-            if (class_exists($class))
-            {
+            if (class_exists($class)) {
                 $addon = new $class();
                 $addon->uninstall();
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
 
-        // 导入
-        Service::importsql($name, 'uninstall.sql');
-
         // 移除插件目录
-//        rmdirs(ADDON_PATH . $name);
+        rmdirs(ADDON_PATH . $name);
 
         // 刷新
         Service::refresh();
@@ -427,65 +379,50 @@ EOD;
 
     /**
      * 启用
-     * @param   string  $name   插件名称
-     * @param   boolean $force  是否强制覆盖
+     * @param string  $name  插件名称
+     * @param boolean $force 是否强制覆盖
      * @return  boolean
      */
     public static function enable($name, $force = false)
     {
-        if (!$name || !is_dir(ADDON_PATH . $name))
-        {
+        if (!$name || !is_dir(ADDON_PATH . $name)) {
             throw new Exception('Addon not exists');
         }
-		/*
-        if (!$force)
-        {
+
+        if (!$force) {
             Service::noconflict($name);
         }
 
         $addonDir = ADDON_PATH . $name . DS;
-		if(is_dir($addonDir . 'public' . DS . 'assets')){
-			@rmdirs($addonDir . 'assets');
-			@rename($addonDir . 'public' . DS . 'assets', $addonDir . 'assets');
-			@rmdirs($addonDir . 'public');
-		}
 
         // 复制文件
         $sourceAssetsDir = self::getSourceAssetsDir($name);
         $destAssetsDir = self::getDestAssetsDir($name);
-        if (is_dir($sourceAssetsDir))
-        {
+        if (is_dir($sourceAssetsDir)) {
             copydirs($sourceAssetsDir, $destAssetsDir);
         }
-        foreach (self::getCheckDirs() as $k => $dir)
-        {
-            if (is_dir($addonDir . $dir))
-            {
+        foreach (self::getCheckDirs() as $k => $dir) {
+            if (is_dir($addonDir . $dir)) {
                 copydirs($addonDir . $dir, ROOT_PATH . $dir);
             }
         }
-		*/
+
         //执行启用脚本
-        try
-        {
+        try {
             $class = get_addon_class($name);
-            if (class_exists($class))
-            {
+            if (class_exists($class)) {
                 $addon = new $class();
-                if (method_exists($class, "enable"))
-                {
+                if (method_exists($class, "enable")) {
                     $addon->enable();
                 }
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
 
         $info = get_addon_info($name);
         $info['state'] = 1;
-        //unset($info['url']);
+        unset($info['url']);
 
         set_addon_info($name, $info);
 
@@ -496,60 +433,58 @@ EOD;
 
     /**
      * 禁用
-     * 
-     * @param   string  $name   插件名称
-     * @param   boolean $force  是否强制禁用
+     *
+     * @param string  $name  插件名称
+     * @param boolean $force 是否强制禁用
      * @return  boolean
      * @throws  Exception
      */
     public static function disable($name, $force = false)
     {
-        if (!$name || !is_dir(ADDON_PATH . $name))
-        {
+        if (!$name || !is_dir(ADDON_PATH . $name)) {
             throw new Exception('Addon not exists');
         }
-		/*
-        if (!$force)
-        {
+        if (!$force) {
             Service::noconflict($name);
         }
 
         // 移除插件基础资源目录
         $destAssetsDir = self::getDestAssetsDir($name);
-        if (is_dir($destAssetsDir))
-        {
+        if (is_dir($destAssetsDir)) {
             rmdirs($destAssetsDir);
         }
 
+        $dirs = [];
         // 移除插件全局资源文件
         $list = Service::getGlobalFiles($name);
-        foreach ($list as $k => $v)
-        {
+        foreach ($list as $k => $v) {
+            $dirs[] = dirname(ROOT_PATH . $v);
             @unlink(ROOT_PATH . $v);
         }
-		*/
+
+        // 移除插件空目录
+        $dirs = array_filter(array_unique($dirs));
+        foreach ($dirs as $k => $v) {
+            remove_empty_folder($v);
+        }
+
         $info = get_addon_info($name);
         $info['state'] = 0;
-        //unset($info['url']);
+        unset($info['url']);
 
         set_addon_info($name, $info);
 
         // 执行禁用脚本
-        try
-        {
+        try {
             $class = get_addon_class($name);
-            if (class_exists($class))
-            {
+            if (class_exists($class)) {
                 $addon = new $class();
 
-                if (method_exists($class, "disable"))
-                {
+                if (method_exists($class, "disable")) {
                     $addon->disable();
                 }
             }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
 
@@ -560,56 +495,77 @@ EOD;
 
     /**
      * 升级插件
-     * 
-     * @param   string  $name   插件名称
-     * @param   array   $extend 扩展参数
+     *
+     * @param string $name   插件名称
+     * @param array  $extend 扩展参数
      */
     public static function upgrade($name, $extend = [])
     {
         $info = get_addon_info($name);
-        if ($info['state'])
-        {
+        if ($info['state']) {
             throw new Exception(__('Please disable addon first'));
         }
         $config = get_addon_config($name);
-        if ($config)
-        {
+        if ($config) {
             //备份配置
         }
+
+        // 备份插件文件
+        Service::backup($name);
 
         // 远程下载插件
         $tmpFile = Service::download($name, $extend);
 
         // 解压插件
         $addonDir = Service::unzip($name);
-		if(is_dir($addonDir . 'public' . DS . 'assets')){
-			@rmdirs($addonDir . 'assets');
-			@rename($addonDir . 'public' . DS . 'assets', $addonDir . 'assets');
-			@rmdirs($addonDir . 'public');
-		}
 
         // 移除临时文件
         @unlink($tmpFile);
 
-        if ($config)
-        {
+        if ($config) {
             // 还原配置
             set_addon_config($name, $config);
         }
-        
+
         // 导入
         Service::importsql($name);
-        
+
+        // 执行升级脚本
+        try {
+            $addonName = ucfirst($name);
+            //创建临时类用于调用升级的方法
+            $sourceFile = ADDON_PATH . $name . DS . $addonName . ".php";
+            $destFile = ADDON_PATH . $name . DS . $addonName . "Upgrade.php";
+
+            $classContent = str_replace("class {$addonName} extends", "class {$addonName}Upgrade extends", file_get_contents($sourceFile));
+
+            //创建临时的类文件
+            file_put_contents($destFile, $classContent);
+
+            $className = "\\addons\\" . $name . "\\" . $addonName . "Upgrade";
+            $addon = new $className($name);
+
+            //调用升级的方法
+            if (method_exists($addon, "upgrade")) {
+                $addon->upgrade();
+            }
+
+            //移除临时文件
+            @unlink($destFile);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+
         // 刷新
         Service::refresh();
-        
+
         return true;
     }
 
     /**
      * 获取插件在全局的文件
      *
-     * @param   string  $name   插件名称
+     * @param string $name 插件名称
      * @return  array
      */
     public static function getGlobalFiles($name, $onlyconflict = false)
@@ -617,38 +573,30 @@ EOD;
         $list = [];
         $addonDir = ADDON_PATH . $name . DS;
         // 扫描插件目录是否有覆盖的文件
-        foreach (self::getCheckDirs() as $k => $dir)
-        {
+        foreach (self::getCheckDirs() as $k => $dir) {
             $checkDir = ROOT_PATH . DS . $dir . DS;
-            if (!is_dir($checkDir))
+            if (!is_dir($checkDir)) {
                 continue;
+            }
             //检测到存在插件外目录
-            if (is_dir($addonDir . $dir))
-            {
+            if (is_dir($addonDir . $dir)) {
                 //匹配出所有的文件
                 $files = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator($addonDir . $dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
+                    new RecursiveDirectoryIterator($addonDir . $dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
                 );
 
-                foreach ($files as $fileinfo)
-                {
-                    if ($fileinfo->isFile())
-                    {
+                foreach ($files as $fileinfo) {
+                    if ($fileinfo->isFile()) {
                         $filePath = $fileinfo->getPathName();
                         $path = str_replace($addonDir, '', $filePath);
-                        if ($onlyconflict)
-                        {
+                        if ($onlyconflict) {
                             $destPath = ROOT_PATH . $path;
-                            if (is_file($destPath))
-                            {
-                                if (filesize($filePath) != filesize($destPath) || md5_file($filePath) != md5_file($destPath))
-                                {
+                            if (is_file($destPath)) {
+                                if (filesize($filePath) != filesize($destPath) || md5_file($filePath) != md5_file($destPath)) {
                                     $list[] = $path;
                                 }
                             }
-                        }
-                        else
-                        {
+                        } else {
                             $list[] = $path;
                         }
                     }
@@ -660,7 +608,7 @@ EOD;
 
     /**
      * 获取插件源资源文件夹
-     * @param   string  $name   插件名称
+     * @param string $name 插件名称
      * @return  string
      */
     protected static function getSourceAssetsDir($name)
@@ -670,14 +618,13 @@ EOD;
 
     /**
      * 获取插件目标资源文件夹
-     * @param   string  $name   插件名称
+     * @param string $name 插件名称
      * @return  string
      */
     protected static function getDestAssetsDir($name)
     {
-        $assetsDir = ROOT_PATH . str_replace("/", DS, "assets/addons/{$name}/");
-        if (!is_dir($assetsDir))
-        {
+        $assetsDir = ROOT_PATH . str_replace("/", DS, "public/assets/addons/{$name}/");
+        if (!is_dir($assetsDir)) {
             mkdir($assetsDir, 0755, true);
         }
         return $assetsDir;
@@ -700,7 +647,7 @@ EOD;
     {
         return [
             'application',
-            'assets'
+            'public'
         ];
     }
 

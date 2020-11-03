@@ -2,7 +2,7 @@
 
 namespace think\addons;
 
-use app\admin\library\Auth;
+use app\common\library\Auth;
 use think\Config;
 use think\Hook;
 use think\Lang;
@@ -37,13 +37,13 @@ class Controller extends \think\Controller
 
     /**
      * 权限Auth
-     * @var Auth 
+     * @var Auth
      */
     protected $auth = null;
 
     /**
      * 布局模板
-     * @var string 
+     * @var string
      */
     protected $layout = null;
 
@@ -62,7 +62,7 @@ class Controller extends \think\Controller
         $this->request = $request;
 
         //移除HTML标签
-        $this->request->filter('strip_tags');
+        $this->request->filter('trim,strip_tags,htmlspecialchars');
 
         // 是否自动转换控制器和操作名
         $convert = Config::get('url_convert');
@@ -90,7 +90,7 @@ class Controller extends \think\Controller
         $this->addon = $addon ? call_user_func($filter, $addon) : '';
         $this->controller = $controller ? call_user_func($filter, $controller) : 'index';
         $this->action = $action ? call_user_func($filter, $action) : 'index';
-        
+
         // 重置配置
         Config::set('template.view_path', ADDON_PATH . $this->addon . DS . 'view' . DS);
 
@@ -124,7 +124,7 @@ class Controller extends \think\Controller
         if (!$this->auth->match($this->noNeedLogin))
         {
             //初始化
-            if($token) $this->auth->init($token);
+            $this->auth->init($token);
             //检测是否登录
             if (!$this->auth->isLogin())
             {
