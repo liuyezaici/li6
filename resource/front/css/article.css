@@ -138,9 +138,11 @@
     font-size: 16px;
     overflow: hidden;
     max-width: 760px;
-    white-space: pre-wrap;
 }
 
+.article_body #article_content .content_box p {
+    white-space: pre-wrap;
+}
 .article_body #article_content .content_box blockquote p {
     white-space: pre-line;
 }
