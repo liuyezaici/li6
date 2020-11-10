@@ -132,7 +132,8 @@
     margin-top: 10px;
     border-bottom: 1px solid #dedede;
 }
-.article_body #article_content .content_box {
+
+.article_body #article_content .content_box .markdown-body {
     line-height: 28px;
     font-size: 16px;
     overflow: hidden;
