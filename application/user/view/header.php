@@ -11,22 +11,3 @@
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
-<script type="text/javascript" src="/resource/front/js/front.js"></script><!-- 前端js-->
-<link href="/resource/front/css/front.css" rel="stylesheet" media="all" /> <!-- 模版样式 -->
-<base target="_blank">
-</head>
-<body>
-<div id="navigation">
-    <ul>
-        <li>
-            <a href="/" class="logo" target="_parent"><img src="/resource/front/images/logo.png" alt="logo" /></a>
-        </li>
-        <li class="active">
-            <i></i>
-            <a href="/" target="_parent">LR主页 2015/11/12</a>
-        </li>
-        <li class="status_box">
-            <a href="javascript:void(0);" target="_self" class="btn btn-default" onclick="loginIn();">登录</a>
-        </li>
-    </ul>
-</div>
