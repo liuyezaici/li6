@@ -198,7 +198,8 @@ class Backend extends Controller
         $this->assign('auth', $this->auth);
         //渲染管理员对象
         $this->assign('admin', Users::get($this->auth->id));
-        $this->view->assign('footer',   $this->view->fetch(APP_PATH . 'user/view/footer.php'));
+        $this->assign('header',   $this->view->fetch(APP_PATH . 'user/view/header.php'));
+        $this->assign('footer',   $this->view->fetch(APP_PATH . 'user/view/footer.php'));
     }
 
     /**
