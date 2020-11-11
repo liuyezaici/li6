@@ -13,9 +13,9 @@
 <link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script src="/resource/pub/js/jquery-lr_box.js"></script>
-<script src="/resource/pub/js/jquery-lr_base.js"></script>
-<script src="/resource/pub/js/jquery-lr_element.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
 
     <script src="/resource/pub/codemirror/5.2.0/codemirror.js"></script>
     <link rel="stylesheet" href="/resource/pub/codemirror/5.2.0/codemirror.css">

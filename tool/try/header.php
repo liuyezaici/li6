@@ -2,9 +2,9 @@
     <link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
     <link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
     <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-    <script src="/resource/pub/js/jquery-lr_box.js"></script>
-    <script src="/resource/pub/js/jquery-lr_base.js"></script>
-    <script src="/resource/pub/js/jquery-lr_element.js"></script>
+    <script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+    <script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+    <script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
 <link href="/resource/front/css/front.css?a" rel="stylesheet" media="all" /> <!-- 模版样式 -->
 <script type="text/javascript" src="/include/lib/xheditor/xheditor.js"></script><!-- 编辑器插件-->
 <base target="_blank">
