@@ -1,26 +1,18 @@
 周1 
-	
+	manage：socket统计加弹窗展示详情
 	
 	 
 周2
-    注册苹果海外id 下载注册火币app 测试购买usdt
-	找usdt ltc 交易代码
-     
+    
+
 周3
-    api:用webman重构服务 上测试0 等环境升级php7.1
-	
+ 
 周4 
-    api:新框架调试 :扫码登录时获取用户系统等问题.
-	chat:跨域调试 确定js不支持
-	api:恢复旧版的 gateway 扩展
-	 
+
 	 
 周5  
-    socket:统计接口功能 表：im_socket_count
-    manage:统计接口功能界面排版	
-    api: 修复扫码登录的时间戳获取问题
-	
-	
+  
+  
    
 	wallet：找ltc交易代码--未果 
    
