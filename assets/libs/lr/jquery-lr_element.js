@@ -7285,7 +7285,7 @@ function regCodeAddGang(str) {
                     __checkIfRenewSonObj(newVal);//检测是否需要触发子对象刷新data
                 }
             }
-            console.log('sel newVal:', newVal);
+            //console.log('newVal:', newVal);
             //如果值是数组 并且多个值 并且未定义是否多选，则默认支持多选
             if($.isArray(newVal) && newVal.length>0 && obj['multi'] == undefined) {
                 obj['multi'] = true;

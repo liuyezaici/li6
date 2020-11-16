@@ -1,7 +1,8 @@
 周1 
 	manage：socket统计加弹窗展示详情
+	socket：群成员等缓存优化 去掉冗余的代码
+	socket/api: 创建群的接口代码转到api
 	
-	 
 周2
     
 
@@ -15,6 +16,24 @@
   
    
 	wallet：找ltc交易代码--未果 
+   
+   
+   
+   
+   
+   
+   
+   /uid/123/20201116/123123123.txt
+   /gid/66/123/20201116/123123123.txt
+   
+   uid_msg_table索引:
+   uid,uniqueid,time,filepath
+   
+   gid_msg_table_123 索引:
+   uid,uniqueid,time,filepath
+    
+   gid_msg_table_123 索引:
+   uid,uniqueid,time,filepath
    
    
    
