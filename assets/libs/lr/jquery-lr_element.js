@@ -7272,7 +7272,7 @@ function regCodeAddGang(str) {
             if(strHasKuohao(sourceVal, 'public')) {
                 newData = livingObj['data'];
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-            } else if(strHasKuohao(newVal, 'data')) {
+            } else if(strHasKuohao(sourceVal, 'data')) {
                 newData = opt['data'] || {};
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
             } else {
@@ -7285,7 +7285,7 @@ function regCodeAddGang(str) {
                     __checkIfRenewSonObj(newVal);//检测是否需要触发子对象刷新data
                 }
             }
-            //console.log('newVal:', newVal);
+            console.log('sel newVal:', newVal);
             //如果值是数组 并且多个值 并且未定义是否多选，则默认支持多选
             if($.isArray(newVal) && newVal.length>0 && obj['multi'] == undefined) {
                 obj['multi'] = true;
@@ -8539,7 +8539,7 @@ function regCodeAddGang(str) {
         var options = cloneData(sourceOptions);
         options = options || {};
         var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';
-        var obj = $('<textarea id="'+ editorId +'" style="width: 100%"></textarea>');
+        var obj = $('<textarea id="'+ editorId +'"></textarea>');
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj['tag'] = 'editor';
         obj[objValIsNode] = false;
@@ -8746,7 +8746,6 @@ function regCodeAddGang(str) {
                 //console.log(this);
                 //console.log(options);
 
-                options['width'] = getOptVal(options, ['width'], '100%');
                 options['placeholder'] = getOptVal(options, ['place', 'placeholder'], '');
                 var editorOut = !isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
                 var editorType = !isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd

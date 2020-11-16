@@ -10,8 +10,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
-<link href="/resource/pub/css/jquery.lr_box.css" rel="stylesheet" media="all" />
-<link href="/resource/pub/css/jquery.lr_element.css" rel="stylesheet" media="all" />
+<link href="/min/?f=/assets/libs/lr/jquery.lr_box.css,/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
