@@ -6,6 +6,9 @@
 周2
     supermq/socket:删除个人消息和群消息->转移到队列中排队执行
     supermq/api/common.oss:建群、转发等文件oss操作全部转到mq异步执行，防止堵塞业务代码
+    supermq/socket/common:移除群成员，解散群代码优化，先移除群列表，再异步执行删除用户的群消息
+    mq/socket/common:消息提前写入缓存，后面再将sql转给mq直接入库
+	
 
 周3
  
