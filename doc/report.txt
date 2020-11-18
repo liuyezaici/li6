@@ -10,8 +10,19 @@
     mq/socket/common:消息提前写入缓存，后面再将sql转给mq直接入库
 	
 
-周3
- 
+周3 
+    doc:创建群的新api接口
+	common:好友缓存的写入和判断优化,修复不是好友的检测问题；apiVer代码转为公共
+	common:用户的群列表缓存优化
+	web: api.js接口访问对象；socket.data解析兼容新旧版
+	socket:client和uid的绑定改为gateway自带函数
+	
+	
+	
+	
+    
+	转发@昵称中带emoji乱码？
+   
 周4 
 
 	 
