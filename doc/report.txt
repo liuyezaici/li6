@@ -17,13 +17,16 @@
 	web: api.js接口访问对象；socket.data解析兼容新旧版
 	socket:client和uid的绑定改为gateway自带函数
 	
-	
-	
-	
-    
-	转发@昵称中带emoji乱码？
    
 周4 
+    common:单聊阅后即焚问题修复；消息入库加管理员过滤
+	mq:写入离线消息-发布任务的昵称问题
+	supermq/socket:阅后即焚的业务代码改为直接在mq中执行，防止堵塞socket业务
+	
+    
+	
+	
+	转发@昵称中带emoji乱码？
 
 	 
 周5  
