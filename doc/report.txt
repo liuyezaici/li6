@@ -22,39 +22,16 @@
     common:单聊阅后即焚问题修复；消息入库加管理员过滤
 	mq:写入离线消息-发布任务的昵称问题
 	supermq/socket:阅后即焚的业务代码改为直接在mq中执行，防止堵塞socket业务
-	
     
+周5  
+	common/socket/supermq:新增在线发送消息动作保证送达服务
+	api:踢人代码调试
+	mq:同步dev的代码阅后即焚和消息保证送达功能
 	
+	
+  
+ -------------------------------------------
 	
 	转发@昵称中带emoji乱码？
-
-	 
-周5  
-  
-  
-  
-  
-  
-  
-   
-	wallet：找ltc交易代码--未果 
-   
-   
-   
-   
-   新消息结构规划：
-   
-   /uid/123/20201116/123123123.txt
-   /gid/66/123/20201116/123123123.txt
-   
-   uid_msg_table索引:
-   uid,uniqueid,time,filepath
-   
-   gid_msg_table_123 索引:
-   uid,uniqueid,time,filepath
-    
-   gid_msg_table_123 索引:
-   uid,uniqueid,time,filepath
-   
    
    
