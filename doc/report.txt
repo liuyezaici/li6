@@ -8,7 +8,9 @@
 	
 周2
     合并代码：新版本 api/socket代码合并到master分支
-    
+	api/socket: 设置、删除聊天对象接口转api;
+	
+    调试api异常未打印日志的问题
 	
 
 周3 
