@@ -1,32 +1,26 @@
 周1 
-	manage：socket统计加弹窗展示详情
-	socket：群成员等缓存优化 去掉冗余的代码
-	socket/api: 创建群的接口代码转到api
+	
+	api:踢人代码再次调试 发现是app旧版问题
+	socket/api:socket的撤回群消息接口改为api
+	common: 用户登录和注册的代码转移到api,client代码也分离。 因为gateway在api的命名空间不支持socket项目
+	api:socket的修改群名字改为api接口
+	api:socket的清空个人、群消息改为api接口 
 	
 周2
-    supermq/socket:删除个人消息和群消息->转移到队列中排队执行
-    supermq/api/common.oss:建群、转发等文件oss操作全部转到mq异步执行，防止堵塞业务代码
-    supermq/socket/common:移除群成员，解散群代码优化，先移除群列表，再异步执行删除用户的群消息
-    mq/socket/common:消息提前写入缓存，后面再将sql转给mq直接入库
+    合并代码：新版本 api/socket代码合并到master分支
+    
 	
 
 周3 
-    doc:创建群的新api接口
-	common:好友缓存的写入和判断优化,修复不是好友的检测问题；apiVer代码转为公共
-	common:用户的群列表缓存优化
-	web: api.js接口访问对象；socket.data解析兼容新旧版
-	socket:client和uid的绑定改为gateway自带函数
+   
 	
    
 周4 
-    common:单聊阅后即焚问题修复；消息入库加管理员过滤
-	mq:写入离线消息-发布任务的昵称问题
-	supermq/socket:阅后即焚的业务代码改为直接在mq中执行，防止堵塞socket业务
+
+    
     
 周5  
-	common/socket/supermq:新增在线发送消息动作保证送达服务
-	api:踢人代码调试
-	mq:同步dev的代码阅后即焚和消息保证送达功能
+	
 	
 	
   
