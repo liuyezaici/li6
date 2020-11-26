@@ -24,7 +24,7 @@
    socket/common/supermq: 重新优化队列的初始化和消费模式，支持扩展新的服务
    supermq:调试ios推送的问题
    web/socket:网页的ack消息优化 去掉重复的提交和下发动作
-   
+   timecheck: 定时器作为新服务加入supermq 调试阅后即焚 正常
    
 
     
