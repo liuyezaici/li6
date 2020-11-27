@@ -26,21 +26,15 @@
    web/socket:网页的ack消息优化 去掉重复的提交和下发动作
    timecheck: 定时器作为新服务加入supermq 调试阅后即焚 正常
    
-
-    
-    
 周5  
+    socket:调试测试2突然aeskey不一致的问题 没找到原因
+	socket/api:网页刷新时的socket断开时不再解绑，改为初始化页面时解绑;
+	socket:获取用户ip支持gateway请求;
+	pc:网页刷新时请求后台释放聊天对象
+	
 	
 	
 	
   
-  
-  apicode: "c2m9" msg: {method: "receiveFeedBack"} 不用告诉另一端
-  
-
- -------------------------------------------
-	
-	转发@昵称中带emoji乱码？
-    ip获取的长度过多
 	
    
