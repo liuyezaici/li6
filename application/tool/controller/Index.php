@@ -25,7 +25,13 @@ class Index extends Frontend
     public function saveTask() {
         $list = input('urls', '');
         if($list) {
-            Db('downTask')->insert(['taskStr' => json_encode($list)]);
+            $hash = md5($list);
+            if(!Db('downTask')->where(['hash' => $hash])->find()) {
+                Db('downTask')->insert([
+                    'hash' => $hash,
+                    'taskStr' => json_encode($list)
+                ]);
+            }
         }
         echo 'success';
     }
