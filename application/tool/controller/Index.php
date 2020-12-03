@@ -47,7 +47,7 @@ class Index extends Frontend
     public function delTask() {
         $hashHid = input('id', '', 'intval');
         if($hashHid) {
-            Db('downTask')->where(['id'=> $hashHid])->delete();
+            Db('downTask')->where(['hash'=> $hashHid])->delete();
         }
         $this->success('success');
     }
