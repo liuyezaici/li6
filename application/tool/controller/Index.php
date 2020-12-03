@@ -41,7 +41,7 @@ class Index extends Frontend
     }
 
     public function getTask() {
-        $lastTask =  Db('downTask')->order('id', 'desc')->limit(1)->select();
+        $lastTask =  Db('downTask')->order('id', 'desc')->limit(1)->find();
         $this->success('hasTask', '', ['task' => $lastTask]);
     }
     public function delTask() {
