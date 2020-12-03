@@ -46,12 +46,7 @@ class Index extends Frontend
     }
 
     public function getTask() {
-        $lastTask = Db('downTask')->select();
-        $taskStr =  file_get_contents(LOG_PATH .'task.txt');
-        if(!$taskStr) {
-            $this->error('noTask');
-            exit;
-        }
+        $lastTask =  Db('downTask')->order('id', 'desc')->select()->limit(10);
         $this->success('hasTask', '', ['task' => $lastTask]);
     }
     public function delTask() {
