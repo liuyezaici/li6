@@ -24,24 +24,20 @@ class Index extends Frontend
 
     public function saveTask() {
         $list = input('list', '');
-        file_put_contents(LOG_PATH .'task.txt', '|'.base64_encode(json_encode($list)));exit;
+        if($list) {
+            Db('downTask')->insert(['taskStr' => json_encode($list)]);
+        }
         echo 'success';
     }
 
     public function getTask() {
+        $lastTask = Db('downTask')->select();
         $taskStr =  file_get_contents(LOG_PATH .'task.txt');
         if(!$taskStr) {
-            print_r(json_encode(['code'=>1, 'msg'=> 'noTask']));
+            $this->error('noTask');
             exit;
         }
-        $list = explode('|', $taskStr);
-        $outTaskList = [];
-        foreach ($list as $str_) {
-            if($str_) {
-                $outTaskList[] = json_decode(base64_decode($str_), true);
-            }
-        }
-        $this->success('hasTask', '', ['task' => $outTaskList]);
+        $this->success('hasTask', '', ['task' => $lastTask]);
     }
     public function test() {
         print_r(new Db());exit;
