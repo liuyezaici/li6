@@ -26,21 +26,13 @@ class Index extends Frontend
     }
 
     public function saveTask() {
+        $caijiId = input('id', '');
         $list = input('urls', '');
         if($list) {
             $checkHashList = [];
-            $list = json_decode($list, true);
-            foreach ($list as $v) {
-                $checkHashList[] = [
-                    'surl' => $v['surl'],
-                    'nurl' => $v['nurl'],
-                    'flag' => $v['flag'],
-                ];
-            }
-            $hash = md5(json_encode($checkHashList));
-            if(!Db('downTask')->where(['hash' => $hash])->find()) {
+            if(!Db('downTask')->where(['hash' => $caijiId])->find()) {
                 Db('downTask')->insert([
-                    'hash' => $hash,
+                    'hash' => $caijiId,
                     'taskStr' => json_encode($list)
                 ]);
             }
