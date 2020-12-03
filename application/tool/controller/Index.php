@@ -22,6 +22,27 @@ class Index extends Frontend
         parent::_initialize();
     }
 
+    public function saveTask() {
+        $list = input('list', '');
+        file_put_contents(LOG_PATH .'task.txt', '|'.base64_encode(json_encode($list)));exit;
+        echo 'success';
+    }
+
+    public function getTask() {
+        $taskStr =  file_get_contents(LOG_PATH .'task.txt');
+        if(!$taskStr) {
+            print_r(json_encode(['code'=>1, 'msg'=> 'noTask']));
+            exit;
+        }
+        $list = explode('|', $taskStr);
+        $outTaskList = [];
+        foreach ($list as $str_) {
+            if($str_) {
+                $outTaskList[] = json_decode(base64_decode($str_), true);
+            }
+        }
+        $this->success('hasTask', '', ['task' => $outTaskList]);
+    }
     public function test() {
         print_r(new Db());exit;
         echo 666;
