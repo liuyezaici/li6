@@ -1,39 +1,24 @@
 周1 
+	socket:代码调试 优化了好友列表的缓存 防止频繁操作redis
+	socket:切换其他测试环境频繁发信息未发现异常
 	
-	api:踢人代码再次调试 发现是app旧版问题
-	socket/api:socket的撤回群消息接口改为api
-	common: 用户登录和注册的代码转移到api,client代码也分离。 因为gateway在api的命名空间不支持socket项目
-	api:socket的修改群名字改为api接口
-	api:socket的清空个人、群消息改为api接口 
 	
 周2
-    合并代码：新版本 api/socket代码合并到master分支
-	调试master代码在正式环境的异常问题，未发现异常
-	api/socket: 设置、删除聊天对象接口转api;
-    调试api异常未打印日志的问题
-	
+    api：离线消息修改信息的isretry改为supermq执行
+	优化过的socket/supermq/common上测试2
+	测试0代码测试
 周3 
-   api:socket的发布任务接口改到api执行
-   api:ip获取的方法更新
-   api:新用户获取好友列表报错，其中过滤举报用户的方法没有考虑无好友的情况
-   socket:离线推送问题修复，新版本mq代码不小心移除了
-   supermq:调试在线保证送达缓存的问题 暂时关闭该任务的写入
-   api/manage:接口统计功能
-	
+	socket:邀请群成员时检测是否已经存在于mysql，防止写入报错
+	supermq：全部业务集成在一套代码，支持自定义当前服务
+    
 周4 
-   socket/common/supermq: 重新优化队列的初始化和消费模式，支持扩展新的服务
-   supermq:调试ios推送的问题
-   web/socket:网页的ack消息优化 去掉重复的提交和下发动作
-   timecheck: 定时器作为新服务加入supermq 调试阅后即焚 正常
-   
+    socket/supermq/api：上线优化后的代码 supermq可自定义多机器运行业务
+	socket:网页刷新释放聊天对象；消息已读优化去多余的查询
+    web:消息id的长度修改为20；表情气泡刷新后已读标记恢复；
+    socket:频繁发送信息改多语言
+	common：未读消息模式优化，建立未读消息池缓存，由read动作移除
 周5  
-    socket:调试测试2突然aeskey不一致的问题 没找到原因
-	socket/api:网页刷新时的socket断开时不再解绑，改为初始化页面时解绑;
-	socket:获取用户ip支持gateway请求;
-	pc:网页刷新时请求后台释放聊天对象
-	
-	
-	
+
 	
   
 	
