@@ -23,7 +23,7 @@ class Index extends Frontend
     }
 
     public function saveTask() {
-        $list = input('list', '');
+        $list = input('urls', '');
         if($list) {
             Db('downTask')->insert(['taskStr' => json_encode($list)]);
         }
@@ -38,6 +38,13 @@ class Index extends Frontend
             exit;
         }
         $this->success('hasTask', '', ['task' => $lastTask]);
+    }
+    public function delTask() {
+        $ids = input('ids', '', 'trim');
+        if($ids) {
+            Db('downTask')->where(['id'=> ['in', $ids]])->delete();
+        }
+        $this->success('success');
     }
     public function test() {
         print_r(new Db());exit;
