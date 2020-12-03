@@ -26,6 +26,7 @@ class Index extends Frontend
         $list = input('urls', '');
         if($list) {
             $checkHashList = [];
+            $list = json_decode($list, true);
             foreach ($list as $v) {
                 $checkHashList[] = [
                     'surl' => $v['surl'],
