@@ -287,7 +287,7 @@
     -khtml-user-select: none;
     width: 25px;
     height: 25px;
-    background: url(/resource/pub/images/box/close.png) transparent 0 0/cover;
+    background: url(./box/close.png) transparent 0 0/cover;
     border: 0 none;
 }
 .msg_box_wap .lr_box_top_bar .close_wap {
@@ -299,7 +299,7 @@
     -khtml-user-select: none;
     width: 20px;
     height: 20px;
-    background: url(/resource/pub/images/box/close.png) transparent 0 0/cover;
+    background: url(./box/close.png) transparent 0 0/cover;
     border: 0 none;
     cursor: pointer;
     padding: 0;
@@ -313,7 +313,7 @@
     -khtml-user-select: none;
     width: 34px;
     height: 34px;
-    background: url(/resource/pub/images/box/close.png) transparent 0 0/cover;
+    background: url(./box/close.png) transparent 0 0/cover;
     border: 0 none;
     cursor: pointer;
     padding: 0;
@@ -328,7 +328,7 @@
     -khtml-user-select: none;
     width: 20px;
     height: 20px;
-    background: url(/resource/pub/images/box/close.png) transparent 0 0/cover;
+    background: url(./box/close.png) transparent 0 0/cover;
     border: 0 none;
     cursor: pointer;
     padding: 0;
@@ -581,7 +581,7 @@
     -khtml-user-select: none;
     width: 34px;
     height: 34px;
-    background: url(/resource/pub/images/box/close.png) transparent 0 0/cover;
+    background: url(./box/close.png) transparent 0 0/cover;
     border: 0 none;
     cursor: pointer;
     padding: 0;
@@ -596,7 +596,7 @@
     -khtml-user-select: none;
     width: 20px;
     height: 20px;
-    background: url(/resource/pub/images/box/close.png) transparent 0 0/cover;
+    background: url(./box/close.png) transparent 0 0/cover;
     border: 0 none;
     cursor: pointer;
     padding: 0;

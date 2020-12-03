@@ -132,11 +132,16 @@
     margin-top: 10px;
     border-bottom: 1px solid #dedede;
 }
-.article_body #article_content .content_box {
+
+.article_body #article_content .content_box .markdown-body {
     line-height: 28px;
     font-size: 16px;
     overflow: hidden;
     max-width: 760px;
+}
+
+.article_body #article_content .content_box p {
+    white-space: pre-wrap;
 }
 .article_body #article_content .content_box blockquote p {
     white-space: pre-line;

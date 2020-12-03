@@ -2,11 +2,11 @@
 
 namespace app\user\controller;
 
-use app\common\controller\Frontend;
+use app\common\controller\Backend;
 
 use think\Cache;
 
-class Index extends Frontend
+class Index extends Backend
 {
 
     protected $noNeedLogin = [];

@@ -488,6 +488,7 @@ $http_worker->onMessage = function($connection, $data)
 Worker::runAll();
 
 screen -S socket
+screen 里面 ctrl+d 执行删除当前screen
 php start.php start
 ctrl a + d 切出
 

@@ -1,0 +1,25 @@
+周1 
+	socket:代码调试 优化了好友列表的缓存 防止频繁操作redis
+	socket:切换其他测试环境频繁发信息未发现异常
+	
+	
+周2
+    api：离线消息修改信息的isretry改为supermq执行
+	优化过的socket/supermq/common上测试2
+	测试0代码测试
+周3 
+	socket:邀请群成员时检测是否已经存在于mysql，防止写入报错
+	supermq：全部业务集成在一套代码，支持自定义当前服务
+    
+周4 
+    socket/supermq/api：上线优化后的代码 supermq可自定义多机器运行业务
+	socket:网页刷新释放聊天对象；消息已读优化去多余的查询
+    web:消息id的长度修改为20；表情气泡刷新后已读标记恢复；
+    socket:频繁发送信息改多语言
+	common：未读消息模式优化，建立未读消息池缓存，由read动作移除
+周5  
+
+	
+  
+	
+   

@@ -8,10 +8,8 @@
     <meta name="description" content="李大爷个人主页">
     <?=$header?>
     <link href="/resource/front/css/article.css" rel="stylesheet" media="all" /> <!--  首页 -->
-    <link href="/resource/pub/css/jquery.lr_comment.css" rel="stylesheet" media="all" />
-    <link rel="stylesheet" href="/include/lib/markdown/markdown.css" />
-    <script src="/resource/pub/js/jq_plug/jquery-lr_comment.js"></script>
-    <script src="/resource/pub/js/jq_plug/jquery-lr_editor.js"></script>
+    <link href="/assets/libs/lr/jquery.lr_comment.css" rel="stylesheet" media="all" />
+    <link rel="stylesheet" href="/assets/libs/markdown/markdown.css" />
     <script src="/resource/pub/js/jq_plug/jquery.imgLazyLoading.js"></script>
 
 <div class="article_body">
@@ -47,9 +45,7 @@
                 <td valign="top">
                     <p class="article_begin">正文开始</p>
                     <div class="content_box">
-                        <div class="markdown-body">
-                            <?=$info['content']?>
-                        </div>
+                        <div class="markdown-body"><?=$info['content']?></div>
                     </div>
                     <p class="article_end">正文结束</p>
                 </td>

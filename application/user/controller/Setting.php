@@ -2,12 +2,12 @@
 
 namespace app\user\controller;
 
-use app\common\controller\Frontend;
+use app\common\controller\Backend;
 use app\common\model\Users;
 use fast\Str;
 use fast\File;
 
-class Setting extends Frontend
+class Setting extends Backend
 {
 
     protected $noNeedLogin = [];

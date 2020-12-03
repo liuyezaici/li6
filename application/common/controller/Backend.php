@@ -53,7 +53,7 @@ class Backend extends Controller
     /**
      * 是否开启数据限制
      * 支持auth/personal
-     * 表示按权限判断/仅限个人 
+     * 表示按权限判断/仅限个人
      * 默认为禁用,若启用请务必保证表中存在admin_id字段
      */
     protected $dataLimit = false;
@@ -90,7 +90,7 @@ class Backend extends Controller
      * 表示注释或字段名
      */
     protected $importHeadType = 'comment';
-	
+
 	protected $currentAddonName = '';
 
     /**
@@ -198,6 +198,8 @@ class Backend extends Controller
         $this->assign('auth', $this->auth);
         //渲染管理员对象
         $this->assign('admin', Users::get($this->auth->id));
+        $this->assign('header',   $this->view->fetch(APP_PATH . 'user/view/header.php'));
+        $this->assign('footer',   $this->view->fetch(APP_PATH . 'user/view/footer.php'));
     }
 
     /**
@@ -205,11 +207,11 @@ class Backend extends Controller
      * @param string $name
      */
     protected function loadlang($name)
-    {	
-		$file = file_path(APP_PATH . $this->request->module(), $name, '.php', 'lang/'.Lang::detect());	
+    {
+		$file = file_path(APP_PATH . $this->request->module(), $name, '.php', 'lang/'.Lang::detect());
 		if($file)Lang::load($file);
 		/*$temp = explode('.', str_replace(array('/', '\\'), '.', $name));
-		$temp1 = array_pop($temp);		
+		$temp1 = array_pop($temp);
 		$temp0 = implode('/', $temp);
 		$file = APP_PATH . $this->request->module() . '/' . $temp0 . '/lang/' . Lang::detect() . '/' . $temp1 . '.php';
 		if(!is_file($file))$file = APP_PATH . $this->request->module() . '/lang/' . Lang::detect() . '/' . str_replace('.', '/', $name) . '.php';
@@ -219,7 +221,7 @@ class Backend extends Controller
     /**
      * 渲染配置信息
      * @param mixed $name 键名或数组
-     * @param mixed $value 值 
+     * @param mixed $value 值
      */
     protected function assignconfig($name, $value = '')
     {
@@ -283,10 +285,10 @@ class Backend extends Controller
 
     /**
      * Selectpage的实现方法
-     * 
+     *
      * 当前方法只是一个比较通用的搜索匹配,请按需重载此方法来编写自己的搜索逻辑,$where按自己的需求写即可
      * 这里示例了所有的参数，所以比较复杂，实现上自己实现只需简单的几行即可
-     * 
+     *
      */
     protected function selectpage()
     {

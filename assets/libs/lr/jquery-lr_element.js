@@ -1,8 +1,6 @@
 // VERSION 20180823
 // LR 2018.8
 // 支持字符串的数据三元算法
-//jquery 1.9以后 的$.browser兼容
-(function(jQuery){if(jQuery.browser){return}jQuery.browser={};jQuery.browser.mozilla=false;jQuery.browser.webkit=false;jQuery.browser.opera=false;jQuery.browser.msie=false;var nAgt=navigator.userAgent;jQuery.browser.name=navigator.appName;jQuery.browser.fullVersion=""+parseFloat(navigator.appVersion);jQuery.browser.majorVersion=parseInt(navigator.appVersion,10);var nameOffset,verOffset,ix;if((verOffset=nAgt.indexOf("Opera"))!=-1){jQuery.browser.opera=true;jQuery.browser.name="Opera";jQuery.browser.fullVersion=nAgt.substring(verOffset+6);if((verOffset=nAgt.indexOf("Version"))!=-1){jQuery.browser.fullVersion=nAgt.substring(verOffset+8)}}else{if((verOffset=nAgt.indexOf("MSIE"))!=-1){jQuery.browser.msie=true;jQuery.browser.name="Microsoft Internet Explorer";jQuery.browser.fullVersion=nAgt.substring(verOffset+5)}else{if((verOffset=nAgt.indexOf("Chrome"))!=-1){jQuery.browser.webkit=true;jQuery.browser.name="Chrome";jQuery.browser.fullVersion=nAgt.substring(verOffset+7)}else{if((verOffset=nAgt.indexOf("Safari"))!=-1){jQuery.browser.webkit=true;jQuery.browser.name="Safari";jQuery.browser.fullVersion=nAgt.substring(verOffset+7);if((verOffset=nAgt.indexOf("Version"))!=-1){jQuery.browser.fullVersion=nAgt.substring(verOffset+8)}}else{if((verOffset=nAgt.indexOf("Firefox"))!=-1){jQuery.browser.mozilla=true;jQuery.browser.name="Firefox";jQuery.browser.fullVersion=nAgt.substring(verOffset+8)}else{if((nameOffset=nAgt.lastIndexOf(" ")+1)<(verOffset=nAgt.lastIndexOf("/"))){jQuery.browser.name=nAgt.substring(nameOffset,verOffset);jQuery.browser.fullVersion=nAgt.substring(verOffset+1);if(jQuery.browser.name.toLowerCase()==jQuery.browser.name.toUpperCase()){jQuery.browser.name=navigator.appName}}}}}}}if((ix=jQuery.browser.fullVersion.indexOf(";"))!=-1){jQuery.browser.fullVersion=jQuery.browser.fullVersion.substring(0,ix)}if((ix=jQuery.browser.fullVersion.indexOf(" "))!=-1){jQuery.browser.fullVersion=jQuery.browser.fullVersion.substring(0,ix)}jQuery.browser.majorVersion=parseInt(""+jQuery.browser.fullVersion,10);if(isNaN(jQuery.browser.majorVersion)){jQuery.browser.fullVersion=""+parseFloat(navigator.appVersion);jQuery.browser.majorVersion=parseInt(navigator.appVersion,10)}jQuery.browser.version=jQuery.browser.majorVersion})(jQuery);
 //$.url.decode('http:%%%'); 实际以下插件中并没有使用 urldecode 此处嵌入只是方便以后的调取
 jQuery.url = function() { function l(a) { for(var b = "", c = 0, f = 0, d = 0;c < a.length;) { f = a.charCodeAt(c); if(f < 128) { b += String.fromCharCode(f); c++ }else if(f > 191 && f < 224) { d = a.charCodeAt(c + 1); b += String.fromCharCode((f & 31) << 6 | d & 63); c += 2 }else { d = a.charCodeAt(c + 1); c3 = a.charCodeAt(c + 2); b += String.fromCharCode((f & 15) << 12 | (d & 63) << 6 | c3 & 63); c += 3 } }return b } function m(a, b) { var c = {}, f = {"true":true, "false":false, "null":null}; $.each(a.replace(/\+/g, " ").split("&"), function(d, j) { var e = j.split("="); d = k(e[0]); j = c; var i = 0, g = d.split("]["), h = g.length - 1; if(/\[/.test(g[0]) && /\]$/.test(g[h])) { g[h] = g[h].replace(/\]$/, ""); g = g.shift().split("[").concat(g); h = g.length - 1 }else h = 0; if(e.length === 2) { e = k(e[1]); if(b)e = e && !isNaN(e) ? +e : e === "undefined" ? undefined : f[e] !== undefined ? f[e] : e; if(h)for(;i <= h;i++) { d = g[i] === "" ? j.length : g[i]; j = j[d] = i < h ? j[d] || (g[i + 1] && isNaN(g[i + 1]) ? {} : []) : e }else if($.isArray(c[d]))c[d].push(e); else c[d] = c[d] !== undefined ? [c[d], e] : e }else if(d)c[d] = b ? undefined : "" }); return c } function n(a) { a = a || window.location; var b = ["source", "protocol", "authority", "userInfo", "user", "password", "host", "port", "relative", "path", "directory", "file", "query", "anchor"]; a = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(a); for(var c = {}, f = b.length;f--;)c[b[f]] = a[f] || ""; if(c.query)c.params = m(c.query, true); return c } function o(a) { if(a.source)return encodeURI(a.source); var b = []; if(a.protocol)if(a.protocol == "file")b.push("file:///"); else a.protocol == "mailto" ? b.push("mailto:") : b.push(a.protocol + "://"); if(a.authority)b.push(a.authority); else { if(a.userInfo)b.push(a.userInfo + "@"); else if(a.user) { b.push(a.user); a.password && b.push(":" + a.password); b.push("@") }if(a.host) { b.push(a.host); a.port && b.push(":" + a.port) } }if(a.path)b.push(a.path); else { a.directory && b.push(a.directory); a.file && b.push(a.file) }if(a.query)b.push("?" + a.query); else a.params && b.push("?" + $.param(a.params)); a.anchor && b.push("#" + a.anchor); return b.join("") } function p(a) { return encodeURIComponent(a) } function k(a) { a = a || window.location.toString(); return l(unescape(a.replace(/\+/g, " "))) } return{encode:p, decode:k, parse:n, build:o} }();
 
@@ -7274,7 +7272,7 @@ function regCodeAddGang(str) {
             if(strHasKuohao(sourceVal, 'public')) {
                 newData = livingObj['data'];
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-            } else if(strHasKuohao(newVal, 'data')) {
+            } else if(strHasKuohao(sourceVal, 'data')) {
                 newData = opt['data'] || {};
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
             } else {
@@ -8541,7 +8539,7 @@ function regCodeAddGang(str) {
         var options = cloneData(sourceOptions);
         options = options || {};
         var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';
-        var obj = $('<textarea id="'+ editorId +'" style="width: 100%"></textarea>');
+        var obj = $('<textarea id="'+ editorId +'"></textarea>');
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj['tag'] = 'editor';
         obj[objValIsNode] = false;
@@ -8748,7 +8746,6 @@ function regCodeAddGang(str) {
                 //console.log(this);
                 //console.log(options);
 
-                options['width'] = getOptVal(options, ['width'], '100%');
                 options['placeholder'] = getOptVal(options, ['place', 'placeholder'], '');
                 var editorOut = !isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
                 var editorType = !isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd
