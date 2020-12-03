@@ -45,9 +45,9 @@ class Index extends Frontend
         $this->success('hasTask', '', ['task' => $lastTask]);
     }
     public function delTask() {
-        $ids = input('ids', '', 'trim');
-        if($ids) {
-            Db('downTask')->where(['id'=> ['in', $ids]])->delete();
+        $hashHid = input('id', '', 'intval');
+        if($hashHid) {
+            Db('downTask')->where(['id'=> $hashHid])->delete();
         }
         $this->success('success');
     }
