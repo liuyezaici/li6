@@ -20,8 +20,37 @@ class Index extends Frontend
     public function _initialize()
     {
         parent::_initialize();
+        header("Access-Control-Allow-Origin:*");
+        header("Access-Control-Allow-Methods:GET, POST, OPTIONS, DELETE");
+        header("Access-Control-Allow-Headers:DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type, Accept-Language, Origin, Accept-Encoding");
     }
 
+    public function saveTask() {
+        $caijiId = input('id', '');
+        $list = input('urls', '');
+        if($list) {
+            $checkHashList = [];
+            if(!Db('downTask')->where(['hash' => $caijiId])->find()) {
+                Db('downTask')->insert([
+                    'hash' => $caijiId,
+                    'taskStr' => json_encode($list)
+                ]);
+            }
+        }
+        echo 'success';
+    }
+
+    public function getTask() {
+        $lastTask =  Db('downTask')->order('id', 'desc')->limit(1)->find();
+        $this->success('hasTask', '', ['task' => $lastTask]);
+    }
+    public function delTask() {
+        $hashHid = input('id', '', 'intval');
+        if($hashHid) {
+            Db('downTask')->where(['hash'=> $hashHid])->delete();
+        }
+        $this->success('success');
+    }
     public function test() {
         print_r(new Db());exit;
         echo 666;
