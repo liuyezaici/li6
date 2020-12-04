@@ -18,8 +18,12 @@
     socket:频繁发送信息改多语言
 	common：未读消息模式优化，建立未读消息池缓存，由read动作移除
 周5  
+    common:优化未读消息数量的缓存方法
+	manage:接口统计优化 默认只检索今天的数据
+	common:IOS的桌面角标数量控制代码提取优化
+	socket:uid.cid在线去掉多重判断，可能导致cpu增高的问题
+	common:黑名单缓存改为集合
+	socket:优化在线聊天时的gateway::inOnline的重复多次判断的问题
 
-	
-  
 	
    
