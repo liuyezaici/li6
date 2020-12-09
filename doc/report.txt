@@ -1,29 +1,23 @@
 周1 
-	socket:代码调试 优化了好友列表的缓存 防止频繁操作redis
-	socket:切换其他测试环境频繁发信息未发现异常
-	
-	
+	socket: 代码调试 未检测到cpu异常偏高的方法
+	manage: 二次优化api统计的详情接口 加符合索引
+	common/socket/api: 群昵称 个人昵称 缓存代码优化 复制到各自的类
 周2
-    api：离线消息修改信息的isretry改为supermq执行
-	优化过的socket/supermq/common上测试2
-	测试0代码测试
+    api:修复旧的获取ip的调取方法
+	api:框架路由的接口优化 兼容框架路由和新版路由的请求
+	chat:api的路由全部转为新版
+    
 周3 
-	socket:邀请群成员时检测是否已经存在于mysql，防止写入报错
-	supermq：全部业务集成在一套代码，支持自定义当前服务
+	
+	
+	
     
 周4 
-    socket/supermq/api：上线优化后的代码 supermq可自定义多机器运行业务
-	socket:网页刷新释放聊天对象；消息已读优化去多余的查询
-    web:消息id的长度修改为20；表情气泡刷新后已读标记恢复；
-    socket:频繁发送信息改多语言
-	common：未读消息模式优化，建立未读消息池缓存，由read动作移除
+    
+	
+	
 周5  
-    common:优化未读消息数量的缓存方法
-	manage:接口统计优化 默认只检索今天的数据
-	common:IOS的桌面角标数量控制代码提取优化
-	socket:uid.cid在线去掉多重判断，可能导致cpu增高的问题
-	common:黑名单缓存改为集合
-	socket:优化在线聊天时的gateway::inOnline的重复多次判断的问题
+  
 
 	
    
