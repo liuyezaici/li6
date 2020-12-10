@@ -8,12 +8,17 @@
 	chat:api的路由全部转为新版
     
 周3 
-	
-	
-	
+	common:用户昵称缓存取强类型字符串
+	chat:气泡的html代码中内容存储格式由url编码改为aes加密，解决之前的emoji格式转发失败的问题
+	socket:邀请群成员的接口优化 隐私权限关闭、黑名单区分提示内容
+	api:拷贝socket的添加群成员的接口到api
     
 周4 
-    
+    common:用户设备绑定查询改为缓存操作
+	socket:调试所有mysql操作 检查频繁读取数据库的语句
+    common:群管理员的mysql读取改为缓存操作
+	common:表情包的图片缓存操作
+	common:用户置顶对象改为缓存操作
 	
 	
 周5  
