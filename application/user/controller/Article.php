@@ -199,6 +199,10 @@ class Article extends Backend
                 'path' => $path,
             ]
         );
+        foreach ($result as &$v) {
+            $v['title'] = addslashes($v['title']);
+        }
+        unset($v);
         $articleList = json_decode(json_encode($result), true)['data'];
         foreach ($articleList as &$v) {
             $v['typeName'] = $v['typeid'] ? ArticleTypesModel::getFieldById($v['typeid'], 'title') : '';
