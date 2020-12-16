@@ -200,7 +200,7 @@ class Article extends Backend
             ]
         );
         foreach ($result as &$v) {
-            $v['title'] = addslashes($v['title']);
+            $v['title'] = str_replace("'", '&#39;', $v['title']);
         }
         unset($v);
         $articleList = json_decode(json_encode($result), true)['data'];
