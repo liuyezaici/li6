@@ -244,6 +244,12 @@ git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/eth.gi
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/li6.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/queue.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/dwsj.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/supermq.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/ecshop.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/chat.treeholes.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/api.chat.treeholes.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/common.chat.treeholes.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/socket.chat.treeholes.git
 git remote rm origin
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/leg.git
 √‚√‹¬Î
