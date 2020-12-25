@@ -4336,7 +4336,7 @@ function regCodeAddGang(str) {
             }
         }
         var extendAttr = opt['extend_attr'] || {};
-        var afterCreate = opt['after_create'] || false;//扩展方法
+        var afterCreate = getOptVal(opt, ['afterCreate', 'after_create'], false);
         if(isUndefined(defaultOps['value'])) defaultOps['value'] = ' ';//必须输入空文本只能执行node替换
         var options = $.extend({}, defaultOps);
         options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
@@ -6248,7 +6248,9 @@ function regCodeAddGang(str) {
         extendAttr['class_extend'] = 'form-horizontal';
         var formType = options['type'];
         var defaultSubmit = options['submit'] || null;
+        var replaceDataFunc = getOptVal(options, ['replaceData', 'replace_data'], null);
         var postData = getOptVal(options, ['post_data', 'postData'], null);
+        var afterCreate = getOptVal(options, ['afterCreate', 'after_create'], false);
         if(formType == 'upload') extendAttr['enctype'] = 'multipart/form-data'; //文件上传表单
         var autoFunc = function (thisObj, options_) {
             //支持打包uri
@@ -6257,6 +6259,7 @@ function regCodeAddGang(str) {
                     return jQuery.param( this.getFormDatas() );
                 }
             });
+            if(afterCreate) afterCreate(thisObj);
         };
 
         var successObj =  $.extend({}, options);
@@ -6276,6 +6279,9 @@ function regCodeAddGang(str) {
                 var response = defaultSubmit(thisObj, e);
                 if(response === false) return false;
             }
+            if(replaceDataFunc) {
+                postDataForm = replaceDataFunc(postDataForm, thisObj, e);
+            }
             //console.log(formType);
             if(formType == 'post') {//执行post以及post成功之后的回调动作
                 successObj['post_data'] = postDataForm;
@@ -6294,7 +6300,7 @@ function regCodeAddGang(str) {
         };
         options['submit'] = submitSys;
         options[objValIsNode] = false; //不允许再append val
-        return makeDom({tag:'form', 'options': options, 'extend_attr':extendAttr, 'after_create':autoFunc});
+        return makeDom({tag:'form', 'options': options, 'extend_attr':extendAttr, 'afterCreate':autoFunc});
     };
 //生成快速编辑的表单
     global.makeFormEdit = function(sourceOptions) {
@@ -9304,7 +9310,7 @@ function regCodeAddGang(str) {
         var opt = cloneData(sourceOptions);
         var defaultOps = opt || {};
         var extendAttr = opt['extend_attr'] || {};
-        var afterCreate = opt['after_create'] || false;//扩展方法
+        var afterCreate = getOptVal(opt, ['afterCreate', 'after_create'], false);
         var options = $.extend({}, defaultOps);
         options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
         var bar = $('<div></div>');

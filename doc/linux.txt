@@ -250,6 +250,7 @@ git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/chat.t
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/api.chat.treeholes.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/common.chat.treeholes.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/socket.chat.treeholes.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/upload.chat.git
 git remote rm origin
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/leg.git
 免密码
@@ -493,8 +494,10 @@ $http_worker->onMessage = function($connection, $data)
 };
 Worker::runAll();
 
-screen -S socket
-screen 里面 ctrl+d 执行删除当前screen
+screen -S socket 新建
+删除：
+1.screen 里面 ctrl+d 执行删除当前screen
+2. screen -X -S 26542 quit
 php start.php start
 ctrl a + d 切出
 
