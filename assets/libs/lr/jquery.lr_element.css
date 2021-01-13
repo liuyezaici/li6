@@ -934,6 +934,16 @@ div.form-control,
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
 }
+.input-group > .diy_input_box + .diy_input_box {
+    display: table-cell;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+.input-group > .diy_input_box + .diy_input_box .diy_input {
+    border-left: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
 .input-group > .btnLr:first-child:not(:last-child) {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
@@ -1035,7 +1045,7 @@ div.form-control,
     width: auto;
     z-index: 1000;
     padding: 3px 5px;
-    font-size: 14px;
+    font-size: 12px;
 }
 .select_box .diy_items ul {
     padding: 0;
@@ -2557,6 +2567,18 @@ div.form-control,
 .no_border, .no_border .diy_input {
     border-width: 0;
 }
+.no_right_border {
+    border-right-width: 0;
+}
+.no_right_border .diy_input {
+    border-right-width: 0;
+}
+.no_left_border {
+    border-left-width: 0;
+}
+.no_left_border .diy_input {
+    border-left-width: 0;
+}
 
 /* 幻灯片 */
 .diy_ppt {
@@ -2821,6 +2843,30 @@ div.form-control,
 .pagination-sm > li:last-child > span {
     border-top-right-radius: 3px;
     border-bottom-right-radius: 3px;
+}
+.pagination.pagination-pagination-sm {
+    padding: 5px 0;
+    margin: 8px 0;
+}
+.pagination-xs > li > a,
+.pagination-xs > li > span {
+    padding: 2px 5px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+.pagination-xs > li:first-child > a,
+.pagination-xs > li:first-child > span {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+.pagination-xs > li:last-child > a,
+.pagination-xs > li:last-child > span {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+.pagination.pagination-xs {
+    padding: 5px 0;
+    margin: 5px 0;
 }
 .pagination .pageBtn {
     width: 80px;

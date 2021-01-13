@@ -2692,6 +2692,7 @@ function regCodeAddGang(str) {
         var pageMenu = getOptVal(options_, ['pageMenu', 'pagemenu', 'page_menu'], null); //menudata来源于url
         var dataFromFunc = getOptVal(dataFrom,'func', null);
         var dataFromUrl = getOptVal(dataFrom,'url', '');
+        var dataBeforeDecode = getOptVal(dataFrom, 'dataBefore', null);//数据处理前的解密方法
         var postParameter = getOptVal(dataFrom, ['post_data', 'postData'], {});
         var callKeys = getCallData(dataFrom);
         var successKey = callKeys['success_key'];
@@ -2707,8 +2708,6 @@ function regCodeAddGang(str) {
         var __formatDataFunc = function (response, callFunc) {
             var getFromData;
             var getPMenuFromData;
-            //console.log('response _____________');
-            //console.log(JSON.stringify(response));
             if(dataFromDataKey) {
                 //console.log('dataFromDataKey:'+ dataFromDataKey);
                 if(dataFromDataKey.indexOf('.') !=-1) {
@@ -2719,14 +2718,12 @@ function regCodeAddGang(str) {
                     });
                 } else {
                     getFromData = hasData(response[dataFromDataKey]) ? response[dataFromDataKey] : {};
-                    //console.log('getFromData:');
-                    //console.log(getFromData);
                 }
             } else {
                 getFromData = response;
             }
-            //console.log('renew_obj_data_____________');
-            //console.log(getFromData);
+            // console.log('getFromData:');
+            // console.log(getFromData);
             if(pageMenu) {
                 if(menuDataFromKey.indexOf('.') !=-1) {
                     var array_ = menuDataFromKey.split('.');
@@ -2789,10 +2786,14 @@ function regCodeAddGang(str) {
                 var postData = {
                     post_url: dataFromUrl,
                     post_data: postParameter,
-                    success_func: function (response) {
+                    successFunc: function (response) {
+                        if(dataBeforeDecode) {
+                            response = dataBeforeDecode(response);
+                        }
+                        // console.log('response', response);
                         __formatDataFunc(response, callFunc);
 
-                    }, err_func: function (response) {
+                    }, errFunc: function (response) {
                         if(errFunc) errFunc(response, obj_);
                     }
                 };
@@ -4592,6 +4593,17 @@ function regCodeAddGang(str) {
             'after_create': funcAfterCreate
         });
     };
+    global.makeLabel = function(defaultOps) {
+        var funcAfterCreate = function (thisObj, option_) {
+            //绑定拖拽事件
+            callBindDragObj(thisObj, option_);
+        };
+        return makeDom({
+            'tag': 'label',
+            'options': defaultOps,
+            'after_create': funcAfterCreate
+        });
+    };
     global.makeH1 = function(defaultOps) {
         return makeDom({
             'tag': 'h1',
@@ -5543,6 +5555,7 @@ function regCodeAddGang(str) {
             var inputTypeAuto =  option_['type'] || 'text';
             var useLrBtn = getOptVal(option_, ['lr_btn'], null);//使用左右数量按钮
             var readonly = getOptVal(option_, ['readonly', 'readOnly'], null);//readonly
+            var autocomplete = getOptVal(option_, ['autocomplete'], 'off');//off
             var lrBtnStep = parseFloat(option_['lr_btn_step']) || 1;//左右-+按钮 增减的跳度
             var lrBtnType = option_['lr_btn_type'] || 'middle';//左右-+按钮默认样式 middle right left
             var callKeys = getCallData(option_);
@@ -5564,7 +5577,7 @@ function regCodeAddGang(str) {
             if(/([a-zA-Z_]+[a-zA-Z_\d.]*)(\[([a-zA-Z_]+[a-zA-Z_\d.]*)\])*\[([a-zA-Z_]+[a-zA-Z_\d.]*)\]$/.test(parentName) && inputTypeAuto  == 'file') {
                 parentName = createRadomName('file');
             }
-            obj.input =  $('<input class="diy_input" type="'+ inputTypeAuto +'" autocomplete="off" name="'+ parentName +'" />');
+            obj.input =  $('<input class="diy_input" type="'+ inputTypeAuto +'" autocomplete="'+ autocomplete +'" name="'+ parentName +'" />');
             if(readonly !== null) {
                 obj.input.attr('readOnly', true);
             }
