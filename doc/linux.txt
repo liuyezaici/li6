@@ -237,6 +237,7 @@ lirui lirui
 linux ≥ı ºªØ’æµ„ 
 git init
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/newoss.git
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/fastadmin-oss.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/beyond1314.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/dwsj.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/ethli6js.git
