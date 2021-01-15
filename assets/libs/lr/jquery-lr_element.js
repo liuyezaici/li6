@@ -10973,6 +10973,28 @@ function regCodeAddGang(str) {
         return $('<script charset="'+ charset +'" type="'+ jsType +'" src="'+ options['src'] +'"></script>');
     };
 
+    //传统表单的自定义打包提交方法
+    global.formSubmitEven = function(form, opt) {
+        form.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var data_ = form.serializeArray();
+            var pData = {};
+            data_.map(function (v, n) {
+                pData[v.name] = v.value;
+            });
+            if(!isUndefined(opt['postData'])) {
+                opt['postData'].map(function (v, k) {
+                    pData[k] = v;
+                });
+            }
+            var newOpt = {
+                'postData' : pData
+            };
+            newOpt = $.extend({}, newOpt, opt);
+            global.postAndDone(newOpt);
+        });
+    };
     //弹窗的搜索打包
     $.fn.formBoxSearch = function(fn) {
         var form = $(this);
@@ -11025,7 +11047,6 @@ function regCodeAddGang(str) {
             });
         };
 
-
     });
 //此js只能加载一次 不能用于ajax内置模板多次加载
 //因为：document绑定事件只绑定一次 多次加载会导致多次绑定
@@ -11060,5 +11081,6 @@ function regCodeAddGang(str) {
         });
         global.bindDocumentHideMenuEven = true;
     }
+
 })(this, jQuery);
 
