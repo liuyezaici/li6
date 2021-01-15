@@ -510,9 +510,6 @@ function regCodeAddGang(str) {
             } else {
                 optData = options['data'] || makeNullData();
             }
-            //console.log('format_AttrVals');
-            //console.log(thisObj);
-            //console.log(options);
             //console.log(options['data']);
             var newAttr = {};
             var hidden = false;
@@ -1044,7 +1041,7 @@ function regCodeAddGang(str) {
         //str 要替换的字符串
         //objName 要转成的变量名字
         this_.formatStr = function(str, data_, index, obj_, attrName) {
-            if(isUndefined(data_) || !isObj(data_)) data_ = {};
+            if(isUndefined(data_) || !isObj(data_)) return;
             str = str || '';
             obj_ = obj_ || null;
             attrName = attrName || '';
@@ -1100,25 +1097,15 @@ function regCodeAddGang(str) {
             //格式单个变量
             function formatOneDateKey(abc, dataPublic) {
                 dataPublic = dataPublic || 'data'; // data的来源 要么继承data 要么public里取
-                //console.log('formatOne DateKey abc:'+ abc + ',dataPublic:'+ dataPublic);
                 abc = abc || '';
                 abc = $.trim(abc);
                 var resultStr=   '';
                 if(!abc) return abc;
                 attrName = attrName || '';
                 if(dataPublic == 'data') {
-                    //console.log(data_);
-                    if(!isUndefined(data_[abc])) {
-                        //console.log(obj_);
-                        //console.log('!isUndefined abc:'+abc +'');
-                        //console.log(data_);
-                        resultStr = data_[abc]; //这里调取的数据不能再进行格式化算法 要当作纯字符串输出。如：“我的>123” 格式化会报错。
-                        //console.log('resultStr:'+ resultStr);
-                    } else {
-                        //console.log('isUndefined abc:'+abc +'');
-                        //console.log(data_);
-                        var match1 = abc.match(/^this\.([a-zA-Z0-9]+)/);
-                        var match2 = abc.match(/^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/);
+                    var match1 = abc.match(/^this\.([a-zA-Z0-9]+)/);
+                    var match2 = abc.match(/^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/);
+                    if(match1 || match2) {
                         if(match1 != null) {
                             //console.log('replace 1_________________ :'+abc);
                             //允许获取当前data对象
@@ -1138,6 +1125,23 @@ function regCodeAddGang(str) {
                                 resultStr = eval(abc2);
                             } catch(err){
                                 resultStr = '';
+                            }
+                        }
+                    } else {
+                        //{a.b}
+                        if(abc.indexOf('.') !=-1) {
+                            var array_ = abc.split('.');
+                            var getData = $.extend({}, data_);
+                            $.each(array_, function (n, key_) {
+                                if(isUndefined(getData[key_])) {
+                                    return;
+                                }
+                                getData = !isUndefined(getData[key_]) ? getData[key_] : {};
+                            });
+                            resultStr = getData.toString();
+                        } else {
+                            if(!isUndefined(data_[abc])) {
+                                resultStr = data_[abc]; //这里调取的数据不能再进行格式化算法 要当作纯字符串输出。如：“我的>123” 格式化会报错。
                             }
                         }
                     }
@@ -4446,29 +4450,13 @@ function regCodeAddGang(str) {
                 var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
                 options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
                 // if(tag == 'td') {
-                //console.log('make dom:');
-                //console.log(this);
-                //console.log(options_);
-                //console.log(options_['data']);
-                // }
-                // if(tag == 'button') {
-                //console.log('make button:');
-                //console.log(this);
-                //console.log(JSON.stringify(options_));
-                // }
-                //console.log('renew this ddddddddddddddddddd:');
-                //console.log(this);
-                //console.log(options_['data']);
                 optionDataFrom(obj, options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
                 optionGetSet(this, options_);
-                //console.log(this);
-                //console.log('call_formatAttr:', this);
                 strObj.formatAttr(this, options_);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 this[objLastValKey] = this[objValObjKey];//设置完所有属性 要更新旧的val
-
                 //console.log('finish');
                 //console.log(this);
             },
@@ -4806,9 +4794,6 @@ function regCodeAddGang(str) {
                     //console.log('son__'+ n);
                     //console.log(son);
                     sonData = newData[n]||[];
-                    //console.log('newData');
-                    //console.log(son);
-                    //console.log(sonData);
                     if(isUndefined(sonData['index'])) sonData['index'] = n;
                     renewObjData(son, sonData);
                 });

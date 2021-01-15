@@ -15,12 +15,7 @@
 define('APP_DIR', 'application');
 define('APP_PATH', __DIR__ . '/application/');
 
-// 判断是否安装FastAdmin
-if (!is_file(__DIR__ . '/install/install.lock'))
-{
-    header("location:/install.php");
-    exit;
-}
+
 if(isset($_SERVER['HTTP_API']) || isset($_POST['HTTP_API'])){
 	$http_api = isset($_SERVER['HTTP_API']) ? $_SERVER['HTTP_API'] : $_POST['HTTP_API'];
 	if($http_api){
