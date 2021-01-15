@@ -1041,7 +1041,7 @@ function regCodeAddGang(str) {
         //str 要替换的字符串
         //objName 要转成的变量名字
         this_.formatStr = function(str, data_, index, obj_, attrName) {
-            if(isUndefined(data_) || !isObj(data_)) return;
+            if(isUndefined(data_) || !isObj(data_)) data_ = {};
             str = str || '';
             obj_ = obj_ || null;
             attrName = attrName || '';
