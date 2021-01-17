@@ -19,7 +19,7 @@ var items = makeChecked({
 $('#show_div').append(items);
 $('#show_reload_btn').append(makeA({
         value: '点此更新数据',
-        'class': 'btnLr btn-success',
+        'class': 'btnLr btnLrSuccess',
         click: function (obj, ev, scope) {
             items['data'] =  {i: makeRadom(1)};
         }

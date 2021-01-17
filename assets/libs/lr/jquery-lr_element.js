@@ -73,6 +73,7 @@ function uniqueArray(array_) {
 }
 //转义正则敏感符 str_.replace(new RegExp(match,"gm"), matchVal); 否则当字符串match中含有以下符号时，无法替换
 function regCodeAddGang(str) {
+    if(!str) return '';
     str = str.replace(/\?/g, '\\\?');
     str = str.replace(/\+/g, '\\\+');
     str = str.replace(/\^/g, '\\\^');
@@ -358,27 +359,26 @@ function regCodeAddGang(str) {
 
 
     //字符串方法 集合
-    var strObj = new (function() {
-        var this_ = this;
-        this_.runYufaReg =  /^{*([a-zA-Z_]+[a-zA-Z_\d.]*)\[run\]\((.*)\)\s*\;*\s*\}*$/; //一定要英文或{开头
+    var strObj =  {
+        runYufaReg :  /^{*([a-zA-Z_]+[a-zA-Z_\d.]*)\[run\]\((.*)\)\s*\;*\s*\}*$/, //一定要英文或{开头
         //运行系统语法
-        this_.runYufa = function(str_) {
+        runYufa : function(str_) {
             //console.log('runYufa Yufa  :'+ str_ );
             str_ = $.trim(str_);
             str_ = trim(str_,'{');
             str_ = trim(str_,'}');
-            str_ = str_.replace(RegExp(this_.runYufaReg, 'g'), '$1($2)');//去掉[run]标记
+            str_ = str_.replace(RegExp(this.runYufaReg, 'g'), '$1($2)');//去掉[run]标记
             //console.log('runYufa Yufa  :'+ str_ );
             //run之前要把引号里的内容解析不然会误判，
             // 如： {11 +"[url_hash_code]%E7%9A%84bb" == "[url_hash_code]11%E7%9A%84bb"?"[url_hash_code]11_bb":"[url_hash_code]22_bb" }
-            str_ = this_.urlDecodeLR(str_);
+            str_ = this.urlDecodeLR(str_);
             //console.log('result  :'+ str_ );
             str_ = eval(str_);
             //console.log('result  :'+ str_ );
             return str_;
-        };
+        },
         //检测{}内的字符串是否有运算语法
-        this_.hasYufa = function(str) {
+        hasYufa: function(str) {
             str = str || '';
             if(!str) return false;
             //必须以{开头 和 }结尾 才算语法
@@ -444,7 +444,7 @@ function regCodeAddGang(str) {
                 }
                 return 'regYufa3YuanSet';
             }
-            if (this_.runYufaReg.test(str)) {
+            if (this.runYufaReg.test(str)) {
                 //console.log('check has Yufa  runReg');
                 return 'runReg';
             }
@@ -458,29 +458,29 @@ function regCodeAddGang(str) {
 
             //console.log('check has Yufa end false :'+ str);
             return false;
-        };
+        },
 
         //自带的url加密标识 防止无法区分是否需要解密
-        this_.urlHashCode = '[url_hash_code]';
-        this_.urlencodeLR = function(s_) {
+        urlHashCode : '[url_hash_code]',
+        urlencodeLR : function(s_) {
             if(isBoolean(s_)) return s_;
             if(isNumber(s_)) return s_;
             if(!s_) return s_;
-            return this_.urlHashCode + $.url.encode(s_);
-        };
+            return this.urlHashCode + $.url.encode(s_);
+        },
         //解密url
-        this_.urlDecodeLR = function(s_) {
+        urlDecodeLR : function(s_) {
             if(isBoolean(s_)) return s_;
             if(isNumber(s_)) return s_;
             if(!s_) return s_;
             //console.log('urldecode s_:'+ s_);
-            if(s_.indexOf(this_.urlHashCode) ==-1) return s_;
-            var urlReg = this_.urlHashCode.replace(/\[/, '\\[');
+            if(s_.indexOf(this.urlHashCode) ==-1) return s_;
+            var urlReg = this.urlHashCode.replace(/\[/, '\\[');
             urlReg = urlReg.replace(/\]/, '\\]');
             var reg_ = urlReg + '([^"\']+)';
 
             s_ = s_.replace(RegExp(reg_, 'g'), function (tmpMatch, tmpMatch1, tmpMatch2) {
-                var jkhYinhRegOur1 = '(\'|")'+  regCodeAddGang(this_.urlHashCode) + tmpMatch1 + '(\'|")';
+                var jkhYinhRegOur1 = '(\'|")'+  regCodeAddGang(strObj.urlHashCode) + tmpMatch1 + '(\'|")';
                 // "[url_hash_code] 其他中文 {a}  " 在url里不需要给{a}加引号
                 var newHtml = tmpMatch1 ? $.url.decode(tmpMatch1) : '';
                 newHtml = decodeNewHtml(newHtml);
@@ -496,10 +496,10 @@ function regCodeAddGang(str) {
                 return newHtml;
             });
             return s_;
-        };
+        },
 
         //当属性中有公式绑定了同步变量时，同步变量的更新要更新属性
-        this_.formatAttr = function(thisObj, options, index) {
+        formatAttr : function(thisObj, options, index, hasSetData) {
             index = index || 0;
             //如果之前继承过父亲的data 则后面自身渲染时 如果自身不作data声明 是要继续使用last_options的data的
             var hasLastOpt = thisObj && thisObj['last_options'] && thisObj['last_options']['data'] ? true : false;
@@ -510,10 +510,6 @@ function regCodeAddGang(str) {
             } else {
                 optData = options['data'] || makeNullData();
             }
-            //console.log('format_AttrVals');
-            //console.log(thisObj);
-            //console.log(options);
-            //console.log(options['data']);
             var newAttr = {};
             var hidden = false;
             var setHidden = false;//设置隐藏样式
@@ -543,25 +539,16 @@ function regCodeAddGang(str) {
                 //支持字符串中输入{公式} value已经在外部更新 这里只针对属性
                 //if(n =='class_extend') console.log('n:'+ n +',v:'+v);
                 if(isStrOrNumber(v) && strHasKuohao(v)) {
-                    //console.log(thisObj);
-                    //console.log('push:'+n);
-                    //console.log('has kuohao:'+n +':'+ v);
-                    //console.log(optData);
                     //value 也可以设置全局变量
                     if(n != 'data') has_kuohao = true; //data 带括号不算是属性包含括号 因为下次格式化也不是通过format来实现的 是通过 renew ObjData
-                    if(!strHasKuohao(v)) { //把之前的括号调出来再次格式化
-                        v = options['source_'+n];
+                    if(n !='value' && hasSetData) {
+                        v = strObj.formatStr(v, optData, index, thisObj, n);
                     }
-                    // console.log('source1, '+ n +': ', v, optData);
-                    //console.log(thisObj);
-                    //console.log(optData);
-                    if(n !='value') v = strObj.formatStr(v, optData, index, thisObj, n); //计算v中的公式 {1+2 > 3}
-                    //console.log('source2, '+ n +': '+ v);
                     thisObj['options'][n] = v; //参数要改变 防止外部取出来的仍是括号
-                    //console.log('opt_format_after, '+ n +': '+ v);
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
-                if(optionIsSame(thisObj, options, n) && n !='style'  && n !='class' && n !='class_extend' && !strHasKuohao(v) && !options['source_'+n]) {
+                // if(optionIsSame(thisObj, options, n) && n !='style'  && n !='class' && n !='class_extend' && !strHasKuohao(v) && !options['source_'+n]) {
+                if(optionIsSame(thisObj, options, n)) {
                     //console.log('optionIsSame this', n + ':'+ v);
                     //console.log(thisObj);
                     return;
@@ -570,25 +557,10 @@ function regCodeAddGang(str) {
                     if(strHasKuohao(v)) has_kuohao = true;
                 }
                 //console.log('format this');
-                //console.log(thisObj);
-                //console.log(n + ':'+ v);
-                //console.log(thisObj);
-                //makeDom专用value/td/th对象
-                if((n == 'value' || n == 'td' || n == 'th' ) ) {
-                    //console.log(optData);
-                    //console.log(n + ':'+ v);
-                    //v不能在此执行替换 要在append之后 记录了原始的text才能替换解析
-                    if(!isUndefined(thisObj.domAppendVal)) {
-                        thisObj.domAppendVal(options);
-                        return;//continue
-                    }
-                    if(thisObj.formatVal) {
-                        thisObj.formatVal(options);
-                    }
-                    return;//continue
+                var val = getOptVal(options, ['value', 'th', 'td']);
+                if(isString(val) && thisObj.formatVal) {
+                    thisObj.formatVal(options);
                 }
-                //console.log('format this');
-                //console.log(n + ':'+ v);
                 if(n == 'type') {
                     if(isStrOrNumber(v)) {
                         //sanjiao在data更新不能更新obj的type  只能属性更新时通知其改变
@@ -759,11 +731,11 @@ function regCodeAddGang(str) {
             thisObj.events = cloneData(evenOption, thisObj.events);
             //更新旧的options
             options = $.extend({}, options, thisObj['options']);
-            this_.addEvents(thisObj);
+            strObj.addEvents(thisObj);
             return newOpt;
-        };
+        },
         //绑定属性
-        this_.addEvents = function(thisObj) {
+        addEvents : function(thisObj) {
             //console.log('add.Events', thisObj);
             //console.log(thisObj);
             var evenOption = thisObj.events || {};
@@ -772,13 +744,13 @@ function regCodeAddGang(str) {
             var bindObj = isUndefined(thisObj.bindEvenObj) ? thisObj: thisObj.bindEvenObj;
             //特殊例子：makePage 对象不需要绑定事件
             objSetOptEven(bindObj, evenOption, thisObj);
-        };
+        },
         //当属性中有公式绑定了同步变量时，同步变量的更新要更新属性
-        this_.reFormatKhAttr = function(thisObj, newOpt) {
+        reFormatKhAttr: function(thisObj, newOpt) {
             //console.log('reFormat.KhAttr', thisObj);
             var optData = newOpt['data'];
-            //console.log('newOpt');
-            //console.log(newOpt);
+            console.log('newOpt.data');
+            console.log(optData);
             var attrsHasData = thisObj[objHasKhAttrs] || [];
             if(!hasData(attrsHasData)) return;
             //console.log('reFormat__________________.KhAttr Attr');
@@ -795,7 +767,7 @@ function regCodeAddGang(str) {
             var newAttr = {};
             var evenOption = {};
             var opt = thisObj['options'];
-            //console.log(attrsHasData);
+            console.log('attrsHasData', attrsHasData);
             $.each(attrsHasData, function (index, n) {
                 v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
                 if(n =='value') {
@@ -1037,26 +1009,24 @@ function regCodeAddGang(str) {
                 thisObj.attr(newAttr);
             }
             thisObj.events = cloneData(evenOption, thisObj.events);
-            this_.addEvents(thisObj);
-        };
+            this.addEvents(thisObj);
+        },
 
         //字符串转变量
         //str 要替换的字符串
         //objName 要转成的变量名字
-        this_.formatStr = function(str, data_, index, obj_, attrName) {
+        formatStr : function(str, data_, index, obj_, attrName) {
             if(isUndefined(data_) || !isObj(data_)) data_ = {};
             str = str || '';
             obj_ = obj_ || null;
             attrName = attrName || '';
-            index = index || 0;
             if(str=='' || !isStrOrNumber(str) || ( !strHasKuohao(str, 'data') &&  !strHasKuohao(str, 'public'))) {
-                //console.log('return Str:'+ str);
                 return str;
             }
             var abcAlbReg = '\{([a-zA-Z_]+[a-zA-Z_\d.]*)\}';
             str = yinhaogTH(str);//所有\\"都要保护起来
             str = changeYinhaoIn(str);// 防止解析{func}里的func时 "==?"这样的字符串被误解析
-            //console.log('format Str1:'+ str);
+            console.log('format Str1:'+ str);
             //转译引号里的内容 防止检测纠正语句时对替换的干扰
             //{12 === item ?"a= item2":"b"} 加密 "a= item2"
             function changeYinhaoIn(s_) {
@@ -1074,7 +1044,7 @@ function regCodeAddGang(str) {
                         match_ = formatAbc(match_, 'data'); //格式化字符串 数据来源于 data
                         //console.log('formats_ after match_3:'+ match_);
                     }
-                    return "'"+ (match_ ? this_.urlencodeLR(encodeNewHtml(match_)) : '') +"'";
+                    return "'"+ (match_ ? strObj.urlencodeLR(encodeNewHtml(match_)) : '') +"'";
                 });
                 s_ = s_.replace(/"([^"]*)"/g, function (match_) {
                     match_ = trim(match_, '"');
@@ -1087,7 +1057,7 @@ function regCodeAddGang(str) {
                     }
                     match_ = match_.replace(/\(/g, kuohaoNewhasl);//()在引号里不会加密url 会混淆 所以要作转译
                     match_ = match_.replace(/\)/g, kuohaoNewhasr);//()在引号里不会加密url 会混淆 所以要作转译
-                    return '"'+ (match_ ? this_.urlencodeLR(encodeNewHtml(match_)) : '') +'"';
+                    return '"'+ (match_ ? this.urlencodeLR(encodeNewHtml(match_)) : '') +'"';
                 });
                 //console.log('new s_:'+ s_);
                 return s_;
@@ -1196,7 +1166,7 @@ function regCodeAddGang(str) {
                             bindSetVal = trim(bindSetVal, '"');
                             bindSetVal = trim(bindSetVal, "'");
 
-                            bindSetVal = this_.urlDecodeLR(bindSetVal);
+                            bindSetVal = this.urlDecodeLR(bindSetVal);
                             //console.log('bindSetVal:'+ bindSetVal);
                             //console.log('replace setStr:'+ setStr);
                             //console.log('bindKey:'+ bindKey);
@@ -1256,12 +1226,12 @@ function regCodeAddGang(str) {
                 //console.log('remendErr.Str11:'+ s_);
                 s_ = remendErrStr(s_);
                 //console.log('remendErr.Str22:'+ s_);
-                var has_Yufa = this_.hasYufa(s_);
+                var has_Yufa = strObj.hasYufa(s_);
                 if(has_Yufa ) {
                     //console.log(s_);
                     //console.log('has__Yufa:'+ has_Yufa);
                     //console.log('s___1:'+ s_);
-                    s_ = this_.runYufa(s_);
+                    s_ = strObj.runYufa(s_);
                     //console.log('s___2:'+ s_);
                 } else {
                     //console.log(s_+ ' no has__Yufa:'+ has_Yufa);
@@ -1293,12 +1263,12 @@ function regCodeAddGang(str) {
                             //console.log(' check_Yufa:'+ func_);
                             var checkFunc = remendErrStr(func_);
                             //console.log('checkFunc2:'+ checkFunc);
-                            var has3Yufa = this_.hasYufa(checkFunc);
+                            var has3Yufa = strObj.hasYufa(checkFunc);
                             //console.log(checkFunc+ ' has3_Yufa:'+ has3Yufa);
                             if(has3Yufa) {
-                                checkFunc = this_.urlDecodeLR(checkFunc);
+                                checkFunc = strObj.urlDecodeLR(checkFunc);
                                 //console.log('after urlDecodeLR :'+ checkFunc);
-                                macthNew= this_.runYufa(checkFunc)
+                                macthNew= strObj.runYufa(checkFunc)
                                 //console.log('s3:'+ s3);
                                 //console.log('checkFunc:'+ checkFunc);
                                 //console.log('macthNew:'+ macthNew);
@@ -1330,17 +1300,17 @@ function regCodeAddGang(str) {
                     }
                     //替换错误的语法 再检测是否含语法
                     s3 = remendErrStr(s3);
-                    var has3Yufa = this_.hasYufa(s3);
+                    var has3Yufa = strObj.hasYufa(s3);
                     if(has3Yufa) {
                         // 纠正错误的语法 如 ? aa
                         //console.log(s3+ ' has3_Yufa:'+ has3Yufa);
                         //console.log(s3+ ' has3_Yufa:'+ has3Yufa);
-                        s3 = this_.runYufa(s3);
+                        s3 = strObj.runYufa(s3);
                     } else {
                         //console.log(s3+ ' no has3_Yufa:'+ has3Yufa);
                     }
                     //解析完data的数据再恢复引号
-                    s3 = this_.urlDecodeLR(s3);
+                    s3 = strObj.urlDecodeLR(s3);
                     //console.log(' ———————————————:'+ s3);
                     if(strHasKuohao(s3, 'data') && yufaNum >0) { //必须之前有语法 才能继续检测 否则没有语法不需要再循环
                         s3 = replaceFunc(s3);
@@ -1355,7 +1325,7 @@ function regCodeAddGang(str) {
                 } else {
                     //直到没有语法才可以解析
                     if(isStrOrNumber(s_)) {
-                        s_ = this_.urlDecodeLR(s_);
+                        s_ = strObj.urlDecodeLR(s_);
                     }
                 }
                 return s_;
@@ -1411,7 +1381,7 @@ function regCodeAddGang(str) {
                         var matchValJhkReg = match_.replace(/^\{(.+)\}$/, '<j>$1<\\/j>');
                         var hasJkhOutReg = '\{([^\<]*)' + matchValJhkReg + '([^\}]*)[\'|\"|\}]'
                         //console.log(hasJkhOutReg);
-                        var jkhYinhRegOur = '(\'|")'+  regCodeAddGang(this_.urlHashCode)
+                        var jkhYinhRegOur = '(\'|")'+  regCodeAddGang(strObj.urlHashCode)
                             +'([^\'"]*)\s*' + matchValJhkReg + 's*([^\'"]*)(\'|")'; // "[url_hash_code]  {a}  " 在url里不需要给{a}加引号
                         //变量外部含有尖括号 并且外部无引号
                         if(RegExp(hasJkhOutReg, 'g').test(str_)
@@ -1425,7 +1395,7 @@ function regCodeAddGang(str) {
                             matches.forEach(function (matchTmp) {
                                 //console.log('matchTmp :'+ matchTmp);
                                 //console.log('match_ :'+ match_);
-                                var newMac = matchTmp.replace(RegExp(regCodeAddGang(matchValJhkReg), 'g'), '"'+ this_.urlencodeLR(encodeNewHtml(matchVal)) +'"');
+                                var newMac = matchTmp.replace(RegExp(regCodeAddGang(matchValJhkReg), 'g'), '"'+ strObj.urlencodeLR(encodeNewHtml(matchVal)) +'"');
                                 //console.log('newMac:'+ newMac);
                                 str_ = str_.replace(RegExp(regCodeAddGang(matchTmp), 'g'), newMac);
                             });
@@ -1682,7 +1652,7 @@ function regCodeAddGang(str) {
                         var newMatch = $.trim(matchesMid);
                         //console.log('newMatch:'+ newMatch);
                         newMatch = match__.replace(RegExp(reg3yuan3, 'g'), function (tmpMac) {
-                            return '"'+ this_.urlencodeLR(encodeNewHtml(tmpMac.substr(0, tmpMac.length-1 ))) + '"?';
+                            return '"'+ strObj.urlencodeLR(encodeNewHtml(tmpMac.substr(0, tmpMac.length-1 ))) + '"?';
                         });
                         checkSstr_ = checkSstr_.replace(match__, newMatch);
                         match__ = newMatch;
@@ -1715,7 +1685,7 @@ function regCodeAddGang(str) {
                             if(frontReg.test(macTmp)) {
                                 //console.log('front_________');
                                 newMatch = macTmp.replace(RegExp(frontReg, 'g'), function (match1, match2) {
-                                    return match1.replace(match2, '"'+ this_.urlencodeLR(encodeNewHtml(match2)) + '"');//没有引号的要统一urlencode 因为后面要统一解密
+                                    return match1.replace(match2, '"'+ strObj.urlencodeLR(encodeNewHtml(match2)) + '"');//没有引号的要统一urlencode 因为后面要统一解密
                                 });
                                 //console.log('newMatch11:'+ newMatch);
                             } else {
@@ -1725,7 +1695,7 @@ function regCodeAddGang(str) {
                                     //console.log('match1:'+ match1);
                                     //console.log('match2:'+ match2);
                                     //console.log('match3:'+ match3);
-                                    return match1.replace(match3, '"'+  this_.urlencodeLR(encodeNewHtml(match3)) + '"');//没有引号的要统一urlencode 因为后面要统一解密
+                                    return match1.replace(match3, '"'+  strObj.urlencodeLR(encodeNewHtml(match3)) + '"');//没有引号的要统一urlencode 因为后面要统一解密
                                 });
                                 //console.log('newMatch22:'+ newMatch);
                             }
@@ -1767,7 +1737,7 @@ function regCodeAddGang(str) {
                             //console.log('match1:'+ match1);
                             //console.log('checkIfNumber:'+ checkIfNumber);
                             if(checkIfNumber) {
-                                return match1.replace(checkIfNumber, '"'+ this_.urlencodeLR(encodeNewHtml(checkIfNumber)) + '"');//没有引号的要统一urlencode 因为后面要统一解密
+                                return match1.replace(checkIfNumber, '"'+ strObj.urlencodeLR(encodeNewHtml(checkIfNumber)) + '"');//没有引号的要统一urlencode 因为后面要统一解密
                             } else {
                                 return match2;
                             }
@@ -1853,7 +1823,7 @@ function regCodeAddGang(str) {
             //console.log(' end resultStr :'+ str);
             return str;
         }
-    });
+    };
 
 
     //如果属性含有花括号 替换
@@ -2088,29 +2058,26 @@ function regCodeAddGang(str) {
         return flag;
     }
     //更新对象的所有文本节点
-    function formatObjNodesVal(thisObj,  dataLive) {
+    function formatObjNodesVal(thisObj,  dataLive, hasSetData) {
         var data = [];
         if(dataLive) data = cloneData(dataLive); //data可能来源于living Obj 所以要重新克隆一个新的data 防止index回传
-        //console.log('formatObjNodesVal:', thisObj);
-        //console.log(thisObj);
-        //console.log(thisObj.nodeObj);
-        //console.log(thisObj.htmObj);
         if(thisObj.nodeObj && thisObj.nodeObj.length >0) {
             $.each(thisObj.nodeObj, function (n, item) {
-                //console.log(item);
                 var nodeText = item.text;//textNode原始字符串 如{abc}未编译
                 var node = item.obj;
-                //console.log('nodeText:',node,nodeText);
                 if(strHasKuohao(nodeText)) {
                     thisObj[objAttrHasKh] = true;
                 }
-                var newStr = strObj.formatStr(nodeText, data, n, thisObj, 'value');
+                var newStr = nodeText;
+                if(hasSetData) {
+                    console.log('formatStr =:'+ nodeText,data);
+                    newStr =  strObj.formatStr(nodeText, data, n, thisObj, 'value');
+                }
                 //console.log('newStr =:'+ newStr);
                 newStr = htmlDecode(newStr);
                 //console.log('htmlDecode :'+ newStr , 'nodeText:'+nodeText);
                 //只有文本被修改才更新node的文本 防止没必要的操作dom 带<>标记的内容要在此格式化
                 if(nodeText !== newStr) {
-                    //console.log('setTextContent============', node,newStr);
                     setTextContent(node, newStr);
                 }
             });
@@ -2403,25 +2370,25 @@ function regCodeAddGang(str) {
     }
     //call renew val
     function callRewObjStringVal(obj_, options) {
-        //console.log('callRewObj.StringVal');
-        //console.log(obj_);
+        console.log('callRewObj.StringVal');
+        console.log(obj_, obj_[objValIsNode]);
         if(obj_[objValIsNode]) {
             //未渲染
             if(strHasKuohao(options['value'], 'data') && !dataIsSame(obj_['last_options']['data'], options['data'])) {//局部的data变了 才格式化
-                //console.log('formatObj.NodesVal', obj_['last_options']['data'], options['data']);
-                //console.log(options['data']);
-                formatObjNodesVal(obj_, options['data']);
+                console.log('formatObj.NodesVal');
+                console.log(options['data']);
+                formatObjNodesVal(obj_, options['data'], !isUndefined(options['data']));
             } else if(strHasKuohao(options['value'], 'public')) {//全局的data不变化 无须格式化
-                formatObjNodesVal(obj_, options['data']);
+                formatObjNodesVal(obj_, options['data'], !isUndefined(options['data']));
             } else {
                 //console.log('已渲染 node');
                 domAppendNode(obj_, options);
             }
 
         } else {
-            //console.log('callRew ObjStringVal');
-            //console.log(obj_);
-            //console.log(obj_.formatVal);
+            console.log('callRew ObjStringVal');
+            console.log(obj_);
+            console.log(obj_.formatVal);
             if(obj_.formatVal) {
                 // 特殊的支持格式化value的对象 如：switch的data改变时 其value是可以格式化的
                 //console.log('callRew obj.format Val');
@@ -2524,8 +2491,6 @@ function regCodeAddGang(str) {
     //属性捆绑读写 参数设置 和更新
     function optionGetSet(thisObj, options, bindDataKey) {
         bindDataKey = bindDataKey || 'value';//绑定全局变量的属性key obj设置了bind 那么全局变量的值会同步更新这个属性
-        //允许外部取全部参数 如果之前已经设置过参数，再次赋值要覆盖旧的参数
-        options['data'] = options['data'] || [];//补充data 防止无法外部触发更新
         var setOptins = $.extend({}, options);//用于设置的参数
         if(isUndefined(setOptins['class'])) setOptins['class'] = '';//默认要带上class 否则属性无法被外部修改
         //补充source_n
@@ -2534,6 +2499,7 @@ function regCodeAddGang(str) {
         var tmpAttr = [];
         $.each(setOptins, function (opt_, val_) {
             if (strHasKuohao(val_)) {
+                thisObj[objAttrHasKh] = true;
                 if(opt_.substr(0, 7) !== 'source_') {
                     tmpAttr.push(opt_);
                     options['source_' + opt_] = val_;
@@ -2579,23 +2545,18 @@ function regCodeAddGang(str) {
                 }
             });
         }
-        //console.log(thisObj);
-        //console.log('setOptins');
-        //console.log(setOptins);
         //允许外部修改 数据、value 等触发控件的自更新/
+        if(isUndefined(setOptins['data'])) {
+            setOptins['data']= [];
+        }
         $.each(setOptins, function (opt_, val_) {
             //console.log('get set:: '+opt_ + ':' + val_);
             if(thisObj.hasOwnProperty(opt_)) {
-                //console.log(thisObj);
-                //console.log('hasOwnProperty :'+ opt_);
-                //console.log(thisObj[opt_]);
                 return;
             }
             if(opt_ == 'value') { //continue value是不需要默认存取的 全部自己定义
                 return;
             }
-            //console.log('get set:: '+opt_ + ':' + val_);
-
             Object.defineProperty(thisObj, opt_, {
                 get: function () {
                     //如果当前数值已经绑定 读取公共的数据
@@ -2605,8 +2566,6 @@ function regCodeAddGang(str) {
                     }
                     //console.log('get::'+opt_ + ':' + val_);
                     if(opt_ == 'data') {
-                        //console.log('get::'+opt_ + ':');
-                        //console.log(options[opt_]);
                         var optData = options[opt_];
                         if(isStrOrNumber(optData)) return optData;
                         return cloneData(optData);//data要克隆取， 否则同步修改对象，导致不变
@@ -2615,19 +2574,11 @@ function regCodeAddGang(str) {
                 },
                 set: function (newVal) {
                     options[opt_] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
-                    // console.log('set::'+opt_ );
-                    // console.log(thisObj);
-                    // console.log(newVal);
                     //name 等自动更新的参数无需触发更新
                     if($.inArray(opt_, optionsChangeNoRenew) != -1) { //系统属性改变 无须触发更新
-                        //console.log('sys no renew:'+ opt_);
-                        //console.log(optionsChangeNoRenew);
                         return;
                     }
 
-                    //console.log('options '+ opt_ + ' :');
-                    //console.log(newVal);
-                    //console.log(optionsChangeNoRenew);
                     if(opt_ =='value') {//对象单独的格式化val的方法 如 input img btn table
                         //console.log('set val');
                         if(thisObj.renewVal) {
@@ -2638,9 +2589,6 @@ function regCodeAddGang(str) {
                     //console.log(thisObj);
                     //console.log(options);
                     if(opt_ =='data') {
-                        // console.log('set::'+opt_ );
-                        // console.log(thisObj);
-                        // console.log(newVal);
                         renewObjData(thisObj, newVal); //直接更新data 里面已经 更新属性  format AttrVals(thisObj, options);
                         options[opt_] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
                         //console.log('renew::data');
@@ -2683,11 +2631,10 @@ function regCodeAddGang(str) {
         if(isUndefined(options_['extendParentData'])) {
             options_['extendParentData'] = extendParentData;
         }
-        if(isUndefined(options_['data'])) options_['data'] = []; //强制加data,允许外部修改data
-        var data_ = options_['data'];
+        // if(isUndefined(options_['data'])) options_['data'] = []; //强制加data,允许外部修改data
+        var data_ = getOptVal(options_, ['data'], {}); //data
         //console.log('obj.optionDataFrom');
         //console.log(obj_);
-        //console.log(data_);
         var dataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null); //data来源
         var pageMenu = getOptVal(options_, ['pageMenu', 'pagemenu', 'page_menu'], null); //menudata来源于url
         var dataFromFunc = getOptVal(dataFrom,'func', null);
@@ -2879,7 +2826,10 @@ function regCodeAddGang(str) {
 
     //更新对象的data时 重新渲染对象的{}
     function renewObjData(obj, newData) {
-        if(!isOurObj(obj)) return;//非自定义的对象不能更data
+        if(!isOurObj(obj)) {
+            console.log('!isOurObj:', obj);
+            return;
+        }
         if(isStrOrNumber(newData)) return;//非data
         //console.log(JSON.stringify(newData));
         var options = cloneData(obj['options']);
@@ -2889,8 +2839,9 @@ function regCodeAddGang(str) {
         //console.log(obj);
         //console.log('OptBack:');
         //console.log(OptBack);
-        var newOpt = cloneData(OptBack[0]);
+        var newOpt = OptBack[0];
         newPushData = newOpt['data'];
+        console.log('objAttrHasKh:', obj, obj[objAttrHasKh]);
         if(obj[objAttrHasKh]) {
             strObj.reFormatKhAttr(obj, newOpt);
         }
@@ -3992,12 +3943,10 @@ function regCodeAddGang(str) {
     }
 
     //对象字符串node类型的写入和刷新
-    function domAppendNode(obj_, opt) {
+    function domAppendNode(obj_, opt, hasSetData) {
         var optValStr = opt['value'] || opt['son'] || '';
         var optData = opt['data'] || makeNullData();
-        // console.log('optValStr', optValStr);
-        // console.log('optData', optData);
-        if(isStrOrNumber(optData)) { //optData : {son_v}
+        if(isStrOrNumber(optData) && hasSetData) { //optData : {son_v}
             optData = strObj.formatStr(optData, [], 0, obj_, 'data');
         }
         //更新node
@@ -4035,21 +3984,20 @@ function regCodeAddGang(str) {
             //提取dom的node
             var thisNewVal = getObjHtmlNode(obj_, obj_[0], optData);
             obj_.append(thisNewVal);
-            formatObjNodesVal(obj_, optData); //value的改变 也要重新格式化
+            formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
         };
         //当值的文本发生变化时 要一起更新静态节点内容
-        // console.log('optionIsSame', optionIsSame(obj_, opt, 'value'));
         if(!optionIsSame(obj_, opt, 'value') || obj_.nodeObj.length == 0 )
         {
             _renewNodeVal(optValStr);//更新node
         } else if(!dataIsSame(obj_['last_options']['data'], optData)) { //更新子对象或子字符串
-            formatObjNodesVal(obj_, optData);
+            formatObjNodesVal(obj_, optData, hasSetData);
         } else if(obj_[objBindAttrsName]) { //obj bind attrs(如:class) 中含{{dataName} > 2}
             $.each(obj_[objBindAttrsName], function (bindName, attrNames) {
                 // 只格式化value
                 $.each(attrNames, function (n, attrKey) {
                     if(attrKey =='value')  {
-                        formatObjNodesVal(obj_, livingObj);
+                        formatObjNodesVal(obj_, livingObj, hasSetData);
                     }
                 });
             });
@@ -4148,38 +4096,27 @@ function regCodeAddGang(str) {
         }
     }
     //普通的obj对象写入obj对象
-    function domAppendObj(obj_, opt, tag) {
+    function domAppendObj(obj_, opt) {
         var optNewVal =  opt['value'] || opt['son'] || '';
         var optData = opt['data'] || []; //空data的form 在 append table时，table有data 则不能覆盖
         var callClone = isUndefined(opt[optionCallCloneKey]) ? false : opt[optionCallCloneKey];
-        // console.log('domAppendObj', obj_);
         // console.log(opt);
-        // console.log(optNewVal);
         //console.log(hasData(optNewVal));
         if(!hasData(optNewVal)) {
-            //console.log('!hasData');
             return;
         }
-        //console.log('domAppendObj');
         //console.log(obj_);
         //console.log(optNewVal);
         //console.log(optData);
         if(_valIsAy(optNewVal)) {
             //console.log('_valIsAy optNewVal');
             if(hasData(obj_[objValObjKey])) {
-                //console.log('exist obj val');
             } else {
-                //console.log(obj_);
-                //console.log(callClone);
                 $.each(optNewVal, function (n, valObj) {
                     __appendOneOurObj(valObj, n);
                 });
             }
         } else {
-            //console.log(obj_);
-            //console.log(optData);
-            //console.log('__appendOneOurObj');
-            //console.log(optNewVal);
             __appendOneOurObj(optNewVal, 0);
         }
         //创建对象的儿子对象
@@ -4188,14 +4125,8 @@ function regCodeAddGang(str) {
             //console.log('__appendOneOurObj');
             if(isUndefined(valObj)) {
                 return;
-            } //value: [,,] 要跳过
-            //console.log(obj_);
-            //console.log('append OneOurObj');
-            //console.log(valObj);
-            //console.log(callClone);
-            //console.log(obj_[objLastValKey]);
+            }
             var sonOpt,newObj;
-            //console.log('callClone', callClone);
             if(callClone) {//当前准备写入的的obj需要先克隆
                 sonOpt = cloneData(valObj['options']);
                 //console.log(objToJson(valObj['options']));
@@ -4219,7 +4150,7 @@ function regCodeAddGang(str) {
                 //console.log(obj_);
                 var valForCompare = $.isArray(valObj) ? valObj : [valObj];
                 if(!dataIsSame(obj_[objLastValKey], valForCompare)) { //内容obj已变
-                    //console.log('val change: append new val ::::::::');
+                    console.log('val change: append new val ::::::::');
                     //console.log('valForCompare');
                     if(valObj) {
                         objPushVal(obj_, valObj);
@@ -4228,9 +4159,7 @@ function regCodeAddGang(str) {
                 //console.log(obj_);
                 if(hasData(optData) && (typeof optData == 'array' || typeof optData == 'object'))
                 { //有数据传入 哪怕是[] 都要判断之前的对象是否有data 有则对比更新
-                    // if(tag == 'form') {
-                    // }
-                    //console.log('renewObjData', valObj);
+                    console.log('renewObjData', valObj, optData);
                     renewObjData(valObj, optData);
                 }
             }
@@ -4323,16 +4252,12 @@ function regCodeAddGang(str) {
         defaultOps['tag'] = tag;
         //必须设置name 否则拖动换排序时无法切换对象的子name
 
-        //console.log('opt_name:'+ defaultOps['name']);
         if(isUndefined(defaultOps['name'])) {
             //td span 不需要加name 因为它们不参与循环
             if(tag == 'tr' || tag == 'li') {
                 defaultOps['name'] = createRadomName(tag);
             } else if(tag =='li' && tag =='tr') {
                 var newname = createRadomName(tag);
-                // if(tag == 'td') {
-                //console.log('makedomname:'+newname);
-                // }
                 defaultOps['name'] = newname;
             }
         }
@@ -4353,32 +4278,26 @@ function regCodeAddGang(str) {
         if(!isUndefined(opt[objValIsNode])) {
             obj[objValIsNode] = opt[objValIsNode];
         } else {
-            if(!isStrOrNumber(options['value'])) { //对象式val 不能再
+            if(!isStrOrNumber(options['value'])) {
                 obj[objValIsNode] = false;
             }
         }
         //当外部修改obj的val时，直接更新
         //when value is changed by outside
         obj.renewVal = function(newV, opt_) {
-            // console.log('renew val');
-            // console.log(newV);
             if(isUndefined(opt_)) opt_ = obj['options'];
             //console.log(obj);
             opt_['value'] = newV;
             //console.log(newV);
             //console.log(opt_);
             if(isStrOrNumber(newV)) {
-                // console.log('objValIsNode');
                 obj[objValIsNode] = true; //修改obj的内容类型
                 domAppendNode(obj, opt_);
             } else {  //value is obj
                 obj[objValIsNode] = false;
                 obj.html('');
                 __clearSons(obj); //如果是对象的val被修改，提前清空sons
-                //console.log('__clear_Sons');
-                //console.log('domAppendObj');
-                //console.log(obj);
-                domAppendObj(obj, opt_, tag);
+                domAppendObj(obj, opt_);
             }
         };
         //触发子数据更新
@@ -4393,7 +4312,6 @@ function regCodeAddGang(str) {
                 if(!son)  return; //value: [obj1,,obj2] ,,要跳过
                 //子对象是否继承父data
                 if(!isUndefined(son['extendParentData']) && son['extendParentData'] == true) {
-                    //console.log('renewObjData son::::::::::::');
                     renewObjData(son, newData);
                 } else {
                     //console.log('!extendParentData', son);
@@ -4406,8 +4324,8 @@ function regCodeAddGang(str) {
             obj.renewVal(newObj, obj['options']);
             //console.log(obj['value']);
         };
-        obj.domAppendVal = function(opt) {
-            //console.log('___________opt', opt);
+        obj.domAppendVal = function(opt, hasSetData) {
+            console.log('domAppend.Val', obj, opt);
             var obj_ = this;
             if(isUndefined(opt['value']) || opt['value']=='') opt['value'] = ' ';//必须输入空文本只能执行node替换
             opt= opt || [];
@@ -4421,18 +4339,11 @@ function regCodeAddGang(str) {
                 domAppendTrObj(obj_, opt);
             } else {
                 var optValStr = opt['value'] || opt['son'] || '';
-                //console.log('optValStr:'+ optValStr);
                 if(isStrOrNumber(optValStr) ) {
-                    //console.log(obj_);
-                    //console.log(optValStr);
-                    domAppendNode(obj_, opt);
+                    domAppendNode(obj_, opt, hasSetData);
                 } else {  //value is obj
-                    __clearSons(obj_); //如果是对象的val被修改，提前清空sons
-                    //console.log('domAppendObj');
-                    //console.log(tag, obj_);
-                    //console.log(opt);
-
-                    domAppendObj(obj_, opt, tag);
+                    // __clearSons(obj_); //如果是对象的val被修改，提前清空sons
+                    domAppendObj(obj_, opt);
                 }
             }
         }
@@ -4446,29 +4357,15 @@ function regCodeAddGang(str) {
                 var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
                 options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
                 // if(tag == 'td') {
-                //console.log('make dom:');
-                //console.log(this);
-                //console.log(options_);
-                //console.log(options_['data']);
-                // }
-                // if(tag == 'button') {
-                //console.log('make button:');
-                //console.log(this);
-                //console.log(JSON.stringify(options_));
-                // }
-                //console.log('renew this ddddddddddddddddddd:');
-                //console.log(this);
-                //console.log(options_['data']);
-                optionDataFrom(obj, options_);
+                // console.log('renew dom:', this, JSON.stringify(options_));
+                optionDataFrom(this, options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                optionGetSet(this, options_);
-                //console.log(this);
-                //console.log('call_formatAttr:', this);
-                strObj.formatAttr(this, options_);
+                var hasSetData = !isUndefined(options['data']);
+                strObj.formatAttr(this, options_, 0, hasSetData);
+                this.domAppendVal(options_, hasSetData);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 this[objLastValKey] = this[objValObjKey];//设置完所有属性 要更新旧的val
-
                 //console.log('finish');
                 //console.log(this);
             },
@@ -4506,8 +4403,10 @@ function regCodeAddGang(str) {
         // if(tag == 'form') console.log('here form op:');
         //console.log('herea:');
         //console.log(obj);
-        //console.log('domAppend ');
-        //console.log(defaultOps['value']);
+        // console.log('optionGetSet ');
+        // console.log(obj);
+        // console.log(defaultOps['data']);
+        optionGetSet(obj, defaultOps);
         obj.renew(defaultOps);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
         objBindVal(obj, defaultOps);//数据绑定
         addCloneName(obj, defaultOps);//支持克隆
@@ -4579,6 +4478,18 @@ function regCodeAddGang(str) {
     global.makeP = function(defaultOps) {
         return makeDom({
             'tag': 'p',
+            'options': defaultOps
+        });
+    };
+    global.makeB = function(defaultOps) {
+        return makeDom({
+            'tag': 'b',
+            'options': defaultOps
+        });
+    };
+    global.makeI = function(defaultOps) {
+        return makeDom({
+            'tag': 'i',
             'options': defaultOps
         });
     };
@@ -4657,7 +4568,6 @@ function regCodeAddGang(str) {
      */
     global.makeList = function(sourceOptions) {
         //console.log('makeList.:');
-        //console.log(sourceOptions, sourceOptions['data']);
         var options = cloneData(sourceOptions);
         options = options || {};
         var obj = $('<ul></ul>');
@@ -4794,8 +4704,6 @@ function regCodeAddGang(str) {
                 //console.log(obj[objValObjKey]);
                 $.each(obj[objValObjKey], function (n, son) {
                     //console.log(son);
-                    //console.log('newData');
-                    //console.log(newData);
                     renewObjData(son, newData);
                 });
             } else {
@@ -4938,16 +4846,12 @@ function regCodeAddGang(str) {
                 }
                 obj.INeedParentValFlag = getOptVal(options_, ['need_parent_val', 'needParentVal'], false);//需要父参数渲染好才能请求url
                 obj.INeedParentKey = getOptVal(options_, ['need_parent_key', 'needParentKey', 'need_parent_name', 'needParentName'], 'demo_name');
-                //console.log('renew list');
-                //console.log(obj);
-                //console.log(options_);
+                console.log('renew list');
+                console.log(obj);
+                console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                //console.log('optionDataFrom list______');
-                //console.log(this);
-                //console.log(options_);
                 optionDataFrom(this, options_);
-                optionGetSet(this, options_, 'data');
                 strObj.formatAttr(this, options_);//其内容 已经在clone li里全部生成过了 只差数据来格式化了
                 //console.log('end formatAttr');
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
@@ -4968,6 +4872,7 @@ function regCodeAddGang(str) {
         });
         cloneListSon(obj, options);
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(this, options_);
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
         //对象直接设置了data 可以触发 延迟执行
@@ -5315,8 +5220,8 @@ function regCodeAddGang(str) {
                 //console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                optionGetSet(this, options_);
                 strObj.formatAttr(this, options_);
+                optionGetSet(this, options_);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 this[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的option
             },
@@ -6017,11 +5922,11 @@ function regCodeAddGang(str) {
                 optionDataFrom(obj, options_);
                 //初始化value
                 obj.realVal = inputVal;
-                optionGetSet(obj, options_);
                 //console.log('formatAttr');
                 //格式化和绑定事件交由内部input 因为每次重新生成input 事件都需要重新绑定
                 obj.createInput(options_);//重新创建一个input
                 strObj.formatAttr(obj, options_);
+                optionGetSet(obj, options_);
                 addOptionNullFunc(obj, options_);//加null_func
                 //console.log('makeInput_end');
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
@@ -6090,8 +5995,8 @@ function regCodeAddGang(str) {
                 var loadFunc = options_['load'] || null;
                 var loadError = options_['error'] || null;
                 var src = options_['src'] || null;
-                optionGetSet(this, options_, 'src'); //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 strObj.formatAttr(this, options_);
+                optionGetSet(this, options_, 'src'); //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 if(src && !strHasKuohao(src)) this.attr('src', src);//格式化src后再赋值
                 obj['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //console.log(options_);
@@ -6221,7 +6126,6 @@ function regCodeAddGang(str) {
                         var newStr = strObj.formatStr(option_.value, optData, 0, thisObj, 'value');
                         thisObj.renewVal(newStr);
                         if(rest_time == 0) {
-                            //renewObjData
                             optData['rest_time'] = 0;
                             thisObj['last_options']['value'] = sourceVal;//恢复默认的value
                             thisObj.removeAttr('disabled');
@@ -6535,7 +6439,6 @@ function regCodeAddGang(str) {
                 }
                 options_['click'] = click_extend;
                 //先设定options参数 下面才可以修改options
-                optionGetSet(this, options_);
                 strObj.formatAttr(this, options_);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
             },
@@ -7613,12 +7516,12 @@ function regCodeAddGang(str) {
                     };
                 }
                 options_['class_extend'] = 'select_box';
-                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 addOptionNullFunc(this, options_);//加null_func
                 delete newInputEven['value'];
                 //console.log(options_);
                 obj.bindEvenObj = obj.textObj;
                 strObj.formatAttr(obj.textObj, newInputEven);/// 给input分配的事件 如 blur
+                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 //强制加value参数 否则无法触发初始化渲染value事件：format Val
                 var formatOpt = cloneData(options_);
                 if(isUndefined(formatOpt['value'])) formatOpt['value'] = '';
@@ -7876,13 +7779,9 @@ function regCodeAddGang(str) {
                 //console.log('options_');
                 //console.log(obj);
                 //console.log(options_);
-                optionGetSet(obj, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 addOptionNullFunc(obj, options_);//加null_func
-                //console.log('options_');
-                //console.log(options_);
-                //console.log('attrOpt');
-                //console.log(attrOpt);
                 strObj.formatAttr(obj, options_);
+                optionGetSet(obj, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -8081,10 +7980,10 @@ function regCodeAddGang(str) {
                 //console.log(this);
                 removeAllEven(options_);
                 //添加数据
-                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 addOptionNullFunc(this, options_);//加null_func
                 //console.log(options_);
                 strObj.formatAttr(obj, options_);//无需再设置value //给input分配的事件 如 blur
+                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //如果值是确定的 需要检测是否刷新子对象data
             },
@@ -8799,10 +8698,10 @@ function regCodeAddGang(str) {
                     }
                 }
 
-                optionGetSet(this, options);
                 //console.log('options');
                 //console.log(options);
                 strObj.formatAttr(obj, options); //里面找出事件来绑定
+                optionGetSet(this, options);
                 obj[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的val
                 obj['last_options'] = $.extend({}, options);//设置完所有属性 要更新旧的option
             },
@@ -9004,8 +8903,8 @@ function regCodeAddGang(str) {
                 //console.log('page:');
                 //console.log(options);
                 optionDataFrom(pageBody, options);
-                optionGetSet(pageBody, options);
                 strObj.formatAttr(pageBody, options); //里面找出事件来绑定
+                optionGetSet(pageBody, options);
                 var page = parseInt(options.page);
                 var pageSize = parseInt(pageSize);
                 if(pageSize < 1 ) pageSize = 1;
@@ -9471,9 +9370,9 @@ function regCodeAddGang(str) {
                 };
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options_参数 下面才可以修改options_
-                optionGetSet(this, options_);
                 //console.log('renew call_formatAttr:');
                 strObj.formatAttr(this, options_); //里面找出事件来绑定
+                optionGetSet(this, options_);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //console.log('finish');
                 //console.log(this);
@@ -9620,9 +9519,6 @@ function regCodeAddGang(str) {
                 $.each(sons, function (n, son) {
                     sonData = newData[n];
                     if(!sonData) sonData = []; //数据突然为空
-                    //console.log('renew SonData');
-                    //console.log(son);
-                    //console.log(sonData);
                     if(isUndefined(sonData['index'])) sonData['index'] = n;
                     renewObjData(son, sonData);
                 })
@@ -10069,9 +9965,9 @@ function regCodeAddGang(str) {
                 createRepeatDataTree(treeOpt['data'], liOpt, checkOpt, objInner, null);
                 obj['son'] = objInner;
                 objInner[parentObjKey] = obj; //设置其父对象
-                optionGetSet(obj, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 addOptionNullFunc(obj, options_);//加null_func
                 strObj.formatAttr(obj, options_);
+                optionGetSet(obj, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步

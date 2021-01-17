@@ -25,6 +25,7 @@
     background-image: none;
     border: 1px solid transparent;
     border-radius: 4px;
+    text-decoration: none;
 }
 .btnLr:focus,
 .btnLr:active:focus,

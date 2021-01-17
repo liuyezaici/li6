@@ -39,7 +39,7 @@ var div2 = makeDiv({
 $('#show_div').append(div).append(div2);
 $('#show_reload_btn').append(makeA({
         value: '点此更新数据',
-        'class': 'btnLr btn-success',
+        'class': 'btnLr btnLrSuccess',
         click: function (e) {
             var newVal = makeRadom(4) % 2;
             div['data'] = {'sex': newVal};
