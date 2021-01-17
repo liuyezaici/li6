@@ -8,97 +8,91 @@ jQuery.url = function() { function l(a) { for(var b = "", c = 0, f = 0, d = 0;c 
 jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.context||s,xhr,status,e)}if(s.global){(s.context?jQuery(s.context):jQuery.event).trigger("ajaxError",[xhr,s,e])}},createUploadIframe:function(frameId,uri){if(window.ActiveXObject){if(jQuery.browser.version=="9.0"||jQuery.browser.version=="10.0"){var io=document.createElement("iframe");io.id=frameId;io.name=frameId}else{if(jQuery.browser.version=="6.0"||jQuery.browser.version=="7.0"||jQuery.browser.version=="8.0"){var io=document.createElement('<iframe id="'+frameId+'" name="'+frameId+'" />');if(typeof uri=="boolean"){io.src="javascript:false"}else{if(typeof uri=="string"){io.src=uri}}}}}else{var io=document.createElement("iframe");io.id=frameId;io.name=frameId}io.style.position="absolute";io.style.top="-1000px";io.style.left="-1000px";document.body.appendChild(io);return io},ajaxFileUpload:function(s){s=jQuery.extend({},jQuery.ajaxSettings,s);var id=new Date().getTime();var uploadForm={};var tmpLoading=null;var frameId="jUploadFrame"+id;var formId="jUploadForm"+id;var postData=s.data||null;var loadingUrl=s.loadingUrl||"";if(loadingUrl){tmpLoading=$('<img class="loading_gif" src="'+loadingUrl+'">')}uploadForm=$('<form  action="'+s.url+'" target="'+frameId+'" method="POST" '+'name="'+formId+'" style="position: absolute; top: -1000px; left: -1000px;" id="'+formId+'" enctype="multipart/form-data"></form>');if(tmpLoading){s.fileInput.after(tmpLoading)}var inputPrev=s.fileInput.prev();var inputParent=s.fileInput.parent();$(document.body).append(s.fileInput);s.fileInput.wrap(uploadForm);uploadForm=$("#"+formId);if(postData){var tmpInput="";$.each(postData,function(key_,val_){tmpInput=$('<input type="hidden" name="'+key_+'" value="'+val_+'" />');uploadForm.append(tmpInput)})}jQuery.createUploadIframe(frameId,s.secureuri);if(s.global&&!jQuery.active++){jQuery.event.trigger("ajaxStart")}var requestDone=false;var xml={};if(s.global){jQuery.event.trigger("ajaxSend",[xml,s])}var uploadCallback=function(isTimeout){var io=document.getElementById(frameId);try{if(io.contentWindow){xml.responseText=io.contentWindow.document.body?io.contentWindow.document.body.innerHTML:null;xml.responseXML=io.contentWindow.document.XMLDocument?io.contentWindow.document.XMLDocument:io.contentWindow.document}else{if(io.contentDocument){xml.responseText=io.contentDocument.document.body?io.contentDocument.document.body.innerHTML:null;xml.responseXML=io.contentDocument.document.XMLDocument?io.contentDocument.document.XMLDocument:io.contentDocument.document}}}catch(e){jQuery.handleError(s,xml,null,e)}var callFinish=false;if(xml||isTimeout=="timeout"){requestDone=true;var status;try{status=isTimeout!="timeout"?"success":"error";if(status!="error"){var data=jQuery.uploadHttpData(xml,s.dataType);if(s.finish){s.finish(data,status)}else{console.log("!s.finish");console.log(s)}if(s.global){jQuery.event.trigger("ajaxSuccess",[xml,s])}}else{jQuery.handleError(s,xml,status)}}catch(e){status="error";jQuery.handleError(s,xml,status,e)}jQuery(io).unbind();setTimeout(function(){try{$(io).remove();if(tmpLoading){tmpLoading.remove()}if(inputPrev.length>0){inputPrev.after(s.fileInput)}else{inputParent.append(s.fileInput)}$(uploadForm).remove()}catch(e){jQuery.handleError(s,xml,null,e)}},100);xml=null}};if(s.timeout>0){setTimeout(function(){if(!requestDone){uploadCallback("timeout")}},s.timeout)}try{$(uploadForm).submit()}catch(e){jQuery.handleError(s,xml,null,e)}if(window.attachEvent){document.getElementById(frameId).attachEvent("onload",uploadCallback)}else{document.getElementById(frameId).addEventListener("load",uploadCallback,false)}return{abort:function(){}}},uploadHttpData:function(r,type){var data=!type;data=type=="xml"||data?r.responseXML:r.responseText;if(type=="script"){jQuery.globalEval(data)}if(type=="json"){var data=r.responseText;var reg_=/^<pre.*?>(.*?)<\/pre>$/i;if(reg_.test(data)){var am=reg_.exec(data);var data=(am)?am[1]:"";eval("data = "+data)}else{eval("data = "+data)}}if(type=="html"){jQuery("<div>").html(data).evalScripts()}return data}});
 
 //md5
-(function(u){var k=function(a,c){var h,g,k,m;k=a&2147483648;m=c&2147483648;h=a&1073741824;g=c&1073741824;a=(a&1073741823)+(c&1073741823);return h&g?a^2147483648^k^m:h|g?a&1073741824?a^3221225472^k^m:a^1073741824^k^m:a^k^m},l=function(a,c,h,g,l,m,b){a=k(a,k(k(c&h|~c&g,l),b));return k(a<<m|a>>>32-m,c)},n=function(a,c,h,g,l,m,b){a=k(a,k(k(c&g|h&~g,l),b));return k(a<<m|a>>>32-m,c)},p=function(a,c,h,g,l,m,b){a=k(a,k(k(c^h^g,l),b));return k(a<<m|a>>>32-m,c)},q=function(a,c,h,g,l,m,b){a=k(a,k(k(h^(c|~g), l),b));return k(a<<m|a>>>32-m,c)},t=function(a){var c="",h,g;for(g=0;3>=g;g++)h=a>>>8*g&255,h="0"+h.toString(16),c+=h.substr(h.length-2,2);return c};u.extend({md5:function(a){var c,h,g,r,m,b,d,e,f;a=a.replace(/\x0d\x0a/g,"\n");c="";for(h=0;h<a.length;h++)g=a.charCodeAt(h),128>g?c+=String.fromCharCode(g):(127<g&&2048>g?c+=String.fromCharCode(g>>6|192):(c+=String.fromCharCode(g>>12|224),c+=String.fromCharCode(g>>6&63|128)),c+=String.fromCharCode(g&63|128));h=c.length;a=h+8;r=16*((a-a%64)/64+1);a=Array(r-1);for(b=0;b<h;)g=(b-b%4)/4,m=b%4*8,a[g]|=c.charCodeAt(b)<<m,b++;g=(b-b%4)/4;a[g]|=128<<b%4*8;a[r-2]=h<<3;a[r-1]=h>>>29;b=1732584193;d=4023233417;e=2562383102;f=271733878;for(c=0;c<a.length;c+=16)h=b,g=d,r=e,m=f,b=l(b,d,e,f,a[c+0],7,3614090360),f=l(f,b,d,e,a[c+1],12,3905402710),e=l(e,f,b,d,a[c+2],17,606105819),d=l(d,e,f,b,a[c+3],22,3250441966),b=l(b,d,e,f,a[c+4],7,4118548399),f=l(f,b,d,e,a[c+5],12,1200080426),e=l(e,f,b,d,a[c+6],17,2821735955),d=l(d,e,f,b,a[c+7],22,4249261313),b=l(b,d,e,f,a[c+8],7,1770035416),f=l(f,b,d,e,a[c+9],12,2336552879),e=l(e,f,b,d,a[c+10],17,4294925233),d=l(d,e,f,b,a[c+11],22,2304563134),b=l(b,d,e,f,a[c+12],7,1804603682),f=l(f,b,d,e,a[c+13],12,4254626195),e=l(e,f,b,d,a[c+14],17,2792965006),d=l(d,e,f,b,a[c+15],22,1236535329),b=n(b,d,e,f,a[c+1],5,4129170786),f=n(f,b,d,e,a[c+6],9,3225465664),e=n(e,f,b,d,a[c+11],14,643717713),d=n(d,e,f,b,a[c+0],20,3921069994),b=n(b,d,e,f,a[c+5],5,3593408605),f=n(f,b,d,e,a[c+10],9,38016083),e=n(e,f,b,d,a[c+15],14,3634488961),d=n(d,e,f,b,a[c+4],20,3889429448),b=n(b,d,e,f,a[c+9],5,568446438),f=n(f,b,d,e,a[c+14],9,3275163606),e=n(e,f,b,d,a[c+3],14,4107603335),d=n(d,e,f,b,a[c+8],20,1163531501),b=n(b,d,e,f,a[c+13],5,2850285829),f=n(f,b,d,e,a[c+2],9,4243563512),e=n(e,f,b,d,a[c+7],14,1735328473),d=n(d,e,f,b,a[c+12],20,2368359562),b=p(b,d,e,f,a[c+5],4,4294588738),f=p(f,b,d,e,a[c+8],11,2272392833),e=p(e,f,b,d,a[c+11],16,1839030562),d=p(d,e,f,b,a[c+14],23,4259657740),b=p(b,d,e,f,a[c+1],4,2763975236),f=p(f,b,d,e,a[c+4],11,1272893353),e=p(e,f,b,d,a[c+7],16,4139469664),d=p(d,e,f,b,a[c+10],23,3200236656),b=p(b,d,e,f,a[c+13],4,681279174),f=p(f,b,d,e,a[c+0],11,3936430074),e=p(e,f,b,d,a[c+3],16,3572445317),d=p(d,e,f,b,a[c+6],23,76029189),b=p(b,d,e,f,a[c+9],4,3654602809),f=p(f,b,d,e,a[c+12],11,3873151461),e=p(e,f,b,d,a[c+15],16,530742520),d=p(d,e,f,b,a[c+2],23,3299628645),b=q(b,d,e,f,a[c+0],6,4096336452),f=q(f,b,d,e,a[c+7],10,1126891415),e=q(e,f,b,d,a[c+14],15,2878612391),d=q(d,e,f,b,a[c+5],21,4237533241),b=q(b,d,e,f,a[c+12],6,1700485571),f=q(f,b,d,e,a[c+3],10,2399980690),e=q(e,f,b,d,a[c+10],15,4293915773),d=q(d,e,f,b,a[c+1],21,2240044497),b=q(b,d,e,f,a[c+8],6,1873313359),f=q(f,b,d,e,a[c+15],10,4264355552),e=q(e,f,b,d,a[c+6],15,2734768916),d=q(d,e,f,b,a[c+13],21,1309151649),b=q(b,d,e,f,a[c+4],6,4149444226),f=q(f,b,d,e,a[c+11],10,3174756917),e=q(e,f,b,d,a[c+2],15,718787259),d=q(d,e,f,b,a[c+9],21,3951481745),b=k(b,h),d=k(d,g),e=k(e,r),f=k(f,m);return(t(b)+t(d)+t(e)+t(f)).toLowerCase()}})})(jQuery);
+    (function(u){var k=function(a,c){var h,g,k,m;k=a&2147483648;m=c&2147483648;h=a&1073741824;g=c&1073741824;a=(a&1073741823)+(c&1073741823);return h&g?a^2147483648^k^m:h|g?a&1073741824?a^3221225472^k^m:a^1073741824^k^m:a^k^m},l=function(a,c,h,g,l,m,b){a=k(a,k(k(c&h|~c&g,l),b));return k(a<<m|a>>>32-m,c)},n=function(a,c,h,g,l,m,b){a=k(a,k(k(c&g|h&~g,l),b));return k(a<<m|a>>>32-m,c)},p=function(a,c,h,g,l,m,b){a=k(a,k(k(c^h^g,l),b));return k(a<<m|a>>>32-m,c)},q=function(a,c,h,g,l,m,b){a=k(a,k(k(h^(c|~g), l),b));return k(a<<m|a>>>32-m,c)},t=function(a){var c="",h,g;for(g=0;3>=g;g++)h=a>>>8*g&255,h="0"+h.toString(16),c+=h.substr(h.length-2,2);return c};u.extend({md5:function(a){var c,h,g,r,m,b,d,e,f;a=a.replace(/\x0d\x0a/g,"\n");c="";for(h=0;h<a.length;h++)g=a.charCodeAt(h),128>g?c+=String.fromCharCode(g):(127<g&&2048>g?c+=String.fromCharCode(g>>6|192):(c+=String.fromCharCode(g>>12|224),c+=String.fromCharCode(g>>6&63|128)),c+=String.fromCharCode(g&63|128));h=c.length;a=h+8;r=16*((a-a%64)/64+1);a=Array(r-1);for(b=0;b<h;)g=(b-b%4)/4,m=b%4*8,a[g]|=c.charCodeAt(b)<<m,b++;g=(b-b%4)/4;a[g]|=128<<b%4*8;a[r-2]=h<<3;a[r-1]=h>>>29;b=1732584193;d=4023233417;e=2562383102;f=271733878;for(c=0;c<a.length;c+=16)h=b,g=d,r=e,m=f,b=l(b,d,e,f,a[c+0],7,3614090360),f=l(f,b,d,e,a[c+1],12,3905402710),e=l(e,f,b,d,a[c+2],17,606105819),d=l(d,e,f,b,a[c+3],22,3250441966),b=l(b,d,e,f,a[c+4],7,4118548399),f=l(f,b,d,e,a[c+5],12,1200080426),e=l(e,f,b,d,a[c+6],17,2821735955),d=l(d,e,f,b,a[c+7],22,4249261313),b=l(b,d,e,f,a[c+8],7,1770035416),f=l(f,b,d,e,a[c+9],12,2336552879),e=l(e,f,b,d,a[c+10],17,4294925233),d=l(d,e,f,b,a[c+11],22,2304563134),b=l(b,d,e,f,a[c+12],7,1804603682),f=l(f,b,d,e,a[c+13],12,4254626195),e=l(e,f,b,d,a[c+14],17,2792965006),d=l(d,e,f,b,a[c+15],22,1236535329),b=n(b,d,e,f,a[c+1],5,4129170786),f=n(f,b,d,e,a[c+6],9,3225465664),e=n(e,f,b,d,a[c+11],14,643717713),d=n(d,e,f,b,a[c+0],20,3921069994),b=n(b,d,e,f,a[c+5],5,3593408605),f=n(f,b,d,e,a[c+10],9,38016083),e=n(e,f,b,d,a[c+15],14,3634488961),d=n(d,e,f,b,a[c+4],20,3889429448),b=n(b,d,e,f,a[c+9],5,568446438),f=n(f,b,d,e,a[c+14],9,3275163606),e=n(e,f,b,d,a[c+3],14,4107603335),d=n(d,e,f,b,a[c+8],20,1163531501),b=n(b,d,e,f,a[c+13],5,2850285829),f=n(f,b,d,e,a[c+2],9,4243563512),e=n(e,f,b,d,a[c+7],14,1735328473),d=n(d,e,f,b,a[c+12],20,2368359562),b=p(b,d,e,f,a[c+5],4,4294588738),f=p(f,b,d,e,a[c+8],11,2272392833),e=p(e,f,b,d,a[c+11],16,1839030562),d=p(d,e,f,b,a[c+14],23,4259657740),b=p(b,d,e,f,a[c+1],4,2763975236),f=p(f,b,d,e,a[c+4],11,1272893353),e=p(e,f,b,d,a[c+7],16,4139469664),d=p(d,e,f,b,a[c+10],23,3200236656),b=p(b,d,e,f,a[c+13],4,681279174),f=p(f,b,d,e,a[c+0],11,3936430074),e=p(e,f,b,d,a[c+3],16,3572445317),d=p(d,e,f,b,a[c+6],23,76029189),b=p(b,d,e,f,a[c+9],4,3654602809),f=p(f,b,d,e,a[c+12],11,3873151461),e=p(e,f,b,d,a[c+15],16,530742520),d=p(d,e,f,b,a[c+2],23,3299628645),b=q(b,d,e,f,a[c+0],6,4096336452),f=q(f,b,d,e,a[c+7],10,1126891415),e=q(e,f,b,d,a[c+14],15,2878612391),d=q(d,e,f,b,a[c+5],21,4237533241),b=q(b,d,e,f,a[c+12],6,1700485571),f=q(f,b,d,e,a[c+3],10,2399980690),e=q(e,f,b,d,a[c+10],15,4293915773),d=q(d,e,f,b,a[c+1],21,2240044497),b=q(b,d,e,f,a[c+8],6,1873313359),f=q(f,b,d,e,a[c+15],10,4264355552),e=q(e,f,b,d,a[c+6],15,2734768916),d=q(d,e,f,b,a[c+13],21,1309151649),b=q(b,d,e,f,a[c+4],6,4149444226),f=q(f,b,d,e,a[c+11],10,3174756917),e=q(e,f,b,d,a[c+2],15,718787259),d=q(d,e,f,b,a[c+9],21,3951481745),b=k(b,h),d=k(d,g),e=k(e,r),f=k(f,m);return(t(b)+t(d)+t(e)+t(f)).toLowerCase()}})})(jQuery);
 //js base64
-(function($){var b64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",a256="",r64=[256],r256=[256],i=0;var UTF8={encode:function(strUni){var strUtf=strUni.replace(/[\u0080-\u07ff]/g,function(c){var cc=c.charCodeAt(0);return String.fromCharCode(192|cc>>6,128|cc&63)}).replace(/[\u0800-\uffff]/g,function(c){var cc=c.charCodeAt(0);return String.fromCharCode(224|cc>>12,128|cc>>6&63,128|cc&63)});return strUtf},decode:function(strUtf){var strUni=strUtf.replace(/[\u00e0-\u00ef][\u0080-\u00bf][\u0080-\u00bf]/g,function(c){var cc=((c.charCodeAt(0)&15)<<12)|((c.charCodeAt(1)&63)<<6)|(c.charCodeAt(2)&63);return String.fromCharCode(cc)}).replace(/[\u00c0-\u00df][\u0080-\u00bf]/g,function(c){var cc=(c.charCodeAt(0)&31)<<6|c.charCodeAt(1)&63;return String.fromCharCode(cc)});return strUni}};while(i<256){var c=String.fromCharCode(i);a256+=c;r256[i]=i;r64[i]=b64.indexOf(c);++i}function code(s,discard,alpha,beta,w1,w2){s=String(s);var buffer=0,i=0,length=s.length,result="",bitsInBuffer=0;while(i<length){var c=s.charCodeAt(i);c=c<256?alpha[c]:-1;buffer=(buffer<<w1)+c;bitsInBuffer+=w1;while(bitsInBuffer>=w2){bitsInBuffer-=w2;var tmp=buffer>>bitsInBuffer;result+=beta.charAt(tmp);buffer^=tmp<<bitsInBuffer}++i}if(!discard&&bitsInBuffer>0){result+=beta.charAt(buffer<<(w2-bitsInBuffer))}return result}var Plugin=$.base64=function(dir,input,encode){return input?Plugin[dir](input,encode):dir?null:this};Plugin.btoa=Plugin.encode=function(plain,utf8encode){plain=Plugin.raw===false||Plugin.utf8encode||utf8encode?UTF8.encode(plain):plain;plain=code(plain,false,r256,b64,8,6);return plain+"====".slice((plain.length%4)||4)};Plugin.atob=Plugin.decode=function(coded,utf8decode){coded=String(coded).split("=");var i=coded.length;do{--i;coded[i]=code(coded[i],true,r64,a256,6,8)}while(i>0);coded=coded.join("");return Plugin.raw===false||Plugin.utf8decode||utf8decode?UTF8.decode(coded):coded}}(jQuery));
+    (function($){var b64="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",a256="",r64=[256],r256=[256],i=0;var UTF8={encode:function(strUni){var strUtf=strUni.replace(/[\u0080-\u07ff]/g,function(c){var cc=c.charCodeAt(0);return String.fromCharCode(192|cc>>6,128|cc&63)}).replace(/[\u0800-\uffff]/g,function(c){var cc=c.charCodeAt(0);return String.fromCharCode(224|cc>>12,128|cc>>6&63,128|cc&63)});return strUtf},decode:function(strUtf){var strUni=strUtf.replace(/[\u00e0-\u00ef][\u0080-\u00bf][\u0080-\u00bf]/g,function(c){var cc=((c.charCodeAt(0)&15)<<12)|((c.charCodeAt(1)&63)<<6)|(c.charCodeAt(2)&63);return String.fromCharCode(cc)}).replace(/[\u00c0-\u00df][\u0080-\u00bf]/g,function(c){var cc=(c.charCodeAt(0)&31)<<6|c.charCodeAt(1)&63;return String.fromCharCode(cc)});return strUni}};while(i<256){var c=String.fromCharCode(i);a256+=c;r256[i]=i;r64[i]=b64.indexOf(c);++i}function code(s,discard,alpha,beta,w1,w2){s=String(s);var buffer=0,i=0,length=s.length,result="",bitsInBuffer=0;while(i<length){var c=s.charCodeAt(i);c=c<256?alpha[c]:-1;buffer=(buffer<<w1)+c;bitsInBuffer+=w1;while(bitsInBuffer>=w2){bitsInBuffer-=w2;var tmp=buffer>>bitsInBuffer;result+=beta.charAt(tmp);buffer^=tmp<<bitsInBuffer}++i}if(!discard&&bitsInBuffer>0){result+=beta.charAt(buffer<<(w2-bitsInBuffer))}return result}var Plugin=$.base64=function(dir,input,encode){return input?Plugin[dir](input,encode):dir?null:this};Plugin.btoa=Plugin.encode=function(plain,utf8encode){plain=Plugin.raw===false||Plugin.utf8encode||utf8encode?UTF8.encode(plain):plain;plain=code(plain,false,r256,b64,8,6);return plain+"====".slice((plain.length%4)||4)};Plugin.atob=Plugin.decode=function(coded,utf8decode){coded=String(coded).split("=");var i=coded.length;do{--i;coded[i]=code(coded[i],true,r64,a256,6,8)}while(i>0);coded=coded.join("");return Plugin.raw===false||Plugin.utf8decode||utf8decode?UTF8.decode(coded):coded}}(jQuery));
 
-
-function isAbcJhk( value ) {
-    return /^{\s*[\.a-zA-Z0-9_]+\s*}$/.test( value );
-}
-function isNumber( value ) {
-    return /^[\+\-0-9.]+$/.test( value );
-}
-function isObj( value ) {
-    return typeof value == 'object';
-}
-function isString( value ) {
-    return typeof value == 'string';
-}
-function isStrOrNumber( value ) {
-    return isString(value) || isNumber(value);
-}
-function trim(str, node) {
-    if(isBoolean(str)) return str;
-    str = str || " ";
-    node = node || " ";
-    if(isObj(str)) return str;
-    if(isNumber(str)) return str;
-    var len = node.length;
-    if (str.substr(0, len) == node) str = str.substr(len);
-    if (str.substr(str.length - len, len) == node) str = str.substr(0, str.length - len);
-    return str;
-}
-function toNumber (val) {
-    var n = parseFloat(val);
-    return isNaN(n) ? val : n
-}
-function isBoolean (s) {
-    return typeof s =='boolean';
-}
-function htmlDecode(str){
-    if(isObj(str)) return str;
-    var s = "";
-    if(!str || str.length == 0) return "";
-    if(isBoolean(str)) return str;
-    if(isNumber(str)) return str;
-    if(!str.replace) {
-        console.log('str no suppose replace:');
-        console.log(str);
+    function isAbcJhk( value ) {
+        return /^{\s*[\.a-zA-Z0-9_]+\s*}$/.test( value );
     }
-    s = str.replace(/&amp;/g,"&");
-    s = s.replace(/&lt;/g,"<");
-    s = s.replace(/&gt;/g,">");
-    s = s.replace(/&nbsp;/g," ");
-    s = s.replace(/&#39;/g,"\'");
-    s = s.replace(/&quot;/g,"\"");
-    return s;
-}
-
-//数组去重
-function uniqueArray(array_) {
-    array_ = array_ || [];
-    //console.log(array_);
-    return jQuery.unique(array_.sort());
-}
-//转义正则敏感符 str_.replace(new RegExp(match,"gm"), matchVal); 否则当字符串match中含有以下符号时，无法替换
-function regCodeAddGang(str) {
+    function isNumber( value ) {
+        return /^[\+\-0-9.]+$/.test( value );
+    }
+    function isObj( value ) {
+        return typeof value == 'object';
+    }
+    function isString( value ) {
+        return typeof value == 'string';
+    }
+    function isStrOrNumber( value ) {
+        return isString(value) || isNumber(value);
+    }
+    function trim(str, node) {
+        if(isBoolean(str)) return str;
+        str = str || " ";
+        node = node || " ";
+        if(isObj(str)) return str;
+        if(isNumber(str)) return str;
+        var len = node.length;
+        if (str.substr(0, len) == node) str = str.substr(len);
+        if (str.substr(str.length - len, len) == node) str = str.substr(0, str.length - len);
+        return str;
+    }
+    function toNumber (val) {
+        var n = parseFloat(val);
+        return isNaN(n) ? val : n
+    }
+    function isBoolean (s) {
+        return typeof s =='boolean';
+    }
+    function htmlDecode(str){
+        if(isObj(str)) return str;
+        var s = "";
+        if(!str || str.length == 0) return "";
+        if(isBoolean(str)) return str;
+        if(isNumber(str)) return str;
+        if(!str.replace) {
+            console.log('str no suppose replace:');
+            console.log(str);
+        }
+        s = str.replace(/&amp;/g,"&");
+        s = s.replace(/&lt;/g,"<");
+        s = s.replace(/&gt;/g,">");
+        s = s.replace(/&nbsp;/g," ");
+        s = s.replace(/&#39;/g,"\'");
+        s = s.replace(/&quot;/g,"\"");
+        return s;
+    }
+    //数组去重
+    function uniqueArray(array_) {
+        array_ = array_ || [];
+        //console.log(array_);
+        return jQuery.unique(array_.sort());
+    }
+    //转义正则敏感符 str_.replace(new RegExp(match,"gm"), matchVal); 否则当字符串match中含有以下符号时，无法替换
+    function regCodeAddGang(str) {
     if(!str) return '';
-    str = str.replace(/\?/g, '\\\?');
-    str = str.replace(/\+/g, '\\\+');
-    str = str.replace(/\^/g, '\\\^');
-    str = str.replace(/\(/g, '\\\(');
-    str = str.replace(/\)/g, '\\\)');
-    str = str.replace(/\*/g, '\\\*');
-    str = str.replace(/\$/g, '\\\$');
-    str = str.replace(/\[/g, '\\\[');
-    str = str.replace(/\]/g, '\\\]');
-    str = str.replace(/\{/g, '\\\{');
-    str = str.replace(/\}/g, '\\\}');
-    str = str.replace(/\|/g, '\\\|');
-    str = str.replace(/\=/g, '\\\=');
-    str = str.replace(/\\\\/g, '\\\\\\');
-    return str;
-}
+        str = str.replace(/\?/g, '\\\?');
+        str = str.replace(/\+/g, '\\\+');
+        str = str.replace(/\^/g, '\\\^');
+        str = str.replace(/\(/g, '\\\(');
+        str = str.replace(/\)/g, '\\\)');
+        str = str.replace(/\*/g, '\\\*');
+        str = str.replace(/\$/g, '\\\$');
+        str = str.replace(/\[/g, '\\\[');
+        str = str.replace(/\]/g, '\\\]');
+        str = str.replace(/\{/g, '\\\{');
+        str = str.replace(/\}/g, '\\\}');
+        str = str.replace(/\|/g, '\\\|');
+        str = str.replace(/\=/g, '\\\=');
+        str = str.replace(/\\\\/g, '\\\\\\');
+        return str;
+    }
 
 (function (global, $) {
     //定义是否绑定过文档点击事件
-    global.bindDocumentHideMenuEven = false;
+    window.bindDocumentHideMenuEven = false;
     var menu_pub_class_name = 'my_diy_menu'; //全部的option菜单样式 用于统一鼠标点击body自动隐藏
-    var rCRLF = /\r?\n/g,
-        rsubmitterTypes = /^(?:submit|button|image|reset)$/i,
-        rcheckableType = ( /^(?:checkbox|radio)$/i ),
-        rsubmittable = /^(?:input|select|textarea|keygen|span|div)/i;;
     //对象加zindex
     var menuZindexClass = 'menu_add_zindex';
     var parentObjKey = 'parent';//给所有对象加一个父亲 设置键名
@@ -277,14 +271,14 @@ function regCodeAddGang(str) {
         if(!url) return '';
         if(url.indexOf('?') != -1) {
             if(url.indexOf('?lr_radom') !=-1) {
-                return url += url.split('?lr_radom')[0] + '?lr_radom='+ makeRadom(22);
+                return url += url.split('?lr_radom')[0] + '?lr_radom='+ global.makeRadom(22);
             }
             if(url.indexOf('&lr_radom') !=-1) {
-                return url += url.split('&lr_radom')[0] + '&lr_radom='+ makeRadom(22);
+                return url += url.split('&lr_radom')[0] + '&lr_radom='+ global.makeRadom(22);
             }
-            return url += '&lr_radom='+ makeRadom(22);
+            return url += '&lr_radom='+ global.makeRadom(22);
         }
-        return url += '?r_='+ makeRadom(22);
+        return url += '?r_='+ global.makeRadom(22);
     }
     //检测是否有非法运算字符 > 123 或 d =='ddd'
 
@@ -522,11 +516,12 @@ function regCodeAddGang(str) {
             var class_extend_true_val = '';
             var newOpt = {};
             var evenOption = {};//事件参数
-            //console.log(thisObj);
+            // console.log('formatAttr');
+            // console.log(thisObj);
             //console.log(options['click']);
             var tmpStyle = [];
             $.each(options, function (n, v) {
-                //console.log(thisObj, 'each:'+ n , v);
+                // console.log('each:'+ n , v);
                 class_extend_true_val = '';
                 //格式化要取原参数
                 if(options['source_'+n]) {
@@ -544,13 +539,13 @@ function regCodeAddGang(str) {
                     if(n !='value' && hasSetData) {
                         v = strObj.formatStr(v, optData, index, thisObj, n);
                     }
-                    thisObj['options'][n] = v; //参数要改变 防止外部取出来的仍是括号
+                    options[n] = v; //参数要改变 防止外部取出来的仍是括号
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
                 // if(optionIsSame(thisObj, options, n) && n !='style'  && n !='class' && n !='class_extend' && !strHasKuohao(v) && !options['source_'+n]) {
                 if(optionIsSame(thisObj, options, n)) {
-                    //console.log('optionIsSame this', n + ':'+ v);
-                    //console.log(thisObj);
+                    // console.log('optionIsSame this', n + ':'+ v);
+                    // console.log(thisObj);
                     return;
                 }
                 if(isStrOrNumber(v)) {
@@ -749,8 +744,8 @@ function regCodeAddGang(str) {
         reFormatKhAttr: function(thisObj, newOpt) {
             //console.log('reFormat.KhAttr', thisObj);
             var optData = newOpt['data'];
-            console.log('newOpt.data');
-            console.log(optData);
+            // console.log('reFormatKhAttr.data');
+            // console.log(optData);
             var attrsHasData = thisObj[objHasKhAttrs] || [];
             if(!hasData(attrsHasData)) return;
             //console.log('reFormat__________________.KhAttr Attr');
@@ -767,7 +762,7 @@ function regCodeAddGang(str) {
             var newAttr = {};
             var evenOption = {};
             var opt = thisObj['options'];
-            console.log('attrsHasData', attrsHasData);
+            // console.log('attrsHasData', attrsHasData);
             $.each(attrsHasData, function (index, n) {
                 v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
                 if(n =='value') {
@@ -986,7 +981,7 @@ function regCodeAddGang(str) {
                 //console.log(newAttr);
                 var oldExtendClass = getOptVal(opt, 'class_extend', '');
                 if(oldExtendClass) {
-                        newAttr['class'] = classAddSubClass(newAttr['class'], oldExtendClass, ' ');
+                    newAttr['class'] = classAddSubClass(newAttr['class'], oldExtendClass, ' ');
 
                 }
                 //如果更新了可见，则之前的hidden要去掉
@@ -1026,7 +1021,7 @@ function regCodeAddGang(str) {
             var abcAlbReg = '\{([a-zA-Z_]+[a-zA-Z_\d.]*)\}';
             str = yinhaogTH(str);//所有\\"都要保护起来
             str = changeYinhaoIn(str);// 防止解析{func}里的func时 "==?"这样的字符串被误解析
-            console.log('format Str1:'+ str);
+            // console.log('format Str1:'+ str);
             //转译引号里的内容 防止检测纠正语句时对替换的干扰
             //{12 === item ?"a= item2":"b"} 加密 "a= item2"
             function changeYinhaoIn(s_) {
@@ -1057,7 +1052,7 @@ function regCodeAddGang(str) {
                     }
                     match_ = match_.replace(/\(/g, kuohaoNewhasl);//()在引号里不会加密url 会混淆 所以要作转译
                     match_ = match_.replace(/\)/g, kuohaoNewhasr);//()在引号里不会加密url 会混淆 所以要作转译
-                    return '"'+ (match_ ? this.urlencodeLR(encodeNewHtml(match_)) : '') +'"';
+                    return '"'+ (match_ ? strObj.urlencodeLR(encodeNewHtml(match_)) : '') +'"';
                 });
                 //console.log('new s_:'+ s_);
                 return s_;
@@ -2077,7 +2072,7 @@ function regCodeAddGang(str) {
                 }
                 var newStr = nodeText;
                 if(hasSetData) {
-                    console.log('formatStr =:'+ nodeText,data);
+                    // console.log('formatStr =:'+ nodeText,data);
                     newStr =  strObj.formatStr(nodeText, data, n, thisObj, 'value');
                 }
                 //console.log('newStr =:'+ newStr);
@@ -2108,7 +2103,7 @@ function regCodeAddGang(str) {
         });
     }
     //对比data数组和对象是否一致
-    global.dataIsSame= function( x, y ) {
+    var dataIsSame= function( x, y ) {
         // If both x and y are null or undefined and exactly the same
         if ( x === y ) {
             return true;
@@ -2294,25 +2289,14 @@ function regCodeAddGang(str) {
         var loadBg = !isUndefined(options['load_bg']) ? options['load_bg'] :  false;
         var postData = getOptVal(options, ['post_data', 'postData'], null);
         var errFunc = getOptVal(options, ['err_func', 'errFunc', 'error_func', 'errorFunc'], null);//失败回调
-        if(loadBg) loading();
-        rePost(postUrl, postData,function(data) {
-            if(loadBg) noLoading();
-            //console.log(successVal);
-            //console.log(successKey);
-            //console.log(data);
-            //console.log(data[successKey]);
+        return global.rePost(postUrl, postData,function(data) {
             if(!data) {
                 console.log('post result: no data');
                 return;
             }
-            //console.log(data);
-            //console.log('successKey:'+ successKey);
-            //console.log('successVal', successVal);
-            //console.log(strInArray(data[successKey], successVal));
             if(successVal && successKey && (isUndefined(data[successKey]) || strInArray(data[successKey], successVal) == -1)) {
                 if(errFunc) errFunc(data, obj, livingObj);
             } else {
-                //console.log('successFunc:'+ successFunc);
                 //可能这里会执行关闭所有（最新）窗口，所以要提前执行，防止将默认的提示语误关。
                 if(successFunc) {
                     if(isString(successFunc)) {
@@ -2332,7 +2316,7 @@ function regCodeAddGang(str) {
 
     function createRadomName(tag, num) {
         num = num ||'';
-        var newName = 'lr_'+ tag +'_'+ makeRadom(7) + num;
+        var newName = 'lr_'+ tag +'_'+ global.makeRadom(7) + num;
         //名字已经存在，并且在页面中 （如果层被关闭，可能有gloal对象 但不存在页面中了，这时候可以继续覆盖原对象name）
         if(global[newName]) {
             //console.log('exist:'+ global[newName]);
@@ -2377,13 +2361,13 @@ function regCodeAddGang(str) {
     }
     //call renew val
     function callRewObjStringVal(obj_, options) {
-        console.log('callRewObj.StringVal');
-        console.log(obj_, obj_[objValIsNode]);
+        // console.log('callRewObj.StringVal');
+        // console.log(obj_, obj_[objValIsNode]);
         if(obj_[objValIsNode]) {
             //未渲染
             if(strHasKuohao(options['value'], 'data') && !dataIsSame(obj_['last_options']['data'], options['data'])) {//局部的data变了 才格式化
-                console.log('formatObj.NodesVal');
-                console.log(options['data']);
+                // console.log('formatObj.NodesVal');
+                // console.log(options['data']);
                 formatObjNodesVal(obj_, options['data'], !isUndefined(options['data']));
             } else if(strHasKuohao(options['value'], 'public')) {//全局的data不变化 无须格式化
                 formatObjNodesVal(obj_, options['data'], !isUndefined(options['data']));
@@ -2393,9 +2377,9 @@ function regCodeAddGang(str) {
             }
 
         } else {
-            console.log('callRew ObjStringVal');
-            console.log(obj_);
-            console.log(obj_.formatVal);
+            // console.log('callRew ObjStringVal');
+            // console.log(obj_);
+            // console.log(obj_.formatVal);
             if(obj_.formatVal) {
                 // 特殊的支持格式化value的对象 如：switch的data改变时 其value是可以格式化的
                 //console.log('callRew obj.format Val');
@@ -2553,9 +2537,8 @@ function regCodeAddGang(str) {
             });
         }
         //允许外部修改 数据、value 等触发控件的自更新/
-        if(isUndefined(setOptins['data'])) {
-            setOptins['data']= [];
-        }
+        if(isUndefined(setOptins['data']))  setOptins['data']= [];
+        // if(isUndefined(setOptins['extendParentData']))  setOptins['extendParentData']= false;
         $.each(setOptins, function (opt_, val_) {
             //console.log('get set:: '+opt_ + ':' + val_);
             if(thisObj.hasOwnProperty(opt_)) {
@@ -2598,14 +2581,6 @@ function regCodeAddGang(str) {
                     if(opt_ =='data') {
                         renewObjData(thisObj, newVal); //直接更新data 里面已经 更新属性  format AttrVals(thisObj, options);
                         options[opt_] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
-                        //console.log('renew::data');
-                        //console.log(thisObj);
-                    } else {
-                        //console.log('renew::'+opt_ );
-                        //console.log(thisObj);
-                        //console.log(newVal);
-                        //不能让外部修改属性
-                        // thisObj.renew(options, opt_);//要带上更新的参数
                     }
                 }
             });
@@ -2633,9 +2608,8 @@ function regCodeAddGang(str) {
         } else if(!isUndefined(options_['data_from']) || !isUndefined(options_['dataFrom'])) {
             extendParentData = false;
         }
-        //console.log(obj_);
-        //console.log('extendParentData:'+ extendParentData);
         if(isUndefined(options_['extendParentData'])) {
+            // console.log('set.extendParentData', extendParentData);
             options_['extendParentData'] = extendParentData;
         }
         // if(isUndefined(options_['data'])) options_['data'] = []; //强制加data,允许外部修改data
@@ -2754,7 +2728,7 @@ function regCodeAddGang(str) {
                 if(successKey) postData['success_key'] = successKey;
                 if(successValue) postData['success_value'] = successValue;
                 if(errFunc) postData['err_func'] = errFunc;
-                postAndDone(postData, obj_);
+                global.postAndDone(postData, obj_);
             }
             //允许外部刷新数据
             obj_.renewData = function (callFunc, page) {
@@ -2797,7 +2771,7 @@ function regCodeAddGang(str) {
                     if(successValue) postData['success_value'] = successValue;
                     if(errFunc) postData['err_func'] = errFunc;
                     //console.log(postData);
-                    postAndDone(postData, obj_);
+                    global.postAndDone(postData, obj_);
                 };
             }
         }  else if(typeof dataFrom == 'string') { //select专用
@@ -2833,10 +2807,7 @@ function regCodeAddGang(str) {
 
     //更新对象的data时 重新渲染对象的{}
     function renewObjData(obj, newData) {
-        if(!isOurObj(obj)) {
-            console.log('!isOurObj:', obj);
-            return;
-        }
+        if(!isOurObj(obj)) return;//非自定义的对象不能更data
         if(isStrOrNumber(newData)) return;//非data
         //console.log(JSON.stringify(newData));
         var options = cloneData(obj['options']);
@@ -2848,7 +2819,6 @@ function regCodeAddGang(str) {
         //console.log(OptBack);
         var newOpt = OptBack[0];
         newPushData = newOpt['data'];
-        console.log('objAttrHasKh:', obj, obj[objAttrHasKh]);
         if(obj[objAttrHasKh]) {
             strObj.reFormatKhAttr(obj, newOpt);
         }
@@ -2858,8 +2828,6 @@ function regCodeAddGang(str) {
             //console.log(obj);
             obj.renewSonLen(options);
         } else if(obj.renewSonData) { //更新长度和更新子data是上包含下的
-            //console.log('renew.SonData_________',obj);
-            //console.log('newPushData',newPushData);
             obj.renewSonData(newPushData);
         }
         //page专用
@@ -3766,7 +3734,6 @@ function regCodeAddGang(str) {
     }
     //打包form内的数据为对象
     $.fn.getFormData = $.fn.getFormDatas = function () {
-        //console.log('get.FormDatas_____________________________');
         var backData = {};
         //保存值到name
         function objSaveVal(obj_, tmpName, objVal) {
@@ -4157,8 +4124,7 @@ function regCodeAddGang(str) {
                 //console.log(obj_);
                 var valForCompare = $.isArray(valObj) ? valObj : [valObj];
                 if(!dataIsSame(obj_[objLastValKey], valForCompare)) { //内容obj已变
-                    console.log('val change: append new val ::::::::');
-                    //console.log('valForCompare');
+                    // console.log('val change: append new val ::::::::');
                     if(valObj) {
                         objPushVal(obj_, valObj);
                     }
@@ -4166,8 +4132,9 @@ function regCodeAddGang(str) {
                 //console.log(obj_);
                 if(hasData(optData) && (typeof optData == 'array' || typeof optData == 'object'))
                 { //有数据传入 哪怕是[] 都要判断之前的对象是否有data 有则对比更新
-                    console.log('renewObjData', valObj, optData);
-                    renewObjData(valObj, optData);
+                    if(!isUndefined(valObj['extendParentData']) && valObj['extendParentData'] == true) {
+                        renewObjData(valObj, optData);
+                    }
                 }
             }
         }
@@ -4226,7 +4193,7 @@ function regCodeAddGang(str) {
             //console.log(trData);
             //console.log('makeTD_____________________', opt__['data']);
             //console.log('trdata',trData);
-            var newTd = tdKey =='td' ? makeTd(opt__) : makeTh(opt__);
+            var newTd = tdKey =='td' ? global.makeTd(opt__) : global.makeTh(opt__);
             //console.log('hasData trData _____________________', hasData(trData));
             if(isStrOrNumber(opt__['data']) && hasData(trData)) {
                 //console.log('makeTD2222_____________________');
@@ -4250,7 +4217,7 @@ function regCodeAddGang(str) {
         obj_[objValObjKey] = [];
         obj_[objLastValKey] = [];
     }
-    //创建文本dom /a/p/span/div/li/td/em/i////
+    //创建文本dom /a/p/span/div/li/td/em/b/i/
     function makeDom(sourceOptions) {
         var opt = cloneData(sourceOptions);
         opt = opt || {};
@@ -4258,7 +4225,6 @@ function regCodeAddGang(str) {
         var defaultOps = opt['options'] || {};
         defaultOps['tag'] = tag;
         //必须设置name 否则拖动换排序时无法切换对象的子name
-
         if(isUndefined(defaultOps['name'])) {
             //td span 不需要加name 因为它们不参与循环
             if(tag == 'tr' || tag == 'li') {
@@ -4309,30 +4275,24 @@ function regCodeAddGang(str) {
         };
         //触发子数据更新
         obj.renewSonData = function(newData) {
-            //console.log(obj);
             newData = newData || [];
             if(!hasData(obj[objValObjKey])) return;
             //console.log('sons:', obj[objValObjKey], newData);
             $.each(obj[objValObjKey], function (n, son) {
-                //console.log('son::::::::::::',son);
-                //console.log('newData', newData);
-                if(!son)  return; //value: [obj1,,obj2] ,,要跳过
+                if(!son)  return;
                 //子对象是否继承父data
                 if(!isUndefined(son['extendParentData']) && son['extendParentData'] == true) {
                     renewObjData(son, newData);
                 } else {
-                    //console.log('!extendParentData', son);
+                    // console.log('!extendParentData', son);
                 }
             })
         };
         //append方法扩展
         obj.appendObj = function(newObj) {
-            //console.log(obj['options']);
             obj.renewVal(newObj, obj['options']);
-            //console.log(obj['value']);
         };
         obj.domAppendVal = function(opt, hasSetData) {
-            console.log('domAppend.Val', obj, opt);
             var obj_ = this;
             if(isUndefined(opt['value']) || opt['value']=='') opt['value'] = ' ';//必须输入空文本只能执行node替换
             opt= opt || [];
@@ -4354,25 +4314,24 @@ function regCodeAddGang(str) {
                 }
             }
         }
-        //console.log('make dom:');
-        //console.log(options);
         //外部设置val
         obj.extend({
             //主动更新数据
             renew: function(optionsGet) {
                 optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
                 // if(tag == 'td') {
-                // console.log('renew dom:', this, JSON.stringify(options_));
-                optionDataFrom(this, options_);
+                // console.log('renew dom:', this, JSON.stringify(optionsGet));
+                optionDataFrom(this, optionsGet);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
                 var hasSetData = !isUndefined(options['data']);
-                strObj.formatAttr(this, options_, 0, hasSetData);
-                this.domAppendVal(options_, hasSetData);
-                this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
-                this[objLastValKey] = this[objValObjKey];//设置完所有属性 要更新旧的val
+                strObj.formatAttr(obj, optionsGet, 0, hasSetData);
+                obj.domAppendVal(optionsGet, hasSetData);
+                // if(tag == 'i') {
+                //     console.log('renew last_options:', obj, JSON.stringify (optionsGet));
+                // }
+                obj['last_options'] = $.extend({}, optionsGet);//设置完所有属性 要更新旧的option
+                obj[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的val
                 //console.log('finish');
                 //console.log(this);
             },
@@ -4380,8 +4339,6 @@ function regCodeAddGang(str) {
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;
-                //console.log('cloneSelf__________', tag, optionsGet);
-                //console.log(optionsGet);
                 return makeDom({
                     'tag': tag,
                     'options': optionsGet,
@@ -4407,19 +4364,14 @@ function regCodeAddGang(str) {
                 }
             }
         });
-        // if(tag == 'form') console.log('here form op:');
-        //console.log('herea:');
-        //console.log(obj);
-        // console.log('optionGetSet ');
-        // console.log(obj);
-        // console.log(defaultOps['data']);
-        optionGetSet(obj, defaultOps);
         obj.renew(defaultOps);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(obj, defaultOps);
         objBindVal(obj, defaultOps);//数据绑定
         addCloneName(obj, defaultOps);//支持克隆
         if(afterCreate) afterCreate(obj, defaultOps); //初始化内容再写入内容
-        return obj;//makeDom
+        return obj;
     }
+
     //创建简单的标签对象
     global.makeA = function(defaultOps) {
         var funcAfterCreate = function (thisObj, option_) {
@@ -4523,9 +4475,14 @@ function regCodeAddGang(str) {
         });
     };
     global.makeH1 = function(defaultOps) {
+        var funcAfterCreate = function (thisObj, option_) {
+            //绑定拖拽事件
+            callBindDragObj(thisObj, option_);
+        };
         return makeDom({
             'tag': 'h1',
-            'options': defaultOps
+            'options': defaultOps,
+            'after_create': funcAfterCreate
         });
     };
     global.makeH2 = function(defaultOps) {
@@ -4594,7 +4551,7 @@ function regCodeAddGang(str) {
                     return obj[objValObjKey];
                 }
                 ,set: function (newVal) {
-                     obj[objValObjKey] = (newVal);
+                    obj[objValObjKey] = (newVal);
                 }
             });
         }
@@ -4696,9 +4653,9 @@ function regCodeAddGang(str) {
         };
         //更新list子对象的数据
         obj.renewSonData = function(newData){
-            //console.log('renew.SonData');
-            //console.log(obj);
-            //console.log(newData);
+            // console.log('renew.SonData');
+            // console.log(obj);
+            // console.log(newData);
             // return;
             newData = newData || [];
             if(!hasData(obj[objValObjKey])) return;
@@ -4710,7 +4667,6 @@ function regCodeAddGang(str) {
                 }
                 //console.log(obj[objValObjKey]);
                 $.each(obj[objValObjKey], function (n, son) {
-                    //console.log(son);
                     renewObjData(son, newData);
                 });
             } else {
@@ -4850,9 +4806,9 @@ function regCodeAddGang(str) {
                 }
                 obj.INeedParentValFlag = getOptVal(options_, ['need_parent_val', 'needParentVal'], false);//需要父参数渲染好才能请求url
                 obj.INeedParentKey = getOptVal(options_, ['need_parent_key', 'needParentKey', 'need_parent_name', 'needParentName'], 'demo_name');
-                console.log('renew list');
-                console.log(obj);
-                console.log(options_);
+                // console.log('renew list');
+                // console.log(obj);
+                // console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
                 optionDataFrom(this, options_);
@@ -4876,7 +4832,7 @@ function regCodeAddGang(str) {
         });
         cloneListSon(obj, options);
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
-        optionGetSet(this, options_);
+        optionGetSet(obj, options);
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
         //对象直接设置了data 可以触发 延迟执行
@@ -5103,7 +5059,7 @@ function regCodeAddGang(str) {
                 var trOpt_;
                 $.each(trOpts, function (n, tmpOpt_) {
                     trOpt_ = cloneData(tmpOpt_);
-                    trObj = makeTr(trOpt_);
+                    trObj = global.makeTr(trOpt_);
                     // console.log('makeTr.each:obj', trOpt_, trData, trObj);
                     trObj[parentObjKey] = obj;//分配父对象
                     //console.log('set tr.SonData1');
@@ -5190,7 +5146,7 @@ function regCodeAddGang(str) {
                         val_.forEach(function (trOpt) {
                             trOpt[optionCallCloneKey] = tableIsClone;
                             delete trOpt['data'];//如果是克隆的会带上之前的data 导致无法更新自身的data 所以要提前删除
-                            var trObj = makeTr(trOpt);
+                            var trObj = global.makeTr(trOpt);
                             if(!findRepeatTr) trAppendIndex = trObj;//只要未找到tr，所有tr_n都都算是最后一个应该产生tr的地方
                             var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
                             //console.log('makeDataTr ed ::::::::::');
@@ -5225,7 +5181,6 @@ function regCodeAddGang(str) {
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
                 strObj.formatAttr(this, options_);
-                optionGetSet(this, options_);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 this[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的option
             },
@@ -5285,6 +5240,7 @@ function regCodeAddGang(str) {
         };
         obj.appendTrs(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(obj, options);
         addCloneName(obj, options);//支持克隆
         return obj;
     };
@@ -5596,7 +5552,7 @@ function regCodeAddGang(str) {
                         var newUrl = obj.attr('url');
                         postData[ajaxPostName] = $.trim(thisVal);//name必须重新获取 因为上面的是临时变量
                         if(inputPostData) postData = cloneData(inputPostData, postData);
-                        postAndDone({
+                        global.postAndDone({
                             post_url: newUrl,
                             post_data: postData,
                             success_value: successVal,
@@ -5657,7 +5613,7 @@ function regCodeAddGang(str) {
                         postData[ajaxPostName] = text_;
                         if(inputPostData) postData = cloneData(inputPostData, postData);
                         var inputUrl = obj.options['url'];
-                        rePost(inputUrl, postData, function(response) {
+                        global.rePost(inputUrl, postData, function(response) {
                             var menuData;
                             if(dataKey) {
                                 menuData = response[dataKey] || response;
@@ -5930,7 +5886,6 @@ function regCodeAddGang(str) {
                 //格式化和绑定事件交由内部input 因为每次重新生成input 事件都需要重新绑定
                 obj.createInput(options_);//重新创建一个input
                 strObj.formatAttr(obj, options_);
-                optionGetSet(obj, options_);
                 addOptionNullFunc(obj, options_);//加null_func
                 //console.log('makeInput_end');
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
@@ -5967,7 +5922,7 @@ function regCodeAddGang(str) {
         });
 
         obj.renew(options);
-        // console.log('___bindInput::');
+        optionGetSet(obj, options);
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
         //console.log(obj);
@@ -6000,7 +5955,6 @@ function regCodeAddGang(str) {
                 var loadError = options_['error'] || null;
                 var src = options_['src'] || null;
                 strObj.formatAttr(this, options_);
-                optionGetSet(this, options_, 'src'); //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 if(src && !strHasKuohao(src)) this.attr('src', src);//格式化src后再赋值
                 obj['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //console.log(options_);
@@ -6055,6 +6009,7 @@ function regCodeAddGang(str) {
             }
         });
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(obj, options, 'src'); //参数读写绑定 参数可能被外部重置 所以要同步更新参数
         objBindVal(obj, options, [{'key_':'bind', 'val_':'src'}]);
         addCloneName(obj, options);//支持克隆
         return obj;
@@ -6207,7 +6162,7 @@ function regCodeAddGang(str) {
             if(formType == 'post') {//执行post以及post成功之后的回调动作
                 successObj['post_data'] = postDataForm;
                 successObj['post_url'] = url;
-                postAndDone(successObj, thisObj);
+                global.postAndDone(successObj, thisObj);
             } else if(formType == 'func') {
                 //这里的扩展submit可以为空 只执行用户自己定义的submit事件 如：
                 //  submit: function(obj, e) {
@@ -6371,7 +6326,7 @@ function regCodeAddGang(str) {
                     }
                 }
                 if(setText && newText !=='') {
-                     updateBindObj($.trim(setText), newText, exceptObj);
+                    updateBindObj($.trim(setText), newText, exceptObj);
                 }
             },
             //主动更新数据
@@ -7037,9 +6992,6 @@ function regCodeAddGang(str) {
                     obj.append(itemObj);
                     obj['createItem'] = true;
                 }
-                //console.log('items_______options_');
-                //console.log(options_);
-                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 addOptionNullFunc(this, options_);//加null_func
                 strObj.formatAttr(obj, options_);
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
@@ -7065,6 +7017,7 @@ function regCodeAddGang(str) {
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
         obj.renew(options);
+        optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
         //console.log('item_obj');
         //console.log(obj);
@@ -7464,7 +7417,7 @@ function regCodeAddGang(str) {
                     if(pageOpt) {
                         //console.log('create_page');
                         var pageNowKey = pageOpt['page_now_key'] || pageOpt['current_page_key'] || 'page';
-                        var pageObj = makePage({
+                        var pageObj = global.makePage({
                             data: '{'+ pageOpt['data_key'] +'}',
                             page: pageNowKey ? '{'+ pageNowKey +'}' : 'page',
                             total: pageOpt['result_total_key'] ? '{'+ pageOpt['result_total_key'] +'}' : 'total',
@@ -7509,7 +7462,7 @@ function regCodeAddGang(str) {
                         if(canEnter && thisVal && oldVal !=thisVal ) {
                             var postAddData = {};
                             postAddData[postAddName] = $.trim(thisVal);//name必须重新获取 因为上面的是临时变量
-                            postAndDone({
+                            global.postAndDone({
                                 post_url: selectAddUrl,
                                 post_data: postAddData,
                                 success_value: successAddVal,
@@ -7525,7 +7478,6 @@ function regCodeAddGang(str) {
                 //console.log(options_);
                 obj.bindEvenObj = obj.textObj;
                 strObj.formatAttr(obj.textObj, newInputEven);/// 给input分配的事件 如 blur
-                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 //强制加value参数 否则无法触发初始化渲染value事件：format Val
                 var formatOpt = cloneData(options_);
                 if(isUndefined(formatOpt['value'])) formatOpt['value'] = '';
@@ -7552,6 +7504,7 @@ function regCodeAddGang(str) {
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
         obj.renew(options);
+        optionGetSet(obj, options);
         addCloneName(obj, options);//支持克隆
         //console.log('select_obj');
         //console.log(obj);
@@ -8099,7 +8052,7 @@ function regCodeAddGang(str) {
             makeDays_(ymd_[0], ymd_[1], ymd_[2]);
         };
         var obj = makeInput(options);
-        var menuName = 'calendar_menu_'+ parseInt(makeRadom(10));
+        var menuName = 'calendar_menu_'+ parseInt(global.makeRadom(10));
         obj._rili = $('<div class="calendar_menu '+ menu_pub_class_name +'" id="'+ menuName +'"></div>');
         $('body').append(obj._rili);
         //创建日历菜单
@@ -8347,7 +8300,7 @@ function regCodeAddGang(str) {
 //批量上传的表单
     global.makeUploadForm = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        var previewId = !isUndefined(options.id) ? options.id : 'multip_upload_prev_images_'+ parseInt(makeRadom(22));
+        var previewId = !isUndefined(options.id) ? options.id : 'multip_upload_prev_images_'+ parseInt(global.makeRadom(22));
         var uploadInput = makeInput({type: 'file', multi: 'true'});
         var submitUploadBtn = makeBtn({value: '上传',  'type': 'button', 'class': 'btnLr btnLrInfo'});
         var previewObj = makeDiv({
@@ -8846,7 +8799,7 @@ function regCodeAddGang(str) {
                 }
                 var opt = options;
                 var li = pageBody.find("li[data-page='"+ newP +"']");
-                if(li.length == 0 || newP-pageBody.fromPage>4  || pageBody['current_page'] - newP>2) { //跳度太大 页面不存在 需要重新生成
+                if(li.length == 0 || newP-pageBody.fromPage<=2  || newP-pageBody.fromPage>= pageBody.pageBtnNum-2 ) { //跳度太大 页面不存在 需要重新生成
                     opt['page'] = newP;
                     this.renew(opt);
                 } else {
@@ -8876,7 +8829,8 @@ function regCodeAddGang(str) {
                 // console.log('pageSize1:');
                 // console.log(pageSize);
                 var pageBtnNum = getOptVal(options, ['pagenum', 'pageNum'], 5);//分页按钮显示的数量
-                var pageType = getOptVal(options, ['type'], 'default');//分页样式 default/goto
+                var pageType = getOptVal(options, ['type'], 'default');//分页样式 default/btn
+                var goto = getOptVal(options, ['goto'], null);
                 var pageClass = getOptVal(options, ['class'], '');
                 options['page'] = options['page'] || 1;
                 options['btnSize'] = (!options['size'] || !setSize(options['size'])) ? 'md' : options['size'];//过滤size
@@ -8924,10 +8878,11 @@ function regCodeAddGang(str) {
                 //console.log(pageBody);
                 pageBody['current_page'] = page;
                 pageBody.totalPage = totalPage;
+                pageBody.pageBtnNum = pageBtnNum;
                 pageBody.empty();
                 if(pageType=='default') {
                     var preLi = $('<li><a href="javascript: void(0)" target="_self">&laquo;</a></li>');
-                } else if(pageType == 'goto') {
+                } else if(pageType == 'btn') {
                     var preLi = $('<li><a href="javascript: void(0)" target="_self" class="endPage"> &lt; </a></li>');
                 }
                 preLi.off().on('click', function (e) {
@@ -8997,7 +8952,7 @@ function regCodeAddGang(str) {
                         }
                     });
                     pageBody.append(nextLi);
-                } else if(pageType == 'goto') {
+                } else if(pageType == 'btn') {
                     var nowPage = pageBody['current_page'];
                     var senglue = (nowPage == totalPage || toPage>=totalPage )? null: $('<li><a href="javascript: void(0)" target="_self" class="endPage"> ... </a></li>');
                     var totalLi = (nowPage == totalPage || toPage>=totalPage )? null: $('<li><a href="javascript: void(0)" target="_self"> '+ totalPage +' </a></li>');
@@ -9022,8 +8977,8 @@ function regCodeAddGang(str) {
                     if(totalLi)pageBody.append(totalLi);
                     if(nextLi)pageBody.append(nextLi);
                 }
-                if(pageType == 'goto') {
-                    var gotoLi = $('<li><span class="pageBtn">Goto <input class="togoPage" /></span></li>');
+                if(goto) {
+                    var gotoLi = $('<li><a><input class="togoPage" placeholder="Goto" /></a></li>');
                     var gotoPageObj = gotoLi.find('.togoPage');
                     if(pageBody.gotoPage) gotoPageObj.val(pageBody.gotoPage);
                     gotoPageObj.off().on('blur', function (e) {
@@ -9034,7 +8989,11 @@ function regCodeAddGang(str) {
                         pageBody.setPage(thisPage);
                     });
                     pageBody.gotoPageObj = gotoPageObj;
-                    pageBody.append(gotoLi);
+                    if(strInArray(goto, ['r', 'right']) !=-1) {
+                        pageBody.append(gotoLi);
+                    } else if(strInArray(goto, ['l', 'left']) !=-1) {
+                        pageBody.prepend(gotoLi);
+                    }
                 }
 
                 pageBody['last_options'] = $.extend({}, options);//设置完所有属性 要更新旧的option
@@ -9052,7 +9011,7 @@ function regCodeAddGang(str) {
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makePage(optionsGet);
+                return global.makePage(optionsGet);
             },
             updates: function(dataName, exceptObj) {//数据被动同步
                 //console.log('updates this');
@@ -9158,7 +9117,7 @@ function regCodeAddGang(str) {
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makePage(optionsGet);
+                return global.makePage(optionsGet);
             },
             updates: function(dataName, exceptObj) {//数据被动同步
                 dataName = $.trim(dataName);
@@ -9237,8 +9196,6 @@ function regCodeAddGang(str) {
         bar[objValIsNode] = false;
         bar[objAttrHasKh] = false;
         var valueStrFormatdSuccess = false;
-        //console.log('makedom:');
-        //console.log(obj);
         // //支持外部设置值
         Object.defineProperty(bar, 'value', {
             get: function () {
@@ -10920,52 +10877,49 @@ function regCodeAddGang(str) {
             fn(uri, postData);
         })
     };
-    $(function () {
-//direction string 拖拽方向
-//loadFunc function 加载数据
-        $.fn.dragToLoadData = function (direction, loadFunc) {
-            direction = direction || 'up'; //默认上拖加载,其他 up|down|left|right
-            var dragObj = $(this);
-            dragObj.on('touchstart', function(e) {
-                var touch = e.originalEvent, startX = touch.changedTouches[0].pageX;
-                var startY = touch.changedTouches[0].pageY;
-                dragObj.on('touchmove', function(e) {
-                    //e.preventDefault();安卓底下 会引起拖拽失效
-                    touch = e.originalEvent.touches[0] ||
-                        e.originalEvent.changedTouches[0];
-                    if (touch.pageX - startX > 10) {//右划
-                        if(direction == 'right') {
+    //direction string 拖拽方向
+    //loadFunc function 加载数据
+    $.fn.dragToLoadData = function (direction, loadFunc) {
+        direction = direction || 'up'; //默认上拖加载,其他 up|down|left|right
+        var dragObj = $(this);
+        dragObj.on('touchstart', function(e) {
+            var touch = e.originalEvent, startX = touch.changedTouches[0].pageX;
+            var startY = touch.changedTouches[0].pageY;
+            dragObj.on('touchmove', function(e) {
+                //e.preventDefault();安卓底下 会引起拖拽失效
+                touch = e.originalEvent.touches[0] ||
+                    e.originalEvent.changedTouches[0];
+                if (touch.pageX - startX > 10) {//右划
+                    if(direction == 'right') {
+                        loadFunc();
+                    }
+                } else if (touch.pageX - startX < -10) {//左划
+                    if(direction == 'left') {}
+                }
+                if (touch.pageY - startY > 10) {//下划
+                    if(direction == 'down') {
+                        var scrollTop = $(document).scrollTop();
+                        if(scrollTop == 0) loadFunc();
+                    }
+                } else if (touch.pageY - startY < -10) {//上划
+                    if(direction == 'up') {
+                        var scrollTop = $(document).scrollTop();
+                        var docHeight = $(document).height();
+                        var winHeight = $(window).height();
+                        if(scrollTop + winHeight >= docHeight - 1 ) {
                             loadFunc();
                         }
-                    } else if (touch.pageX - startX < -10) {//左划
-                        if(direction == 'left') {}
                     }
-                    if (touch.pageY - startY > 10) {//下划
-                        if(direction == 'down') {
-                            var scrollTop = $(document).scrollTop();
-                            if(scrollTop == 0) loadFunc();
-                        }
-                    } else if (touch.pageY - startY < -10) {//上划
-                        if(direction == 'up') {
-                            var scrollTop = $(document).scrollTop();
-                            var docHeight = $(document).height();
-                            var winHeight = $(window).height();
-                            if(scrollTop + winHeight >= docHeight - 1 ) {
-                                loadFunc();
-                            }
-                        }
-                    }
-                });
-                //return false;
-            }).on('touchend', function() {
-                dragObj.off('touchmove');
+                }
             });
-        };
-
-    });
+            //return false;
+        }).on('touchend', function() {
+            dragObj.off('touchmove');
+        });
+    };
 //此js只能加载一次 不能用于ajax内置模板多次加载
 //因为：document绑定事件只绑定一次 多次加载会导致多次绑定
-    if(!global.bindDocumentHideMenuEven) {
+    if(!window.bindDocumentHideMenuEven) {
         $(document).mousedown(function(event) {
             var $target = $(event.target);
             var thisClass = $target.attr('class') ? $target.attr('class') : '';
@@ -10994,8 +10948,8 @@ function regCodeAddGang(str) {
                 }
             }, 20);
         });
-        global.bindDocumentHideMenuEven = true;
+        window.bindDocumentHideMenuEven = true;
     }
-
+    return global;
 })(this, jQuery);
 
