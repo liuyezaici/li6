@@ -1070,25 +1070,15 @@ function regCodeAddGang(str) {
             //格式单个变量
             function formatOneDateKey(abc, dataPublic) {
                 dataPublic = dataPublic || 'data'; // data的来源 要么继承data 要么public里取
-                //console.log('formatOne DateKey abc:'+ abc + ',dataPublic:'+ dataPublic);
                 abc = abc || '';
                 abc = $.trim(abc);
                 var resultStr=   '';
                 if(!abc) return abc;
                 attrName = attrName || '';
                 if(dataPublic == 'data') {
-                    //console.log(data_);
-                    if(!isUndefined(data_[abc])) {
-                        //console.log(obj_);
-                        //console.log('!isUndefined abc:'+abc +'');
-                        //console.log(data_);
-                        resultStr = data_[abc]; //这里调取的数据不能再进行格式化算法 要当作纯字符串输出。如：“我的>123” 格式化会报错。
-                        //console.log('resultStr:'+ resultStr);
-                    } else {
-                        //console.log('isUndefined abc:'+abc +'');
-                        //console.log(data_);
-                        var match1 = abc.match(/^this\.([a-zA-Z0-9]+)/);
-                        var match2 = abc.match(/^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/);
+                    var match1 = abc.match(/^this\.([a-zA-Z0-9]+)/);
+                    var match2 = abc.match(/^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/);
+                    if(match1 || match2) {
                         if(match1 != null) {
                             //console.log('replace 1_________________ :'+abc);
                             //允许获取当前data对象
@@ -1108,6 +1098,23 @@ function regCodeAddGang(str) {
                                 resultStr = eval(abc2);
                             } catch(err){
                                 resultStr = '';
+                            }
+                        }
+                    } else {
+                        //{a.b}
+                        if(abc.indexOf('.') !=-1) {
+                            var array_ = abc.split('.');
+                            var getData = $.extend({}, data_);
+                            $.each(array_, function (n, key_) {
+                                if(isUndefined(getData[key_])) {
+                                    return;
+                                }
+                                getData = !isUndefined(getData[key_]) ? getData[key_] : {};
+                            });
+                            resultStr = getData.toString();
+                        } else {
+                            if(!isUndefined(data_[abc])) {
+                                resultStr = data_[abc]; //这里调取的数据不能再进行格式化算法 要当作纯字符串输出。如：“我的>123” 格式化会报错。
                             }
                         }
                     }
@@ -4714,9 +4721,6 @@ function regCodeAddGang(str) {
                     //console.log('son__'+ n);
                     //console.log(son);
                     sonData = newData[n]||[];
-                    //console.log('newData');
-                    //console.log(son);
-                    //console.log(sonData);
                     if(isUndefined(sonData['index'])) sonData['index'] = n;
                     renewObjData(son, sonData);
                 });
@@ -10884,6 +10888,28 @@ function regCodeAddGang(str) {
         return $('<script charset="'+ charset +'" type="'+ jsType +'" src="'+ options['src'] +'"></script>');
     };
 
+    //传统表单的自定义打包提交方法
+    global.formSubmitEven = function(form, opt) {
+        form.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var data_ = form.serializeArray();
+            var pData = {};
+            data_.map(function (v, n) {
+                pData[v.name] = v.value;
+            });
+            if(!isUndefined(opt['postData'])) {
+                opt['postData'].map(function (v, k) {
+                    pData[k] = v;
+                });
+            }
+            var newOpt = {
+                'postData' : pData
+            };
+            newOpt = $.extend({}, newOpt, opt);
+            global.postAndDone(newOpt);
+        });
+    };
     //弹窗的搜索打包
     $.fn.formBoxSearch = function(fn) {
         var form = $(this);
@@ -10936,7 +10962,6 @@ function regCodeAddGang(str) {
             });
         };
 
-
     });
 //此js只能加载一次 不能用于ajax内置模板多次加载
 //因为：document绑定事件只绑定一次 多次加载会导致多次绑定
@@ -10971,5 +10996,6 @@ function regCodeAddGang(str) {
         });
         global.bindDocumentHideMenuEven = true;
     }
+
 })(this, jQuery);
 

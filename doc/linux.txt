@@ -255,6 +255,7 @@ git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/upload
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/poc_oss.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/poc_portal.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/wz123.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/chat.treeholes.git
 git remote rm origin
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/leg.git
 √‚√‹¬Î
