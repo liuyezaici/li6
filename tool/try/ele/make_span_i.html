@@ -6,11 +6,8 @@
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
 
 <style>
-    .simple_span.active {
+    .simple_span {
         font-weight: bold;
-    }
-    .simple_span.hover {
-        font-style: italic;
         background-color: #efefef;
     }
 </style>
@@ -26,7 +23,9 @@
     var simpleSpan = makeSpan({
         name: 'test_span',
         data: {'ps': '没什么特别的技能'},
-        value: '<i class="glyphicon glyphicon-fire"></i>',
+        value: makeI({
+            value:' ps:{ps}',
+        }),
        'class': "simple_span"
     });
   $('#show_span').append(simpleSpan);
