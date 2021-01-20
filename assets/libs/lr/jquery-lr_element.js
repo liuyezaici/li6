@@ -134,6 +134,16 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         return newOpt;
     }
 
+    //拷贝options原本未解析的属性
+    function getSourceOpt(opt) {
+        $.each(opt, function (k, v) {
+            if(!isUndefined(opt['source_'+ k])) {
+                opt[k] = opt['source_'+ k];
+            }
+        });
+        return opt;
+    }
+
     //移除options所有事件
     function removeAllEven(opt) {
         $.each(opt, function (k, v) {
@@ -521,7 +531,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //console.log(options['click']);
             var tmpStyle = [];
             $.each(options, function (n, v) {
-                // console.log('each:'+ n , v);
+                // console.log('formatAttr.....each:'+ n , v);
                 class_extend_true_val = '';
                 //系统参数 无须解析
                 if(n.substr(0, 7) =='source_') {
@@ -538,10 +548,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }
                     }
                     if(strInArray(n, ['value', 'th', 'td']) !=-1 && isString(v)) {
-
-                    } if(thisObj.formatVal) {
-                        thisObj.formatVal(options);
-                        return;
+                        if(thisObj.formatVal) {
+                            thisObj.formatVal(options);
+                            return;
+                        }
                     }
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
@@ -2800,7 +2810,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
     //更新对象的data时 重新渲染对象的{}
     function renewObjData(obj, newData) {
-        console.log('renewObjData:', obj, newData);
+        // console.log('renewObjData:', obj, newData);
         if(!isOurObj(obj)) return;//非自定义的对象不能更data
         if(isStrOrNumber(newData)) return;//非data
         //console.log(JSON.stringify(newData));
@@ -2810,7 +2820,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var OptBack = optionAddData(options, newPushData);
         var newOpt = OptBack[0];
         newPushData = newOpt['data'];
-        console.log('objAttrHasKh:', obj[objAttrHasKh], newOpt);
+        // console.log('objAttrHasKh:', obj[objAttrHasKh], newOpt);
         if(obj[objAttrHasKh]) {
             strObj.reFormatKhAttr(obj, newOpt);
         }
@@ -4272,7 +4282,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             $.each(obj[objValObjKey], function (n, son) {
                 if(!son)  return;
                 //子对象是否继承父data
-                console.log('sons:', son, son['extendParentData']);
+                // console.log('sons:', son, son['extendParentData']);
                 if(!isUndefined(son['extendParentData']) && son['extendParentData'] == true) {
                     renewObjData(son, newData);
                 } else {
@@ -4329,7 +4339,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             },
             //克隆当前对象
             cloneSelf: function(optionsGet) {
-                optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;
                 return makeDom({
                     'tag': tag,
@@ -4884,9 +4893,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //更新table.data 如果含有带循环的tr 则只更新data的tr；反之更新全部tr
         var trAppendIndex = null;//第一个tr出现的前一个tr_n的位置
         obj.renewSonLen = function (opt) {
-            // console.log('renewSonLen::');
-            // console.log(obj['tr_defaults']);
+            console.log('renewSonLen::');
+            console.log(obj['tr_defaults']);
             var sons;
+            var groupSons;//按组分子tr 如果有2个tr循环 则 groupSons[0] = [tr1,tr2]; groupSons[1] = [tr4, tr5];
             var demoData = opt['data'];
             //console.log(demoData);
             //console.log(JSON.stringify(demoData));
@@ -4898,7 +4908,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //如果之前产生过多的儿子而新数量变少要剔除
                 var lastValLen = sons.length;
                 var nowValLen = newData.length * trOptLen;
-                // console.log('lastValLen:'+ lastValLen, this[tableWithDataTrKey]);
+                // console.log('lastValLen:'+ lastValLen);
                 // console.log('nowValLen:'+ nowValLen);
                 if(lastValLen > nowValLen) { //多出来 裁掉
                     sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
@@ -4945,20 +4955,27 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     for(tmpTrGroupid = 0; tmpTrGroupid < newTrGroups; tmpTrGroupid++) {
                         tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                         tmpData =  newData[tmpTrGroupid];
-                        //一组组更新(创建)tr
+                        console.log('tmpData:', tmpData);
+                        //一组组更新/创建tr
                         for(var i2 = 0 ; i2 < trOptLen; i2 ++) {
-                            tmpIndex =  tmpTrGroupFromIndex ++;
+                            tmpIndex =  tmpTrGroupFromIndex ++; //当前组里第几个tr
+                            console.log('i2:', i2, 'tmpIndex', tmpIndex);
                             //console.log('tmpData', tmpIndex);
                             //console.log(tmpData);
                             if(!isUndefined(sons[tmpIndex])) {
+                                // console.log('has_tmpIndex', tmpIndex);
                                 sons[tmpIndex]['data'] = tmpData;
                             } else {
-                                if(!hasData(sons[i2])) {
-                                    var cloneTr = obj['tr_defaults'][i2];
-                                    var cloneOpt = cloneTr['options'];
+                                console.log('create_tmpIndex', tmpIndex);
+                                if(!hasData(sons[tmpIndex])) {
+                                    console.log('no_i2', i2);
+                                    var cloneTr = obj['tr_defaults'][tmpIndex];
+                                    var cloneOpt = getSourceOpt(cloneTr['options']);
                                     cloneOpt['data'] = tmpData;
+                                    console.log('cloneOpt:', cloneOpt);
                                     // console.log('cloneSelf111',i2, obj['tr_defaults'][i2], tmpData);
                                     newTr = cloneTr.cloneSelf(cloneOpt);
+                                    console.log('newTr:', newTr);
                                     if(trAppendIndex) {
                                         //console.log('trAppendIndex', trAppendIndex);
                                         trAppendIndex.after(newTr);
@@ -4967,6 +4984,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                         obj.tBody.append(newTr);
                                     }
                                 } else {
+                                    console.log('has_i2', i2);
                                     // console.log('cloneSelf2222',i2, sons[i2], tmpData);
                                     var cloneTr = sons[i2];
                                     var cloneOpt = cloneTr['options'];
@@ -5034,7 +5052,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var sons = obj[tableWithDataTrKey];
             //new trs
             var trObj;
-            //创建第一组tr 不用克隆 并且存储默认的tr对象 防止tr渲染清空后无法再次克隆tr
+            //创建第一组tr 不用克隆 并且存储默认的tr虚拟对象 防止tr渲染清空后无法再次克隆tr
             if(!cloneIf) {
                 // console.log('!cloneIf.each:___', trOpts);
                 var addDefaultTr = false;
@@ -5045,6 +5063,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 var trOpt_;
                 $.each(trOpts, function (n, tmpOpt_) {
                     trOpt_ = cloneData(tmpOpt_);
+                    console.log("trOpt_;", trOpt_);
                     trObj = global.makeTr(trOpt_);
                     // console.log('makeTr.each:obj', trOpt_, trData, trObj);
                     trObj[parentObjKey] = obj;//分配父对象
@@ -5068,6 +5087,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }
                     } else if(addDefaultTr) {
                         obj['tr_defaults'].push(trObj);
+                        console.log("obj['tr_defaults'].push(trObj);", obj);
                     }
                 });
             } else {

@@ -1,5 +1,7 @@
 <!DOCTYPE html> <html> <head> <meta charset="utf-8">
-<link href="/min/?f=/assets/libs/lr/jquery.lr_box.css,/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
@@ -26,8 +28,7 @@
     var getDataUrl = '/index/tool/get_rows';
     //js造一个简单的表格
     var table = makeTable({
-        'width': '500',
-        'class': 'well js_table',
+        'class': 'well',
         'name': 'login_table',
         data_from: {
             url: getDataUrl,
@@ -39,28 +40,23 @@
                 msgTisf(e.msg);
             }
         },
-        tr_top: [
-            {
-                th: [
-                    { value: 'ID'  },
-                    { value: '标题' }
-                ]
-            }
-        ],
+        // tr_top: [
+        //     {
+        //         th: [
+        //             { value: 'ID'  },
+        //             { value: '标题' }
+        //         ]
+        //     }
+        // ],
         tr: [
             {
+                id_: '{id}',
+                dblclick: function (o) {
+                    msgTisf(o.id_);
+                },
                 td: [
                     {
-                        id_: '{id}',
-                        dblclick: function (o) {
-                            msgTisf(o.id_);
-                        },
-                        value: [
-                            makeSpan({
-                                id2_: '{id}',
-                                value: 'id:{id}'
-                            })
-                        ]
+                        value: '{id}'
                     },
                     // {
                     //     value: [

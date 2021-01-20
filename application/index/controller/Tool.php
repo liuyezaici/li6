@@ -36,10 +36,6 @@ class Tool extends Frontend
             [
                 'id' => 2,
                 'title' => 'bb'
-            ],
-            [
-                'id' => 3,
-                'title' => 'cc'
             ]
         ]);
     }
