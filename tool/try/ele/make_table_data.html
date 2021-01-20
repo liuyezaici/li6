@@ -1,5 +1,6 @@
 <!DOCTYPE html> <html> <head> <meta charset="utf-8">
-<link href="/min/?f=/assets/libs/lr/jquery.lr_box.css,/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
 <script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
@@ -27,28 +28,27 @@
         'class': 'well js_table',
         'name': 'demo',
         data: [
-            {'id': makeRadom(2), 'name': 'aaa_'+ makeRadom(2)},
-            {'id': makeRadom(2), 'name': 'bbb_'+ makeRadom(2)},
+            {'id': makeRadom(2), 'title': 'aaa_'+ makeRadom(2)},
+            {'id': makeRadom(2), 'title': 'bbb_'+ makeRadom(2)},
         ],
         tr: [
             {
+                id_: '{id}',
+                dblclick: function (o) {
+                    msgTisf(o.id_);
+                },
                 td: [
                     {
+                        id_: '{id}',
                         value: [
                             makeSpan({
                                 value: 'id:{id}'
-                            })
-                        ]
-                    }
-                ]
-            },
-            {
-                td: [
-                    {
-                        value: [
-                            makeSpan({
-                                value: 'id:{id}'
-                            })
+                            }),
+                            // makeInput({
+                            //     width: '200px',
+                            //     name: 'u_nick',
+                            //     value: '{title}'
+                            // })
                         ]
                     }
                 ]

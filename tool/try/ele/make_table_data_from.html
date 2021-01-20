@@ -19,12 +19,11 @@
     }
 </style>
 //js造一个简单的表格 <br />
-// 如需要登录 还需要创建一个form , 参考：<a href="/tool/try/?filename=lr_ele/make_form" target="_blank">makeForm</a>
 <div id="show_table"></div>
 <div id="show_reload_btn"></div>
 
 <script>
-    var getDataUrl = '/?s=tool/get_rows';
+    var getDataUrl = '/index/tool/get_rows';
     //js造一个简单的表格
     var table = makeTable({
         'width': '500',
@@ -32,10 +31,10 @@
         'name': 'login_table',
         data_from: {
             url: getDataUrl,
-            data_key: 'info',
+            data_key: 'data',
             post_data: {},
-            success_key: 'id',
-            success_value: '0038',
+            success_key: 'code',
+            success_value: '1',
             err_func: function (e) {
                 msgTisf(e.msg);
             }
@@ -48,43 +47,33 @@
                 ]
             }
         ],
-        tr_top2: [
-            {
-                th: [
-                    { value: 'ID2'  },
-                    { value: '标题2' }
-                ]
-            }
-        ],
         tr: [
             {
                 td: [
                     {
+                        id_: '{id}',
+                        dblclick: function (o) {
+                            msgTisf(o.id_);
+                        },
                         value: [
                             makeSpan({
+                                id2_: '{id}',
                                 value: 'id:{id}'
                             })
                         ]
                     },
-                    {
-                        value: [
-                            makeInput({
-                                width: '200px',
-                                name: 'u_nick',
-                                value: '{title}'
-                            })
-                        ]
-                    }
+                    // {
+                    //     value: [
+                    //         makeInput({
+                    //             width: '200px',
+                    //             name: 'u_nick',
+                    //             value: '{title}'
+                    //         })
+                    //     ]
+                    // }
                 ]
             }
-        ],
-        tr_bottom: [
-            {
-                th: [
-                    { value: '底部', colSpan: 2, 'style': 'text-align: left;'  },
-                ]
-            }
-        ],
+        ]
     });
     $('#show_table').append(
         table

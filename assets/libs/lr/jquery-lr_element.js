@@ -523,39 +523,34 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             $.each(options, function (n, v) {
                 // console.log('each:'+ n , v);
                 class_extend_true_val = '';
-                //格式化要取原参数
-                if(options['source_'+n]) {
-                    v = options['source_'+n];
-                }
                 //系统参数 无须解析
                 if(n.substr(0, 7) =='source_') {
                     return;
                 }
                 //支持字符串中输入{公式} value已经在外部更新 这里只针对属性
-                //if(n =='class_extend') console.log('n:'+ n +',v:'+v);
-                if(isStrOrNumber(v) && strHasKuohao(v)) {
-                    //value 也可以设置全局变量
-                    if(n != 'data') has_kuohao = true; //data 带括号不算是属性包含括号 因为下次格式化也不是通过format来实现的 是通过 renew ObjData
-                    if(n !='value' && hasSetData) {
-                        v = strObj.formatStr(v, optData, index, thisObj, n);
+                if(isStrOrNumber(v) ) {
+                    if(strHasKuohao(v)) {
+                        options['source_' + n] = v;
+                        if(n != 'data') has_kuohao = true; //data 带括号不算是属性包含括号 因为下次格式化也不是通过format来实现的 是通过 renew ObjData
+                        if(n !='value' && hasSetData) {
+                            v = strObj.formatStr(v, optData, index, thisObj, n);
+                            options[n] = v; //参数要改变 防止外部取出来的仍是括号
+                        }
                     }
-                    options[n] = v; //参数要改变 防止外部取出来的仍是括号
+                    if(strInArray(n, ['value', 'th', 'td']) !=-1 && isString(v)) {
+
+                    } if(thisObj.formatVal) {
+                        thisObj.formatVal(options);
+                        return;
+                    }
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
-                // if(optionIsSame(thisObj, options, n) && n !='style'  && n !='class' && n !='class_extend' && !strHasKuohao(v) && !options['source_'+n]) {
                 if(optionIsSame(thisObj, options, n)) {
                     // console.log('optionIsSame this', n + ':'+ v);
                     // console.log(thisObj);
                     return;
                 }
-                if(isStrOrNumber(v)) {
-                    if(strHasKuohao(v)) has_kuohao = true;
-                }
-                //console.log('format this');
-                var val = getOptVal(options, ['value', 'th', 'td']);
-                if(isString(val) && thisObj.formatVal) {
-                    thisObj.formatVal(options);
-                }
+
                 if(n == 'type') {
                     if(isStrOrNumber(v)) {
                         //sanjiao在data更新不能更新obj的type  只能属性更新时通知其改变
@@ -590,21 +585,22 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //style的转译属性：position/width/height/left/top/margin_/padding_
                 //都要提进style=''里
                 if(isStrOrNumber(v) ) {
-                    var hasGangStr = false;
-                    styleHengAttrs.forEach(function (n_) {
-                        var reg_ = new RegExp('^'+ n_, "gm");
-                        if(n.match(reg_) && $.inArray(n,styleIgnore) == -1) {
-                            n = n.replace('_', '-');
-                            hasGangStr = true;
-                        }
-                    });
-                    if(strInArray(n, cssAttrs) !=-1 || hasGangStr) {
-                        //console.log('push '+ n+':'+ v);
-                        tmpStyle.push(n+':'+v);
-                    }
-                    //支持data-n
-                    //console.log('add newAttr111 '+ n +':'+ v);
-                    if(n != 'data' && n.substr(0, 4) == 'data' ) {
+                   if(n.indexOf('_') !=-1 || n.indexOf('-') !=-1) {
+                       var hasGangStr = false;
+                       styleHengAttrs.forEach(function (n_) {
+                           var reg_ = new RegExp('^'+ n_, "gm");
+                           if(n.match(reg_) && $.inArray(n,styleIgnore) == -1) {
+                               n = n.replace('_', '-');
+                               hasGangStr = true;
+                           }
+                       });
+                       if(strInArray(n, cssAttrs) !=-1 || hasGangStr) {
+                           //console.log('push '+ n+':'+ v);
+                           tmpStyle.push(n+':'+v);
+                       }
+                   }
+                    //支持 data data-n
+                    if(n.substr(0, 4) == 'data' ) {
                         //console.log('add newAttr222 '+ n +':'+ v);
                         if(!optionIsSame(thisObj, options, n)) {
                             //console.log('add newAttr '+ n +':'+ v);
@@ -742,15 +738,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         },
         //当属性中有公式绑定了同步变量时，同步变量的更新要更新属性
         reFormatKhAttr: function(thisObj, newOpt) {
-            //console.log('reFormat.KhAttr', thisObj);
             var optData = newOpt['data'];
-            // console.log('reFormatKhAttr.data');
+            // console.log('reFormat.KhAttr.data');
             // console.log(optData);
             var attrsHasData = thisObj[objHasKhAttrs] || [];
+            // console.log('reFormat__________________.KhAttr Attr');
+            // console.log(thisObj);
+            // console.log(attrsHasData);
             if(!hasData(attrsHasData)) return;
-            //console.log('reFormat__________________.KhAttr Attr');
-            //console.log(thisObj);
-            //console.log(attrsHasData);
             var v;
             var setHidden = undefined;
             var hidden = false;
@@ -2381,9 +2376,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             // console.log(obj_);
             // console.log(obj_.formatVal);
             if(obj_.formatVal) {
-                // 特殊的支持格式化value的对象 如：switch的data改变时 其value是可以格式化的
-                //console.log('callRew obj.format Val');
-                //console.log(obj_);
                 obj_.formatVal(options);
             }
         }
@@ -2481,6 +2473,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
     //属性捆绑读写 参数设置 和更新
     function optionGetSet(thisObj, options, bindDataKey) {
+        // console.log('optionGetSet');
+        // console.log(thisObj);
         bindDataKey = bindDataKey || 'value';//绑定全局变量的属性key obj设置了bind 那么全局变量的值会同步更新这个属性
         var setOptins = $.extend({}, options);//用于设置的参数
         if(isUndefined(setOptins['class'])) setOptins['class'] = '';//默认要带上class 否则属性无法被外部修改
@@ -2490,10 +2484,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var tmpAttr = [];
         $.each(setOptins, function (opt_, val_) {
             if (strHasKuohao(val_)) {
-                thisObj[objAttrHasKh] = true;
                 if(opt_.substr(0, 7) !== 'source_') {
                     tmpAttr.push(opt_);
-                    options['source_' + opt_] = val_;
                 } else {
                     tmpAttr.push(opt_.replace(/^source_/g, ''));
                 }
@@ -2503,6 +2495,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
             }
         });
+        // console.log('tmpAttr', tmpAttr);
         tmpAttr = uniqueArray(tmpAttr);
         thisObj[objHasKhAttrs] = tmpAttr;
         if(thisObj.hasOwnProperty('options')) {
@@ -2807,6 +2800,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
     //更新对象的data时 重新渲染对象的{}
     function renewObjData(obj, newData) {
+        console.log('renewObjData:', obj, newData);
         if(!isOurObj(obj)) return;//非自定义的对象不能更data
         if(isStrOrNumber(newData)) return;//非data
         //console.log(JSON.stringify(newData));
@@ -2814,11 +2808,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var newPushData = cloneData(newData);
         //options在此赋值data
         var OptBack = optionAddData(options, newPushData);
-        //console.log(obj);
-        //console.log('OptBack:');
-        //console.log(OptBack);
         var newOpt = OptBack[0];
         newPushData = newOpt['data'];
+        console.log('objAttrHasKh:', obj[objAttrHasKh], newOpt);
         if(obj[objAttrHasKh]) {
             strObj.reFormatKhAttr(obj, newOpt);
         }
@@ -3397,7 +3389,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     //公共监听对象设置新值
     function setObjData(dataName, val) {
         //必须先定义数据绑定 才能触发数据同步
-        // console.log('update:'+ dataName +':'+ val);
         if(livingObj.hasOwnProperty(dataName)) livingObj[dataName] = val;
     }
     //公共监听对象 取值
@@ -4277,10 +4268,11 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.renewSonData = function(newData) {
             newData = newData || [];
             if(!hasData(obj[objValObjKey])) return;
-            //console.log('sons:', obj[objValObjKey], newData);
+            // console.log('renewSonData.sons:', obj[objValObjKey], newData);
             $.each(obj[objValObjKey], function (n, son) {
                 if(!son)  return;
                 //子对象是否继承父data
+                console.log('sons:', son, son['extendParentData']);
                 if(!isUndefined(son['extendParentData']) && son['extendParentData'] == true) {
                     renewObjData(son, newData);
                 } else {
@@ -4324,7 +4316,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 optionDataFrom(this, optionsGet);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                var hasSetData = !isUndefined(options['data']);
+                var hasSetData = !isUndefined(optionsGet['data']);
                 strObj.formatAttr(obj, optionsGet, 0, hasSetData);
                 obj.domAppendVal(optionsGet, hasSetData);
                 // if(tag == 'i') {
@@ -4797,13 +4789,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         }
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet, changeAttr) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 obj.INeedParentValFlag = getOptVal(options_, ['need_parent_val', 'needParentVal'], false);//需要父参数渲染好才能请求url
                 obj.INeedParentKey = getOptVal(options_, ['need_parent_key', 'needParentKey', 'need_parent_name', 'needParentName'], 'demo_name');
                 // console.log('renew list');
@@ -5167,13 +5153,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             });
         } ;
         obj.extend({
-            renew: function(optionsGet, changeAttr) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 optionDataFrom(obj, options_);
                 //console.log('renew table');
                 //console.log(this);
@@ -5322,13 +5302,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.formatVal = function (opt) {
             var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
-            var newData = opt['data'];
+            var newData = opt['data'] || {};
+            // console.log('format.InputVal:', newData, sourceVal);
             var sourceValIsPub = strHasKuohao(sourceVal, 'public');
             var sourceValIsData = strHasKuohao(sourceVal, 'data');
             var renewBind = true;
             if(sourceValIsPub ||sourceValIsData) {
+                if(!opt['source_value']) opt['source_value'] = sourceVal;
                 if(sourceValIsPub) {
-                    // console.log('strHasKuohao public:', sourceVal);
                     newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 } else if(sourceValIsData) {
                     newVal = strObj.formatStr(sourceVal, newData||{}, 0, obj, 'value');
@@ -5337,6 +5318,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             } else {
                 newVal = sourceVal;
             }
+            obj[objAttrHasKh] = true;
             obj.setRealInputVal(newVal, renewBind, true, [obj]);
             if(obj.setLrBtnDisable) obj.setLrBtnDisable();
             if(obj.lazyCall) {
@@ -5658,8 +5640,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 var loadingUrl = getOptVal(option_, ['loadingUrl', 'loading_url'], null);
                 optionsEvent['change_extend'] = function () {
                     var inputUrl = obj.options['url'];
-                    //console.log('on_________________________________change');
-                    //console.log(inputUrl);
                     $.ajaxFileUpload({
                         url: inputUrl,//上传地址
                         loadingUrl: loadingUrl,//loading地址
@@ -5844,13 +5824,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //外部更新所有属性
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet, changeAttr) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 //console.log('obj options_:');
                 //console.log(obj);
                 //console.log(options_);
@@ -5886,8 +5860,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //格式化和绑定事件交由内部input 因为每次重新生成input 事件都需要重新绑定
                 obj.createInput(options_);//重新创建一个input
                 strObj.formatAttr(obj, options_);
+                // console.log('makeInput_end1', options_['value']);
                 addOptionNullFunc(obj, options_);//加null_func
-                //console.log('makeInput_end');
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -5938,13 +5912,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //外部设置val
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet, changeAttr) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 optionDataFrom(this, options_);
                 //console.log('renew img');
                 //console.log(options_);
@@ -6241,15 +6209,11 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var sourceVal = opt['source_value'] || opt['value'];
             var newData = opt['data']||{};
             var newVal ;
-            // console.log('newData', newData);
-            // console.log('sourceVal', sourceVal);
             if(strHasKuohao(sourceVal, 'public')) {
                 newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
                 obj[objAttrHasKh] = true;
             } else if(strHasKuohao(sourceVal, 'data')) {
-                // console.log('newData', newData);
                 newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-                // console.log('newVal', newVal);
                 obj[objAttrHasKh] = true;
             } else {
                 newVal = sourceVal;
@@ -6330,22 +6294,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
             },
             //主动更新数据
-            renew: function(optionsGet) {
-                optionsGet = optionsGet || {};
-                var defaultData = [{
-                    value: 1,
-                    text: 'on'
-                },{
-                    value: 0,
-                    text: 'off'
-                }];
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 var selectItem = options_['item']|| [{'value': 1}, {'value': 0}];
-                selectItem = $.extend(defaultData, selectItem);//保留默认的配置 用于克隆
                 var valueKey = !isUndefined(options_['value_key']) ? options_['value_key'] : 'value'; //没有下标则取value
                 var textKey = !isUndefined(options_['text_key']) ? options_['text_key'] : 'text'; //没有下标则取value
                 var type_ = !isUndefined(options_['type']) ? options_['type'] : ''; //1,2,3,4,5样式
@@ -6837,14 +6787,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         };
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
-                //console.log(options_['data']);
+            renew: function(options_) {
                 if(isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
                 if(isUndefined(options_['text'])) options_['text'] = ''; //强制加text 否则外部无法取
                 var sValueStr = !isUndefined(options_['value']) ? options_['value'] : [] ;
@@ -7255,13 +7198,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         };
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet) {
-                optionsGet = optionsGet || {};
-                var options_ = cloneData(optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 if(isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
                 var sValueStr = getOptVal(options_, ['value'], []) ;
                 var itemValueArray = sValueStr;
@@ -7634,13 +7571,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         };
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options_) {
                 var size_ = options_['size']||''; //xs/sm/md/lg
                 var objExtendClass = '';
                 if(sizeIsXs(size_)) {
@@ -8610,17 +8541,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //外部设置val
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet, changeAttr) {
-                optionsGet = optionsGet || {};
-                var options = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options) {
-                    console.log('no options');
-                    return;
-                }
+            renew: function(options) {
                 //console.log('renew exitor');
                 //console.log(this);
                 //console.log(options);
-
                 options['placeholder'] = getOptVal(options, ['place', 'placeholder'], '');
                 var editorOut = !isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
                 var editorType = !isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd
@@ -9239,14 +9163,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //外部设置val
         bar.extend({
             //主动更新数据
-            renew: function(optionsGet) {
-                // if(tag == 'tr') {
-                //console.log('renew this ddddddddddddddddddd:');
-                //console.log(this);
-                //console.log(optionsGet);
-                // }
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
+            renew: function(options_) {
                 options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
                 if(!options_)  return;
                 var barVal = options_['value'] || '';
@@ -9862,16 +9779,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         }
         obj.extend({
             //主动更新数据
-            renew: function(optionsGet) {
-                optionsGet = optionsGet || {};
-                var options_ = $.extend({}, optionsGet);//保留默认的配置 用于克隆
-                if(!options_) {
-                    console.log('no options');
-                    return;
-                }
-                //console.log('renew item::::::::::::::');
-                //console.log(options_['value']);
-                //console.log(options_['data']);
+            renew: function(options_) {
                 if(isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
                 var sValueStr = !isUndefined(options_['value']) ? options_['value'] : [] ;
                 obj['multi'] = getOptVal(options, ['mul', 'multi', 'multity'], undefined); //是否支持多选

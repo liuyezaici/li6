@@ -27,6 +27,22 @@ class Tool extends Frontend
         $this->keyword = input('keyword', '', 'trim');
     }
 
+    public function get_rows() {
+        $this->success('', '', [
+            [
+                'id' => 1,
+                'title' => 'aa'
+            ],
+            [
+                'id' => 2,
+                'title' => 'bb'
+            ],
+            [
+                'id' => 3,
+                'title' => 'cc'
+            ]
+        ]);
+    }
     public function get_group() {
         $this->success('', '', ['group' => 1]);
     }
