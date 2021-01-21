@@ -555,7 +555,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
                 if(optionIsSame(thisObj, options, n)) {
-                    console.log('optionIsSame this', n + ':'+ v);
+                    // console.log('optionIsSame this', n + ':'+ v);
                     // console.log(thisObj);
                     return;
                 }
@@ -772,7 +772,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             $.each(attrsHasData, function (index, n) {
                 v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
                 if(n =='value') {
-                    // console.log('callRewObjStringVal__________________');
                     callRewObjStringVal(thisObj, newOpt);
                     return;//continue
                 }
@@ -5101,7 +5100,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.extend({
             renew: function(options_) {
                 optionDataFrom(obj, options_);
-                console.log('renew table');
+                //console.log('renew table');
                 //console.log(this);
                 //console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
@@ -10732,7 +10731,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 'postData' : pData
             };
             var onSubmit = !isUndefined(opt['submit']) ? opt['submit'] :  false;
-            if(onSubmit) onSubmit();
+            if(onSubmit) onSubmit(form);
             newOpt = $.extend({}, newOpt, opt);
             global.postAndDone(newOpt);
         });
