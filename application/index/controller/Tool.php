@@ -10,6 +10,7 @@ use fast\Date;
 use fast\Addon;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
+use fast\Str;
 
 class Tool extends Frontend
 {
@@ -28,16 +29,15 @@ class Tool extends Frontend
     }
 
     public function get_rows() {
-        $this->success('', '', [
-            [
-                'id' => 1,
-                'title' => 'aa'
-            ],
-            [
-                'id' => 2,
-                'title' => 'bb'
-            ]
-        ]);
+        $list = [];
+        $num = input('num', 3, 'intval');
+        for($i=0; $i< $num; $i++) {
+            $list[] = [
+                'id' => $i+1,
+                'title' => Str::getRandChar(5)
+            ];
+        }
+        $this->success('', '', $list);
     }
     public function get_group() {
         $this->success('', '', ['group' => 1]);

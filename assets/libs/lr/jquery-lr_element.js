@@ -256,7 +256,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     }
     //判断数据为空
     function hasData(obj) {
-        if(obj == null) return false;
+        if(obj == null || !obj) return false;
         if(typeof obj != 'object') return false;
         if(Array.isArray(obj)) return obj.length > 0;
         return !objIsNull(obj);
@@ -531,7 +531,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //console.log(options['click']);
             var tmpStyle = [];
             $.each(options, function (n, v) {
-                // console.log('formatAttr.....each:'+ n , v);
                 class_extend_true_val = '';
                 //系统参数 无须解析
                 if(n.substr(0, 7) =='source_') {
@@ -556,11 +555,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
                 if(optionIsSame(thisObj, options, n)) {
-                    // console.log('optionIsSame this', n + ':'+ v);
+                    console.log('optionIsSame this', n + ':'+ v);
                     // console.log(thisObj);
                     return;
                 }
-
                 if(n == 'type') {
                     if(isStrOrNumber(v)) {
                         //sanjiao在data更新不能更新obj的type  只能属性更新时通知其改变
@@ -604,11 +602,11 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                hasGangStr = true;
                            }
                        });
-                       if(strInArray(n, cssAttrs) !=-1 || hasGangStr) {
-                           //console.log('push '+ n+':'+ v);
-                           tmpStyle.push(n+':'+v);
-                       }
                    }
+                   //属性转为style
+                    if(strInArray(n, cantAddCssAttrs) !=-1 || hasGangStr) {
+                        tmpStyle.push(n+':'+v);
+                    }
                     //支持 data data-n
                     if(n.substr(0, 4) == 'data' ) {
                         //console.log('add newAttr222 '+ n +':'+ v);
@@ -656,12 +654,15 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         classExtFlag = false;
                     }
                 }
+                // console.log('formatAttr.....each:'+ n , v);
                 //扩展属性不需要显示
-                if((isStrOrNumber(v) || typeof v == 'boolean') && canAddAttr(n)) {
-                    if(thisObj.attr && thisObj.attr(n) && v  && thisObj.attr(n) == v  && n != 'class') {
-                        return; //不变的属性不用设置
+                if(canAddAttr(n)) {
+                    if(isStrOrNumber(v) || typeof v == 'boolean') {
+                        if(thisObj.attr && thisObj.attr(n) && v  && thisObj.attr(n) == v  && n != 'class') {
+                            return; //不变的属性不用设置
+                        }
+                        newAttr[n] = v;
                     }
-                    newAttr[n] = v;
                 }
             });
             //console.log(newAttr);
@@ -771,6 +772,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             $.each(attrsHasData, function (index, n) {
                 v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
                 if(n =='value') {
+                    // console.log('callRewObjStringVal__________________');
                     callRewObjStringVal(thisObj, newOpt);
                     return;//continue
                 }
@@ -797,7 +799,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                             //console.log('hasGangStr '+ n+':'+ v);
                         }
                     });
-                    if(strInArray(n, cssAttrs) !=-1 || hasGangStr) {
+                    if(strInArray(n, cantAddCssAttrs) !=-1 || hasGangStr) {
                         //console.log('push '+ n+':'+ v);
                         tmpStyle.push(n+':'+v);
                     }
@@ -2077,10 +2079,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 var newStr = nodeText;
                 if(hasSetData) {
-                    // console.log('formatStr =:'+ nodeText,data);
                     newStr =  strObj.formatStr(nodeText, data, n, thisObj, 'value');
                 }
-                //console.log('newStr =:'+ newStr);
                 newStr = htmlDecode(newStr);
                 //console.log('htmlDecode :'+ newStr , 'nodeText:'+nodeText);
                 //只有文本被修改才更新node的文本 防止没必要的操作dom 带<>标记的内容要在此格式化
@@ -2334,9 +2334,16 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         "min-|list_|list-|target_|target-|rotation_|rotation-|overflow_|overflow-|vertical_|vertical-|white_|white-|text_|text-|background_|background-|animation_|animation-";
     styleHengAttrs = styleHengAttrs.split('|');
     var styleIgnore = ['text_key'];//系统的文本键名 不是style来的 要忽略
-    //允许直接在attr属性中填写的css 会自动转入style
-    var cssAttrs = ['position', 'width', 'height', 'left', 'top', 'margin', 'color', 'zindex', 'padding', 'background'];
-    //忽略绑定的attr
+    //attr属性中不能添加为obj.attr的属性 它们会自动转入style
+    var cantAddCssAttrs = [
+        'display', 'position', 'width', 'height', 'left', 'top', 'margin', 'padding',
+        'color', 'zindex', 'background','border',
+        'overflow',
+        'resize',
+        'animation',
+        'rotation',
+    ];
+    //找出能添加到对象的属性 css类不可以
     function canAddAttr(attrName) {
         var hasStr = false;
         styleHengAttrs.forEach(function (n_) {
@@ -2346,7 +2353,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 hasStr = true;
             }
         });
-        cssAttrs.forEach(function (n_) {
+        cantAddCssAttrs.forEach(function (n_) {
             var reg_ = new RegExp('^'+ n_, "gm");
             if(attrName.match(reg_)) {
                 // if(n_ =='colspan') console.log(attrName);
@@ -2360,7 +2367,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 'source_data_text', 'obj_val_is_node', 'success_key', 'tag'
             ]) ==-1;
         //console.log('inShowStr:'+ inShowStr);
-        //console.log('hasStr:'+ hasStr);
         return inShowStr && attrName.indexOf('extend') == -1 && !hasStr;
     }
     //call renew val
@@ -2535,15 +2541,30 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
             });
         }
-        //允许外部修改 数据、value 等触发控件的自更新/
-        if(isUndefined(setOptins['data']))  setOptins['data']= [];
-        // if(isUndefined(setOptins['extendParentData']))  setOptins['extendParentData']= false;
+        //强制绑定data
+        if(!thisObj.hasOwnProperty('data')) {
+            // console.log('bindData-----');
+            // console.log(thisObj);
+            Object.defineProperty(thisObj, 'data', {
+                get: function () {
+                    var optData = options['data'];
+                    if(isStrOrNumber(optData)) return optData;
+                    return cloneData(optData);//data要克隆取， 否则同步修改对象，导致不变
+                },
+                set: function (newVal) {
+                    // console.log('call obj to renew data:', thisObj, newVal);
+                    renewObjData(thisObj, newVal); //直接更新data 里面已经 更新属性  format AttrVals(thisObj, options);
+                    options['data'] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
+                }
+            });
+        }
         $.each(setOptins, function (opt_, val_) {
-            //console.log('get set:: '+opt_ + ':' + val_);
             if(thisObj.hasOwnProperty(opt_)) {
                 return;
             }
-            if(opt_ == 'value') { //continue value是不需要默认存取的 全部自己定义
+            if(opt_ == 'value' || opt_=='data') {
+                //continue value是不需要默认存取的 全部自己定义
+                //data在上面自定义
                 return;
             }
             Object.defineProperty(thisObj, opt_, {
@@ -2553,12 +2574,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         //console.log('get::bindDataKey'+opt_ + ':' + val_);
                         return getObjData($.trim(options['bind']));
                     }
-                    //console.log('get::'+opt_ + ':' + val_);
-                    if(opt_ == 'data') {
-                        var optData = options[opt_];
-                        if(isStrOrNumber(optData)) return optData;
-                        return cloneData(optData);//data要克隆取， 否则同步修改对象，导致不变
-                    }
                     return options[opt_];
                 },
                 set: function (newVal) {
@@ -2566,20 +2581,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     //name 等自动更新的参数无需触发更新
                     if($.inArray(opt_, optionsChangeNoRenew) != -1) { //系统属性改变 无须触发更新
                         return;
-                    }
-
-                    if(opt_ =='value') {//对象单独的格式化val的方法 如 input img btn table
-                        //console.log('set val');
-                        if(thisObj.renewVal) {
-                            thisObj.renewVal(newVal);
-                        }
-                    }
-                    //console.log('call obj to renew:');
-                    //console.log(thisObj);
-                    //console.log(options);
-                    if(opt_ =='data') {
-                        renewObjData(thisObj, newVal); //直接更新data 里面已经 更新属性  format AttrVals(thisObj, options);
-                        options[opt_] = newVal; //无同步更新  不能立即更新data，renew ObjData 还需要对比data
                     }
                 }
             });
@@ -2591,9 +2592,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //如果对象设置有对象格式的data，则给它一个标识：不需要继承父data
         var extendParentData = true; //是否需要继承父data
         if(!isUndefined(options_['data'])) {//has:data
-            //console.log(obj_);
-            //console.log('!isUndefined');
-            //console.log(options_['data']);
             if(typeof options_['data'] != 'string') {
                 //console.log('no_str');
                 if(hasData(options_['data'])) extendParentData = false; //data为[]的话也要算继承父data的 因为默认TD的data就是[]
@@ -2736,22 +2734,13 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             };
             var needParentVal = obj_.INeedParentValFlag || false;
             //不需要取父值参数的情况，可直接请求提交
-            //console.log('need_parent_val _________'+ needParentVal);
-            //console.log(obj_);
-            //console.log('renewData');
-            //console.log(obj_);
-            //console.log(obj_.renewData);
             if(!needParentVal) {
                 _renewMyUrlData(successFunc);
             } else {
-                //console.log('need_parent_val22 _________');
-                //console.log(obj_);
                 //select.son专用延迟更新菜单的方法
                 //否则等待父值渲染成功再取值,触发此接口即可更新此对象的data
                 obj_.getDataWithParentVal = function (newParentVal, func, page) {
-                    //console.log('call_getDataWith.ParentVal:'+ newParentVal);
-                    //console.log('needParentKey _________'+ obj_.INeedParentKey);
-                    //console.log(JSON.stringify(options_));
+
                     page = page || null;
                     if(page) postParameter[menuDataPageKey] = page;
                     postParameter[(obj_.INeedParentKey||'id')] = newParentVal;
@@ -2808,9 +2797,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     function renewObjData(obj, newData) {
         if(!isOurObj(obj)) return;//非自定义的对象不能更data
         if(isStrOrNumber(newData)) return;//非data
-        //console.log(JSON.stringify(newData));
         var options = cloneData(obj['options']);
         var newPushData = cloneData(newData);
+        // console.log('renew-ObjData', obj, options, JSON.stringify(newPushData));
+        // console.log(obj[objAttrHasKh]);
         //options在此赋值data
         var OptBack = optionAddData(options, newPushData);
         var newOpt = OptBack[0];
@@ -2942,37 +2932,35 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //console.log(thisObj);
                 //console.log(newOpt);
                 //console.log('newOpt:'+ (objToJson(newOpt)));
-                var  newOption = cloneData(defaultOps);
-                if(!isUndefined(newOption['name'])) {
+                var  newOpt = cloneData(defaultOps);
+                newOpt = getSourceOpt(newOpt);
+                if(!isUndefined(newOpt['name'])) {
                     //tr li的name由用户自己定义区分，因为有时候用户不需要自动加下标
                     // var oldName = newOption['name'];
                     // newOption['name'] = indexClass.nameAddNum(oldName);
                 } else {
                     //td span 不需要强加name
-                    var tag = newOption['tag'];
+                    var tag = newOpt['tag'];
                     if(tag =='li' && tag =='tr') {
-                        newOption['name'] = createRadomName(newOption['tag']); //必须设置name 否则拖动换排序时无法切换对象的子name
+                        newOpt['name'] = createRadomName(newOpt['tag']); //必须设置name 否则拖动换排序时无法切换对象的子name
                     }
                 }
-                var newObj = thisObj.cloneSelf(newOption);
+                var newObj = thisObj.cloneSelf(newOpt);
                 //console.log('newObj obj:');
                 //console.log(newObj);
                 return newObj;
             },
             addline:  function(afterFlag) {
                 if(isUndefined(afterFlag)) afterFlag = true;
-                var newOption = $.extend({}, defaultOps);
-                var objName = thisObj['name'] || '';
+                var newOpt = $.extend({}, defaultOps);
+                newOpt = getSourceOpt(newOpt);
                 var newName;
                 newName = createRadomName(defaultOps['tag']); //为当前对象补充name
                 var parentObj = thisObj['parent'];//其父
                 var hasParent = isOurObj(parentObj);
 
-                newOption['name'] = newName;
-                //console.log('newOption:',newOption, newOption['data']);
-                var newObj = thisObj.cloneSelf(newOption);
-                //console.log(newObj);
-                //console.log(newObj);
+                newOpt['name'] = newName;
+                var newObj = thisObj.cloneSelf(newOpt);
                 if(hasParent) {
                     newObj['parent'] = parentObj;//设置其父
                     var parentSons = parentObj['value'];
@@ -3007,9 +2995,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     thisObj.before(newObj);
                 }
                 //如果是tr 要补充父对象
-                if(newOption['tag'] == 'tr') {
+                if(newOpt['tag'] == 'tr') {
                     parentObj[objValObjKey].push(newObj);
-                    if(parentObj['tr_defaults']) {
+                    if(parentObj['tr_clone_demo']) {
                         parentObj[tableWithDataTrKey].push(newObj);
                     } else {
                         parentObj[tableNoDataTrKey].push(newObj);
@@ -4004,12 +3992,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //console.log(dataIsSame(obj_[objLastValKey], valForCompare));
         if(hasData(obj_[objLastValKey]) && dataIsSame(obj_[objLastValKey], valForCompare)) { // val未变 不用append
             //console.log('tr val no change ::::::::');
-            //console.log(obj_);
-            //console.log(obj_[objLastValKey]);
-            //console.log(optNewVal);
         } else {
             var optData = opt['data'] || [];
-            //console.log('tr val change ::::::::',optData);
             var trNewOpt = tdToObj(optData, opt);//创建新的TD
             var newVal = trNewOpt['value'] || [];
             if(!$.isArray(newVal)) newVal = [newVal];
@@ -4027,6 +4011,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         //console.log('callClone but just get cloneTD success:');
                     } else {
                         tdOpt = cloneData(td_['options']);
+                        tdOpt = getSourceOpt(tdOpt);
                         newTd = td_.cloneSelf(tdOpt);
                         objPushVal(obj_, newTd);
                         //console.log('callClone success:');
@@ -4101,6 +4086,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //console.log(objToJson(sonOpt));
                 //准备data 如果是克隆的子对象 data不应该提前修改 否则子对象的data就默认不需要继承父了
                 //console.log('clone sonOpt', sonOpt);
+                sonOpt = getSourceOpt(sonOpt);
                 newObj = valObj.cloneSelf(sonOpt);
                 if(valObj['extendParentData'] && isStrOrNumber(sonOpt['data']) && hasData(optData)) {
                     //console.log('callClone set_data ::::::::');
@@ -4255,8 +4241,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if(isUndefined(opt_)) opt_ = obj['options'];
             //console.log(obj);
             opt_['value'] = newV;
-            //console.log(newV);
-            //console.log(opt_);
             if(isStrOrNumber(newV)) {
                 obj[objValIsNode] = true; //修改obj的内容类型
                 domAppendNode(obj, opt_);
@@ -4271,7 +4255,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.renewSonData = function(newData) {
             newData = newData || [];
             if(!hasData(obj[objValObjKey])) return;
-            // console.log('renewSonData.sons:', obj[objValObjKey], newData);
+            // console.log('renew SonData.sons:', obj[objValObjKey], newData);
             $.each(obj[objValObjKey], function (n, son) {
                 if(!son)  return;
                 //子对象是否继承父data
@@ -4291,9 +4275,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if(isUndefined(opt['value']) || opt['value']=='') opt['value'] = ' ';//必须输入空文本只能执行node替换
             opt= opt || [];
             if(!hasData(opt)) return '';
-            //console.log('dom.AppendVal');
-            //console.log(this);
-            //console.log(opt['value']);
+            // console.log('dom.AppendVal');
+            // console.log(this);
+            // console.log(opt['value']);
             tag = tag || 'span';
             //console.log(obj_);
             if(tag == 'tr') { //value is obj
@@ -4313,17 +4297,15 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //主动更新数据
             renew: function(optionsGet) {
                 optionsGet = optionsGet || {};
-                // if(tag == 'td') {
-                // console.log('renew dom:', this, JSON.stringify(optionsGet));
+                // if(tag == 'a') {
+                //     console.log('renew a_______________:', this, optionsGet['data']);
+                // }
                 optionDataFrom(this, optionsGet);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
                 var hasSetData = !isUndefined(optionsGet['data']);
                 strObj.formatAttr(obj, optionsGet, 0, hasSetData);
                 obj.domAppendVal(optionsGet, hasSetData);
-                // if(tag == 'i') {
-                //     console.log('renew last_options:', obj, JSON.stringify (optionsGet));
-                // }
                 obj['last_options'] = $.extend({}, optionsGet);//设置完所有属性 要更新旧的option
                 obj[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的val
                 //console.log('finish');
@@ -4580,6 +4562,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if(nowValLen ==0 && !obj['default_li'] ) {
                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                     var newOpt = cloneData(sonFirst['options']);
+                    newOpt = getSourceOpt(newOpt);
                     obj['default_li'] = sonFirst.cloneSelf(newOpt);
                 }
                 sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
@@ -4610,6 +4593,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         if(!hasData(sons)) {
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(obj['default_li']['options']);
+                            newOpt = getSourceOpt(newOpt);
                             newLi = obj['default_li'].cloneSelf(newOpt);
                             sonFirst = newLi;
                         } else {
@@ -4618,6 +4602,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                             //console.log(sonFirst['options']['value']);
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(sonFirst['options']);
+                            newOpt = getSourceOpt(newOpt);
                             newLi = sonFirst.cloneSelf(newOpt);
                             //console.log('sonFirst.clone');
                             //console.log(newLi);
@@ -4704,6 +4689,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     //console.log('liOpt');
                     //console.log('liOptWidthNewData');
                     //console.log(liOptWidthNewData);
+                    liOpt = getSourceOpt(liOpt);
                     // //首次空时直接用第一份参数创建li
                     if(obj[objValObjKey].length == 0) {
                         //创建li时 其data可能是字符串 不能给格式化后的data它 否则后面无法再被父data更新
@@ -4716,8 +4702,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         liObj = obj.makeSonLi(liOpt);
                         //console.log(liObj);
                     } else {
-                        //console.log('clone__________________SonLi');
-                        //console.log('liOpt', liOpt);
                         liObj = obj[objValObjKey][0].cloneSelf(liOpt);//克隆要拿原数据 带括号的
 
                     }
@@ -4865,7 +4849,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj[tableWithDataTrKey] = [];//带data数据的tr对象 作循环打印的本体
         obj[tableNoDataTrKey] = [];//不带data数据的tr对象 不作循环
         obj[objValIsNode] = false;
-        obj['tr_defaults'] = null;
+        obj['tr_clone_demo'] = null; //循环数据的克隆母版
         var tableIsClone = options[optionCallCloneKey] === true;
         //获取tr的循环个数
         var _getTrNum = function(opt) {
@@ -4882,7 +4866,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //更新table.data 如果含有带循环的tr 则只更新data的tr；反之更新全部tr
         var trAppendIndex = null;//第一个tr出现的前一个tr_n的位置
         var cloneDefaultRepeatTr = function(index, tmpData) {
-            var cloneTr = obj['tr_defaults'][index];
+            var cloneTr = obj['tr_clone_demo'][index];
             var cloneOpt = cloneData(cloneTr['options']);
             cloneOpt = getSourceOpt(cloneOpt);
             cloneOpt['tag'] = 'tr';
@@ -4902,7 +4886,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var sons;
             var demoData = opt['data'];
             var trOptLen = _getTrNum(opt);
-            if(hasData(this[tableWithDataTrKey]) || obj['tr_defaults']) {
+            if(hasData(this[tableWithDataTrKey]) || obj['tr_clone_demo']) {
                 sons = this[tableWithDataTrKey] ;
                 var newData = cloneData(demoData);
                 if(!$.isArray(newData)) newData = [newData];
@@ -5007,8 +4991,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if(!cloneIf) {
                 // console.log('!cloneIf.each:___', trOpts);
                 var addDefaultTr = false;
-                if(!obj['tr_defaults']) {
-                    obj['tr_defaults'] = [];
+                if(!obj['tr_clone_demo']) {
+                    obj['tr_clone_demo'] = [];
                     addDefaultTr = true;
                 }
                 var trOpt_;
@@ -5016,9 +5000,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     trOpt_ = cloneData(tmpOpt_);
                     trObj = global.makeTr(trOpt_);
                     trObj[parentObjKey] = obj;//分配父对象
-                    trObj['data'] = trData; //必须克隆完再更新data
                     //有data则写入table，无data则只写入虚拟tr_default
                     if(hasData(trData)) {
+                        trObj['data'] = trData; //必须克隆完再更新data
                         obj[objValObjKey].push(trObj); //带数据的tr 缓存obj的子对象
                         obj[tableWithDataTrKey].push(trObj); //带数据的tr 缓存obj的子对象
                         if(lastTrNoData) {
@@ -5031,11 +5015,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         if(addDefaultTr) {
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(trObj['options']);
+                            newOpt = getSourceOpt(newOpt);
                             newOpt['tag'] = 'tr';
-                            obj['tr_defaults'].push(trObj.cloneSelf(newOpt));
+                            obj['tr_clone_demo'].push(trObj.cloneSelf(newOpt));
                         }
                     } else if(addDefaultTr) {
-                        obj['tr_defaults'].push(trObj);
+                        obj['tr_clone_demo'].push(trObj);
                     }
                 });
             } else {
@@ -5057,7 +5042,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         }
         //克隆多行的可数据循环的tr
         function createRepeatDataTrs(options) {
-            var optionsData = options['data'] || []; // data: {son_data}
+            var optionsData = options['data'] || null; // data: {son_data}
             var trOptions = $.extend({}, options['tr'] || {});//子的公共配置 tr: {}
             var trGroupLen = 0; //循环的tr内部数量
             $.each(trOptions, function () {
@@ -5073,7 +5058,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     makeRepeatTrs(cloneData(trOptions), tmpData, cloneIf);
                 });
             } else {
-                if(isStrOrNumber(optionsData)) optionsData = []; //字符串格式的data不需要给tr
                 makeRepeatTrs(trOptions, optionsData, false);
             }
         }
@@ -5123,7 +5107,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.extend({
             renew: function(options_) {
                 optionDataFrom(obj, options_);
-                //console.log('renew table');
+                console.log('renew table');
                 //console.log(this);
                 //console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
@@ -5667,7 +5651,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 //input的data更新时，pre子对象也要更新
                 obj.renewSonData = function(newData) {
-                    //console.log('renewSonData', obj.prev, newData);
+                    //console.log('renew SonData', obj.prev, newData);
                     //console.log(obj.prev['data']);
                     newData = newData || [];
                     //console.log(newData);
@@ -9439,6 +9423,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                             //console.log('clone_tmpIndex:'+ tmpIndex);
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(sons[0]['options']);
+                            newOpt = getSourceOpt(newOpt);
                             newChecked = sons[0].cloneSelf(newOpt);
                             //console.log('cloneOpt newChecked');
                             //console.log(newChecked);
@@ -9690,6 +9675,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                 if(isOurObj(tmpObj)) {
                                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                                     var newOpt = cloneData(tmpObj['options']);
+                                    newOpt = getSourceOpt(newOpt);
                                     newSon = tmpObj.cloneSelf(newOpt);
 
                                 } else {
@@ -9711,6 +9697,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                 if(isOurObj(tmpObj)) {
                                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                                     var newOpt = cloneData(tmpObj['options']);
+                                    newOpt = getSourceOpt(newOpt);
                                     newSon = tmpObj.cloneSelf(newOpt);
                                 } else {
                                     newSon = tmpObj.clone();

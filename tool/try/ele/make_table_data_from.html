@@ -25,7 +25,7 @@
 <div id="show_reload_btn"></div>
 
 <script>
-    var getDataUrl = '/index/tool/get_rows';
+    var getDataUrl = '/index/tool/get_rows?num=2';
     //js造一个简单的表格
     var table = makeTable({
         'class': 'well',
@@ -50,14 +50,17 @@
         // ],
         tr: [
             {
-                id_: '{id}',
+                customerId: '{id}',
                 click: function (o) {
                     console.log(o, o.options);
-                    msgTisf(o.id_);
+                    msgTisf(o.customerId);
                 },
                 td: [
                     {
-                        value: '{id}'
+                        value:  makeA({
+                            customerId: '{id}',
+                            value: '{id}'
+                        })
                     },
                     // {
                     //     value: [
@@ -75,17 +78,17 @@
     $('#show_table').append(
         table
     );
-    $('#show_reload_btn').append(makeA({
-        value: '点此更新数据1',
-        target: '_self',
-        'class': 'btnLr btnLrSuccess',
-        click: function (e) {
-            table['data'] = [
-                {id: makeRadom(5), title: makeRadom(4)},
-                {id: makeRadom(5), title: makeRadom(4)},
-                {id: makeRadom(5), title: makeRadom(4)},
-                {id: makeRadom(5), title: makeRadom(4)},
-            ];
-        }
-    }));
+    // $('#show_reload_btn').append(makeA({
+    //     value: '点此更新数据1',
+    //     target: '_self',
+    //     'class': 'btnLr btnLrSuccess',
+    //     click: function (e) {
+    //         table['data'] = [
+    //             {id: makeRadom(5), title: makeRadom(4)},
+    //             {id: makeRadom(5), title: makeRadom(4)},
+    //             {id: makeRadom(5), title: makeRadom(4)},
+    //             {id: makeRadom(5), title: makeRadom(4)},
+    //         ];
+    //     }
+    // }));
 </script>

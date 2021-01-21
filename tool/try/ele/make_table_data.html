@@ -38,8 +38,10 @@
                 },
                 td: [
                     {
-                        name: 'row[{id}][title]',
-                        value: '{id}-{title}'
+                        value: makeA({
+                            id_: '{id}',
+                            value: '{id}.{title}'
+                        })
                     }
                 ]
             }
