@@ -2291,7 +2291,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             }
         }
         var postUrl = options['post_url'] || options['url'] || '';
-        var loadBg = !isUndefined(options['load_bg']) ? options['load_bg'] :  false;
         var postData = getOptVal(options, ['post_data', 'postData'], null);
         var errFunc = getOptVal(options, ['err_func', 'errFunc', 'error_func', 'errorFunc'], null);//失败回调
         return global.rePost(postUrl, postData,function(data) {
@@ -2483,8 +2482,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
     //属性捆绑读写 参数设置 和更新
     function optionGetSet(thisObj, options, bindDataKey) {
-        // console.log('optionGetSet');
-        // console.log(thisObj);
         bindDataKey = bindDataKey || 'value';//绑定全局变量的属性key obj设置了bind 那么全局变量的值会同步更新这个属性
         var setOptins = $.extend({}, options);//用于设置的参数
         if(isUndefined(setOptins['class'])) setOptins['class'] = '';//默认要带上class 否则属性无法被外部修改
@@ -2505,7 +2502,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
             }
         });
-        // console.log('tmpAttr', tmpAttr);
         tmpAttr = uniqueArray(tmpAttr);
         thisObj[objHasKhAttrs] = tmpAttr;
         if(thisObj.hasOwnProperty('options')) {
@@ -2810,7 +2806,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
     //更新对象的data时 重新渲染对象的{}
     function renewObjData(obj, newData) {
-        // console.log('renewObjData:', obj, newData);
         if(!isOurObj(obj)) return;//非自定义的对象不能更data
         if(isStrOrNumber(newData)) return;//非data
         //console.log(JSON.stringify(newData));
@@ -2820,7 +2815,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var OptBack = optionAddData(options, newPushData);
         var newOpt = OptBack[0];
         newPushData = newOpt['data'];
-        // console.log('objAttrHasKh:', obj[objAttrHasKh], newOpt);
         if(obj[objAttrHasKh]) {
             strObj.reFormatKhAttr(obj, newOpt);
         }
@@ -4281,7 +4275,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             $.each(obj[objValObjKey], function (n, son) {
                 if(!son)  return;
                 //子对象是否继承父data
-                // console.log('sons:', son, son['extendParentData']);
                 if(!isUndefined(son['extendParentData']) && son['extendParentData'] == true) {
                     renewObjData(son, newData);
                 } else {
@@ -8883,6 +8876,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     gotoPageObj.off().on('blur', function (e) {
                         var thisPage = parseInt($(this).val());
                         if(!thisPage || thisPage<1) return;
+                        if(thisPage > totalPage) {
+                            msgTisf('noMorePage');
+                            return;
+                        }
                         pageBody.gotoPage = thisPage;
                         if(thisPage>totalPage) thisPage = totalPage;
                         pageBody.setPage(thisPage);
@@ -10735,7 +10732,15 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var data_ = form.serializeArray();
             var pData = {};
             data_.map(function (v, n) {
-                pData[v.name] = v.value;
+                if(!isUndefined(pData[v.name])) {
+                    if($.isArray(pData[v.name])) {
+                        pData[v.name].push(v.value);
+                    } else {
+                        pData[v.name] = [pData[v.name], v.value];
+                    }
+                } else {
+                    pData[v.name] = v.value;
+                }
             });
             if(!isUndefined(opt['postData'])) {
                 opt['postData'].map(function (v, k) {
@@ -10745,6 +10750,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var newOpt = {
                 'postData' : pData
             };
+            var onSubmit = !isUndefined(opt['submit']) ? opt['submit'] :  false;
+            if(onSubmit) onSubmit();
             newOpt = $.extend({}, newOpt, opt);
             global.postAndDone(newOpt);
         });
