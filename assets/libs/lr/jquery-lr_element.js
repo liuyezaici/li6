@@ -3014,7 +3014,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 //如果是tr 要补充父对象
                 if(newOption['tag'] == 'tr') {
-                    //console.log('parent:', parentObj);
                     parentObj[objValObjKey].push(newObj);
                     if(parentObj['tr_defaults']) {
                         parentObj[tableWithDataTrKey].push(newObj);
@@ -4337,9 +4336,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //console.log('finish');
                 //console.log(this);
             },
-            //克隆当前对象
+            //克隆当前对象 name要重新生成
             cloneSelf: function(optionsGet) {
                 optionsGet[optionCallCloneKey] = true;
+                optionsGet['name'] = createRadomName(optionsGet['tag']);
                 return makeDom({
                     'tag': tag,
                     'options': optionsGet,
@@ -4561,11 +4561,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
         //更新list.data
         obj.renewSonLen = function (opt) {
-            //console.log('renew.SonLen');
-            //console.log(obj);
-            //console.log(opt);
             if(liIsArray) {
-                //console.log('liIsArray');
                 return ;//数组格式的li不需要执行渲染
             }
             var sons = this[objValObjKey];
@@ -4873,7 +4869,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj[objValObjKey] = [];//记录对象的子 tr 无须每次更新数据都重新生成 tr
         obj[objLastValKey] = [];
         obj['last_options'] = getOptVal(options, 'last_options', {});
-        obj[tableWithDataTrKey] = [];//带data数据的tr对象 作循环
+        obj[tableWithDataTrKey] = [];//带data数据的tr对象 作循环打印的本体
         obj[tableNoDataTrKey] = [];//不带data数据的tr对象 不作循环
         obj[objValIsNode] = false;
         obj['tr_defaults'] = null;
@@ -4892,14 +4888,26 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
         //更新table.data 如果含有带循环的tr 则只更新data的tr；反之更新全部tr
         var trAppendIndex = null;//第一个tr出现的前一个tr_n的位置
+        var cloneDefaultRepeatTr = function(index, tmpData) {
+            var cloneTr = obj['tr_defaults'][index];
+            var cloneOpt = cloneData(cloneTr['options']);
+            cloneOpt = getSourceOpt(cloneOpt);
+            cloneOpt['tag'] = 'tr';
+            var newTr = cloneTr.cloneSelf(cloneOpt);
+            newTr['data'] = tmpData; //必须克隆完再更新data
+            newTr[parentObjKey] = obj;//分配父对象
+            obj[objValObjKey].push(newTr); //带数据的tr 缓存obj的子对象
+            obj[tableWithDataTrKey].push(newTr); //带数据的tr 缓存obj的子对象
+            if(trAppendIndex) {
+                trAppendIndex.after(newTr);
+            } else {
+                obj.tBody.append(newTr);
+            }
+            return newTr;
+        };
         obj.renewSonLen = function (opt) {
-            console.log('renewSonLen::');
-            console.log(obj['tr_defaults']);
             var sons;
-            var groupSons;//按组分子tr 如果有2个tr循环 则 groupSons[0] = [tr1,tr2]; groupSons[1] = [tr4, tr5];
             var demoData = opt['data'];
-            //console.log(demoData);
-            //console.log(JSON.stringify(demoData));
             var trOptLen = _getTrNum(opt);
             if(hasData(this[tableWithDataTrKey]) || obj['tr_defaults']) {
                 sons = this[tableWithDataTrKey] ;
@@ -4908,8 +4916,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //如果之前产生过多的儿子而新数量变少要剔除
                 var lastValLen = sons.length;
                 var nowValLen = newData.length * trOptLen;
-                // console.log('lastValLen:'+ lastValLen);
-                // console.log('nowValLen:'+ nowValLen);
+                //更新data
+                var dataLines = newData.length;
+                var tmpTrGroupid; //遍历在第N行data
+                var tmpTrGroupFromIndex;
+                var tmpIndex;
+                var tmpData;
                 if(lastValLen > nowValLen) { //多出来 裁掉
                     sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
                         if(o.name) {
@@ -4922,91 +4934,37 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     sons.forEach(function(tmpSon_) {
                         obj[objValObjKey].push(tmpSon_);
                     });
-                    obj[objLastValKey] = obj[objValObjKey];
-                    //更新data
-                    var newTrGroups = nowValLen/trOptLen;
-                    var tmpTrGroupid; //tr第几组
-                    var tmpTrGroupFromIndex;
-                    var tmpIndex;
-                    var tmpData;
-                    for(tmpTrGroupid = 0; tmpTrGroupid < newTrGroups; tmpTrGroupid++) {
+                    //遍历data数据
+                    for(tmpTrGroupid = 0; tmpTrGroupid < dataLines; tmpTrGroupid++) {
                         tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                         tmpData =  newData[tmpTrGroupid];
                         tmpData['index'] = tmpTrGroupid;
-                        //console.log('tmpTrGroupid:'+ tmpTrGroupid);
                         //一组组更新(创建)tr
                         for(var i2 = 0 ; i2 < trOptLen; i2 ++) {
                             tmpIndex =  tmpTrGroupFromIndex ++;
                             if(!isUndefined(sons[tmpIndex])) {
-                                //console.log('renew_tmpIndex:'+ tmpIndex);
                                 sons[tmpIndex]['data'] = tmpData;
                             }
                         }
-                        //console.log('after td::');
-                        //console.log(sons);
                     }
                 } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
-                    var newTr;
-                    var newTrGroups = nowValLen/trOptLen;
-                    var tmpTrGroupid; //tr第几组
-                    var tmpTrGroupFromIndex;
-                    var tmpIndex;
-                    var tmpData;
-                    for(tmpTrGroupid = 0; tmpTrGroupid < newTrGroups; tmpTrGroupid++) {
+                    for(tmpTrGroupid = 0; tmpTrGroupid < dataLines; tmpTrGroupid++) {
                         tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                         tmpData =  newData[tmpTrGroupid];
-                        console.log('tmpData:', tmpData);
                         //一组组更新/创建tr
                         for(var i2 = 0 ; i2 < trOptLen; i2 ++) {
-                            tmpIndex =  tmpTrGroupFromIndex ++; //当前组里第几个tr
-                            console.log('i2:', i2, 'tmpIndex', tmpIndex);
-                            //console.log('tmpData', tmpIndex);
-                            //console.log(tmpData);
+                            tmpIndex =  tmpTrGroupFromIndex ++; //在所有son里面 当前是第几个tr
                             if(!isUndefined(sons[tmpIndex])) {
-                                // console.log('has_tmpIndex', tmpIndex);
                                 sons[tmpIndex]['data'] = tmpData;
+                                // console.log('renew_tmpIndex, i2:', i2, 'tmpIndex', tmpIndex);
                             } else {
-                                console.log('create_tmpIndex', tmpIndex);
-                                if(!hasData(sons[tmpIndex])) {
-                                    console.log('no_i2', i2);
-                                    var cloneTr = obj['tr_defaults'][tmpIndex];
-                                    var cloneOpt = getSourceOpt(cloneTr['options']);
-                                    cloneOpt['data'] = tmpData;
-                                    console.log('cloneOpt:', cloneOpt);
-                                    // console.log('cloneSelf111',i2, obj['tr_defaults'][i2], tmpData);
-                                    newTr = cloneTr.cloneSelf(cloneOpt);
-                                    console.log('newTr:', newTr);
-                                    if(trAppendIndex) {
-                                        //console.log('trAppendIndex', trAppendIndex);
-                                        trAppendIndex.after(newTr);
-                                    } else {
-                                        //console.log('append__');
-                                        obj.tBody.append(newTr);
-                                    }
-                                } else {
-                                    console.log('has_i2', i2);
-                                    // console.log('cloneSelf2222',i2, sons[i2], tmpData);
-                                    var cloneTr = sons[i2];
-                                    var cloneOpt = cloneTr['options'];
-                                    cloneOpt['data'] = tmpData;
-                                    newTr = cloneTr.cloneSelf(cloneOpt);
-                                    sons[sons.length-1].after(newTr);
-                                }
-                                sons[sons.length] = newTr; //已经更新table带data的tr
-                                newTr[parentObjKey] = this;
-                                this[objValObjKey].push(newTr);
-                                //等克隆完tr的属性才能更新data 不然提早渲染的data可能无法再次刷新
-                                newTr['data'] = tmpData;
+                                //直接用虚拟tr进行克隆
+                                cloneDefaultRepeatTr(i2, tmpData);
                                 tmpIndex ++;
                             }
                         }
-                        //console.log('after td::');
-                        //console.log(sons);
                     }
-                    this[objLastValKey] = sons;
                 } else {
-                    // console.log('刷新循环的tr::');
-                    // console.log(newData);
                     obj.renewOldRepeatTr(newData);
                 }
             }
@@ -5063,11 +5021,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 var trOpt_;
                 $.each(trOpts, function (n, tmpOpt_) {
                     trOpt_ = cloneData(tmpOpt_);
-                    console.log("trOpt_;", trOpt_);
                     trObj = global.makeTr(trOpt_);
-                    // console.log('makeTr.each:obj', trOpt_, trData, trObj);
                     trObj[parentObjKey] = obj;//分配父对象
-                    //console.log('set tr.SonData1');
                     trObj['data'] = trData; //必须克隆完再更新data
                     //有data则写入table，无data则只写入虚拟tr_default
                     if(hasData(trData)) {
@@ -5083,15 +5038,16 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         if(addDefaultTr) {
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(trObj['options']);
+                            newOpt['tag'] = 'tr';
                             obj['tr_defaults'].push(trObj.cloneSelf(newOpt));
                         }
                     } else if(addDefaultTr) {
                         obj['tr_defaults'].push(trObj);
-                        console.log("obj['tr_defaults'].push(trObj);", obj);
                     }
                 });
             } else {
                 $.each(trOpts, function (n, trOpt_) {
+                    trOpt_['tag'] = 'tr';
                     trObj = sons[n].cloneSelf(trOpt_);
                     trObj['data'] = trData; //必须克隆完再更新data
                     trObj[parentObjKey] = obj;//分配父对象
@@ -5155,7 +5111,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                             var trObj = global.makeTr(trOpt);
                             if(!findRepeatTr) trAppendIndex = trObj;//只要未找到tr，所有tr_n都都算是最后一个应该产生tr的地方
                             var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
-                            //console.log('makeDataTr ed ::::::::::');
                             if(!tabDataFrom && hasData(tabData)) {
                                 var sonOptBack = optionAddData(trOpt, tabData);
                                 var tmpData = sonOptBack[0]['data'];
@@ -9425,7 +9380,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //更新tree.data 如果含有带循环的tree 则只更新data的tr；反之更新全部tr
         obj.renewSonLen = function(opt) {
             var demoData = opt['data'];
-            //console.log('renewSonLen.newData:');
             //console.log(obj);
             //console.log(demoData);
             //console.log(JSON.stringify(demoData));

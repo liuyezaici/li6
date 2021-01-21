@@ -455,7 +455,10 @@ modify db config
 确保服务器数据库的服务开启：service mysql start查看服务器mysql服务有没有开启：ps -ef | grep mysql进入Mysql ： mysql -h连接的主机的ip -u数据库用户 -p输入密码（第一次服务器安装好Mysql后会自动生成密码
 
 
-安装screen  yum install -y screen
+安装screen  
+yum install -y screen
+sudo apt install screen
+
 
 安装workerman
 wget http://www.workerman.net/download/workermanzip

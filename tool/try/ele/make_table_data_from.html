@@ -51,7 +51,8 @@
         tr: [
             {
                 id_: '{id}',
-                dblclick: function (o) {
+                click: function (o) {
+                    console.log(o, o.options);
                     msgTisf(o.id_);
                 },
                 td: [
@@ -80,10 +81,10 @@
         'class': 'btnLr btnLrSuccess',
         click: function (e) {
             table['data'] = [
-                {id: 'aaa', 'user_nick': 'ddd'},
-                {id: '123', 'user_nick': 'lidaye'},
-                {id: '456', 'user_nick': ''},
-                {id: '789', 'user_nick': 'LR'},
+                {id: makeRadom(5), title: makeRadom(4)},
+                {id: makeRadom(5), title: makeRadom(4)},
+                {id: makeRadom(5), title: makeRadom(4)},
+                {id: makeRadom(5), title: makeRadom(4)},
             ];
         }
     }));

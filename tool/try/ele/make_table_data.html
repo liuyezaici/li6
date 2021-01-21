@@ -24,38 +24,41 @@
 <script>
     //js造一个简单的表格
     var table = makeTable({
-        'width': '500',
         'class': 'well js_table',
-        'name': 'demo',
         data: [
-            {'id': makeRadom(2), 'title': 'aaa_'+ makeRadom(2)},
-            {'id': makeRadom(2), 'title': 'bbb_'+ makeRadom(2)},
+            {'id': makeRadom(3), 'title': 'whoIs'+ makeRadom(6)},
+            {'id': makeRadom(3), 'title': 'im'+ makeRadom(6)},
         ],
         tr: [
             {
                 id_: '{id}',
                 dblclick: function (o) {
+                    console.log(o, o.options);
                     msgTisf(o.id_);
                 },
                 td: [
                     {
-                        id_: '{id}',
-                        value: [
-                            makeSpan({
-                                value: 'id:{id}'
-                            }),
-                            // makeInput({
-                            //     width: '200px',
-                            //     name: 'u_nick',
-                            //     value: '{title}'
-                            // })
-                        ]
+                        name: 'row[{id}][title]',
+                        value: '{id}-{title}'
                     }
                 ]
             }
         ]
     });
     $('#show_table').append(
-        table
+        table,
+        makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btnLrSuccess  btn-xs',
+            click: function (e) {
+                table['data'] = [
+                    {'id': makeRadom(3), 'title': 'whoIs'+ makeRadom(2)},
+                    {'id': makeRadom(3), 'title': 'im'+ makeRadom(2)},
+                    {'id': makeRadom(3), 'title': 'heIs'+ makeRadom(6)},
+                ];
+            }
+        })
+
     );
+
 </script>
