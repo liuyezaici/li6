@@ -25,7 +25,7 @@
 <div id="show_reload_btn"></div>
 
 <script>
-    var getDataUrl = '/index/tool/get_rows?num=2';
+    var getDataUrl = '/index/tool/get_rows?num=10';
     //js造一个简单的表格
     var table = makeTable({
         'class': 'well',
@@ -40,14 +40,14 @@
                 msgTisf(e.msg);
             }
         },
-        // tr_top: [
-        //     {
-        //         th: [
-        //             { value: 'ID'  },
-        //             { value: '标题' }
-        //         ]
-        //     }
-        // ],
+        tr_top: [
+            {
+                th: [
+                    { value: 'ID'  },
+                    { value: '标题' }
+                ]
+            }
+        ],
         tr: [
             {
                 customerId: '{id}',
@@ -62,15 +62,15 @@
                             value: '{id}'
                         })
                     },
-                    // {
-                    //     value: [
-                    //         makeInput({
-                    //             width: '200px',
-                    //             name: 'u_nick',
-                    //             value: '{title}'
-                    //         })
-                    //     ]
-                    // }
+                    {
+                        value: [
+                            makeInput({
+                                width: '200px',
+                                name: 'u_nick',
+                                value: '{title}'
+                            })
+                        ]
+                    }
                 ]
             }
         ]
@@ -78,17 +78,4 @@
     $('#show_table').append(
         table
     );
-    // $('#show_reload_btn').append(makeA({
-    //     value: '点此更新数据1',
-    //     target: '_self',
-    //     'class': 'btnLr btnLrSuccess',
-    //     click: function (e) {
-    //         table['data'] = [
-    //             {id: makeRadom(5), title: makeRadom(4)},
-    //             {id: makeRadom(5), title: makeRadom(4)},
-    //             {id: makeRadom(5), title: makeRadom(4)},
-    //             {id: makeRadom(5), title: makeRadom(4)},
-    //         ];
-    //     }
-    // }));
 </script>

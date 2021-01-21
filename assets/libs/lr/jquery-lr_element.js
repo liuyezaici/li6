@@ -4864,7 +4864,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         };
 
         //更新table.data 如果含有带循环的tr 则只更新data的tr；反之更新全部tr
-        var trAppendIndex = null;//第一个tr出现的前一个tr_n的位置
         var cloneDefaultRepeatTr = function(index, tmpData) {
             var cloneTr = obj['tr_clone_demo'][index];
             var cloneOpt = cloneData(cloneTr['options']);
@@ -4875,11 +4874,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             newTr[parentObjKey] = obj;//分配父对象
             obj[objValObjKey].push(newTr); //带数据的tr 缓存obj的子对象
             obj[tableWithDataTrKey].push(newTr); //带数据的tr 缓存obj的子对象
-            if(trAppendIndex) {
-                trAppendIndex.after(newTr);
-            } else {
-                obj.tBody.append(newTr);
-            }
+            obj.tBody.append(newTr);
             return newTr;
         };
         obj.renewSonLen = function (opt) {
@@ -5086,7 +5081,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                             trOpt[optionCallCloneKey] = tableIsClone;
                             delete trOpt['data'];//如果是克隆的会带上之前的data 导致无法更新自身的data 所以要提前删除
                             var trObj = global.makeTr(trOpt);
-                            if(!findRepeatTr) trAppendIndex = trObj;//只要未找到tr，所有tr_n都都算是最后一个应该产生tr的地方
                             var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
                             if(!tabDataFrom && hasData(tabData)) {
                                 var sonOptBack = optionAddData(trOpt, tabData);
