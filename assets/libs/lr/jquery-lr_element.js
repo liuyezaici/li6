@@ -7666,6 +7666,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var valueStrFormatdSuccess = true;//当前value是否渲染完成
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
+            console.log('radio formatVal', opt);
             opt = opt || [];
             var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
@@ -7814,9 +7815,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 removeAllEven(options_);
                 //添加数据
                 addOptionNullFunc(this, options_);//加null_func
-                //console.log(options_);
                 strObj.formatAttr(obj, options_);//无需再设置value //给input分配的事件 如 blur
-                optionGetSet(this, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //如果值是确定的 需要检测是否刷新子对象data
             },
@@ -7843,6 +7842,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'setText/set_text', 'val_': 'text'}]);//数据绑定
         obj.renew(options);
+        optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
         //console.log('select_obj');
         //console.log(obj);
