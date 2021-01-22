@@ -1402,15 +1402,15 @@ div.form-control,
     height: 34px;
     margin-right: 2px;
 }
-.diy_radio .item_container ul li {
+.diy_radio ul li {
     display: inline-block;
     margin-right: 10px;
     cursor: pointer;
 }
-.diy_radio.radios-sm .item_container ul li {
+.diy_radio.radios-sm ul li {
     margin-right: 10px;
 }
-.diy_radio.radios-lg .item_container ul li {
+.diy_radio.radios-lg ul li {
     margin-right: 25px;
 }
 
@@ -1453,105 +1453,105 @@ div.form-control,
     height: 22px;
 }
 
-.diy_radio .item_container > ul > li.active ._icon {
+.diy_radio li.active ._icon {
     background-color: #ccc;
     border-color: #999;
 }
-.diy_radio.radioType3 .item_container > ul > li.active ._icon {
+.diy_radio.radioType3 li.active ._icon {
     background-color: #e9ecee;
     border: 1px solid #adb8c0;
 }
-.diy_radio.radios-primary .item_container > ul > li.active ._icon {
+.diy_radio.radios-primary li.active ._icon {
     background-color: #337ab7;
     border-color: #2e6da4;
 }
-.diy_radio.radioType3.radios-primary .item_container > ul > li.active ._icon {
+.diy_radio.radioType3.radios-primary li.active ._icon {
     background-color: #dcefff;
     border-color: #9ebbdd;
 }
-.diy_radio.radios-danger .item_container > ul > li.active ._icon {
+.diy_radio.radios-danger li.active ._icon {
     background-color: #d9534f;
     border-color: #d43f3a;
 }
-.diy_radio.radios-warning .item_container > ul > li.active ._icon {
+.diy_radio.radios-warning li.active ._icon {
     background-color: #f0ad4e;
     border-color: #eea236;
 }
-.diy_radio.radios-info .item_container > ul > li.active ._icon {
+.diy_radio.radios-info li.active ._icon {
     background-color: #5bc0de;
     border-color: #409eff;
 }
-.diy_radio.radios-success .item_container > ul > li.active ._icon {
+.diy_radio.radios-success li.active ._icon {
     background-color: #5cb85c;
     border-color: #4cae4c;
 }
-.diy_radio.radioType3.radios-info .item_container > ul > li.active ._icon {
+.diy_radio.radioType3.radios-info li.active ._icon {
     background-color: #dff5ff;
     border-color: #a3deff;
 }
-.diy_radio.radios-black .item_container > ul > li.active ._icon {
+.diy_radio.radios-black li.active ._icon {
     background-color: #222;
     border-color: #000;
 }
-.diy_radio.radioType3.radios-success .item_container > ul > li.active ._icon {
+.diy_radio.radioType3.radios-success li.active ._icon {
     background-color: #e9ffe3;
     border-color: #c9e9a9;
 }
-.diy_radio.radioType3.radios-danger .item_container > ul > li.active ._icon {
+.diy_radio.radioType3.radios-danger li.active ._icon {
     background-color: #ffe4d3;
     border-color: #f3b8b7;
 }
-.diy_radio.radioType3.radios-warning .item_container > ul > li.active ._icon {
+.diy_radio.radioType3.radios-warning li.active ._icon {
     background-color: #fff2d5;
     border-color: #eedb6e;
 }
-.diy_radio.radioType3.radios-black .item_container > ul > li.active ._icon {
+.diy_radio.radioType3.radios-black li.active ._icon {
     background-color: #bababa;
     border-color: #666;
 }
-.diy_radio .item_container > ul > li.active ._icon:before {
+.diy_radio li.active ._icon:before {
     transform: translate(-50%,-50%) scale(1);
 }
-.diy_radio.radioType3.radios-primary .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType3.radios-primary li.active ._icon:before {
     background-color: #a8c8ff;
 }
-.diy_radio.radioType3.radios-info .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType3.radios-info li.active ._icon:before {
     background-color: #94dbff;
 }
-.diy_radio.radioType3.radios-success .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType3.radios-success li.active ._icon:before {
     background-color: #d2ffc0;
 }
-.diy_radio.radioType3.radios-danger .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType3.radios-danger li.active ._icon:before {
     background-color: #ffcfbb;
 }
-.diy_radio.radioType3.radios-warning .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType3.radios-warning li.active ._icon:before {
     background-color: #ffed99;
 }
-.diy_radio.radioType3.radios-black .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType3.radios-black li.active ._icon:before {
     background-color: #7e7e7e;
 }
-.diy_radio.radioType2 .item_container > ul > li.active ._icon {
+.diy_radio.radioType2 li.active ._icon {
     background-color: transparent;
 }
-.diy_radio.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radioType2 li.active ._icon:before {
     background-color: #777;
 }
-.diy_radio.radios-primary.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radios-primary.radioType2 li.active ._icon:before {
     background-color: #2e6da4;
 }
-.diy_radio.radios-danger.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radios-danger.radioType2 li.active ._icon:before {
     background-color: #d43f3a;
 }
-.diy_radio.radios-warning.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radios-warning.radioType2 li.active ._icon:before {
     background-color: #eea236;
 }
-.diy_radio.radios-info.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radios-info.radioType2 li.active ._icon:before {
     background-color: #409eff;
 }
-.diy_radio.radios-success.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radios-success.radioType2 li.active ._icon:before {
     background-color: #4cae4c;
 }
-.diy_radio.radios-black.radioType2 .item_container > ul > li.active ._icon:before {
+.diy_radio.radios-black.radioType2 li.active ._icon:before {
     background-color: #000;
 }
 
@@ -1596,11 +1596,11 @@ div.form-control,
 .diy_radio .active .text {
     color: #333;
 }
-.diy_radio .item_container ul li[disabled] {
+.diy_radio ul li[disabled] {
     color: #777;
     cursor: not-allowed;
 }
-.diy_radio .item_container ul li[disabled] ._icon{
+.diy_radio ul li[disabled] ._icon{
     border: 1px solid #bcbcbc;
     background-color: #eee;
 }
@@ -1610,11 +1610,7 @@ div.form-control,
     display: inline-block;
     vertical-align: middle;
     cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    outline: none;
+    font-style: normal;
 }
 .diy_checked ._icon {
     -moz-user-select: none;
