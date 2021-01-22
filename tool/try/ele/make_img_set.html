@@ -29,5 +29,14 @@
 
     $('#show_pic').append(imgObj);
 
+    $('#show_reload_btn').append(makeA({
+            value: '手气不错',
+            'class': 'btnLr btnLrXs btnLrSuccess',
+            click: function (obj, ev, scope) {
+                var imgId = makeRadom(2);
+                imgObj['data'] =  {'url': '/resource/system/images/face/'+ imgId +'.jpg' }
+            }
+        })
+    );
 
 </script>

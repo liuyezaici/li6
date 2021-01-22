@@ -32,6 +32,16 @@
         }),
        'class': "simple_span"
     });
-  $('#show_span').append(simpleSpan);
+    var a =  makeA({
+    value: '点此更新数据',
+    target: '_self',
+    style: 'margin-left:10px',
+    marginTop: '10px',
+    'class': 'btnLr btnLrXs btnLrSuccess',
+    click: function (e) {
+        simpleSpan['data'] ={'ps': Math.random()};
+    }
+});
+  $('#show_span').append([simpleSpan, a]);
 
 </script>

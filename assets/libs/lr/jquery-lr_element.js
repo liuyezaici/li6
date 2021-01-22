@@ -545,13 +545,13 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         options['source_' + n] = v;
                         if(n != 'data') has_kuohao = true; //data 带括号不算是属性包含括号 因为下次格式化也不是通过format来实现的 是通过 renew ObjData
                         if(strHasKuohao(v, 'data')) {
-                            if(n !='value' && hasSetData) {
+                            if(n !='value' && n !='src' && hasSetData) {
                                 v = strObj.formatStr(v, optData, index, thisObj, n);
                                 options[n] = v; //参数要改变 防止外部取出来的仍是括号
                             }
                         }
                         if(strHasKuohao(v, 'public')) {
-                            if(n !='value') {
+                            if(n !='value' && n !='src') {
                                 v = strObj.formatStr(v, optData, index, thisObj, n);
                                 options[n] = v; //参数要改变 防止外部取出来的仍是括号
                             }
@@ -625,7 +625,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //hide or show
                 if(n =='show' || n =='hidden' || n =='hide') {
                     setHidden = true;
-                    // console.log('show newAttr '+ n +':', v);
                     if(((n =='hide' || n =='hidden') && (v == 'true' ||  v == true ||  v == 1)) || (n =='show' && (v == 'false' ||  v == false ||  v == 0))) {
                         hidden = true;
                     }
@@ -662,6 +661,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 // console.log('formatAttr.....each:'+ n , v);
                 //扩展属性不需要显示
                 if(canAddAttr(n)) {
+                    // console.log('canAddAttr....:'+ n , v);
                     if(isStrOrNumber(v) || typeof v == 'boolean') {
                         if(thisObj.attr && thisObj.attr(n) && v  && thisObj.attr(n) == v  && n != 'class') {
                             return; //不变的属性不用设置
@@ -704,7 +704,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 } else {
                     newAttr['class'] = classAddSubClass(newAttr['class'], 'hidden', false, ' ');
                     if(thisObj) thisObj.removeClass('hidden');
-                    //console.log(newAttr['class']);
                 }
                 options['class'] = newAttr['class'];
             }
@@ -725,12 +724,13 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     }
                 }
             }
-            //console.log(thisObj);
             if(hasData(newAttr) && thisObj.attr ) {//更新属性
                 //一样的class不需要重写
                 if(newAttr['class'] == thisObj.attr('class')) {
                     delete newAttr['class'];
                 }
+                // console.log('newAttr');
+                // console.log(newAttr);
                 thisObj.attr(newAttr);
             }
             if(has_kuohao) {
@@ -741,7 +741,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             options = $.extend({}, options, thisObj['options']);
             strObj.addEvents(thisObj);
             //格式化value
-            var val_ = getOptVal(options,  ['value', 'th', 'td'], null);
+            var val_ = getOptVal(options,  ['value', 'th', 'td', 'src'], null);
             if(val_ !== null && isStrOrNumber(val_) ) {
                 if(thisObj.formatVal) {
                     thisObj.formatVal(options);
@@ -784,12 +784,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var opt = thisObj['options'];
             // console.log('attrsHasData', attrsHasData);
             $.each(attrsHasData, function (index, n) {
+                // console.log('reformat this1:'+ n + ':', v);
                 v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
-                if(n =='value') {
+                if(n =='value' || n =='src') {
                     callRewObjStringVal(thisObj, newOpt);
                     return;//continue
                 }
-                // console.log('reformat this1:'+ n + ':', v);
                 // console.log(optData);
                 v = strObj.formatStr(v, optData, index, thisObj, n); //计算v中的公式 {1+2 > 3}
                 // console.log('format this2:'+ n + ':', v);
@@ -2357,14 +2357,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         'animation',
         'rotation',
     ];
-    //找出能添加到对象的属性 css类不可以
+    //找出能添加到对象的属性 ，过滤掉css类型的属性
     function canAddAttr(attrName) {
-        var hasStr = false;
+        var isCssAttr = false;
         styleHengAttrs.forEach(function (n_) {
             var reg_ = new RegExp('^'+ n_, "gm");
             if(attrName.match(reg_)) {
                 // if(n_ =='colspan') console.log(attrName);
-                hasStr = true;
+                isCssAttr = true;
             }
         });
         cantAddCssAttrs.forEach(function (n_) {
@@ -2372,16 +2372,16 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if(attrName.match(reg_)) {
                 // if(n_ =='colspan') console.log(attrName);
                 //console.log('hasstr:'+ attrName);
-                hasStr = true;
+                isCssAttr = true;
             }
         });
-        // if(attrName =='colspan') console.log(hasStr);
+        //不在常规的可视化属性里
         var inShowStr = $.inArray(attrName,
-            ['value', 'text', 'show', 'value_key', 'valueKey', 'title_key', 'titleKey', 'text_key', 'textKey', 'click', 'is_clone', 'data', 'hide', ignoreBindValsKeyname,
+            ['value', 'src', 'text', 'show', 'value_key', 'valueKey', 'title_key', 'titleKey', 'text_key', 'textKey', 'click', 'is_clone', 'data', 'hide', ignoreBindValsKeyname,
                 'source_data_text', 'obj_val_is_node', 'success_key', 'tag'
             ]) ==-1;
         //console.log('inShowStr:'+ inShowStr);
-        return inShowStr && attrName.indexOf('extend') == -1 && !hasStr;
+        return inShowStr && attrName.indexOf('extend') == -1 && !isCssAttr;
     }
     //call renew val
     function callRewObjStringVal(obj_, options) {
@@ -4068,8 +4068,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             return;
         }
         //console.log(obj_);
-        //console.log(optNewVal);
-        //console.log(optData);
         if(_valIsAy(optNewVal)) {
             //console.log('_valIsAy optNewVal');
             if(hasData(obj_[objValObjKey])) {
@@ -4308,10 +4306,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 // if(tag == 'a') {
                 //     console.log('renew a_______________:', this, optionsGet['data']);
                 // }
+                var hasSetData = !isUndefined(optionsGet['data']);
                 optionDataFrom(this, optionsGet);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                var hasSetData = !isUndefined(optionsGet['data']);
                 strObj.formatAttr(obj, optionsGet, 0, hasSetData);
                 obj.domAppendVal(optionsGet, hasSetData);
                 obj['last_options'] = $.extend({}, optionsGet);//设置完所有属性 要更新旧的option
@@ -4783,9 +4781,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 // console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
+                var hasSetData = !isUndefined(options_['data']);
                 optionDataFrom(this, options_);
-                strObj.formatAttr(this, options_);//其内容 已经在clone li里全部生成过了 只差数据来格式化了
-                //console.log('end formatAttr');
+                strObj.formatAttr(this, options_, 0, hasSetData);//其内容 已经在clone li里全部生成过了 只差数据来格式化了
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 this[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的option
                 //console.log('end ');
@@ -5104,13 +5102,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         } ;
         obj.extend({
             renew: function(options_) {
+                var hasSetData = !isUndefined(options_['data']);
                 optionDataFrom(obj, options_);
                 //console.log('renew table');
                 //console.log(this);
                 //console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                strObj.formatAttr(this, options_);
+                strObj.formatAttr(this, options_, 0, hasSetData);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 this[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的option
             },
@@ -5802,14 +5801,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 options_['class_extend'] = objExtendClass;
                 options_['class'] = classAddSubClass(options_['class'], objExtendClass, true);
+                var hasSetData = !isUndefined(options_['data']);
                 //console.log(options_['class']);
                 optionDataFrom(obj, options_);
                 //初始化value
                 obj.realVal = inputVal;
-                //console.log('formatAttr');
                 //格式化和绑定事件交由内部input 因为每次重新生成input 事件都需要重新绑定
                 obj.createInput(options_);//重新创建一个input
-                strObj.formatAttr(obj, options_);
+                strObj.formatAttr(obj, options_, 0, hasSetData);
                 // console.log('makeInput_end1', options_['value']);
                 addOptionNullFunc(obj, options_);//加null_func
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
@@ -5859,21 +5858,58 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var obj = $('<img />');
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
+        var valueStrFormatdSuccess = false;
+        //单独的格式化value的括号
+        obj.formatVal = function (opt) {
+            // console.log('formatImg.src');
+            opt = opt || [];
+            var sourceVal = opt['source_src'] || opt['src'];
+            var hasData = !isUndefined(opt['data']) ? opt['data'] : false;
+            var newVal;
+            var canSetSrc = false;//有data或允许渲染才可以设置src 防止src访问的是未渲染的字符串
+            if(strHasKuohao(sourceVal, 'public')) {
+                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
+                obj[objAttrHasKh] = true;
+                canSetSrc = true;
+            }else if(strHasKuohao(sourceVal, 'data')) {
+                if(hasData) {
+                    newVal = strObj.formatStr(sourceVal, opt['data'], 0, obj, 'value');
+                    obj[objAttrHasKh] = true;
+                    canSetSrc = true;
+                }
+            } else {
+                newVal = sourceVal;
+                canSetSrc = true;
+            }
+            if (!optionIsSame(obj, opt, 'src')) {
+                valueStrFormatdSuccess = true;
+            }
+            if(canSetSrc && valueStrFormatdSuccess) {
+                obj.attr('src', newVal);
+            }
+            var renewBind = obj[objAttrHasKh]==true;
+            if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
+                updateBindObj($.trim(options['bind']), newVal, [obj]);
+            }
+            if(valueStrFormatdSuccess) {
+                if(obj.lazyCall) {
+                    obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                }
+            }
+        };
         //外部设置val
         obj.extend({
             //主动更新数据
             renew: function(options_) {
-                optionDataFrom(this, options_);
+                var hasSetData = !isUndefined(options_['data']);
                 //console.log('renew img');
                 //console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
-                options_['src'] = options_['src'] || options_['value'];
                 var loadFunc = options_['load'] || null;
                 var loadError = options_['error'] || null;
-                var src = options_['src'] || null;
-                strObj.formatAttr(this, options_);
-                if(src && !strHasKuohao(src)) this.attr('src', src);//格式化src后再赋值
+                optionDataFrom(this, options_);
+                strObj.formatAttr(this, options_, 0, hasSetData);
                 obj['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //console.log(options_);
                 //onload完成事件
@@ -5906,7 +5942,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 return this.attr('src');
             },
             set: function(n) {     //支持外部设值
-                //console.log('set img val:'+ n);
+                console.log('set img val:'+ n);
                 if (!isUndefined(options['bind'])) {
                     updateBindObj($.trim(options['bind']), n, [obj]);//同步更新
                 }
@@ -5923,6 +5959,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if (!isUndefined(options['bind'])) {
                     updateBindObj($.trim(options['bind']), n, [obj]);//同步更新
                 }
+                console.log('set img src:'+ n);
                 this.attr('src', n);
             }
         });
@@ -6252,6 +6289,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 var disabled_ = getOptVal(options_, ['disabled', 'disable'], ''); //boolean
                 var showText = getOptVal(options_, ['show_text', 'showText'], false); //显示文本
                 var readonly = getOptVal(options_, ['readonly', 'readOnly'], false); //只读
+                var hasSetData = !isUndefined(options_['data']);
                 var size_ = options_['size']||''; //xs/sm/md/lg
                 var objExtendClass = '';
                 if(sizeIsXs(size_)) {
@@ -6298,7 +6336,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 options_['click'] = click_extend;
                 //先设定options参数 下面才可以修改options
-                strObj.formatAttr(this, options_);
+                strObj.formatAttr(this, options_, 0, hasSetData);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -6739,6 +6777,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.extend({
             //主动更新数据
             renew: function(options_) {
+                options_ = options_ || {};
+                var hasSetData = !isUndefined(options_['data']);
                 if(isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
                 if(isUndefined(options_['text'])) options_['text'] = ''; //强制加text 否则外部无法取
                 var sValueStr = !isUndefined(options_['value']) ? options_['value'] : [] ;
@@ -6880,7 +6920,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     obj['createItem'] = true;
                 }
                 addOptionNullFunc(this, options_);//加null_func
-                strObj.formatAttr(this, options_);
+                strObj.formatAttr(this, options_, 0, hasSetData);
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -7143,6 +7183,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.extend({
             //主动更新数据
             renew: function(options_) {
+                options_ = options_ || {};
+                var hasSetData = !isUndefined(options_['data']);
                 if(isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
                 var sValueStr = getOptVal(options_, ['value'], []) ;
                 var itemValueArray = sValueStr;
@@ -7358,11 +7400,11 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 delete newInputEven['value'];
                 //console.log(options_);
                 obj.bindEvenObj = obj.textObj;
-                strObj.formatAttr(obj.textObj, newInputEven);/// 给input分配的事件 如 blur
+                strObj.formatAttr(obj.textObj, newInputEven, 0, hasSetData);/// 给input分配的事件 如 blur
                 //强制加value参数 否则无法触发初始化渲染value事件：format Val
                 var formatOpt = cloneData(options_);
                 if(isUndefined(formatOpt['value'])) formatOpt['value'] = '';
-                strObj.formatAttr(obj, formatOpt);
+                strObj.formatAttr(obj, formatOpt, 0, hasSetData);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
 
             },
@@ -7519,6 +7561,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.extend({
             //主动更新数据
             renew: function(options_) {
+                options_ = options_ || {};
+                var hasSetData = !isUndefined(options_['data']);
                 var size_ = options_['size']||''; //xs/sm/md/lg
                 var objExtendClass = '';
                 if(sizeIsXs(size_)) {
@@ -7568,8 +7612,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(isObj(data_) && hasData(data_)) sonObj['data'] = data_;
                     obj.append(sonObj);
                     obj['createCheck'] = true;
-                    //console.log('sonObj');
-                    //console.log(sonObj);
                     var defaultClickFunc = function(obj_, e) {
                         if(obj_.attr('disabled')) return;
                         var lastChecked = hasChecked();
@@ -7614,7 +7656,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 // console.log('obj.before_formatAttr');
                 // console.log(options_);
                 addOptionNullFunc(obj, options_);//加null_func
-                strObj.formatAttr(obj, options_);
+                strObj.formatAttr(obj, options_, 0, hasSetData);
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -7744,6 +7786,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //主动更新数据
             renew: function (optionsGet) {
                 optionsGet = optionsGet || {};
+                var hasSetData = !isUndefined(optionsGet['data']);
                 var options_ = cloneData(optionsGet);//保留默认的配置 用于克隆
                 // console.log('renew radio::::::::::::::');
                 //console.log(this);
@@ -7813,7 +7856,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 removeAllEven(options_);
                 //添加数据
                 addOptionNullFunc(this, options_);//加null_func
-                strObj.formatAttr(obj, options_);//无需再设置value //给input分配的事件 如 blur
+                strObj.formatAttr(obj, options_, 0, hasSetData);//无需再设置value //给input分配的事件 如 blur
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //如果值是确定的 需要检测是否刷新子对象data
             },
@@ -8485,6 +8528,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.extend({
             //主动更新数据
             renew: function(options) {
+                options = options || {};
+                var hasSetData = !isUndefined(options['data']);
                 //console.log('renew exitor');
                 //console.log(this);
                 //console.log(options);
@@ -8524,8 +8569,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
                 //console.log('options');
                 //console.log(options);
-                strObj.formatAttr(obj, options); //里面找出事件来绑定
-                optionGetSet(this, options);
+                strObj.formatAttr(obj, options, 0, hasSetData); //里面找出事件来绑定
                 obj[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的val
                 obj['last_options'] = $.extend({}, options);//设置完所有属性 要更新旧的option
             },
@@ -8550,6 +8594,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             }
         });
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(obj, options);
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
         //console.log(obj);
@@ -8680,6 +8725,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //主动更新数据
             renew: function (options) {
                 options = options || {};
+                var hasSetData = !isUndefined(options['data']);
                 var defaultCfg = {
                     page: 1,
                     pageSize: 10,//单页数量
@@ -8728,7 +8774,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //console.log('page:');
                 //console.log(options);
                 optionDataFrom(pageBody, options);
-                strObj.formatAttr(pageBody, options); //里面找出事件来绑定
+                strObj.formatAttr(pageBody, options, 0, hasSetData); //里面找出事件来绑定
                 var page = parseInt(options.page);
                 var pageSize = parseInt(pageSize);
                 if(pageSize < 1 ) pageSize = 1;
@@ -8969,6 +9015,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             },
             //主动更新数据
             renew: function (options) {
+                var hasSetData = !isUndefined(options['data']);
                 options = options || {};
                 var defaultCfg = {
                     type: 's'
@@ -8980,7 +9027,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(strInArray(options['type'], allowType) ==-1) options['type'] = 's';
                     options['type'] = formatType(options['type']);
                 }
-                strObj.formatAttr(sanjiaoBody, options);//基本属性 无需再修改value
+                optionDataFrom(strObj, options);
+                strObj.formatAttr(sanjiaoBody, options, 0, hasSetData);//基本属性 无需再修改value
                 sanjiaoBody['last_options'] = $.extend({}, options);//设置完所有属性 要更新旧的option
             },
             //克隆当前对象
@@ -9113,6 +9161,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
                 if(!options_)  return;
                 var barVal = options_['value'] || '';
+                var hasSetData = !isUndefined(options_['data']);
                 optionDataFrom(bar, options_);
                 //console.log(dataFrom);
                 //console.log(data_);
@@ -9143,9 +9192,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     var iconWidth = toNumber(iconObj.outerWidth());
                     var barWidth = toNumber(bar.width);
                     var maxLeft = barWidth - iconWidth -2;
-                    var iconWidth = toNumber(iconObj.outerWidth());
-                    var maxTop = bar.outerHeight() - iconHeight -2;
                     var iconHeight = toNumber(iconObj.outerHeight());
+                    var maxTop = bar.outerHeight() - iconHeight -2;
                     if(direction=='x') {
                         var newLeft = (newVal / maxVal) * barWidth;
                         if(iconMinLeft) newLeft = Math.max(newLeft, iconMinLeft);
@@ -9195,7 +9243,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options_参数 下面才可以修改options_
                 //console.log('renew call_formatAttr:');
-                strObj.formatAttr(this, options_); //里面找出事件来绑定
+                strObj.formatAttr(this, options_, 0, hasSetData); //里面找出事件来绑定
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //console.log('finish');
                 //console.log(this);
@@ -9770,6 +9818,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 obj.append(objInner);
                 //console.log('tree.options_');
                 //console.log(JSON.stringify(options_));
+                var hasSetData = !isUndefined(options_['data']);
                 optionDataFrom(objInner, options_);
                 delete liOpt['data'];
                 delete liOpt['son_key'];
@@ -9780,7 +9829,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 obj['son'] = objInner;
                 objInner[parentObjKey] = obj; //设置其父对象
                 addOptionNullFunc(obj, options_);//加null_func
-                strObj.formatAttr(obj, options_);
+                strObj.formatAttr(obj, options_, 0, hasSetData);
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
