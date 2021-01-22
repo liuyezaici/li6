@@ -2091,7 +2091,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     thisObj[objAttrHasKh] = true;
                 }
                 var newStr = nodeText;
-                if(hasSetData) {
+                //首次初始化 要么是带data 要么是需要pubdata
+                if(hasSetData || strHasKuohao(nodeText, 'public')) {
                     newStr =  strObj.formatStr(nodeText, data, n, thisObj, 'value');
                 }
                 newStr = htmlDecode(newStr);
@@ -2938,10 +2939,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
             },
             clone:  function() {
-                //console.log('clone obj:');
-                //console.log(thisObj);
-                //console.log(newOpt);
-                //console.log('newOpt:'+ (objToJson(newOpt)));
                 var  newOpt = cloneData(defaultOps);
                 newOpt = getSourceOpt(newOpt);
                 if(!isUndefined(newOpt['name'])) {
@@ -3953,8 +3950,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
         };
         //当值的文本发生变化时 要一起更新静态节点内容
+        console.log('domAppendNode');
         if(!optionIsSame(obj_, opt, 'value') || obj_.nodeObj.length == 0 )
         {
+            console.log('_renewNodeVal');
             _renewNodeVal(optValStr);//更新node
         } else if(!dataIsSame(obj_['last_options']['data'], optData)) { //更新子对象或子字符串
             formatObjNodesVal(obj_, optData, hasSetData);
@@ -4292,7 +4291,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if(tag == 'tr') { //value is obj
                 domAppendTrObj(obj_, opt);
             } else {
-                var optValStr = opt['value'] || opt['son'] || '';
+                var optValStr = opt['value'] || '';
                 if(isStrOrNumber(optValStr) ) {
                     domAppendNode(obj_, opt, hasSetData);
                 } else {  //value is obj
@@ -7537,7 +7536,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     delete options_['disable'];
                 }
                 //重置value和title/text
-                options_['checked_value'] = getOptVal(options_, ['value'], '');
+                options_['checked_value'] = getOptVal(options_, ['checked'], 1);
                 options_['checked_title'] = getOptVal(options_, ['text'], '');
                 var dataTitle = getOptVal(options_, ['text'], '');
                 delete options_['value'];
@@ -7578,7 +7577,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                             obj_.attr('checked', 'true');
                         }
                         var newVal = !lastChecked;
-                        newVal = newVal ? 1 : 0;
+                        newVal = newVal ? obj.checked_value : 0;
                         obj_['options']['checked'] = newVal;
                         if(options_['bind']) {
                             updateBindObj($.trim(options_['bind']), newVal, [obj_]);
@@ -9708,9 +9707,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     liObj['data'] = tmpData; //必须克隆完再更新data
                     //console.log('append li :');
                     //console.log(liObj);
-                    //console.log('_treeData');
-                    //console.log(tmpData);
-                    //console.log(tmpData[sonDataKey]);
                     appendTo.append(liObj);
                     if(dataParentIndex==0) obj['treeLines'].push(liObj); //带数据的tr 缓存obj的子对象
                     //子层data渲染
