@@ -558,15 +558,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }
                     }
                 }
-                if(strInArray(n, ['value', 'th', 'td']) !=-1) {
-                    // console.log('isVal____.n', thisObj, thisObj['tag']);
-                    if(isStrOrNumber(v) ) {
-                        if(thisObj.formatVal) {
-                            thisObj.formatVal(options);
-                            return;
-                        }
-                    }
-                }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
                 if(optionIsSame(thisObj, options, n)) {
                     // console.log('optionIsSame this', n + ':'+ v);
@@ -679,6 +670,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     }
                 }
             });
+
             //console.log(newAttr);
             if(hasData(tmpStyle)) {
                 if(isUndefined(newAttr['style'])) {
@@ -748,6 +740,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //更新旧的options
             options = $.extend({}, options, thisObj['options']);
             strObj.addEvents(thisObj);
+            //格式化value
+            var val_ = getOptVal(options,  ['value', 'th', 'td'], null);
+            if(val_ !== null && isStrOrNumber(val_) ) {
+                if(thisObj.formatVal) {
+                    thisObj.formatVal(options);
+                    return;
+                }
+            }
             return newOpt;
         },
         //绑定属性
@@ -3950,10 +3950,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
         };
         //当值的文本发生变化时 要一起更新静态节点内容
-        console.log('domAppendNode');
+        // console.log('domAppendNode');
         if(!optionIsSame(obj_, opt, 'value') || obj_.nodeObj.length == 0 )
         {
-            console.log('_renewNodeVal');
+            // console.log('_renewNodeVal');
             _renewNodeVal(optValStr);//更新node
         } else if(!dataIsSame(obj_['last_options']['data'], optData)) { //更新子对象或子字符串
             formatObjNodesVal(obj_, optData, hasSetData);
@@ -4283,9 +4283,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if(isUndefined(opt['value']) || opt['value']=='') opt['value'] = ' ';//必须输入空文本只能执行node替换
             opt= opt || [];
             if(!hasData(opt)) return '';
-            console.log('dom.AppendVal');
-            console.log(this);
-            console.log(opt['value']);
+            // console.log('dom.AppendVal');
+            // console.log(this);
+            // console.log(opt['value']);
             tag = tag || 'span';
             //console.log(obj_);
             if(tag == 'tr') { //value is obj
@@ -4515,7 +4515,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
      }
      */
     global.makeList = function(sourceOptions) {
-        console.log('makeList.:', JSON.stringify(sourceOptions));
+        // console.log('makeList.:', JSON.stringify(sourceOptions));
         var options = cloneData(sourceOptions);
         options = options || {};
         var obj = $('<ul></ul>');
@@ -4738,7 +4738,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             } else {
                 //有数据才循环
                 if(optionsData && hasData(optionsData) ) {
-                    console.log('repeat_data makeli');
+                    // console.log('repeat_data makeli');
                     $.each(optionsData, function (key_, val_) {//data循环数据
                         //console.log('key_:'+ key_ +',val_:');
                         //console.log(val_);
@@ -4778,9 +4778,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             renew: function(options_) {
                 obj.INeedParentValFlag = getOptVal(options_, ['need_parent_val', 'needParentVal'], false);//需要父参数渲染好才能请求url
                 obj.INeedParentKey = getOptVal(options_, ['need_parent_key', 'needParentKey', 'need_parent_name', 'needParentName'], 'demo_name');
-                console.log('renew list');
-                console.log(obj);
-                console.log(options_);
+                // console.log('renew list');
+                // console.log(obj);
+                // console.log(options_);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
                 optionDataFrom(this, options_);
@@ -6564,7 +6564,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var autoRenewMenuText = false;//当前对象的menu的text和val是否同时渲染完成
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
-            console.log('format -- ObjVal', opt);
+            // console.log('format -- ObjVal', opt);
             opt = opt || [];
             var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
@@ -6675,9 +6675,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var valArray_ = [];
             var textArray_ = [];
             var ulLis = obj['menu']['value'];
-            console.log('ulLis', ulLis);
+            // console.log('ulLis', ulLis);
             $.each(ulLis, function(n, tmpItem) {
-                console.log('tmpItem', n, tmpItem);
+                // console.log('tmpItem', n, tmpItem);
                 var liVal = tmpItem.attr('data-value');
                 var liTitle = tmpItem.attr('data-title');
                 //console.log('liVal:'+ liVal);
@@ -7414,6 +7414,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         }
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
+            // console.log('format Val', obj);
             opt = opt || [];
             var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
@@ -7430,8 +7431,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             if ($.isArray(newVal)) newVal = newVal.join(',');
             var renewBind = strHasKuohao(newVal, 'public');
             obj.callRenewBind(newVal, [obj], renewBind);
-            if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+            if(opt.lazyCall) {
+                // console.log('format Val.lazyCall');
+                opt.lazyCall(obj, opt['data'] || {}, livingObj);
             }
         };
 
@@ -7480,6 +7482,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 obj.checked_value = newVal;
             },
             get: function () {
+                // console.log('get_________', hasChecked());
                 if(hasChecked()) return obj.checked_value;
                 return '';
             }
@@ -7536,10 +7539,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     delete options_['disable'];
                 }
                 //重置value和title/text
-                options_['checked_value'] = getOptVal(options_, ['checked'], 1);
+                options_['checked_value'] = getOptVal(options_, ['checked', 'value'], 1);
                 options_['checked_title'] = getOptVal(options_, ['text'], '');
                 var dataTitle = getOptVal(options_, ['text'], '');
-                delete options_['value'];
                 delete options_['text'];
                 if(disabled == 1) options_['disabled'] = true;
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
@@ -7609,11 +7611,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     }
                 }
                 //console.log('options_');
-                //console.log(obj);
-                //console.log(options_);
+                // console.log('obj.before_formatAttr');
+                // console.log(options_);
                 addOptionNullFunc(obj, options_);//加null_func
                 strObj.formatAttr(obj, options_);
-                optionGetSet(obj, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -7646,6 +7647,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
         obj.renew(options);
+        optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
         return obj;
     };
@@ -7665,7 +7667,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         var valueStrFormatdSuccess = true;//当前value是否渲染完成
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
-            console.log('radio format Val', opt);
+            // console.log('radio format Val', opt);
             opt = opt || [];
             var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
@@ -7679,23 +7681,22 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             } else {
                 newVal = sourceVal;
             }
+            // console.log('valueStrFormatdSuccess', valueStrFormatdSuccess);
 
             if (!optionIsSame(obj, opt, 'value')) {
                 valueStrFormatdSuccess = true;
             }
             if ($.isArray(newVal)) newVal = newVal.join(',');
             if(valueStrFormatdSuccess) {
-                if(obj.lazyCall) {
-                    obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                // console.log('(obj.lazyCall', obj.lazyCall);
+                if(opt.lazyCall) {
+                    opt.lazyCall(obj, opt['data'] || {}, livingObj);
                 }
             }
             //console.log(obj);
             var renewBind = obj[objAttrHasKh] == true;
             // console.log('radio renewBind', renewBind);
             obj.callRenewBind(newVal, [obj], renewBind);
-            if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
-            }
         };
         //更像绑定的值
         obj.callRenewBind = function(newVal, exceptObj, renewBind) {
@@ -7799,7 +7800,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         'value': sValueStr
                     };
                     //item自身不能继承data菜单
-                    console.log('makeItems', menuOpt);
+                    // console.log('makeItems', menuOpt);
                     var menu_obj = makeItems(menuOpt);
                     menu_obj[parentObjKey] = obj;//设置其父对象
                     obj['itemsObj'] = menu_obj;
@@ -8728,7 +8729,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //console.log(options);
                 optionDataFrom(pageBody, options);
                 strObj.formatAttr(pageBody, options); //里面找出事件来绑定
-                optionGetSet(pageBody, options);
                 var page = parseInt(options.page);
                 var pageSize = parseInt(pageSize);
                 if(pageSize < 1 ) pageSize = 1;
@@ -9196,7 +9196,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //先设定options_参数 下面才可以修改options_
                 //console.log('renew call_formatAttr:');
                 strObj.formatAttr(this, options_); //里面找出事件来绑定
-                optionGetSet(this, options_);
                 this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
                 //console.log('finish');
                 //console.log(this);
@@ -9322,6 +9321,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //console.log(bar);
         //console.log(defaultOps['value']);
         bar.renew(defaultOps);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(bar, defaultOps);
         objBindVal(bar, defaultOps);//数据绑定
         addCloneName(bar, defaultOps);//支持克隆
         if(afterCreate) afterCreate(bar, defaultOps); //初始化内容再写入内容
@@ -9781,7 +9781,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 objInner[parentObjKey] = obj; //设置其父对象
                 addOptionNullFunc(obj, options_);//加null_func
                 strObj.formatAttr(obj, options_);
-                optionGetSet(obj, options_); // format AttrVals 先获取options遍历更新 再设置读写
                 obj['last_options'] = cloneData(options_);//设置完所有属性 要更新旧的option
             },
             updates: function(dataName, exceptObj) {//数据同步
@@ -9808,6 +9807,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据text绑定
         obj.renew(options);
+        optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
         //console.log('item_obj');
         //console.log(obj);

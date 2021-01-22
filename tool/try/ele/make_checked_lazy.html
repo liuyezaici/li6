@@ -14,20 +14,11 @@ var items = makeChecked({
     name:  'demo',
     value: '6',
     text: '标题',
-    only: 'some_val',
-    checked: true
+    checked: true,
+    lazyCall: function (o, e) {
+        var currentVal = o['value'];
+        msgTisf('currentVal:'+ currentVal);
+    }
 });
-var items1 = makeChecked({
-    name:  'demo1',
-    value: '6',
-    text: '标题',
-    only: 'some_val'
-});
-var items2 = makeChecked({
-    name:  'demo2',
-    value: '6',
-    text: '标题',
-    only: 'some_val'
-});
-$('#show_demo').append(items).append(items1).append(items2);
+$('#show_demo').append(items);
 </script>
