@@ -216,6 +216,7 @@ lirui lirui
 
 linux ≥ı ºªØ’æµ„ 
 git init
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/pomcube.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/customer.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/juzi0.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/newoss.git

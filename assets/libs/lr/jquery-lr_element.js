@@ -3950,10 +3950,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
         };
         //当值的文本发生变化时 要一起更新静态节点内容
-        // console.log('domAppendNode');
         if(!optionIsSame(obj_, opt, 'value') || obj_.nodeObj.length == 0 )
         {
-            // console.log('_renewNodeVal');
             _renewNodeVal(optValStr);//更新node
         } else if(!dataIsSame(obj_['last_options']['data'], optData)) { //更新子对象或子字符串
             formatObjNodesVal(obj_, optData, hasSetData);
@@ -5942,7 +5940,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 return this.attr('src');
             },
             set: function(n) {     //支持外部设值
-                console.log('set img val:'+ n);
+                //console.log('set img val:'+ n);
                 if (!isUndefined(options['bind'])) {
                     updateBindObj($.trim(options['bind']), n, [obj]);//同步更新
                 }
@@ -5959,7 +5957,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if (!isUndefined(options['bind'])) {
                     updateBindObj($.trim(options['bind']), n, [obj]);//同步更新
                 }
-                console.log('set img src:'+ n);
                 this.attr('src', n);
             }
         });
