@@ -6840,15 +6840,15 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     var lastClick = getOptVal(liOpt, ['click'], null);
                     if(lastClickExt) {
                         liOpt['click_extend'] = function (obj_, e_, scope) {
-                            lastClickExt(obj_, obj_.parent.parent.parent, e_, scope);
+                            lastClickExt(obj_, obj_.parent.parent, e_, scope);
                             //console.log('click___');
                             //console.log(obj_);
-                            if(lastClick) lastClick(obj_, obj_.parent.parent.parent, e_, scope);//后置用户设置的事件
+                            if(lastClick) lastClick(obj_, obj_.parent.parent, e_, scope);//后置用户设置的事件
                         }
                     } else {
                         if(lastClick) {
                             liOpt['click_extend'] = function (obj_, e_, scope) {
-                                lastClick(obj_, obj_.parent.parent.parent, e_, scope);//后置用户设置的事件
+                                lastClick(obj_, obj_.parent.parent, e_, scope);//后置用户设置的事件
                             }
                         }
                     }
