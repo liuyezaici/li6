@@ -5981,7 +5981,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         if(!isUndefined(options['rest_time'])) {
             var showTimer = (restNum <= minNum) ? '': '('+ restNum +')';
             optData['rest_time'] = showTimer;
-            valueStr += '{rest_time}';
             options['data'] = optData;
             options['value'] = valueStr;
         }
@@ -6015,9 +6014,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 optData['rest_time'] = restTime;
                 //console.log(optData);
                 thisObj['data'] = optData;
-                option_.value = sourceVal + '{{rest_time}>0?"({rest_time})":""}';
-                thisObj['last_options']['value'] = option_.value;
-                var newStr = strObj.formatStr(option_.value, optData, 0, thisObj, 'value');
+                let val_ = sourceVal + '{{rest_time}>0?"({rest_time})":""}';
+                var newStr = strObj.formatStr(val_, optData, 0, thisObj, 'value');
                 thisObj.renewVal(newStr);
             };
             //外部使用的倒计时触发方法
@@ -6034,11 +6032,11 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     setTimeout(function () {
                         rest_time -= parseFloat(option_.step);
                         optData['rest_time'] = rest_time;
-                        var newStr = strObj.formatStr(option_.value, optData, 0, thisObj, 'value');
+                        let val_ = option_.source_value + '{{rest_time}>0?"({rest_time})":""}';
+                        var newStr = strObj.formatStr(val_, optData, 0, thisObj, 'value');
                         thisObj.renewVal(newStr);
                         if(rest_time == 0) {
                             optData['rest_time'] = 0;
-                            thisObj['last_options']['value'] = sourceVal;//恢复默认的value
                             thisObj.removeAttr('disabled');
                         } else {
                             thisObj.__inSubTime(rest_time);
@@ -7278,7 +7276,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(optTitKey) itemsMenuOpt['title_key'] = optTitKey;
                     var lastClick = getOptVal(itemsMenuOpt, ['click'], '');
                     itemsMenuOpt['click'] = function (o_, ev_, scope_) {
-                        var itemObj = o_.parent.parent.parent;
+                        // console.log('o_', o_);
+                        var itemObj = o_.parent.parent;
                         if(!itemObj['multi']) {
                             itemObj.hide();
                         }
