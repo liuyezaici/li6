@@ -6358,6 +6358,146 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.valChange(selectVal);//首次赋值
         return obj; //makeSwitch
     };
+
+    //创建多个选项的开关
+    global.makeSwitchs = function(sourceOptions) {
+        var options = cloneData(sourceOptions);
+        options = options || {};
+        if(isUndefined(options['name'])) options['name'] = 'no_name';
+        if(isUndefined(options['value'])) options['value'] = '';
+        var selectVal = options['value'];
+        var optItems = options['items'] || [];
+        var obj = $('<span></span>');
+        options['class_extend'] = 'diy_switch';
+        obj['last_options'] = getOptVal(options, 'last_options', {});
+        obj[objValIsNode] = false;
+        obj['switchVal'] = selectVal;
+        obj['switchText'] = '';
+        var iconObj = makeItems(optItems);
+        obj.append(iconObj);
+        //单独的格式化value的括号
+        obj.formatVal = function (opt) {
+            opt = opt || [];
+            var sourceVal = opt['source_value'] || opt['value'];
+            var newData = opt['data']||{};
+            var newVal ;
+            if(strHasKuohao(sourceVal, 'public')) {
+                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
+                obj[objAttrHasKh] = true;
+            } else if(strHasKuohao(sourceVal, 'data')) {
+                newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
+                obj[objAttrHasKh] = true;
+            } else {
+                newVal = sourceVal;
+            }
+            selectVal = newVal;
+            opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
+            obj.valChange(newVal, [obj], false);//自身格式化 不能更新自己的bind 会导致死循环
+            if(obj.lazyCall) {
+                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+            }
+        };
+
+        //支持外部取值 data-value
+        Object.defineProperty(obj, 'value', {
+            get: function() {
+                return obj['switchVal'];
+            },
+            set: function(V) {
+                obj.valChange(V, [this], true);
+            }
+        });
+        //支持外部取值
+        Object.defineProperty(obj, 'text', {
+            get: function() {
+                return obj['switchText'];
+            }
+        });
+
+        //外部设置属性
+        obj.extend({
+            //值的修改
+            valChange: function (newVal, exceptObj, renewBind) {
+                // console.log('val Change', newVal);
+                exceptObj = exceptObj || [];
+                renewBind = isUndefined(renewBind) ? true : renewBind;
+                if(newVal != obj.attr('data-value')) {//obj['value']可能已经提前被同步修改 所以要用attr对比
+                    obj.attr('data-value', newVal);
+                }
+                obj['switchVal'] = newVal;
+                var setText = getOptVal(options, ['setText', 'set_text'], null);
+                var newText = obj.text;
+                // console.log('newText', newVal, setText, renewBind, newText);
+                if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
+                if(renewBind) {
+                    if(newVal.length && options['bind'] && renewBind) {
+                        updateBindObj($.trim(options['bind']), newVal, exceptObj);
+                    } else {
+                        var lastVal = isUndefined(livingObj['data'][options['bind']]) ? null : livingObj['data'][options['bind']];
+                        if(lastVal) {
+                            obj.value = lastVal;
+                        }
+                    }
+                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
+                        renewObjBindAttr(obj, options['bind']);
+                    }
+                }
+                if(setText && newText !=='') {
+                    updateBindObj($.trim(setText), newText, exceptObj);
+                }
+            },
+            //主动更新数据
+            renew: function(options_) {
+                var type_ = !isUndefined(options_['type']) ? options_['type'] : ''; //1,2,3,4,5样式
+                var hasSetData = !isUndefined(options_['data']);
+                var size_ = options_['size']||''; //xs/sm/md/lg
+                var objExtendClass = '';
+                if(sizeIsXs(size_)) {
+                    objExtendClass = 'switch-xs';
+                } else if(sizeIsSm(size_)) {
+                    objExtendClass = 'switch-sm';
+                } else if(sizeIsMd(size_)) {
+                    objExtendClass = 'switch-md';
+                } else if(sizeIsLg(size_)) {
+                    objExtendClass = 'switch-lg';
+                }
+                //参数读写绑定 参数可能被外部重置 所以要同步更新参数
+                optionDataFrom(this, options_);
+                var click_extend = function (obj_) {
+                    var newVal = obj_.value;
+                    obj.valChange(newVal); //单纯的改变样式 赋值
+                };
+                if(options_['click']) {
+                    options_['click_extend'] = options_['click'];
+                }
+                options_['click'] = click_extend;
+                //先设定options参数 下面才可以修改options
+                strObj.formatAttr(this, options_, 0, hasSetData);
+                this['last_options'] = $.extend({}, options_);//设置完所有属性 要更新旧的option
+            },
+            updates: function(dataName, exceptObj) {//数据同步
+                exceptObj = exceptObj || [];
+                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                    exceptObj.push(this);
+                    this.valChange(getObjData($.trim(options['bind'])), exceptObj, false)
+                }
+                if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
+                    renewObjBindAttr(this, dataName);
+                }
+            },
+            //克隆当前对象
+            cloneSelf: function(optionsGet) {
+                optionsGet = optionsGet || cloneData(sourceOptions);
+                optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
+                return makeSwitch(optionsGet);
+            }
+        });
+        obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
+        addCloneName(obj, options);//支持克隆
+        obj.valChange(selectVal);//首次赋值
+        return obj; //makeSwitch
+    };
     //创建Nav选项卡
     global.makeNav = function(sourceOptions) {
         var options = cloneData(sourceOptions);
