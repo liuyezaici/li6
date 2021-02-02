@@ -6373,8 +6373,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj[objValIsNode] = false;
         obj['switchVal'] = selectVal;
         obj['switchText'] = '';
-        var iconObj = makeItems(optItems);
-        obj.append(iconObj);
+        var itemObj = makeItems({items: optItems});
+        obj.append(itemObj);
+        obj.items = itemObj;
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
@@ -6401,7 +6402,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         //支持外部取值 data-value
         Object.defineProperty(obj, 'value', {
             get: function() {
-                return obj['switchVal'];
+                return obj.items.value;
             },
             set: function(V) {
                 obj.valChange(V, [this], true);
@@ -6424,7 +6425,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if(newVal != obj.attr('data-value')) {//obj['value']可能已经提前被同步修改 所以要用attr对比
                     obj.attr('data-value', newVal);
                 }
-                obj['switchVal'] = newVal;
+                obj.items.value = newVal;
                 var setText = getOptVal(options, ['setText', 'set_text'], null);
                 var newText = obj.text;
                 // console.log('newText', newVal, setText, renewBind, newText);

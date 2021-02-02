@@ -15,6 +15,11 @@
    设备管理-设备新版报表曲线图
     
    
+   
+   
+   
+   //连接数据库
+   
+   mysql -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678
 
 	
-   
