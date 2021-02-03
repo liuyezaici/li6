@@ -23,3 +23,5 @@
    mysql -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678
 
 	
+ //Á¬½Óredis
+ redis-cli -h pomcube.pehexp.0001.usw2.cache.amazonaws.com

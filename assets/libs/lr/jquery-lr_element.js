@@ -6462,6 +6462,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 } else if(sizeIsLg(size_)) {
                     objExtendClass = 'switch-lg';
                 }
+                options_['class_extend'] = 'diy_switchs'+ (type_ && type_!=1? type_: '') +
+                    (objExtendClass?' '+objExtendClass : '');
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 optionDataFrom(this, options_);
                 var click_extend = function (obj_) {
