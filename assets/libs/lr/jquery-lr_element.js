@@ -520,7 +520,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
             var newAttr = {};
             var hidden = false;
-            var setHidden = false;//设置隐藏样式
             var setChecked = undefined;//设置打勾样式
             var setDisabled = false;//设置不可点击
             var classExt = false;//包含扩展样式
@@ -575,7 +574,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
-                if(optionIsSame(thisObj, options, n)) {
+                if(optionIsSame(thisObj, options, n) && !has_kuohao) {
                     // console.log('optionIsSame this', n + ':'+ v);
                     // console.log(thisObj);
                     return;
@@ -640,7 +639,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
                 //hide or show
                 if(n =='show' || n =='hidden' || n =='hide') {
-                    setHidden = true;
+                    thisObj.setHidden = true;
                     if(((n =='hide' || n =='hidden') && (v == 'true' ||  v == true ||  v == 1)) || (n =='show' && (v == 'false' ||  v == false ||  v == 0))) {
                         hidden = true;
                     }
@@ -663,15 +662,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 }
                 //console.log('attr:'+n);
                 if(n == 'class_extend') {
-                    classExt = true;
-                    //console.log('class_extend');
-                    //console.log(thisObj);
-                    //console.log(options['class_extend']);
+                    thisObj.classExt = true;
                     if(v) {
-                        classExtFlag = true;
+                        thisObj.classExtFlag = true;
                         thisObj['class_extend_true_val'] = v; //缓存扩展样式 下次还可以移除
                     } else {
-                        classExtFlag = false;
+                        thisObj.classExtFlag = false;
                     }
                 }
                 // console.log('formatAttr.....each:'+ n , v);
@@ -696,24 +692,26 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 });
             }
             var lastClassTrueVal = '';
+            //之前渲染过class的值
             if(thisObj['class_extend_true_val']) {
                 lastClassTrueVal = thisObj['class_extend_true_val'];
             }
-            if(classExt) {
-                if(classExtFlag) {
+            if(thisObj.classExt) {
+                if(thisObj.classExtFlag) {
                     newAttr['class'] = classAddSubClass(newAttr['class'], lastClassTrueVal, true, ' ');
                 } else  {
                     if(lastClassTrueVal) { //之前有生成过扩展样式 要移除
                         newAttr['class'] = classAddSubClass(newAttr['class'], lastClassTrueVal, false, ' ');
                     } else { //如果配置里没有class 并且扩展里也没有 且现在有样式 则要清空样式
-                        if(!classExtFlag && !options['class'] && thisObj.attr('class')) {
+                        if(!thisObj.classExtFlag && !options['class'] && thisObj.attr('class')) {
                             newAttr['class'] = '';
                         }
                     }
                 }
                 options['class'] = newAttr['class'];
             }
-            if(setHidden) {
+            // console.log('setHidden:', thisObj, thisObj.setHidden);
+            if(thisObj.setHidden) {
                 if(hidden) {
                     newAttr['class'] = classAddSubClass(newAttr['class'], 'hidden', true, ' ');
                 } else {
@@ -1101,18 +1099,18 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(!abc) return abc;
                 attrName = attrName || '';
                 if(dataPublic == 'data') {
-                    var regData1 = /^this\.data\.([a-zA-Z0-9]+)/;
-                    var regData2 = /^this\[data\](\[('|")?([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")?\])*/;
                     var regData3 = /^\!*this\.data/; //!this.data
                     var regData4 = /^\!*this\[data\]/;
-                    var matchData1 = abc.match(regData1);
-                    var matchData2 = abc.match(regData2);
                     var matchData3 = abc.match(regData3);
                     var matchData4 = abc.match(regData4);
                     // console.log('matchData3', abc, matchData3);
                     if(matchData3 || matchData4) {
                         resultStr = (abc.match(/(^this\.data)/) ? hasData(data_) : !hasData(data_)) ? 1 : 0;
                     } else {
+                        var regData1 = /^this\.data\.([a-zA-Z0-9]+)/;
+                        var regData2 = /^this\[data\](\[('|")?([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")?\])*/;
+                        var matchData1 = abc.match(regData1);
+                        var matchData2 = abc.match(regData2);
                         if(matchData1 || matchData2) {
                             var matchKey = matchData1[1] || matchData2[1];
                             matchKey = strObj.urlDecodeLR(matchKey);
@@ -1137,15 +1135,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         var match1 = resultStr.match(reg1);
                         var match2 = resultStr.match(reg2);
                         if(match1 || match2) {
+                            // console.log('match1', match1);
                             var matchKey = match1[1] || match2[1];
                             matchKey = strObj.urlDecodeLR(matchKey);
                             // console.log('matchKey', matchKey);
                             //允许获取当前data对象
                             if(matchKey =='data') {
                                 resultStr = hasData(data_) ? true : false;
-                            } else if(data_[matchKey]) {
+                            } else if(!isUndefined(data_[matchKey])) {
                                 resultStr = data_[matchKey];
-                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
+                            } else if(!isUndefined(obj_[matchKey])) { //允许获取 obj.diyAttr
                                 resultStr = obj_[matchKey];
                             } else {
                                 resultStr = '';
@@ -8828,16 +8827,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     global.makePage = function(sourceOptions) {
         var options = cloneData(sourceOptions);
         var pageBody = $('<ul></ul>');
-        options['size'] = (!options['size'] || !setSize(options['size'])) ? 'md' : options['size'];//过滤size
-        var $pageExtClass = 'pagination';
-        if(sizeIsLg(options['size'])) {
-            $pageExtClass += ' pagination-lg';
-        } else if(sizeIsSm(options['size'])) {
-            $pageExtClass += ' pagination-sm';
-        } else if(sizeIsXs(options['size'])) {
-            $pageExtClass += ' pagination-xs';
-        }
-        options['class_extend'] = $pageExtClass;
         pageBody['current_page'] = 1;
         pageBody.totalPage = 0;
         pageBody.fromPage  = 0;
@@ -8891,7 +8880,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 };
                 //兼容各自语法
                 var data_ = options['data'] ||{};
-                //console.log(JSON.stringify(options));
+                // console.log(JSON.stringify(options));
                 //console.log(options['total']);
                 //console.log(data_);
                 var pageSize = getOptVal(options, ['pagesize','page_size', 'pageSize'], 10);//单页显示数量

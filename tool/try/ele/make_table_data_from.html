@@ -61,26 +61,25 @@
             tr: [
                 {
                     show: '{this.data}',
-                     // customerId: '{id}',
+                     customerId: '{id}',
                     click: function (o) {
                         lrBox.msgTisf(o.customerId);
                     },
                     td: [
                         {
                             value:  lrEle.makeA({
-                                // customerId: '{id}',
                                 value: '{id}'
                             })
                         },
-                        // {
-                        //     value: [
-                        //         lrEle.makeInput({
-                        //             width: '200px',
-                        //             name: 'u_nick',
-                        //             value: '{title}'
-                        //         })
-                        //     ]
-                        // }
+                        {
+                            value: [
+                                lrEle.makeInput({
+                                    width: '200px',
+                                    name: 'u_nick',
+                                    value: '{title}'
+                                })
+                            ]
+                        }
                     ]
                 }
             ]

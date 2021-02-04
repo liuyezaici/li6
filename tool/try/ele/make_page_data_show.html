@@ -18,8 +18,7 @@
 //一个简单分页
 
 <div id="show_page1"></div>
-<br />
-<div id="show_bind3"></div>
+<div id="show_btn"></div>
 <script>
 //一个带数据的p
 //注意：
@@ -35,14 +34,26 @@ require.config({
     }
 });
 require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-      $('#show_page1').append(lrEle.makePage({
-          page: 1,
-          show: '{{this.totalPage}>1}',
-          total: 11,
-          pageNum: 8,
-          size: 'sm', //lg  sm xs
-          pageSize: 10
-      }));
+    var pageObj = lrEle.makePage({
+        goto: 'r',
+        size: 'xs',
+        total: 0,
+        show: '{{this.totalPage}>1}',
+    });
+      $('#show_page1').append(pageObj);
+
+    $('#show_btn').append(lrEle.makeA({
+        value: '更新数据',
+        target: '_self',
+        'class': 'btnLr btnLrSuccess',
+        click: function (e) {
+            var pageOpt = pageObj['options'];
+            pageOpt['total'] = 0;
+            pageOpt['page'] = 1;
+            pageOpt['page_size'] = 10;
+            pageObj.renew(pageOpt);
+        }
+    }));
   });
 
 </script>
