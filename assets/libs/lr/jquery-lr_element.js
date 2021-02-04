@@ -1,11 +1,11 @@
+define(['jquery', 'lrBox'], function ($, lrBox) {
 // VERSION 20180823
 // LR 2018.8
-// 支持字符串的数据三元算法
 //$.url.decode('http:%%%'); 实际以下插件中并没有使用 urldecode 此处嵌入只是方便以后的调取
-jQuery.url = function() { function l(a) { for(var b = "", c = 0, f = 0, d = 0;c < a.length;) { f = a.charCodeAt(c); if(f < 128) { b += String.fromCharCode(f); c++ }else if(f > 191 && f < 224) { d = a.charCodeAt(c + 1); b += String.fromCharCode((f & 31) << 6 | d & 63); c += 2 }else { d = a.charCodeAt(c + 1); c3 = a.charCodeAt(c + 2); b += String.fromCharCode((f & 15) << 12 | (d & 63) << 6 | c3 & 63); c += 3 } }return b } function m(a, b) { var c = {}, f = {"true":true, "false":false, "null":null}; $.each(a.replace(/\+/g, " ").split("&"), function(d, j) { var e = j.split("="); d = k(e[0]); j = c; var i = 0, g = d.split("]["), h = g.length - 1; if(/\[/.test(g[0]) && /\]$/.test(g[h])) { g[h] = g[h].replace(/\]$/, ""); g = g.shift().split("[").concat(g); h = g.length - 1 }else h = 0; if(e.length === 2) { e = k(e[1]); if(b)e = e && !isNaN(e) ? +e : e === "undefined" ? undefined : f[e] !== undefined ? f[e] : e; if(h)for(;i <= h;i++) { d = g[i] === "" ? j.length : g[i]; j = j[d] = i < h ? j[d] || (g[i + 1] && isNaN(g[i + 1]) ? {} : []) : e }else if($.isArray(c[d]))c[d].push(e); else c[d] = c[d] !== undefined ? [c[d], e] : e }else if(d)c[d] = b ? undefined : "" }); return c } function n(a) { a = a || window.location; var b = ["source", "protocol", "authority", "userInfo", "user", "password", "host", "port", "relative", "path", "directory", "file", "query", "anchor"]; a = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(a); for(var c = {}, f = b.length;f--;)c[b[f]] = a[f] || ""; if(c.query)c.params = m(c.query, true); return c } function o(a) { if(a.source)return encodeURI(a.source); var b = []; if(a.protocol)if(a.protocol == "file")b.push("file:///"); else a.protocol == "mailto" ? b.push("mailto:") : b.push(a.protocol + "://"); if(a.authority)b.push(a.authority); else { if(a.userInfo)b.push(a.userInfo + "@"); else if(a.user) { b.push(a.user); a.password && b.push(":" + a.password); b.push("@") }if(a.host) { b.push(a.host); a.port && b.push(":" + a.port) } }if(a.path)b.push(a.path); else { a.directory && b.push(a.directory); a.file && b.push(a.file) }if(a.query)b.push("?" + a.query); else a.params && b.push("?" + $.param(a.params)); a.anchor && b.push("#" + a.anchor); return b.join("") } function p(a) { return encodeURIComponent(a) } function k(a) { a = a || window.location.toString(); return l(unescape(a.replace(/\+/g, " "))) } return{encode:p, decode:k, parse:n, build:o} }();
+    $.url = function() { function l(a) { for(var b = "", c = 0, f = 0, d = 0;c < a.length;) { f = a.charCodeAt(c); if(f < 128) { b += String.fromCharCode(f); c++ }else if(f > 191 && f < 224) { d = a.charCodeAt(c + 1); b += String.fromCharCode((f & 31) << 6 | d & 63); c += 2 }else { d = a.charCodeAt(c + 1); c3 = a.charCodeAt(c + 2); b += String.fromCharCode((f & 15) << 12 | (d & 63) << 6 | c3 & 63); c += 3 } }return b } function m(a, b) { var c = {}, f = {"true":true, "false":false, "null":null}; $.each(a.replace(/\+/g, " ").split("&"), function(d, j) { var e = j.split("="); d = k(e[0]); j = c; var i = 0, g = d.split("]["), h = g.length - 1; if(/\[/.test(g[0]) && /\]$/.test(g[h])) { g[h] = g[h].replace(/\]$/, ""); g = g.shift().split("[").concat(g); h = g.length - 1 }else h = 0; if(e.length === 2) { e = k(e[1]); if(b)e = e && !isNaN(e) ? +e : e === "undefined" ? undefined : f[e] !== undefined ? f[e] : e; if(h)for(;i <= h;i++) { d = g[i] === "" ? j.length : g[i]; j = j[d] = i < h ? j[d] || (g[i + 1] && isNaN(g[i + 1]) ? {} : []) : e }else if($.isArray(c[d]))c[d].push(e); else c[d] = c[d] !== undefined ? [c[d], e] : e }else if(d)c[d] = b ? undefined : "" }); return c } function n(a) { a = a || window.location; var b = ["source", "protocol", "authority", "userInfo", "user", "password", "host", "port", "relative", "path", "directory", "file", "query", "anchor"]; a = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(a); for(var c = {}, f = b.length;f--;)c[b[f]] = a[f] || ""; if(c.query)c.params = m(c.query, true); return c } function o(a) { if(a.source)return encodeURI(a.source); var b = []; if(a.protocol)if(a.protocol == "file")b.push("file:///"); else a.protocol == "mailto" ? b.push("mailto:") : b.push(a.protocol + "://"); if(a.authority)b.push(a.authority); else { if(a.userInfo)b.push(a.userInfo + "@"); else if(a.user) { b.push(a.user); a.password && b.push(":" + a.password); b.push("@") }if(a.host) { b.push(a.host); a.port && b.push(":" + a.port) } }if(a.path)b.push(a.path); else { a.directory && b.push(a.directory); a.file && b.push(a.file) }if(a.query)b.push("?" + a.query); else a.params && b.push("?" + $.param(a.params)); a.anchor && b.push("#" + a.anchor); return b.join("") } function p(a) { return encodeURIComponent(a) } function k(a) { a = a || window.location.toString(); return l(unescape(a.replace(/\+/g, " "))) } return{encode:p, decode:k, parse:n, build:o} }();
 
 // ajax上传文件插件
-jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.context||s,xhr,status,e)}if(s.global){(s.context?jQuery(s.context):jQuery.event).trigger("ajaxError",[xhr,s,e])}},createUploadIframe:function(frameId,uri){if(window.ActiveXObject){if(jQuery.browser.version=="9.0"||jQuery.browser.version=="10.0"){var io=document.createElement("iframe");io.id=frameId;io.name=frameId}else{if(jQuery.browser.version=="6.0"||jQuery.browser.version=="7.0"||jQuery.browser.version=="8.0"){var io=document.createElement('<iframe id="'+frameId+'" name="'+frameId+'" />');if(typeof uri=="boolean"){io.src="javascript:false"}else{if(typeof uri=="string"){io.src=uri}}}}}else{var io=document.createElement("iframe");io.id=frameId;io.name=frameId}io.style.position="absolute";io.style.top="-1000px";io.style.left="-1000px";document.body.appendChild(io);return io},ajaxFileUpload:function(s){s=jQuery.extend({},jQuery.ajaxSettings,s);var id=new Date().getTime();var uploadForm={};var tmpLoading=null;var frameId="jUploadFrame"+id;var formId="jUploadForm"+id;var postData=s.data||null;var loadingUrl=s.loadingUrl||"";if(loadingUrl){tmpLoading=$('<img class="loading_gif" src="'+loadingUrl+'">')}uploadForm=$('<form  action="'+s.url+'" target="'+frameId+'" method="POST" '+'name="'+formId+'" style="position: absolute; top: -1000px; left: -1000px;" id="'+formId+'" enctype="multipart/form-data"></form>');if(tmpLoading){s.fileInput.after(tmpLoading)}var inputPrev=s.fileInput.prev();var inputParent=s.fileInput.parent();$(document.body).append(s.fileInput);s.fileInput.wrap(uploadForm);uploadForm=$("#"+formId);if(postData){var tmpInput="";$.each(postData,function(key_,val_){tmpInput=$('<input type="hidden" name="'+key_+'" value="'+val_+'" />');uploadForm.append(tmpInput)})}jQuery.createUploadIframe(frameId,s.secureuri);if(s.global&&!jQuery.active++){jQuery.event.trigger("ajaxStart")}var requestDone=false;var xml={};if(s.global){jQuery.event.trigger("ajaxSend",[xml,s])}var uploadCallback=function(isTimeout){var io=document.getElementById(frameId);try{if(io.contentWindow){xml.responseText=io.contentWindow.document.body?io.contentWindow.document.body.innerHTML:null;xml.responseXML=io.contentWindow.document.XMLDocument?io.contentWindow.document.XMLDocument:io.contentWindow.document}else{if(io.contentDocument){xml.responseText=io.contentDocument.document.body?io.contentDocument.document.body.innerHTML:null;xml.responseXML=io.contentDocument.document.XMLDocument?io.contentDocument.document.XMLDocument:io.contentDocument.document}}}catch(e){jQuery.handleError(s,xml,null,e)}var callFinish=false;if(xml||isTimeout=="timeout"){requestDone=true;var status;try{status=isTimeout!="timeout"?"success":"error";if(status!="error"){var data=jQuery.uploadHttpData(xml,s.dataType);if(s.finish){s.finish(data,status)}else{console.log("!s.finish");console.log(s)}if(s.global){jQuery.event.trigger("ajaxSuccess",[xml,s])}}else{jQuery.handleError(s,xml,status)}}catch(e){status="error";jQuery.handleError(s,xml,status,e)}jQuery(io).unbind();setTimeout(function(){try{$(io).remove();if(tmpLoading){tmpLoading.remove()}if(inputPrev.length>0){inputPrev.after(s.fileInput)}else{inputParent.append(s.fileInput)}$(uploadForm).remove()}catch(e){jQuery.handleError(s,xml,null,e)}},100);xml=null}};if(s.timeout>0){setTimeout(function(){if(!requestDone){uploadCallback("timeout")}},s.timeout)}try{$(uploadForm).submit()}catch(e){jQuery.handleError(s,xml,null,e)}if(window.attachEvent){document.getElementById(frameId).attachEvent("onload",uploadCallback)}else{document.getElementById(frameId).addEventListener("load",uploadCallback,false)}return{abort:function(){}}},uploadHttpData:function(r,type){var data=!type;data=type=="xml"||data?r.responseXML:r.responseText;if(type=="script"){jQuery.globalEval(data)}if(type=="json"){var data=r.responseText;var reg_=/^<pre.*?>(.*?)<\/pre>$/i;if(reg_.test(data)){var am=reg_.exec(data);var data=(am)?am[1]:"";eval("data = "+data)}else{eval("data = "+data)}}if(type=="html"){jQuery("<div>").html(data).evalScripts()}return data}});
+$.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.context||s,xhr,status,e)}if(s.global){(s.context?jQuery(s.context):jQuery.event).trigger("ajaxError",[xhr,s,e])}},createUploadIframe:function(frameId,uri){if(window.ActiveXObject){if(jQuery.browser.version=="9.0"||jQuery.browser.version=="10.0"){var io=document.createElement("iframe");io.id=frameId;io.name=frameId}else{if(jQuery.browser.version=="6.0"||jQuery.browser.version=="7.0"||jQuery.browser.version=="8.0"){var io=document.createElement('<iframe id="'+frameId+'" name="'+frameId+'" />');if(typeof uri=="boolean"){io.src="javascript:false"}else{if(typeof uri=="string"){io.src=uri}}}}}else{var io=document.createElement("iframe");io.id=frameId;io.name=frameId}io.style.position="absolute";io.style.top="-1000px";io.style.left="-1000px";document.body.appendChild(io);return io},ajaxFileUpload:function(s){s=jQuery.extend({},jQuery.ajaxSettings,s);var id=new Date().getTime();var uploadForm={};var tmpLoading=null;var frameId="jUploadFrame"+id;var formId="jUploadForm"+id;var postData=s.data||null;var loadingUrl=s.loadingUrl||"";if(loadingUrl){tmpLoading=$('<img class="loading_gif" src="'+loadingUrl+'">')}uploadForm=$('<form  action="'+s.url+'" target="'+frameId+'" method="POST" '+'name="'+formId+'" style="position: absolute; top: -1000px; left: -1000px;" id="'+formId+'" enctype="multipart/form-data"></form>');if(tmpLoading){s.fileInput.after(tmpLoading)}var inputPrev=s.fileInput.prev();var inputParent=s.fileInput.parent();$(document.body).append(s.fileInput);s.fileInput.wrap(uploadForm);uploadForm=$("#"+formId);if(postData){var tmpInput="";$.each(postData,function(key_,val_){tmpInput=$('<input type="hidden" name="'+key_+'" value="'+val_+'" />');uploadForm.append(tmpInput)})}jQuery.createUploadIframe(frameId,s.secureuri);if(s.global&&!jQuery.active++){jQuery.event.trigger("ajaxStart")}var requestDone=false;var xml={};if(s.global){jQuery.event.trigger("ajaxSend",[xml,s])}var uploadCallback=function(isTimeout){var io=document.getElementById(frameId);try{if(io.contentWindow){xml.responseText=io.contentWindow.document.body?io.contentWindow.document.body.innerHTML:null;xml.responseXML=io.contentWindow.document.XMLDocument?io.contentWindow.document.XMLDocument:io.contentWindow.document}else{if(io.contentDocument){xml.responseText=io.contentDocument.document.body?io.contentDocument.document.body.innerHTML:null;xml.responseXML=io.contentDocument.document.XMLDocument?io.contentDocument.document.XMLDocument:io.contentDocument.document}}}catch(e){jQuery.handleError(s,xml,null,e)}var callFinish=false;if(xml||isTimeout=="timeout"){requestDone=true;var status;try{status=isTimeout!="timeout"?"success":"error";if(status!="error"){var data=jQuery.uploadHttpData(xml,s.dataType);if(s.finish){s.finish(data,status)}else{console.log("!s.finish");console.log(s)}if(s.global){jQuery.event.trigger("ajaxSuccess",[xml,s])}}else{jQuery.handleError(s,xml,status)}}catch(e){status="error";jQuery.handleError(s,xml,status,e)}jQuery(io).unbind();setTimeout(function(){try{$(io).remove();if(tmpLoading){tmpLoading.remove()}if(inputPrev.length>0){inputPrev.after(s.fileInput)}else{inputParent.append(s.fileInput)}$(uploadForm).remove()}catch(e){jQuery.handleError(s,xml,null,e)}},100);xml=null}};if(s.timeout>0){setTimeout(function(){if(!requestDone){uploadCallback("timeout")}},s.timeout)}try{$(uploadForm).submit()}catch(e){jQuery.handleError(s,xml,null,e)}if(window.attachEvent){document.getElementById(frameId).attachEvent("onload",uploadCallback)}else{document.getElementById(frameId).addEventListener("load",uploadCallback,false)}return{abort:function(){}}},uploadHttpData:function(r,type){var data=!type;data=type=="xml"||data?r.responseXML:r.responseText;if(type=="script"){jQuery.globalEval(data)}if(type=="json"){var data=r.responseText;var reg_=/^<pre.*?>(.*?)<\/pre>$/i;if(reg_.test(data)){var am=reg_.exec(data);var data=(am)?am[1]:"";eval("data = "+data)}else{eval("data = "+data)}}if(type=="html"){jQuery("<div>").html(data).evalScripts()}return data}});
 
 //md5
     (function(u){var k=function(a,c){var h,g,k,m;k=a&2147483648;m=c&2147483648;h=a&1073741824;g=c&1073741824;a=(a&1073741823)+(c&1073741823);return h&g?a^2147483648^k^m:h|g?a&1073741824?a^3221225472^k^m:a^1073741824^k^m:a^k^m},l=function(a,c,h,g,l,m,b){a=k(a,k(k(c&h|~c&g,l),b));return k(a<<m|a>>>32-m,c)},n=function(a,c,h,g,l,m,b){a=k(a,k(k(c&g|h&~g,l),b));return k(a<<m|a>>>32-m,c)},p=function(a,c,h,g,l,m,b){a=k(a,k(k(c^h^g,l),b));return k(a<<m|a>>>32-m,c)},q=function(a,c,h,g,l,m,b){a=k(a,k(k(h^(c|~g), l),b));return k(a<<m|a>>>32-m,c)},t=function(a){var c="",h,g;for(g=0;3>=g;g++)h=a>>>8*g&255,h="0"+h.toString(16),c+=h.substr(h.length-2,2);return c};u.extend({md5:function(a){var c,h,g,r,m,b,d,e,f;a=a.replace(/\x0d\x0a/g,"\n");c="";for(h=0;h<a.length;h++)g=a.charCodeAt(h),128>g?c+=String.fromCharCode(g):(127<g&&2048>g?c+=String.fromCharCode(g>>6|192):(c+=String.fromCharCode(g>>12|224),c+=String.fromCharCode(g>>6&63|128)),c+=String.fromCharCode(g&63|128));h=c.length;a=h+8;r=16*((a-a%64)/64+1);a=Array(r-1);for(b=0;b<h;)g=(b-b%4)/4,m=b%4*8,a[g]|=c.charCodeAt(b)<<m,b++;g=(b-b%4)/4;a[g]|=128<<b%4*8;a[r-2]=h<<3;a[r-1]=h>>>29;b=1732584193;d=4023233417;e=2562383102;f=271733878;for(c=0;c<a.length;c+=16)h=b,g=d,r=e,m=f,b=l(b,d,e,f,a[c+0],7,3614090360),f=l(f,b,d,e,a[c+1],12,3905402710),e=l(e,f,b,d,a[c+2],17,606105819),d=l(d,e,f,b,a[c+3],22,3250441966),b=l(b,d,e,f,a[c+4],7,4118548399),f=l(f,b,d,e,a[c+5],12,1200080426),e=l(e,f,b,d,a[c+6],17,2821735955),d=l(d,e,f,b,a[c+7],22,4249261313),b=l(b,d,e,f,a[c+8],7,1770035416),f=l(f,b,d,e,a[c+9],12,2336552879),e=l(e,f,b,d,a[c+10],17,4294925233),d=l(d,e,f,b,a[c+11],22,2304563134),b=l(b,d,e,f,a[c+12],7,1804603682),f=l(f,b,d,e,a[c+13],12,4254626195),e=l(e,f,b,d,a[c+14],17,2792965006),d=l(d,e,f,b,a[c+15],22,1236535329),b=n(b,d,e,f,a[c+1],5,4129170786),f=n(f,b,d,e,a[c+6],9,3225465664),e=n(e,f,b,d,a[c+11],14,643717713),d=n(d,e,f,b,a[c+0],20,3921069994),b=n(b,d,e,f,a[c+5],5,3593408605),f=n(f,b,d,e,a[c+10],9,38016083),e=n(e,f,b,d,a[c+15],14,3634488961),d=n(d,e,f,b,a[c+4],20,3889429448),b=n(b,d,e,f,a[c+9],5,568446438),f=n(f,b,d,e,a[c+14],9,3275163606),e=n(e,f,b,d,a[c+3],14,4107603335),d=n(d,e,f,b,a[c+8],20,1163531501),b=n(b,d,e,f,a[c+13],5,2850285829),f=n(f,b,d,e,a[c+2],9,4243563512),e=n(e,f,b,d,a[c+7],14,1735328473),d=n(d,e,f,b,a[c+12],20,2368359562),b=p(b,d,e,f,a[c+5],4,4294588738),f=p(f,b,d,e,a[c+8],11,2272392833),e=p(e,f,b,d,a[c+11],16,1839030562),d=p(d,e,f,b,a[c+14],23,4259657740),b=p(b,d,e,f,a[c+1],4,2763975236),f=p(f,b,d,e,a[c+4],11,1272893353),e=p(e,f,b,d,a[c+7],16,4139469664),d=p(d,e,f,b,a[c+10],23,3200236656),b=p(b,d,e,f,a[c+13],4,681279174),f=p(f,b,d,e,a[c+0],11,3936430074),e=p(e,f,b,d,a[c+3],16,3572445317),d=p(d,e,f,b,a[c+6],23,76029189),b=p(b,d,e,f,a[c+9],4,3654602809),f=p(f,b,d,e,a[c+12],11,3873151461),e=p(e,f,b,d,a[c+15],16,530742520),d=p(d,e,f,b,a[c+2],23,3299628645),b=q(b,d,e,f,a[c+0],6,4096336452),f=q(f,b,d,e,a[c+7],10,1126891415),e=q(e,f,b,d,a[c+14],15,2878612391),d=q(d,e,f,b,a[c+5],21,4237533241),b=q(b,d,e,f,a[c+12],6,1700485571),f=q(f,b,d,e,a[c+3],10,2399980690),e=q(e,f,b,d,a[c+10],15,4293915773),d=q(d,e,f,b,a[c+1],21,2240044497),b=q(b,d,e,f,a[c+8],6,1873313359),f=q(f,b,d,e,a[c+15],10,4264355552),e=q(e,f,b,d,a[c+6],15,2734768916),d=q(d,e,f,b,a[c+13],21,1309151649),b=q(b,d,e,f,a[c+4],6,4149444226),f=q(f,b,d,e,a[c+11],10,3174756917),e=q(e,f,b,d,a[c+2],15,718787259),d=q(d,e,f,b,a[c+9],21,3951481745),b=k(b,h),d=k(d,g),e=k(e,r),f=k(f,m);return(t(b)+t(d)+t(e)+t(f)).toLowerCase()}})})(jQuery);
@@ -89,7 +89,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         return str;
     }
 
-(function (global, $) {
+
+    var global = {};
     //定义是否绑定过文档点击事件
     window.bindDocumentHideMenuEven = false;
     var menu_pub_class_name = 'my_diy_menu'; //全部的option菜单样式 用于统一鼠标点击body自动隐藏
@@ -673,7 +674,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 // console.log('formatAttr.....each:'+ n , v);
                 //扩展属性不需要显示
                 if(canAddAttr(n)) {
-                    // console.log('canAddAttr....:'+ n , v);
                     if(isStrOrNumber(v) || typeof v == 'boolean') {
                         if(thisObj.attr && thisObj.attr(n) && v  && thisObj.attr(n) == v  && n != 'class') {
                             return; //不变的属性不用设置
@@ -741,8 +741,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if(newAttr['class'] == thisObj.attr('class')) {
                     delete newAttr['class'];
                 }
-                // console.log('newAttr');
-                // console.log(newAttr);
                 thisObj.attr(newAttr);
             }
             if(has_kuohao) {
@@ -796,7 +794,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var opt = thisObj['options'];
             // console.log('attrsHasData', attrsHasData);
             $.each(attrsHasData, function (index, n) {
-                // console.log('reformat this1:'+ n + ':', v);
                 v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
                 if(n =='value' || n =='src') {
                     callRewObjStringVal(thisObj, newOpt);
@@ -1090,10 +1087,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 return s_;
             }
 
-            // console.log('format Str:'+ str);
+            //console.log('format Str:'+ str);
             //console.log('data_:' );
             //console.log(data_ );
-            // console.log(obj_ );
+            //console.log(obj_ );
             //格式单个变量
             function formatOneDateKey(abc, dataPublic) {
                 dataPublic = dataPublic || 'data'; // data的来源 要么继承data 要么public里取
@@ -3035,7 +3032,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     var parentObj = thisObj['parent'];
                     var parentSons = parentObj['value'];
                     if(parentSons.length == 1) {
-                        msgTisf('至少要保留一行');
+                        lrBox.msgTisf('atLeaseOne');
                         return;
                     }
                     $.each(parentSons, function (n, obj_) {
@@ -3335,14 +3332,14 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     function objAddListener(domObj, dataName, val, update_) {
         // console.log('obj.AddListener', domObj, dataName, val, update_);
         update_ = isUndefined(update_) ? true : update_;
-        if(!notifyObj[dataName]) {
+        if(!global.notifyObj[dataName]) {
             if(!livingObj.hasOwnProperty(dataName)) {
                 addKeyToListener(dataName, val);  //数据监听器
             }
             var notifyClass = new notifyer();
             notifyClass['data_name'] = dataName;
             notifyClass.addReceivrs(domObj);
-            notifyObj[dataName] = notifyClass;
+            global.notifyObj[dataName] = notifyClass;
         } else {
             //如果之前没有设置数据，而我现在有，那么要同步更新绑定数据为我这个数据
             var lastVal = isUndefined(livingObj['data'][dataName]) ? null : livingObj['data'][dataName];
@@ -3359,8 +3356,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(domObj.updates && update_) domObj.updates(dataName);
                 }
             }
-            if(!notifyObj[dataName].hasReceivr(domObj)) {
-                notifyObj[dataName].addReceivrs(domObj);
+            if(!global.notifyObj[dataName].hasReceivr(domObj)) {
+                global.notifyObj[dataName].addReceivrs(domObj);
             }
         }
     }
@@ -3397,8 +3394,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         exceptObj = isUndefined(exceptObj) ? [] : exceptObj;
         livingObj['data'][dataName] = newVal;
         // 作为发布者发出通知
-        if(notifyObj[dataName]) {
-            notifyObj[dataName].notify(dataName, exceptObj);
+        if(global.notifyObj[dataName]) {
+            global.notifyObj[dataName].notify(dataName, exceptObj);
         }
     }
     //公共监听对象设置新值
@@ -4528,7 +4525,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
      }
      */
     global.makeList = function(sourceOptions) {
-        // console.log('makeList.:', JSON.stringify(sourceOptions));
         var options = cloneData(sourceOptions);
         options = options || {};
         var obj = $('<ul></ul>');
@@ -4807,12 +4803,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet['tag'] = 'div';
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeList(optionsGet);
+                return global.makeList(optionsGet);
             },
             //创建子对象 外部可以触发此方法
             makeSonLi: function(optionsGet) {
                 // list的value如果写{}则数据来源于data，反之数据来源于全局
-                return makeLi(optionsGet);
+                return global.makeLi(optionsGet);
             }
         });
         cloneListSon(obj, options);
@@ -5139,7 +5135,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 } else {
                     optionsGet['name'] = createRadomName('table'); //必须设置name 否则拖动换排序时无法切换对象的子name
                 }
-                return makeTable(optionsGet);
+                return global.makeTable(optionsGet);
             }
         });
         Object.defineProperty(obj, 'value', {
@@ -5527,8 +5523,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if(valueKey) {
                     searchLiOpt['data-value'] = "{"+ valueKey +"}";
                 }
-                var menuOpt = {'class': menu_pub_class_name +' ajax_menu', value: makeList(ulListOpt)};
-                var searchMenu = makeDiv(menuOpt);
+                var menuOpt = {'class': menu_pub_class_name +' ajax_menu', value: global.makeList(ulListOpt)};
+                var searchMenu = global.makeDiv(menuOpt);
                 obj.menu = searchMenu;
                 searchMenu[parentObjKey] = obj;//设置父亲
                 obj.menu['input'] = obj;//设置input 暴露给外部调取
@@ -5652,7 +5648,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if(prevOpt) { //生成预览图
                     if(isUndefined(prevOpt['class'])) prevOpt['class'] = 'preview_img';
                     var prevPosition = prevOpt['pos'] || 'left'; //出现的位置 left/right/l/r
-                    var prevImgObj = makeImg(prevOpt);
+                    var prevImgObj = global.makeImg(prevOpt);
                     obj.prev = prevImgObj;
                     if(strInArray(prevPosition, ['right', 'r']) != -1) {
                         obj.append(prevImgObj);
@@ -5679,7 +5675,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             obj.bindEvenObj = obj.input;
             //input清除按钮
             if(input_useClearBtn) {
-                obj.textClearObj = makeSpan({
+                obj.textClearObj = global.makeSpan({
                     'class' : 'lrXX', //无内容时要 +hidden 隐藏
                     'click': function (btn_) {
                         btn_.addClass('hidden');
@@ -5855,7 +5851,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeInput(optionsGet);
+                return global.makeInput(optionsGet);
             }
         });
 
@@ -5948,7 +5944,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeImg(optionsGet);
+                return global.makeImg(optionsGet);
             }
         });
         //支持value
@@ -6162,7 +6158,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         delete options['top_title'];
         delete options['topTitle'];
         delete options['class'];
-        var form = makeForm(options);
+        var form = global.makeForm(options);
         msgConfirm(form, '修改', '取消',
             function () {
                 form.trigger('submit');
@@ -6195,7 +6191,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj[objValIsNode] = false;
         obj['switchVal'] = selectVal;
         obj['switchText'] = '';
-        var iconObj = makeSpan({
+        var iconObj = global.makeSpan({
             'class': 'icon_box',
             'value': '<span class="icon_par"><i class="icon"></i></span><span class="text1"></span><span class="text2"></span>'
         });
@@ -6543,7 +6539,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         if(objExtendClass) options['class'] = classAddSubClass(options['class'], objExtendClass, 'add');
         if(navVal) delete options['value'];
         options['data-value'] = navVal;
-        var obj = makeDiv(options);
+        var obj = global.makeDiv(options);
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
         obj['nav_obj'] = [];
@@ -6623,7 +6619,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             } else {
                 navUl['class'] = "{'"+ navVal +"'== '{value}' ? 'active':''}";
             }
-            navObj = makeList({
+            navObj = global.makeList({
                 'data': navData,
                 'class': 'nav nav-tabs',
                 'li': navUl
@@ -6659,9 +6655,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     tmpLi['class'] = navVal == tmpLi['data-value'] ? 'active':'';
                 }
                 navliData.push(tmpLi);
-                liArray.push(makeLi(tmpLi));
+                liArray.push(global.makeLi(tmpLi));
             });
-            navObj = makeUl({
+            navObj = global.makeUl({
                 'data': navData,
                 'class': 'nav nav-tabs',
                 'value': liArray
@@ -6682,7 +6678,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     tmpContentOpt['class_extend'] = 'tab-pane';
                     tmpContentOpt['class'] = navVal == tmpContentOpt['data-value'] ? 'active in' : '';
                 }
-                obj['content_val'].push(makeDiv(tmpContentOpt));
+                obj['content_val'].push(global.makeDiv(tmpContentOpt));
             });
         } else {//当content的配置是对象
             $.each(navData, function (n, tmpData) {
@@ -6698,12 +6694,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     tmpCntOpt['class'] = "{"+ navVal +"== '{value}' ? 'active in':''}";
                     //console.log(tmpCntOpt);
                 }
-                obj['content_val'].push(makeDiv(tmpCntOpt));
+                obj['content_val'].push(global.makeDiv(tmpCntOpt));
             });
         }
         contentObjOpt['value'] = obj['content_val'];
         // contentObjOpt['data'] = options['data']; //内容不能设置data 因为可能自带data
-        var contentObj = makeDiv(contentObjOpt);
+        var contentObj = global.makeDiv(contentObjOpt);
         obj['content_obj'] = contentObj;
         obj['nav_obj'] = navObj;
         obj.append(navObj);
@@ -6733,7 +6729,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeNav(optionsGet);
+                return global.makeNav(optionsGet);
             }
         });
         objBindVal(obj, options);//数据绑定
@@ -6995,7 +6991,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     delete liOpt['text'];
                     // console.log('liOpt ______:');
                     // console.log(JSON.stringify(liOpt));
-                    //console.log('makeList');
                     var lastClickExt = getOptVal(liOpt, ['click_extend', 'clickExtend'], null);
                     var lastClick = getOptVal(liOpt, ['click'], null);
                     if(lastClickExt) {
@@ -7056,7 +7051,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }, 100);
                     };
                     // console.log('ulOpt', JSON.stringify(ulOpt));
-                    ulListObj = makeList(ulOpt);
+                    ulListObj = global.makeList(ulOpt);
                     var sons = ulListObj.value;
                     var disableSons = [];
                     var disableVals = [];
@@ -7094,7 +7089,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeItems(optionsGet);
+                return global.makeItems(optionsGet);
             }
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
@@ -7206,7 +7201,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             //清除内容的按钮
             if(clearBtn) {
                 if(!obj['clear_btn']) {
-                    obj['clear_btn'] = makeSpan({
+                    obj['clear_btn'] = global.makeSpan({
                         'class' : 'lrXX'+ (newTextStr=='' ? ' hidden': ''), //有内容时要 +hidden 隐藏
                         'click': function (btn_) {
                             btn_.addClass('hidden');
@@ -7382,7 +7377,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(needParentVal) {
                         selectSonOpt['need_parent_val'] = true; //定义子对象属性:需要父值去取值
                     }
-                    sonObj = makeSelect(selectSonOpt);
+                    sonObj = global.makeSelect(selectSonOpt);
                     sonObj['parent'] = obj;
                     obj[sonSelectKey] = sonObj;
                 }
@@ -7480,7 +7475,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     delete menuOpt['data_from'];
                     delete menuOpt['dataFrom'];
                     // console.log('itemsMenuOpt', JSON.stringify(itemsMenuOpt));
-                    var menu_obj = makeItems(menuOpt);
+                    var menu_obj = global.makeItems(menuOpt);
                     //console.log('menu_obj',menu_obj);
                     menu_obj[parentObjKey] = obj;//设置其父对象
                     if(!menu_obj.hasClass(menu_pub_class_name)) menu_obj.addClass(menu_pub_class_name);//带公共菜单样式
@@ -7578,7 +7573,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeSelect(optionsGet);
+                return global.makeSelect(optionsGet);
             }
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
@@ -7754,7 +7749,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     var sonOpt = {
                         'class': '_inner',
                         value: [
-                            makeSpan({
+                            global.makeSpan({
                                 'class': '_icon',
                                 'value': ''
                             }),makeSpan({
@@ -7762,7 +7757,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                 'value': dataTitle
                             })]
                     };
-                    var sonObj = makeSpan(sonOpt);
+                    var sonObj = global.makeSpan(sonOpt);
                     sonObj[parentObjKey] = obj;//设置其父对象
                     obj[objValObjKey] = sonObj;//设置其子对象
                     if(isObj(data_) && hasData(data_)) sonObj['data'] = data_;
@@ -7840,7 +7835,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeChecked(optionsGet);
+                return global.makeChecked(optionsGet);
             }
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
@@ -8000,13 +7995,15 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     };
                     //item自身不能继承data菜单
                     // console.log('makeItems', menuOpt);
-                    var menu_obj = makeItems(menuOpt);
+                    var menu_obj = global.makeItems(menuOpt);
                     menu_obj[parentObjKey] = obj;//设置其父对象
                     obj['itemsObj'] = menu_obj;
                     obj['menu'] = menu_obj;//对外方便更新和获取菜单
                     obj['items'] = menu_obj;//对外方便更新和获取菜单
                     objInner.append(menu_obj);
                 }
+                //console.log('options_');
+                //console.log(this);
                 removeAllEven(options_);
                 //添加数据
                 addOptionNullFunc(this, options_);//加null_func
@@ -8032,22 +8029,24 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeRadio(optionsGet);
+                return global.makeRadio(optionsGet);
             }
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'setText/set_text', 'val_': 'text'}]);//数据绑定
         obj.renew(options);
         optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
+        //console.log('select_obj');
+        //console.log(obj);
         return obj; //makeSelect
     };
 
-//创建日历 makeRili
+//创建日历
     global.makeRili = function(sourceOptions) {
         var options = cloneData(sourceOptions);
         /* options :
          {
-         var rili = makeRili({
+         var rili = make Rili({
             name: 'year,month,date',
             width: '100px,
             year_menu_width: '400px,//下拉年的菜单宽度
@@ -8120,7 +8119,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             var ymd_ = getStrYMD(keyupObj.value);
             makeDays_(ymd_[0], ymd_[1], ymd_[2]);
         };
-        var obj = makeInput(options);
+        var obj = global.makeInput(options);
         var menuName = 'calendar_menu_'+ parseInt(global.makeRadom(10));
         obj._rili = $('<div class="calendar_menu '+ menu_pub_class_name +'" id="'+ menuName +'"></div>');
         $('body').append(obj._rili);
@@ -8159,7 +8158,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             }
             //console.log('currentYear:'+ currentYear);
             //console.log('currentMonth:'+ currentMonth);
-            yearMoneyDaySelect = makeSelect({
+            yearMoneyDaySelect = global.makeSelect({
                 'value_key': 'value',
                 'title_key': 'title',
                 menu: {
@@ -8173,7 +8172,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     yearMoneyDaySelect['son']['menu'].hide();
                 },
                 li: {
-                    value: "{title}",
+                    value: '{title}',
                     //修改月份时 要重新载入日期
                     click: function (li_, eve, pubData) {
                         var yearMonth = getCurrentYM();
@@ -8192,7 +8191,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     'value_key': 'value',
                     'title_key': 'title',
                     li: {
-                        value: "{title}",
+                        value: '{title}',
                         width: '25px',
                         //修改月份时 要重新载入日期
                         click: function (li_, eve, pubData) {
@@ -8341,7 +8340,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeRili(optionsGet);
+                return global.makeRili(optionsGet);
             }
         });
         addCloneName(obj, options);//支持克隆
@@ -8352,7 +8351,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     $.fn.fixContent = function(content) {
         var target = $(this);
         var objPosition = target.offset();
-        var newObj = makeDiv({
+        var newObj = global.makeDiv({
             style: {
                 'position': 'absolute',
                 'width': target.outerWidth() + 'px',
@@ -8370,12 +8369,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     global.makeUploadForm = function(sourceOptions) {
         var options = cloneData(sourceOptions);
         var previewId = !isUndefined(options.id) ? options.id : 'multip_upload_prev_images_'+ parseInt(global.makeRadom(22));
-        var uploadInput = makeInput({type: 'file', multi: 'true'});
-        var submitUploadBtn = makeBtn({value: '上传',  'type': 'button', 'class': 'btnLr btnLrInfo'});
-        var previewObj = makeDiv({
+        var uploadInput = global.makeInput({type: 'file', multi: 'true'});
+        var submitUploadBtn = global.makeBtn({value: '上传',  'type': 'button', 'class': 'btnLr btnLrInfo'});
+        var previewObj = global.makeDiv({
             'class': 'multip_upload_prev_images'
         });
-        var formObj = makeForm({
+        var formObj = global.makeForm({
             'type': 'upload',
             'id': previewId,
             elements: [
@@ -8742,15 +8741,17 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeEditor(optionsGet);
+                return global.makeEditor(optionsGet);
             }
         });
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
         optionGetSet(obj, options);
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
+        //console.log(obj);
         return obj; //makeEditor
     };
+
 
 //创建浮动菜单
     global.makeMenu = function(btn, menuId, diyOptions, contendObj, appendType) {
@@ -8795,7 +8796,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         } else {
             menuOption['class'] = menu_pub_class_name; //默认加系统指定菜单名
         }
-        menu = makeDiv(menuOption);
+        menu = global.makeDiv(menuOption);
         menu.append(contendObj);
         if(appendType == 'body') {
             $('body').append(menu);
@@ -8936,7 +8937,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     var nowPage = pageBody['current_page'];
                     var thisToPage = parseInt(nowPage) - 1;
                     if(thisToPage <1) {
-                        msgTis('已经是第一页');
+                        lrBox.msgTisf('noMorePage');
                     } else {
                         pageBody.gotoPage = '';
                         if(pageBody.gotoPageObj) pageBody.gotoPageObj.val('');
@@ -8991,7 +8992,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         var nowPage = pageBody['current_page'];
                         var thisToPage = parseInt(nowPage) + 1;
                         if(thisToPage > totalPage) {
-                            msgTis('已经是最后一页');
+                            lrBox.msgTisf('noMorePage');
                         } else {
                             pageBody.gotoPage = '';
                             if(pageBody.gotoPageObj) pageBody.gotoPageObj.val('');
@@ -9015,7 +9016,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         var nowPage = pageBody['current_page'];
                         var thisToPage = parseInt(nowPage) + 1;
                         if(thisToPage > totalPage) {
-                            msgTis('已经是最后一页');
+                            lrBox.msgTisf('noMorePage');
                         } else {
                             pageBody.gotoPage = '';
                             if(pageBody.gotoPageObj) pageBody.gotoPageObj.val('');
@@ -9034,7 +9035,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         var thisPage = parseInt($(this).val());
                         if(!thisPage || thisPage<1) return;
                         if(thisPage > totalPage) {
-                            msgTisf('noMorePage');
+                            lrBox.msgTisf('noMorePage');
                             return;
                         }
                         pageBody.gotoPage = thisPage;
@@ -9320,7 +9321,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 iconOpt['width'] = isUndefined(iconOpt['width']) ? 30 : iconOpt['width'];
                 //console.log('iconOpt');
                 //console.log(iconOpt);
-                var iconObj = makeSpan(iconOpt);
+                var iconObj = global.makeSpan(iconOpt);
                 options_['class_extend'] = 'diy_bar';
                 options_['style'] = 'border:1px solid #ddd';
                 bar.html('').append(iconObj);
@@ -9475,7 +9476,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeBar(optionsGet);
+                return global.makeBar(optionsGet);
             },
             updates: function(dataName, exceptObj) {//数据被动同步
                 //console.log('updates this:'+ dataName);
@@ -9515,7 +9516,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
     //创建树菜单对象 只能更新、修改起data的长度 data不能设置对象
     var __makeTreeInnerObj = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        var obj = makeDiv(options);
+        var obj = global.makeDiv(options);
         //更新循环的tree的date
         obj.renewOldTree = function(newData) {
             //console.log('renew.SonData');
@@ -9823,7 +9824,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }
                     };
 
-                    checkObj = makeCheck(checkOpt);
+                    checkObj = global.makeCheck(checkOpt);
                     if(parentObj) {
                         checkObj[parentCheckedsKey] = parentObj;
                         if(parentObj[sonCheckedsKey]) {
@@ -9833,7 +9834,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }
                     }
                     if(!isUndefined(tmpData[sonDataKey])) {
-                        sonMenuPbj = makeDiv({
+                        sonMenuPbj = global.makeDiv({
                             'class': 'son_menu'
                         });
                         copyLiOpt['value'] = [
@@ -9859,7 +9860,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                 sonVal.push(newSon);
                             });
                             itemVal.value = sonVal;
-                            copyLiOpt['value'].push(makeSpan(itemVal));
+                            copyLiOpt['value'].push(global.makeSpan(itemVal));
                         }
                     } else {
                         if(itemVal) {
@@ -9880,12 +9881,12 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                                 sonVal.push(newSon);
                             });
                             itemVal.value = sonVal;
-                            copyLiOpt['value'] = [checkObj, makeSpan(itemVal)];
+                            copyLiOpt['value'] = [checkObj, global.makeSpan(itemVal)];
                         } else {
                             copyLiOpt['value'] = checkObj;
                         }
                     }
-                    liObj = makeLi(cloneData(copyLiOpt));
+                    liObj = global.makeLi(cloneData(copyLiOpt));
                     liObj[parentObjKey] = obj;//分配父对象
                     obj[objValObjKey].push(checkObj);//累计子对象li
                     _treeData['index'] = n;
@@ -9934,7 +9935,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 }
                 //console.log('treeOpt ______:');
                 //console.log(JSON.stringify(treeOpt));
-                //console.log('makeList');
                 treeOpt['disabled'] = "{{this.disabled}==true || {this.disabled}=='true' || {this.disabled}==1}";
                 //console.log('treeOpt');
                 //console.log(treeOpt);
@@ -9988,7 +9988,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             cloneSelf: function(optionsGet) {
                 optionsGet = optionsGet || cloneData(sourceOptions);
                 optionsGet[optionCallCloneKey] = true;//此对象创建时 标记强制克隆其自身和所有子obj
-                return makeTree(optionsGet);
+                return global.makeTree(optionsGet);
             }
         });
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据text绑定
@@ -10042,7 +10042,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
 
         if(direcBoth == 'y') moveItemWH = pptHeight;
         var liOpt = {li: options['li'], 'class': innerClass};
-        var list = makeList(liOpt);
+        var list = global.makeList(liOpt);
         options['value'] = list;
         //鼠标经过事件
         var hoverFunc = function (o, e) {
@@ -10068,7 +10068,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
             options['mouseleave_extend'] = leaveFunc;
         }
         delete options['li'];
-        var obj = makeDiv(options);
+        var obj = global.makeDiv(options);
         var listSons = list[objValObjKey];
         var maxImages = listSons.length;
         var currentDistance = 0;
@@ -10258,7 +10258,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(pptDirection =='right' || pptDirection =='up') nextImage();
                     if(pptDirection =='left' || pptDirection =='down') previousImage();
                 };
-                var arrowLeft = makeSpan(leftArrowOpt);
+                var arrowLeft = global.makeSpan(leftArrowOpt);
                 obj.append(arrowLeft);
             }
             if(arrow.right) {
@@ -10271,7 +10271,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     if(pptDirection =='right' || pptDirection =='up') previousImage();
                     if(pptDirection =='left' || pptDirection =='down') nextImage();
                 };
-                var rightArrowOpt = makeSpan(rightArrowOpt);
+                var rightArrowOpt = global.makeSpan(rightArrowOpt);
                 obj.append(rightArrowOpt);
             }
             if(arrow.top) {
@@ -10283,7 +10283,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 topArrowOpt['click_extend'] = function (obj, e) {
                     previousImage();
                 };
-                var arrowTop = makeSpan(topArrowOpt);
+                var arrowTop = global.makeSpan(topArrowOpt);
                 obj.append(arrowTop);
             }
             if(arrow.bottom) {
@@ -10295,7 +10295,7 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 bottomArrowOpt['click_extend'] = function (obj, e) {
                     nextImage();
                 };
-                var bottomArrowOpt = makeSpan(bottomArrowOpt);
+                var bottomArrowOpt = global.makeSpan(bottomArrowOpt);
                 obj.append(bottomArrowOpt);
             }
         }
@@ -11000,5 +11000,4 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         window.bindDocumentHideMenuEven = true;
     }
     return global;
-})(this, jQuery);
-
+});
