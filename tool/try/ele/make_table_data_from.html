@@ -1,11 +1,11 @@
-<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
     <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
     <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 <style>
     .js_table .left_em {
         width: 100px;
@@ -25,57 +25,70 @@
 <div id="show_reload_btn"></div>
 
 <script>
-    var getDataUrl = '/index/tool/get_rows?num=10';
-    //js造一个简单的表格
-    var table = makeTable({
-        'class': 'well',
-        'name': 'login_table',
-        data_from: {
-            url: getDataUrl,
-            data_key: 'data',
-            post_data: {},
-            success_key: 'code',
-            success_value: '1',
-            err_func: function (e) {
-                msgTisf(e.msg);
-            }
-        },
-        tr_top: [
-            {
-                th: [
-                    { value: 'ID'  },
-                    { value: '标题' }
-                ]
-            }
-        ],
-        tr: [
-            {
-                customerId: '{id}',
-                click: function (o) {
-                    console.log(o, o.options);
-                    msgTisf(o.customerId);
-                },
-                td: [
-                    {
-                        value:  makeA({
-                            customerId: '{id}',
-                            value: '{id}'
-                        })
-                    },
-                    {
-                        value: [
-                            makeInput({
-                                width: '200px',
-                                name: 'u_nick',
-                                value: '{title}'
-                            })
-                        ]
-                    }
-                ]
-            }
-        ]
+
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
     });
-    $('#show_table').append(
-        table
-    );
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var getDataUrl = '/index/tool/get_rows?num=1';
+        //js造一个简单的表格
+        var table = lrEle.makeTable({
+            'class': 'well',
+            'name': 'login_table',
+            data_from: {
+                url: getDataUrl,
+                data_key: 'data',
+                post_data: {},
+                success_key: 'code',
+                success_value: '1',
+                err_func: function (e) {
+                    lrBox.msgTisf(e.msg);
+                }
+            },
+            tr_top: [
+                {
+                    th: [
+                        { value: 'ID'  },
+                        { value: '标题' }
+                    ]
+                }
+            ],
+            tr: [
+                {
+                    show: '{this.data}',
+                     // customerId: '{id}',
+                    click: function (o) {
+                        lrBox.msgTisf(o.customerId);
+                    },
+                    td: [
+                        {
+                            value:  lrEle.makeA({
+                                // customerId: '{id}',
+                                value: '{id}'
+                            })
+                        },
+                        // {
+                        //     value: [
+                        //         lrEle.makeInput({
+                        //             width: '200px',
+                        //             name: 'u_nick',
+                        //             value: '{title}'
+                        //         })
+                        //     ]
+                        // }
+                    ]
+                }
+            ]
+        });
+        $('#show_table').append(
+            table
+        );
+    });
+
+
 </script>

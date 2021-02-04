@@ -1,2 +1,0 @@
--- DROP TABLE `__PREFIX__songs`;
--- DROP TABLE `__PREFIX__songs_type`;

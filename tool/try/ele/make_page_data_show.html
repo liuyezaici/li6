@@ -2,11 +2,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
-
+<script src="/assets/js/require.min.js"></script>
 <style>
     .simple_p {
         cursor: pointer;
@@ -30,15 +26,23 @@
 // 如果数据是数组: index 作为每个循环的序号 ;
 // value/class 属性支持js语法. 变量用{}括起
 
-  //
-  $('#show_page1').append(makePage({
-      page: 1,
-      show: '{{this.totalPage}>1}',
-      total: 11,
-      pageNum: 8,
-      size: 'sm', //lg  sm xs
-      pageSize: 10
-  }));
-
+require.config({
+    paths: {
+        jquery: '/resource/pub/js/jq/jquery-3.2.1',
+        lrBase: '/assets/libs/lr/jquery-lr_base',
+        lrBox: '/assets/libs/lr/jquery-lr_box',
+        lrEle: '/assets/libs/lr/jquery-lr_element',
+    }
+});
+require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+      $('#show_page1').append(lrEle.makePage({
+          page: 1,
+          show: '{{this.totalPage}>1}',
+          total: 11,
+          pageNum: 8,
+          size: 'sm', //lg  sm xs
+          pageSize: 10
+      }));
+  });
 
 </script>

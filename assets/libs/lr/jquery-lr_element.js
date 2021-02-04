@@ -403,10 +403,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
             //console.log('check has Yufa  :'+ str);
 
-            //!"" 这样的 算是布尔语法
+            //!"" 这样的 算是布尔语法 语法：(0-n)个空格!(0-n)个空格"(0-n)个空格"
             if(/\s*!\s*"\s*"\s*/.test(str)) {
-                //console.log('yinhao in has { or }  :'+ str);
                 return 'gth';
+            }
+            //!1  !0 !A 这样的 算是布尔语法 语法：(0-n)个空格!(0-n)个空格0-9/a-z
+            if(/\s*!\s*([0-9]+)\s*/.test(str)) {
+                return 'gthZm';
             }
             //("") 这样的 算是布尔语法
             if(/^\s*\(*\s*"\s*"\s*\)*\s*$/.test(str)) {
@@ -1086,64 +1089,84 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //console.log('new s_:'+ s_);
                 return s_;
             }
-
-            //console.log('format Str:'+ str);
-            //console.log('data_:' );
-            //console.log(data_ );
             //console.log(obj_ );
             //格式单个变量
             function formatOneDateKey(abc, dataPublic) {
                 dataPublic = dataPublic || 'data'; // data的来源 要么继承data 要么public里取
                 abc = abc || '';
+                // console.log('abc', abc);
+                // console.log('data_', data_);
                 abc = $.trim(abc);
                 var resultStr=   '';
                 if(!abc) return abc;
                 attrName = attrName || '';
                 if(dataPublic == 'data') {
-                    var reg1 = /^this\.([a-zA-Z0-9]+)/;
-                    var reg2 = /^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/;
-                    var match1 = abc.match(reg1);
-                    var match2 = abc.match(reg2);
-                    if(match1 || match2) {
-                        if(match1 != null) {
-                            var matchKey = match1[1];
-                            matchKey = strObj.urlDecodeLR(matchKey);
-                            //允许获取当前data对象
-                            if(data_[matchKey]) {
-                                resultStr = data_[matchKey];
-                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
-                                resultStr = obj_[matchKey];
-                            } else {
-                                resultStr = '';
-                            }
-                        }
-                        if(match2 !=null) {
-                            var matchKey = match1[1];
-                            matchKey = strObj.urlDecodeLR(matchKey);
-                            //允许获取当前data对象
-                            if(data_[matchKey]) {
-                                resultStr = data_[matchKey];
-                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
-                                resultStr = obj_[matchKey];
-                            } else {
-                                resultStr = '';
-                            }
-                        }
+                    var regData1 = /^this\.data\.([a-zA-Z0-9]+)/;
+                    var regData2 = /^this\[data\](\[('|")?([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")?\])*/;
+                    var regData3 = /^\!*this\.data/; //!this.data
+                    var regData4 = /^\!*this\[data\]/;
+                    var matchData1 = abc.match(regData1);
+                    var matchData2 = abc.match(regData2);
+                    var matchData3 = abc.match(regData3);
+                    var matchData4 = abc.match(regData4);
+                    // console.log('matchData3', abc, matchData3);
+                    if(matchData3 || matchData4) {
+                        resultStr = (abc.match(/(^this\.data)/) ? hasData(data_) : !hasData(data_)) ? 1 : 0;
                     } else {
-                        //{a.b}
-                        if(abc.indexOf('.') !=-1) {
-                            var array_ = abc.split('.');
-                            var getData = $.extend({}, data_);
-                            $.each(array_, function (n, key_) {
-                                if(isUndefined(getData[key_])) {
-                                    return;
-                                }
-                                getData = !isUndefined(getData[key_]) ? getData[key_] : {};
-                            });
-                            resultStr = getData.toString();
+                        if(matchData1 || matchData2) {
+                            var matchKey = matchData1[1] || matchData2[1];
+                            matchKey = strObj.urlDecodeLR(matchKey);
+                            //允许获取当前data对象
+                            if(matchKey =='length') {
+                                resultStr = data_.length;
+                            } else if(data_[matchKey]) {
+                                resultStr = data_[matchKey];
+                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
+                                resultStr = obj_[matchKey];
+                            } else {
+                                resultStr = '';
+                            }
                         } else {
-                            if(!isUndefined(data_[abc])) {
-                                resultStr = data_[abc]; //这里调取的数据不能再进行格式化算法 要当作纯字符串输出。如：“我的>123” 格式化会报错。
+                            resultStr = abc;
+                        }
+                    }
+                    // console.log('resultStr', resultStr);
+                    if(resultStr && isString(resultStr)) {
+                        var reg1 = /^this\.([a-zA-Z0-9]+)/;
+                        var reg2 = /^this\[\d+\]*(\[('|")?([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")?\])*/;
+                        var match1 = resultStr.match(reg1);
+                        var match2 = resultStr.match(reg2);
+                        if(match1 || match2) {
+                            var matchKey = match1[1] || match2[1];
+                            matchKey = strObj.urlDecodeLR(matchKey);
+                            // console.log('matchKey', matchKey);
+                            //允许获取当前data对象
+                            if(matchKey =='data') {
+                                resultStr = hasData(data_) ? true : false;
+                            } else if(data_[matchKey]) {
+                                resultStr = data_[matchKey];
+                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
+                                resultStr = obj_[matchKey];
+                            } else {
+                                resultStr = '';
+                            }
+                            // console.log('resultStr2', resultStr);
+                        } else {
+                            //{a.b}
+                            if(abc.indexOf('.') !=-1) {
+                                var array_ = abc.split('.');
+                                var getData = $.extend({}, data_);
+                                $.each(array_, function (n, key_) {
+                                    if(isUndefined(getData[key_])) {
+                                        return;
+                                    }
+                                    getData = !isUndefined(getData[key_]) ? getData[key_] : {};
+                                });
+                                resultStr = getData.toString();
+                            } else {
+                                if(!isUndefined(data_[abc])) {
+                                    resultStr = data_[abc]; //这里调取的数据不能再进行格式化算法 要当作纯字符串输出。如：“我的>123” 格式化会报错。
+                                }
                             }
                         }
                     }
@@ -1166,12 +1189,15 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
                 var newAbc;
-                if(typeof resultStr == 'object' || typeof resultStr == 'array') { // 对象直接替换当前匹配的data,如：data:{son_data}
+                if(isBoolean(resultStr)) {
+                    // console.log(' isBoolean  ', resultStr);
+                    newAbc = resultStr; //可能是data:{info}提取对象 所以不能转json
+                } else if(typeof resultStr == 'object' || typeof resultStr == 'array') { // 对象直接替换当前匹配的data,如：data:{son_data}
                     newAbc = resultStr; //可能是data:{info}提取对象 所以不能转json
                 } else {
                     newAbc = abc.replace(abc, resultStr);
                 }
-                //console.log(' format one '+ abc +' resultStr:'+ newAbc);
+                // console.log(' format one '+ abc +' resultStr:'+ newAbc, typeof  newAbc);
                 return newAbc;
             }
             //提取赋值的等式 {a=3}
@@ -1242,7 +1268,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 return setSourcsStr;
             }
             str = getSetStr(str); // 提取 aaa = 33; 必须放在第一步 全局变量赋值
-            //console.log('after getSetStr:'+ str);
+            // console.log('after getSetStr:'+ str);
 
             //格式化当前public的变量
             function formatPubJkh(s_) {
@@ -1250,12 +1276,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(!isStrOrNumber(s_))  return s_;
                 if(isBoolean(s_)) return s_;
                 if(!s_) return s_;
-                //console.log('s_:::::::::::::::');
-                //console.log(s_);
+                // console.log('s_:::::::::::::::');
+                // console.log(s_);
                 if(typeof s_ == 'number') s_ += '';
                 //console.log('getStr JHK:  '+s_);
                 s_ = formatAbc(s_, 'public');
-                //console.log('formatAbc public end___:  '+s_);
+                // console.log('formatAbc public end___:  '+s_);
                 if(isObj(s_)) {
                     return s_;
                 }
@@ -1264,9 +1290,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //console.log('remendErr.Str22:'+ s_);
                 var has_Yufa = strObj.hasYufa(s_);
                 if(has_Yufa ) {
-                    //console.log(s_);
-                    //console.log('has__Yufa:'+ has_Yufa);
-                    //console.log('s___1:'+ s_);
+                    // console.log('has__Yufa:'+ has_Yufa);
+                    // console.log('s___1:'+ s_);
                     s_ = strObj.runYufa(s_);
                     //console.log('s___2:'+ s_);
                 } else {
@@ -1276,22 +1301,20 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
             //格式化当前data的变量
             function formatDataJkh(s_) {
-                //console.log('format DataJkh ———————————————:'+ s_);
+                // console.log('format DataJkh ———————————————:'+ s_);
                 if(!isStrOrNumber(s_))  return s_;
                 if(isBoolean(s_)) return s_;
                 if(!s_) return s_;
                 if(typeof s_ == 'number') s_ += '';
                 //console.log('getStr JHK_________________:  '+s_);
+                // console.log('before___________ format Abc:', s_);
                 s_ = formatAbc(s_, 'data');
-                //console.log('after format Abc:', s_);
+                // console.log('after___________ format Abc:', s_);
                 //提取语法：
                 // item {0 % 2==0 ? 'even': 'odd'}
                 // {'a'+'b'}
                 var replaceFunc = function (s3) {
-                    //console.log('s::::::::::: '+ s3);
                     var matchesFunc = __getjkhFunc(s3);
-                    //console.log('__get jkh__Func:');
-                    //console.log(matchesFunc);
                     var yufaNum =0;
                     if(hasData(matchesFunc)) {
                         matchesFunc.forEach(function (func_) {
@@ -1370,13 +1393,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             //console.log('替换public的变量 :'+ str);
             str = formatPubJkh(str); //格式化全局字符串变量 数据来源于 public
             //console.log(obj_);
-            //console.log('替换完public的变量，结果:'+ str);
+            // console.log('替换完public的变量，结果:'+ str);
             str = formatDataJkh(str); //格式化字符串 数据来源于 data
-            //console.log('替换完data的变量，结果:'+ str);
+            // console.log('替换完data的变量，结果:'+ str);
             //替换单个尖括号里的变量
             function replaceMatchAbc(str_, match_, dataPub) { //match_: {abc}
-
-                //console.log('replace MatchAbc str_ :'+str_ + ',dataPub:'+ dataPub);
+                // console.log('replace MatchAbc str_ :', str_);
                 var matchVal;
                 if(dataPub=='public') {
                     matchVal = trim(match_, '{{');
@@ -1393,17 +1415,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     return; //continue
                 }
                 if(!str_) return str_;
-                //console.log(str_);
-                //console.log('matchVal:'+ matchVal);
+                // console.log('matchVal:'+ matchVal);
                 if(isBoolean(str_)) return ;//continue
-                //console.log('change str old :'+str_);
-                //console.log('change str match :'+match_);
-                //console.log('change matchVal old :'+matchVal);
-                //console.log('dataPub :'+dataPub);
-                //console.log(data_);
-                //console.log('change matchVal new :'+matchVal);
                 matchVal = formatOneDateKey(matchVal, dataPub);//格式 {abc}
-                //console.log('change matchVal new :'+matchVal);
+                // console.log('change matchVal new___ :'+ matchVal, typeof matchVal);
                 //此结果可能是提取data数组 或 对象 或字符串
                 if(isStrOrNumber(matchVal)) {
                     //console.log('str_ :'+ str_);
@@ -1442,18 +1457,23 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
                         //console.log('!isNumber  matchVal :'+matchVal);
                         //console.log('change str_ last22222 :'+str_);
+                    } else if(isBoolean(matchVal)) {
+                        console.log('isBoolean');
+                        str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), 0);
                     } else {
                         //console.log('isNumber :'+ matchVal);
                         str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), matchVal);
                     }
                     //console.log('change str_ new :'+str_);
                 } else { //abc => obj 那么abc直接等于obj
-                    //console.log('match_ obj :'+ match_);
-                    if(typeof matchVal == 'object') {
-                        //console.log('matchVal is object ______________::::');
-                        //console.log(str_);
-                        //console.log('match_:'+ match_);
-                        //console.log(matchVal);
+                    // console.log('match_ obj :', match_, typeof matchVal);
+                    if(isBoolean(matchVal)) {
+                        // console.log('matchVal is isBoolean ______________', matchVal);
+                        str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), matchVal?1:0);
+                        // console.log('result ______________', str_);
+                    } else if(typeof matchVal == 'object') {
+                        // console.log('matchVal is object ______________::::');
+                        // console.log(str_);
                         //如果匹配的关键词返回是object 则：如果自身原文就是匹配的变量，则替换自身变量
                         if(match_ == str_) {
                             str_ = matchVal; //可能是data:{info}提取对象 所以不能转json
@@ -1465,8 +1485,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), '');
                     }
                 }
+                // console.log( 'match is abc to decodeNewHtml-------:', str_);
                 str_ = decodeNewHtml(str_);
-                //console.log( 'match is abc to:'+ str_);
                 //console.log('dataPub:'+dataPub);
                 //console.log('matchVal:'+ matchVal);
                 //console.log('change str_ last 233333333333333333333 :'+str_);
@@ -1481,8 +1501,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     if(tmpMatch) {
                         jhkArray = jhkArray.concat(tmpMatch);
                     }
-                    //提取子对象 {this[0][abc]}  this.abc.abc 因为引号里的内容可能加了[url]
-                    var tmpMatch = s_.match(/{([a-zA-Z_]+[a-zA-Z_\d.]*)(\[\d+\])*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*}/g);
+                    //提取子对象 {this[0][abc]}  this.abc.abc 因为引号里的内容可能加了[url]  {!this.data}
+                    var tmpMatch = s_.match(/{\!*([a-zA-Z_]+[a-zA-Z_\d.]*)(\[\d+\])*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*}/g);
                     if(tmpMatch) {
                         jhkArray = jhkArray.concat(tmpMatch);
                     }
@@ -1834,29 +1854,28 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             //格式纯abc123变量
             function formatAbc(s_, dataPub) {
                 dataPub = dataPub || 'data';
+                // console.log('formatAbc:', s_,);
                 var matches;
                 if(!isStrOrNumber(s_))  return s_;
                 if(isBoolean(s_)) return s_;
                 if(!s_) return s_;
                 if(typeof s_ == 'number') s_ += '';
                 matches = __getjkh(s_, dataPub);//获取字符串里的尖括号，如果{}在引号""里 则只保留纯英文的{aa}
-                //console.log('dataPub:'+ dataPub);
-                //console.log('matches:');
-                //console.log(matches);
+                // console.log('matches:');
+                // console.log(matches);
                 //没有获取到{abc} 且没有{"a"+"b"}的语法 才能return
                 if(!hasData(matches)) return s_;
                 matches = uniqueArray(matches);
-                //console.log('matches 222__________________:'+ dataPub);
-                //console.log(matches);
+                // console.log('matches :',matches);
                 matches.forEach(function (match__) {
                     //console.log('match__:'+ match__);
                     //console.log('s_:'+ s_);
                     s_ = replaceMatchAbc(s_, match__, dataPub);
-                    //console.log('after replace MatchAbc:'+ s_);
+                    // console.log('after replace MatchAbc:', s_, typeof s_);
                 });
                 return s_;
             }
-            //console.log(' end resultStr :'+ str);
+            // console.log(' end resultStr :'+ str);
             return str;
         }
     };
