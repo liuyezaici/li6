@@ -545,7 +545,19 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         options['source_' + n] = v;
                         if(n != 'data') has_kuohao = true; //data 带括号不算是属性包含括号 因为下次格式化也不是通过format来实现的 是通过 renew ObjData
                         if(strHasKuohao(v, 'data')) {
-                            if(n !='value' && n !='src' && hasSetData) {
+                            var abcList = getJhksAbc(v);//没有输入变量，也可以格式化纯运算符
+                            var canFormatAbc = false;
+                            if(!abcList) {
+                                canFormatAbc = true;
+                            } else {
+                                //有this.方法 必须强制渲染
+                                $.each(abcList, function (n, v) {
+                                    if(v.indexOf('this[') !=-1 || v.indexOf('this.') !=-1) {
+                                        canFormatAbc = true;
+                                    }
+                                });
+                            }
+                            if(n !='value' && n !='src' && (hasSetData || canFormatAbc)) {
                                 v = strObj.formatStr(v, optData, index, thisObj, n);
                                 options[n] = v; //参数要改变 防止外部取出来的仍是括号
                             }
@@ -1078,10 +1090,10 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 return s_;
             }
 
-            //console.log('format Str:'+ str);
+            // console.log('format Str:'+ str);
             //console.log('data_:' );
             //console.log(data_ );
-            //console.log(obj_ );
+            // console.log(obj_ );
             //格式单个变量
             function formatOneDateKey(abc, dataPublic) {
                 dataPublic = dataPublic || 'data'; // data的来源 要么继承data 要么public里取
@@ -1091,27 +1103,32 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 if(!abc) return abc;
                 attrName = attrName || '';
                 if(dataPublic == 'data') {
-                    var match1 = abc.match(/^this\.([a-zA-Z0-9]+)/);
-                    var match2 = abc.match(/^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/);
+                    var reg1 = /^this\.([a-zA-Z0-9]+)/;
+                    var reg2 = /^this\[\d+\]*(\[('|")([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")\])*/;
+                    var match1 = abc.match(reg1);
+                    var match2 = abc.match(reg2);
                     if(match1 || match2) {
                         if(match1 != null) {
-                            //console.log('replace 1_________________ :'+abc);
+                            var matchKey = match1[1];
+                            matchKey = strObj.urlDecodeLR(matchKey);
                             //允许获取当前data对象
-                            var abc2 = abc.replace('this.', 'data_.');
-                            //console.log(abc2);
-                            try {
-                                resultStr = eval(abc2);
-                            } catch(err){
+                            if(data_[matchKey]) {
+                                resultStr = data_[matchKey];
+                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
+                                resultStr = obj_[matchKey];
+                            } else {
                                 resultStr = '';
                             }
                         }
                         if(match2 !=null) {
+                            var matchKey = match1[1];
+                            matchKey = strObj.urlDecodeLR(matchKey);
                             //允许获取当前data对象
-                            var abc2 = abc.replace(/^this/, 'data_');
-                            abc2 = strObj.urlDecodeLR(abc2);
-                            try {
-                                resultStr = eval(abc2);
-                            } catch(err){
+                            if(data_[matchKey]) {
+                                resultStr = data_[matchKey];
+                            } else if(obj_[matchKey]) { //允许获取 obj.diyAttr
+                                resultStr = obj_[matchKey];
+                            } else {
                                 resultStr = '';
                             }
                         }
@@ -7990,8 +8007,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                     obj['items'] = menu_obj;//对外方便更新和获取菜单
                     objInner.append(menu_obj);
                 }
-                //console.log('options_');
-                //console.log(this);
                 removeAllEven(options_);
                 //添加数据
                 addOptionNullFunc(this, options_);//加null_func
@@ -8024,8 +8039,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         obj.renew(options);
         optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
-        //console.log('select_obj');
-        //console.log(obj);
         return obj; //makeSelect
     };
 
@@ -8736,25 +8749,9 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
         optionGetSet(obj, options);
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
-        //console.log(obj);
         return obj; //makeEditor
     };
 
-    //创建一个浮动层
-    /*
-     * options {left:12,top:66,'class':'',id:''}
-     * */
-    global.appendMenu = function(sourceOptions) {
-        var options = cloneData(sourceOptions);
-        options = options || {};
-        if(isUndefined(options.left)) options.left = 0;
-        if(isUndefined(options.top)) {
-            options.y = 0;
-        } else {
-            options.y = options.top;
-        }
-        makeBox(options);
-    };
 //创建浮动菜单
     global.makeMenu = function(btn, menuId, diyOptions, contendObj, appendType) {
         var menu = $('#'+ menuId);
@@ -8913,7 +8910,6 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                 //console.log('page:');
                 //console.log(options);
                 optionDataFrom(pageBody, options);
-                strObj.formatAttr(pageBody, options, 0, hasSetData); //里面找出事件来绑定
                 var page = parseInt(options.page);
                 var pageSize = parseInt(pageSize);
                 if(pageSize < 1 ) pageSize = 1;
@@ -9003,6 +8999,8 @@ jQuery.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.c
                         }
                     });
                     pageBody.append(nextLi);
+                    //设置完所有属性后 再渲染对象属性，因为可能有attr:'{this.totalPage}';
+                    strObj.formatAttr(pageBody, options, 0, hasSetData);
                 } else if(pageType == 'btn') {
                     var nowPage = pageBody['current_page'];
                     var senglue = (nowPage == totalPage || toPage>=totalPage )? null: $('<li><a href="javascript: void(0)" target="_self" class="endPage"> ... </a></li>');
