@@ -8970,16 +8970,24 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(pageBody.fromPage == toPage) {
                     pageBody.fromPage = 1;
                 }
+                if(pageBody.fromPage == 1)  {
+                    preLi.hide();
+                }
                 if(page > toPage) {
                     pageBody.fromPage = page-1;
                     toPage = toPage + pageBtnNum;
                     if(pageBody.fromPage < 1) pageBody.fromPage = 1;
-                    if(toPage>totalPage) toPage = totalPage;
+                    if(toPage>totalPage) {
+                        toPage = totalPage;
+                    }
                 }
                 //console.log(toPage);
                 var repeatNum = 0;
                 for(i = pageBody.fromPage; i < toPage; i++) {
-                    if(repeatNum >= pageBtnNum) break;//break;
+                    if(repeatNum >= pageBtnNum) {
+                        toPage = repeatNum;
+                        break;
+                    }
                     li = $('<li data-page="'+ i +'"></li>');
                     li.append('<a href="javascript: void(0)" target="_self">'+ i +'</a>');
                     if(page == i) li.addClass('active');
@@ -9034,6 +9042,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     if(senglue)pageBody.append(senglue);
                     if(totalLi)pageBody.append(totalLi);
                     if(nextLi)pageBody.append(nextLi);
+                }
+                if(toPage >= totalPage) {
+                    console.log('toPage', toPage);
+                    nextLi.hide();
                 }
                 if(goto) {
                     var gotoLi = $('<li><a><input class="togoPage" placeholder="Goto" /></a></li>');

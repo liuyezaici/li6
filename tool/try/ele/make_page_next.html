@@ -3,6 +3,21 @@
     <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
     <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
     <script src="/assets/js/require.min.js"></script>
+    <style>
+        .simple_p {
+            cursor: pointer;
+        }
+        .simple_p.active {
+            font-weight: bold;
+        }
+        .simple_p.hover {
+            font-style: italic;
+            background-color: #efefef;
+        }
+    </style>
+    //一个简单分页
+
+    <div id="show_page1"></div>
     <div id="show_btn"></div>
     <script>
         //一个带数据的p
@@ -18,24 +33,14 @@
             }
         });
         require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-            //创建一个按钮
-            var diyBtn = lrEle.makeBtn({
-                'show': 1,
-                'class': 'btnLr btn-sm btn-info',
-                value: '付款信息a',
-                data_id: '{id}',
-                margin_left: '5px',
-                click: function (obj_) {
-                    var id_ = obj_.attr('data_id');
-                },
+            var pageObj = lrEle.makePage({
+                goto: 'r',
+                size: 'md',
+                total: 60,
+                pageSize: 10,
             });
+            $('#show_page1').append(pageObj);
 
-            $('#show_btn').append(diyBtn);
         });
 
     </script>
-
-    <script>
-
-
-</script>
