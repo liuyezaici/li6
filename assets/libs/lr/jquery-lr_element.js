@@ -6196,12 +6196,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     global.makeSwitch = function(sourceOptions) {
         var options = cloneData(sourceOptions);
         options = options || {};
-        if(isUndefined(options['name'])) options['name'] = 'no_name';
         if(isUndefined(options['value'])) options['value'] = '';
         var selectVal = options['value'];
         var obj = $('<span></span>');
         options['class_extend'] = 'diy_switch';
         obj['last_options'] = getOptVal(options, 'last_options', {});
+        var afterCreate = getOptVal(options, ['afterCreate', 'after_create'], false);
         obj[objValIsNode] = false;
         obj['switchVal'] = selectVal;
         obj['switchText'] = '';
@@ -6380,9 +6380,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
         });
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(obj, options);
         objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
         addCloneName(obj, options);//支持克隆
         obj.valChange(selectVal);//首次赋值
+        if(afterCreate) afterCreate(obj, defaultOps); //初始化内容再写入内容
         return obj; //makeSwitch
     };
 
@@ -8967,7 +8969,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     pageBody.fromPage = 1;
                 }
                 if(pageBody.fromPage == 1)  {
-                    preLi.hide();
+                    preLi.remove();
                 }
                 if(page > toPage) {
                     pageBody.fromPage = page-1;
@@ -9040,8 +9042,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     if(nextLi)pageBody.append(nextLi);
                 }
                 if(toPage >= totalPage) {
-                    console.log('toPage', toPage);
-                    nextLi.hide();
+                    nextLi.remove();
                 }
                 if(goto) {
                     var gotoLi = $('<li><a><input class="togoPage" placeholder="Goto" /></a></li>');
