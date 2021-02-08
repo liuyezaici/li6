@@ -7768,10 +7768,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                             global.makeSpan({
                                 'class': '_icon',
                                 'value': ''
-                            }),makeSpan({
+                            }),
+                            global.makeSpan({
                                 'class': '_title',
                                 'value': dataTitle
-                            })]
+                            })
+                        ]
                     };
                     var sonObj = global.makeSpan(sonOpt);
                     sonObj[parentObjKey] = obj;//设置其父对象

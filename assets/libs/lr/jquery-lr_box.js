@@ -958,12 +958,10 @@ define(['jquery'], function ($) {
         if(addLeft) {
             x_ += addLeft;
         }
-        console.log('y_1', y_);
         //允许自定义向下移动
         if(subTop) {
             y_ += subTop;
         }
-        console.log('y_2', y_, 'subTop', subTop);
         //坐标如果是纯数字 要加上单位
         if(!isNaN(x_)) x_ = x_ + "px";
         if(!isNaN(y_)) y_ = y_ + "px";

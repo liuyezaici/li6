@@ -2,38 +2,37 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
-
+<script src="/assets/js/require.min.js"></script>
 <div id="show_demo"></div>
-<script>
-$('#show_demo').append([
-    makeChecked({
-        value: '6',
-        text: '标题',
-        name: 'demo',
-        checked: true,//或者填 true 也可以
-        click: function (o, e) {
-            if(o.checked) {
-                msgTisf('选中我了');
-            } else {
-                msgTisf('取消选择');
+
+    <script>
+        //一个带数据的p
+        //注意：
+        // 如果数据是数组: index 作为每个循环的序号 ;
+        // value/class 属性支持js语法. 变量用{}括起
+        require.config({
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBase: '/assets/libs/lr/jquery-lr_base',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+                lrEle: '/assets/libs/lr/jquery-lr_element',
             }
-        }
-    }),
-    makeDiv({value: '------------------',style: 'margin-top: 10px;margin-bottom: 10px;'}),
-    makeA({
-        'class': 'btnLr btn-xs btn-info',
-        value: '查看所有样式',
-        href: '/tool/try/ele/make_checked_type.html'
-    }),
-    makeA({
-        'class': 'btnLr btn-xs btnLrSuccess',
-        value: '单选框',
-        style: 'margin-left: 10px;',
-        href: '/tool/try/ele/make_checked_one.html'
-    })
-]);
-</script>
+        });
+
+        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+            var demoObj = lrEle.makeChecked({
+                value: '6',
+                text: '标题',
+                name: 'demo',
+                checked: true,//或者填 true 也可以
+                click: function (o, e) {
+                    if(o.checked) {
+                        lrBox.msgTisf('选中我了');
+                    } else {
+                        lrBox.msgTisf('取消选择');
+                    }
+                }
+            });
+            $('#show_demo').append(demoObj);
+        });
+    </script>
