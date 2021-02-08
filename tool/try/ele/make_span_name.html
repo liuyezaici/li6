@@ -27,20 +27,12 @@
         }
     });
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-//一个简单的数据循环
-//注意：
-// 如果数据是数组: index 作为每个循环的序号 ;
-// value/class 属性支持js语法. 变量用{}括起
         var simpleSpan = lrEle.makeSpan({
             name: 'test_span',
-            data: {'ps': '没什么特别的技能'},
-            value: '我只是一串文本: {ps}',
-            'class': "simple_span"
-            , hover: function (o) {
-                o.addClass('hover');
-            }
-            , mouseout: function (o) {
-                o.removeClass('hover');
+            value: '哈喽',
+            'class': "simple_span",
+            click: function (o) {
+                console.log(o.name);
             }
         });
         $('#show_span').append(simpleSpan);

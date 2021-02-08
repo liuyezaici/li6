@@ -13,3 +13,4 @@
 /sql
 /runtime/cached/*.txt
 .user.ini
+/error
