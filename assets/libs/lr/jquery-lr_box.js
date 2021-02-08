@@ -599,6 +599,7 @@ define(['jquery'], function ($) {
             'timer' : 2000,
             'beforeClose' : false,//关闭前的动作
             'resize' : false,//是否允许调整尺寸
+            'noPadding' : false,//内容是否需要间距
         };
         if(isUndefined(options['tag']))  options['tag'] = 'div';
         if($.inArray(options['tag'], ['div', 'span']) ==-1) options['tag'] = 'div';
@@ -633,7 +634,10 @@ define(['jquery'], function ($) {
         if(fangda) fadeIn = false;//放大时 不能渐渐出现
         var fadeInTime = options['fadeInTime'] || 500;//出现的过程时间
         var fangdaTime = options['fangdaTime'] || 300;//放大的过程时间
+        var addLeft = options['addLeft'] || 0;//向右移动距离
+        var subTop = options['subTop'] || 0;//向下移动距离
         var diyCss = options['css'] || false;//默认自定义css
+        var noPadding = options['noPadding'] || false;
         var newBoxId = options['id'];
         var text_ = options.text;
         //初始化window的全局zIndex
@@ -709,6 +713,9 @@ define(['jquery'], function ($) {
         var contentObj = $('<div class="'+ contentClass +' clearfix"></div>');
         if(bodyCss) {
             contentObj.attr('style', bodyCss);
+        }
+        if(noPadding) {
+            contentObj.css('padding', 0);
         }
         if(msgType=='msg') {
             contentObj.addClass('msg');
@@ -927,18 +934,14 @@ define(['jquery'], function ($) {
         if (options.isRound) {
             boxObj.addClass('isRound');
         }
-        var boxWidth,boxHeight;
+        var boxWidth;
         if(cssObj && cssObj.width) {
             boxWidth = cssObj.width;
         } else {
             boxWidth = options.width ? options.width : boxObj.outerWidth();//允许外部提前定义box的宽度 因为像gif这样的图片会加载完才能获取到box真实的width
         }
-        if(cssObj && cssObj.height) {
-            boxHeight = cssObj.height;
-        } else {
-            boxHeight = options.height ? options.height : 0;
-        }
-        var x_,y_;
+
+        var x_=0,y_=0;
         if(options.width == 'auto') {
             boxWidth = parseFloat(boxObj.outerWidth());
         }
@@ -951,6 +954,17 @@ define(['jquery'], function ($) {
         if(!isUndefined(options.x))  x_ = options.x;//直接传入绝对位置时
         if(!isUndefined(options.y))  y_ = options.y;//直接传入绝对位置时
         if(options.positionType == 'fixed') y_ = options.top;//fixed 直接按填写的值
+        //允许自定义向右移动
+        if(addLeft) {
+            x_ += addLeft;
+        }
+        console.log('y_1', y_);
+        //允许自定义向下移动
+        if(subTop) {
+            y_ += subTop;
+        }
+        console.log('y_2', y_, 'subTop', subTop);
+        //坐标如果是纯数字 要加上单位
         if(!isNaN(x_)) x_ = x_ + "px";
         if(!isNaN(y_)) y_ = y_ + "px";
         //设置data属性
