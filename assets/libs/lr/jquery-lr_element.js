@@ -4248,7 +4248,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
         }
         var extendAttr = opt['extend_attr'] || {};
-        var afterCreate = getOptVal(opt, ['afterCreate', 'after_create'], false);
+        var afterCreate = getOptVal(defaultOps, ['afterCreate', 'after_create'], false);
         if(isUndefined(defaultOps['value'])) defaultOps['value'] = ' ';//必须输入空文本只能执行node替换
         var options = $.extend({}, defaultOps);
         options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
@@ -4377,34 +4377,29 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         optionGetSet(obj, defaultOps);
         objBindVal(obj, defaultOps);//数据绑定
         addCloneName(obj, defaultOps);//支持克隆
-        if(afterCreate) afterCreate(obj, defaultOps); //初始化内容再写入内容
+        //初始化内容再写入内容
+        if(afterCreate) {
+            afterCreate(obj, defaultOps);
+        }
+        //绑定拖拽事件
+        callBindDragObj(obj, defaultOps);
         return obj;
     }
 
     //创建简单的标签对象
     global.makeA = function(defaultOps) {
-        var funcAfterCreate = function (thisObj, option_) {
-            //绑定拖拽事件
-            callBindDragObj(thisObj, option_);
-        };
         var extendAttr = {};
         if(isUndefined(defaultOps['href'])) extendAttr = {'href' : 'javascript: void(0);'};
         return makeDom({
             'tag': 'a',
             'options': defaultOps,
             'extend_attr': extendAttr,
-            'after_create': funcAfterCreate
         });
     };
     global.makeDiv = function(defaultOps) {
-        var funcAfterCreate = function (thisObj, option_) {
-            //绑定拖拽事件
-            callBindDragObj(thisObj, option_);
-        };
         return makeDom({
             'tag': 'div',
             'options': defaultOps,
-            'after_create': funcAfterCreate
         });
     };
     global.makeUl = function(defaultOps) {
@@ -4462,36 +4457,21 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         });
     };
     global.makeSpan = function(defaultOps) {
-        var funcAfterCreate = function (thisObj, option_) {
-            //绑定拖拽事件
-            callBindDragObj(thisObj, option_);
-        };
         return makeDom({
             'tag': 'span',
             'options': defaultOps,
-            'after_create': funcAfterCreate
         });
     };
     global.makeLabel = function(defaultOps) {
-        var funcAfterCreate = function (thisObj, option_) {
-            //绑定拖拽事件
-            callBindDragObj(thisObj, option_);
-        };
         return makeDom({
             'tag': 'label',
             'options': defaultOps,
-            'after_create': funcAfterCreate
         });
     };
     global.makeH1 = function(defaultOps) {
-        var funcAfterCreate = function (thisObj, option_) {
-            //绑定拖拽事件
-            callBindDragObj(thisObj, option_);
-        };
         return makeDom({
             'tag': 'h1',
             'options': defaultOps,
-            'after_create': funcAfterCreate
         });
     };
     global.makeH2 = function(defaultOps) {
