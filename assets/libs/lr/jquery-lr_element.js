@@ -522,8 +522,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             var hidden = false;
             var setChecked = undefined;//设置打勾样式
             var setDisabled = false;//设置不可点击
-            var classExt = false;//包含扩展样式
-            var classExtFlag = false;//true 添加 false移除 扩展样式
             var has_kuohao = false; //是否含有括号
             // 如果有括号，并且obj的忽略绑定全局设置为null 则将忽略绑定设置为false;如果没有括号 则忽略绑定设为true
             var class_extend_true_val = '';
@@ -583,8 +581,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 }
                 //除了style class喜欢变来变去 其他文本属性不含括号 并且未改变 则不作更新
                 if(optionIsSame(thisObj, options, n) && !has_kuohao) {
-                    // console.log('optionIsSame this', n + ':'+ v);
-                    // console.log(thisObj);
                     return;
                 }
                 if(n == 'type') {
@@ -661,14 +657,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
                 if(n =='checked') {
-                    //console.log('checked:'+ v);
                     if(v == 'false' || !v || v==0 || v =='0') {
                         setChecked = false;
                     } else {
                         setChecked = true;
                     }
                 }
-                //console.log('attr:'+n);
                 if(n == 'class_extend') {
                     thisObj.classExt = true;
                     if(v) {
@@ -4248,7 +4242,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
         }
         var extendAttr = opt['extend_attr'] || {};
-        var afterCreate = getOptVal(defaultOps, ['afterCreate', 'after_create'], false);
         if(isUndefined(defaultOps['value'])) defaultOps['value'] = ' ';//必须输入空文本只能执行node替换
         var options = $.extend({}, defaultOps);
         options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
@@ -4341,8 +4334,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 obj.domAppendVal(optionsGet, hasSetData);
                 obj['last_options'] = $.extend({}, optionsGet);//设置完所有属性 要更新旧的option
                 obj[objLastValKey] = obj[objValObjKey];//设置完所有属性 要更新旧的val
-                //console.log('finish');
-                //console.log(this);
             },
             //克隆当前对象 name要重新生成
             cloneSelf: function(optionsGet) {
@@ -4352,7 +4343,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     'tag': tag,
                     'options': optionsGet,
                     'extend_attr': extendAttr,
-                    'after_create': afterCreate
                 });
             },
             updates: function(dataName, exceptObj) {//数据被动同步
@@ -4377,10 +4367,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         optionGetSet(obj, defaultOps);
         objBindVal(obj, defaultOps);//数据绑定
         addCloneName(obj, defaultOps);//支持克隆
-        //初始化内容再写入内容
-        if(afterCreate) {
-            afterCreate(obj, defaultOps);
-        }
         //绑定拖拽事件
         callBindDragObj(obj, defaultOps);
         return obj;
@@ -6066,7 +6052,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             callBindDragObj(thisObj, option_);
         };
         options[objValIsNode] = false; //不允许再append val
-        var newBtn = makeDom({tag:'button', 'options':options, 'extend_attr':extendAttr, 'after_create': funcAfterCreate});
+        options['afterCreate'] = funcAfterCreate; //不允许再append val
+        var newBtn = makeDom({tag:'button', 'options':options, 'extend_attr':extendAttr});
         //console.log('newBtn');
         //console.log(newBtn);
         return newBtn;
@@ -9240,7 +9227,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         var opt = cloneData(sourceOptions);
         var defaultOps = opt || {};
         var extendAttr = opt['extend_attr'] || {};
-        var afterCreate = getOptVal(opt, ['afterCreate', 'after_create'], false);
+        var afterCreate = getOptVal(sourceOptions, ['afterCreate', 'after_create'], false);
         var options = $.extend({}, defaultOps);
         options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
         var bar = $('<div></div>');
