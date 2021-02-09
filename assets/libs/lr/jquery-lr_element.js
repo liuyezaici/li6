@@ -2846,7 +2846,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(isStrOrNumber(newData)) return;//非data
         var options = obj['options'];
         var newPushData = cloneData(newData);
-        // console.log('renew-ObjData', obj, newData);
+        console.log('renew-ObjData', obj, newData);
         // console.log(obj[objAttrHasKh]);
         //options在此赋值data
         var OptBack = optionAddData(options, newPushData);
@@ -2859,6 +2859,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(obj.renewSonLen) { //如果对象支持对象更新的扩展事件，如makeList/makeTable的裁剪数量，要修改list的长度
             obj.renewSonLen(options);
         } else if(obj.renewSonData) { //更新长度和更新子data是上包含下的
+            console.log('renewSonData');
             obj.renewSonData(newPushData);
         }
         //page专用
@@ -2992,52 +2993,22 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 return newObj;
             },
             addline:  function(afterFlag) {
-                if(isUndefined(afterFlag)) afterFlag = true;
-                var newOpt = $.extend({}, defaultOps);
-                newOpt = getSourceOpt(newOpt);
+                if(isUndefined(afterFlag)) afterFlag = 'before';
+                var newOpt = thisObj.source_opt;
                 var newName;
                 newName = createRadomName(defaultOps['tag']); //为当前对象补充name
                 var parentObj = thisObj['parent'];//其父
-                var hasParent = isOurObj(parentObj);
-
                 newOpt['name'] = newName;
                 var newObj = thisObj.cloneSelf(newOpt);
-                if(hasParent) {
-                    newObj['parent'] = parentObj;//设置其父
-                    var parentSons = parentObj['value'];
-                    var findIndex = -1;
-                    parentSons.map(function (obj_, n) {
-                        if(obj_ == thisObj) {
-                            findIndex = n+1;//第一个是(0,1)
-                            return false;
-                        }
-                    });
-                }
+                // console.log('thisObj', thisObj);
+                // console.log('newObj', newObj);
+                newObj[parentObjKey] = parentObj;
+                parentObj[objValObjKey].push(newObj);
                 if(afterFlag == 'after') {//在后面添加对象
-                    if(hasParent) {
-                        //在中间插入
-                        var array1 = parentSons.slice(0, findIndex);
-                        var array2 = parentSons.slice(findIndex);
-                        array1.push(newObj);
-                        parentSons = array1.concat(array2);
-                        parentObj['value'] = parentSons; //写入value 不然提交表单时无法获取其值
-                    }
                     thisObj.after(newObj);
+                    // console.log('afterFlag', afterFlag);
                 } else if(afterFlag == 'before') {//在前面添加对象
-                    if(hasParent) {
-                        //在前面插入
-                        var array1 = parentSons.slice(0, findIndex);
-                        var array2 = parentSons.slice(findIndex);
-                        var newArray = [newObj];
-                        newArray = newArray.concat(array1);
-                        parentSons = newArray.concat(array2);
-                        parentObj['value'] = parentSons; //写入value 不然提交表单时无法获取其值
-                    }
                     thisObj.before(newObj);
-                }
-                //如果是tr 要补充父对象
-                if(newOpt['tag'] == 'tr') {
-                    parentObj[objValObjKey].push(newObj);
                 }
                 return newObj;
             },
@@ -4261,7 +4232,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         //触发子数据更新
         obj.renewSonData = function(newData) {
-            // console.log('renewSonData', obj, obj[objValObjKey]);
+            console.log('renewSonData', obj, obj[objValObjKey]);
             newData = newData || [];
             if(!hasData(obj[objValObjKey])) {
                 return;
@@ -4271,7 +4242,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(!son)  return;
                 //子对象是否继承父data
                 var extPar = son['extendParentData'];
-                // console.log('extPar', son, extPar);
+                console.log('extPar', son, extPar);
                 if(!isUndefined(extPar) && extPar == true) {
                     // console.log('renewObjData', son);
                     renewObjData(son, newData);
@@ -4361,8 +4332,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                          renewObjData(valObj, data_);
                      }
                      obj_.append(valObj);
-                     obj_[objValObjKey] = valObj;
-                     obj_['value'] = valObj;
+                     obj_[objValObjKey] = [valObj];
+                     obj_['value'] = [valObj];
                      valObj[parentObjKey] = obj_;
                  } else if($.isArray(valObj)) {
                      $.each(valObj, function (n, val_){
@@ -5058,15 +5029,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //创建多个子对象
         function makeRepeatTrs(trOpts, trOneData, dataIndex) {
-            console.log('make RepeatTrs ________dataIndex:', dataIndex, trOpts);
+            var extendParentData = trOpts['data'] ? false : true;
+            console.log('make RepeatTrs ________dataIndex:', dataIndex, extendParentData);
             //new trs
             var trObj;
             //第一行data直接用子对象生成 span->td->tr
             if(dataIndex == 0) {
                 $.each(trOpts, function (n, tmpOpt_) {
+                    tmpOpt_['extendParentData'] = extendParentData;
                     // console.log('trData_________', trOneData, tmpOpt_);
                     tmpOpt_['data'] = trOneData; //必须克隆完再更新data
                     var newTrObj = global.makeTr(tmpOpt_);
+                    // console.log('make RepeatTrs newTrObj:', newTrObj);
+                    newTrObj[parentObjKey] = obj;
                     obj[objValObjKey].push(newTrObj); // 子对象
                     //之前的son由于提起创建，其data是空的，所以更新
                     renewObjData(newTrObj['value'], trOneData);
@@ -5078,8 +5053,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 // console.log('line2_________', opts);
                 $.each(opts['tr'], function (n, tmpOpt_) {
                     tmpOpt_['data'] = trOneData;
-                    // console.log('new____tr_________', trOneData, tmpOpt_['td']);
+                    tmpOpt_['extendParentData'] = extendParentData;
                     var newTrObj = global.makeTr(tmpOpt_);
+                    // console.log('make RepeatTrs newTrObj:', newTrObj);
+                    newTrObj[parentObjKey] = obj;
                     obj[objValObjKey].push(newTrObj); // 子对象
                     obj.tBody.append(newTrObj);
                 });

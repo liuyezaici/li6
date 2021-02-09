@@ -52,13 +52,12 @@
                     {
                         td: [
                             {
-                                value:
-                                    lrEle.makeBtn({
+                                value: lrEle.makeBtn({
                                         value: '添加1行:{sons.a}',
                                         margin_left: '10px',
                                         'class': 'btnLR btnLrSuccess btnLrXs',
                                         click: function (obj, even, scope) {
-                                            obj.parent.parent.addline(true);
+                                            obj.parent.parent.addline('before');
                                         }
                                     })
                             }
