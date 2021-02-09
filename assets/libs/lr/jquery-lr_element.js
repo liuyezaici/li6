@@ -2846,7 +2846,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(isStrOrNumber(newData)) return;//非data
         var options = obj['options'];
         var newPushData = cloneData(newData);
-        console.log('renew-ObjData', obj, newData);
+        // console.log('renew-ObjData', obj, newData);
         // console.log(obj[objAttrHasKh]);
         //options在此赋值data
         var OptBack = optionAddData(options, newPushData);
@@ -4121,7 +4121,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             setExtData = true;
         }
         var trVal = [], newTd;
-        console.log('makeTD__before,data:',  TdOpts);
+        // console.log('makeTD__before,data:',  TdOpts);
         if (Array.isArray(TdOpts)) {
             TdOpts.forEach(function (opt_) {
                 if(callClone) opt_[optionCallCloneKey] = true;//tr是克隆来的话  td必须也要继续克隆
@@ -4138,7 +4138,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         }
         //创建单个TD
         function makeTD_(opt) {
-            console.log('makeTD_____________________', opt['data']);
+            // console.log('makeTD_____________________', opt['data']);
             //console.log('trdata',trData);
             var newTd = tdKey =='td' ? global.makeTd(opt) : global.makeTh(opt);
             return newTd;
@@ -4215,7 +4215,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         var extendAttr = opt['extend_attr'] || {};
         var obj = $('<'+ tag +'></'+ tag +'>');
         if(!obj.source_opt) obj.source_opt = copySourceOpt(cloneData(defaultOps));
-        console.log('obj.source_opt', obj.source_opt);
+        // console.log('obj.source_opt', obj.source_opt);
         //必须设置name 否则拖动换排序时无法切换对象的子name
         if(isUndefined(defaultOps['name'])) {
             //td span 不需要加name 因为它们不参与循环
@@ -4261,17 +4261,17 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         //触发子数据更新
         obj.renewSonData = function(newData) {
-            console.log('renewSonData', obj, obj[objValObjKey]);
+            // console.log('renewSonData', obj, obj[objValObjKey]);
             newData = newData || [];
             if(!hasData(obj[objValObjKey])) {
                 return;
             }
-            console.log('type of', typeof  obj[objValObjKey], obj[objValObjKey]);
+            // console.log('type of', typeof  obj[objValObjKey], obj[objValObjKey]);
             $.each(obj[objValObjKey], function (n, son) {
                 if(!son)  return;
                 //子对象是否继承父data
                 var extPar = son['extendParentData'];
-                console.log('extPar', son, extPar);
+                // console.log('extPar', son, extPar);
                 if(!isUndefined(extPar) && extPar == true) {
                     // console.log('renewObjData', son);
                     renewObjData(son, newData);
@@ -4289,7 +4289,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             tag = tag || 'span';
             //console.log(obj_);
             if(tag == 'tr') { //value is obj
-                console.log('tr.AppendVal');
+                // console.log('tr.AppendVal');
                 var optNewVal = opt['value'] || opt['son'] || '';
                 var valForCompare = $.isArray(optNewVal) ? optNewVal : [optNewVal];
                 //console.log(valForCompare);
@@ -4298,9 +4298,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     //console.log('tr val no change ::::::::');
                 } else {
                     var optData = opt['data'] || [];
-                    console.log('创建新的TD', optData, opt, opt['td']);
+                    // console.log('创建新的TD', optData, opt, opt['td']);
                     var newVal = tdToObj(optData, opt);//创建新的[TD]
-                    console.log('tr newVal_______||||||||||||||||||||||||||||||end:',newVal);
+                    // console.log('tr newVal_______||||||||||||||||||||||||||||||end:',newVal);
                     newVal.forEach(function(td_) {
                         objPushVal(obj_, td_);
                     });
@@ -4410,9 +4410,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             renew: function(optionsGet) {
                 optionsGet = optionsGet || {};
                 var hasSetData = !isUndefined(optionsGet['data']);
-                if(tag == 'tr') {
-                    console.log('renew tr:', optionsGet['data'], hasSetData);
-                }
+                // if(tag == 'tr') {
+                //     console.log('renew tr:', optionsGet['data'], hasSetData);
+                // }
                 optionDataFrom(obj, optionsGet);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options参数 下面才可以修改options
@@ -4979,7 +4979,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             var tmpIndex;
             var tmpData;
             if(lastValLen > nowValLen) { //多出来 裁掉
-                console.log('多出来 裁掉');
+                // console.log('多出来 裁掉');
                 sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
                     if(o.name) {
                         delete global[o.name];
@@ -5005,7 +5005,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
             } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
-                console.log(' 数据累加,sons:', sons);
+                // console.log(' 数据累加,sons:', sons);
                 for(tmpTrGroupid = 0; tmpTrGroupid < dataLines; tmpTrGroupid++) {
                     tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                     tmpData =  newData[tmpTrGroupid];
@@ -5013,17 +5013,18 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     for(var i2 = 0 ; i2 < trOptLen; i2 ++) {
                         tmpIndex =  tmpTrGroupFromIndex ++; //在所有son里面 当前是第几个tr
                         if(!isUndefined(sons[tmpIndex])) {
-                            console.log('更新旧的tr ', tmpIndex, sons[tmpIndex]);
+                            // console.log('更新旧的tr ', tmpIndex, sons[tmpIndex]);
                             sons[tmpIndex]['data'] = tmpData;
                             // console.log('renew_tmpIndex, i2:', i2, 'tmpIndex', tmpIndex);
                         } else {
-                            console.log('直接用虚拟tr进行克隆 ', i2, tmpData);
+                            // console.log('直接用虚拟tr进行克隆 ', i2, tmpData);
                             cloneRepeatTr(i2, tmpData);
                             tmpIndex ++;
                         }
                     }
                 }
             } else {
+                console.log('更新旧的tr ', newData);
                 obj.renewOldRepeatTr(newData);
             }
         };
@@ -5031,7 +5032,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //外部触发更新子data
         obj.renewSonData = function (newData) {
             console.log('renewSonData');
-            console.log('obj.isRepeat', obj.isRepeat);
             if(obj.isRepeat) {
                 renewSonLen_(newData);
             } else {
@@ -5045,8 +5045,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //更新循环的tr的date
         obj.renewOldRepeatTr = function(newData) {
             var sons = obj[objValObjKey] ;
-            // console.log('renew renewOld RepeatTr');
-            // console.log(newData);
+            console.log('renew sons');
+            console.log(sons);
             var sonData;
             var trOptLen = _getTrNum(obj['options']||[]);
             $.each(sons, function (n, son) {
@@ -5058,13 +5058,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //创建多个子对象
         function makeRepeatTrs(trOpts, trOneData, dataIndex) {
-            console.log('make RepeatTrs ________dataIndex:', dataIndex);
+            console.log('make RepeatTrs ________dataIndex:', dataIndex, trOpts);
             //new trs
             var trObj;
             //第一行data直接用子对象生成 span->td->tr
             if(dataIndex == 0) {
                 $.each(trOpts, function (n, tmpOpt_) {
-                    console.log('trData_________', trOneData, tmpOpt_['td']);
+                    // console.log('trData_________', trOneData, tmpOpt_);
                     tmpOpt_['data'] = trOneData; //必须克隆完再更新data
                     var newTrObj = global.makeTr(tmpOpt_);
                     obj[objValObjKey].push(newTrObj); // 子对象
@@ -5075,10 +5075,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             } else {
                 //第2行data开始 要用source_opt重新生成新的 tr->td->span
                 var opts = obj.source_opt;
-                console.log('line2_________', opts);
+                // console.log('line2_________', opts);
                 $.each(opts['tr'], function (n, tmpOpt_) {
                     tmpOpt_['data'] = trOneData;
-                    console.log('new____tr_________', trOneData, tmpOpt_['td']);
+                    // console.log('new____tr_________', trOneData, tmpOpt_['td']);
                     var newTrObj = global.makeTr(tmpOpt_);
                     obj[objValObjKey].push(newTrObj); // 子对象
                     obj.tBody.append(newTrObj);
@@ -5088,7 +5088,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //克隆多行的可数据循环的tr
         function createRepeatDataTrs(options) {
-            console.log('create RepeatDataTrs RepeatTrs _________');
+            // console.log('create RepeatDataTrs RepeatTrs _________');
             var optionsData = options['data'] || null; // data: {son_data}
             var trOptions = $.extend({}, options['tr'] || {});//子的公共配置 tr: {}
             var trGroupLen = 0; //循环的tr内部数量
@@ -5184,14 +5184,31 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 console.log('no set inputName');
                 return;
             }
-            //有选中 则反选
-            var selectAllFlag = true;
-            if(obj.find("input[name='"+ inputName +"']").first().prop('checked') == true) {
-                selectAllFlag = false;
+            //有选中 则反选 支持 name/.class/findName
+            var selectAllFlag = false;
+            if(inputName.indexOf('.') !=-1) {
+                selectAllFlag = true;
+                if(obj.find("."+ inputName +"").first().prop('checked') == true) {
+                    selectAllFlag = false;
+                }
+                obj.find("."+ inputName +"").prop('checked', selectAllFlag);
+            } else {
+                var findInputByName = obj.find("input[name='"+ inputName +"']");
+                if(findInputByName.length) {
+                    selectAllFlag = true;
+                    if(findInputByName.first().prop('checked') == true) {
+                        selectAllFlag = false;
+                    }
+                    findInputByName.prop('checked', selectAllFlag);
+                } else {
+                    selectAllFlag = !(obj[objValObjKey][0].findName(inputName).checked);
+                    $.each(obj[objValObjKey], function (k, tr) {
+                        if(tr.findName(inputName)) {
+                            tr.findName(inputName).checked = selectAllFlag;
+                        }
+                    });
+                }
             }
-            $.each(obj[objValObjKey], function (k, tr) {
-                tr.find("input[name='"+ inputName +"']").prop('checked', selectAllFlag);
-            });
         };
         //已选
         obj.selected = function(inputName) {
@@ -5200,15 +5217,28 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 console.log('no set inputName');
                 return;
             }
-            //有选中 则反选
-            var selectIds = [], tmpTrInput_;
-            $.each(obj[objValObjKey], function (k, tr) {
-                tmpTrInput_ = tr.find("input[name='"+ inputName +"']");
-                if(!tmpTrInput_) return;//continue
-                if(tmpTrInput_.prop('checked')) {
-                    selectIds.push(tmpTrInput_.val());
-                }
-            });
+            var inputs = [];
+            if(inputName.indexOf('.') !=-1) {
+                inputs = obj.find("."+ inputName +"");
+            } else {
+                inputs = obj.find("input[name='"+ inputName +"']");
+
+            }
+            var selectIds = [];
+            if(inputs.length) {
+                $.each(inputs, function (k, tmpTrInput_) {
+                    if(tmpTrInput_.prop('checked')) {
+                        selectIds.push(tmpTrInput_.val());
+                    }
+                });
+            } else {
+                inputs = [];
+                $.each(obj[objValObjKey], function (k, tr) {
+                    if(tr.findName(inputName) && tr.findName(inputName).checked) {
+                        selectIds.push(tr.findName(inputName).value);
+                    }
+                });
+            }
             return selectIds;
         };
         obj.appendTrs(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
@@ -5218,27 +5248,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj;
     };
 
-    /*创建 输入框
-     属性：
-     name,value,width,place,limit: 'int/float', bind: 'some_value', null_func: ''  //为空时 提交会执行
-     ,readonly,title,
-     ,clear,maxlen,min,max
-     ,size: 'sm/lg'
-     //lr_btn 添加左右控制数量的按钮 lr_btn_type: middle/left/right
-     ajax:true
-     修改/文件/菜单]统一参数
-     url:'/?s=',
-     success_key: 'id',
-     success_value:'0388',
-     success_func: '',
-     快速修改数值   ajax: { }
-     创建ajax下拉菜单
-     data_key: 'data',
-     menu_text:"", // 菜单显示数据
-     value_key: "" //值的下标
-     li: {
-     })
-     */
+    /* 创建 输入框  */
     global.makeInput = function(sourceOptions) {
         var options = cloneData(sourceOptions);
         options = options || {};
@@ -7626,7 +7636,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         sourceOptions['tag'] = 'checked';
         var obj = $('<i></i>');
         if(!obj.source_opt) obj.source_opt = copySourceOpt(sourceOptions);
-        console.log('makeCheck source_opt', obj.source_opt);
+        // console.log('makeCheck source_opt', obj.source_opt);
         var options = cloneData(sourceOptions);
         if(isUndefined(options['name'])) {
             var newname = createRadomName('check');
