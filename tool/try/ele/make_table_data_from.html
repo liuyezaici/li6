@@ -35,7 +35,7 @@
         }
     });
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-        var getDataUrl = '/index/tool/get_rows?num=2';
+        var getDataUrl = '/index/tool/get_rows?num=3';
         //js造一个简单的表格
         var table = lrEle.makeTable({
             'class': 'well',
@@ -62,12 +62,29 @@
                 {
                     // show: '{this.data}',
                     td: [
+                      // {
+                      //     id_: '{id}',
+                      //     value: '{id}.{title}',
+                      //     click: function (o) {
+                      //         lrBox.msgTisf(o.id_);
+                      //     }
+                      //   },
                       {
-                          id_: '{id}',
-                          value: 'dddd',
-                          click: function (o) {
-                              lrBox.msgTisf(o.id_);
-                          }
+                          value: lrEle.makeDiv({
+                              // ct_: '{content}',
+                              value: [
+                                  lrEle.makeSpan({
+                                      'value': 'id:{id}',
+                                  }),
+                                  lrEle.makeSpan({
+                                      id_: '{id}',
+                                      value: 'tt:{id}',
+                                      click: function (o) {
+                                          lrBox.msgTisf(o.id_);
+                                      }
+                                  })
+                              ],
+                          }),
                         },
                      // {
                      //     id_: '{id}',
