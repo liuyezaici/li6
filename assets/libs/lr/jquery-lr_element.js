@@ -2859,7 +2859,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(obj.renewSonLen) { //如果对象支持对象更新的扩展事件，如makeList/makeTable的裁剪数量，要修改list的长度
             obj.renewSonLen(options);
         } else if(obj.renewSonData) { //更新长度和更新子data是上包含下的
-            console.log('renewSonData');
             obj.renewSonData(newPushData);
         }
         //page专用
