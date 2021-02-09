@@ -35,14 +35,13 @@
             }
         });
         require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-            var getDataUrl = '/index/tool/get_rows?num=2';
             //js造一个简单的表格
             var table = lrEle.makeTable({
                 'class': 'well',
                 'name': 'login_table',
                 data: [
-                    {'id': 1,},
-                    {'id': 2}
+                    {'id': 3,},
+                    {'id': 4},
                 ],
                 // tr_top: [
                 //     {
@@ -57,42 +56,23 @@
                         // show: '{this.data}',
                         // id_: '{id}',
                         td: [
-                            // {
-                            //     value: 'dddd',
-                            //     id_: '{id}',
-                            //     click: function (o) {
-                            //         lrBox.msgTisf(o.id_);
-                            //         // lrBox.msgTisf(o.parent.id_);
-                            //     }
-                            // },
                             {
-                                value: lrEle.makeSpan({
-                                    value: 'dddd',
-                                    id_: '{id}',
-                                    click: function (o) {
-                                        lrBox.msgTisf(o.id_);
-                                        // lrBox.msgTisf(o.parent.id_);
+                                value: lrEle.makeChecked({
+                                    value: '{id}',
+                                    id: '{id}',
+                                    text: '标题',
+                                    name: 'demo',
+                                    checked: true,//或者填 true 也可以
+                                    click: function (o, e) {
+                                        if(o.checked) {
+                                            lrBox.msgTisf('选中我了'+ o.id);
+                                        } else {
+                                            lrBox.msgTisf('取消选择');
+                                        }
                                     }
                                 })
-                            },
-                            // {
-                            //     id_: '{id}',
-                            //        value:  lrEle.makeA({
-                            //            value: 'dddd',
-                            //            click: function (o) {
-                            //                lrBox.msgTisf(o.parent.id_);
-                            //            }
-                            //        })
-                            //    },
-                            // {
-                            //     value: [
-                            //         lrEle.makeInput({
-                            //             width: '200px',
-                            //             name: 'u_nick',
-                            //             value: '{title}'
-                            //         })
-                            //     ]
-                            // }
+                            }
+
                         ]
                     }
                 ]

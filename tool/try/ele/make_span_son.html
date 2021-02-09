@@ -13,6 +13,7 @@
         background-color: #efefef;
     }
 </style>
+//一个简单span
 
 <div id="show_span"></div>
 
@@ -32,15 +33,17 @@
 // value/class 属性支持js语法. 变量用{}括起
         var simpleSpan = lrEle.makeSpan({
             name: 'test_span',
-            data: {'ps': '没什么特别的技能'},
-            value: '我只是一串文本: {ps}',
-            'class': "simple_span"
-            , hover: function (o) {
-                o.addClass('hover');
-            }
-            , mouseout: function (o) {
-                o.removeClass('hover');
-            }
+            'data': {'ps': '没什么特别的技能'},
+            'class': 'well',
+            value: lrEle.makeSpan({
+                value: '我只是一串文本: {ps}',
+                hover: function (o) {
+                    o.addClass('hover');
+                } ,
+                mouseout: function (o) {
+                    o.removeClass('hover');
+                }
+            })
         });
         $('#show_span').append(simpleSpan);
     });

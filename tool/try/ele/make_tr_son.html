@@ -13,6 +13,7 @@
         background-color: #efefef;
     }
 </style>
+//一个简单span
 
 <div id="show_span"></div>
 
@@ -30,16 +31,20 @@
 //注意：
 // 如果数据是数组: index 作为每个循环的序号 ;
 // value/class 属性支持js语法. 变量用{}括起
-        var simpleSpan = lrEle.makeSpan({
-            name: 'test_span',
-            data: {'ps': '没什么特别的技能'},
-            value: '我只是一串文本: {ps}',
-            'class': "simple_span"
-            , hover: function (o) {
-                o.addClass('hover');
-            }
-            , mouseout: function (o) {
-                o.removeClass('hover');
+        var simpleSpan = lrEle.makeTr({
+            'data': {'ps': '没什么特别的技能'},
+            'class': 'well',
+            td: {
+                value: lrEle.makeSpan({
+                    'class': 'btn',
+                    value: '我只是一串文本: {ps}',
+                    hover: function (o) {
+                        o.addClass('btn-success');
+                    } ,
+                    mouseout: function (o) {
+                        o.removeClass('btn-success');
+                    }
+                })
             }
         });
         $('#show_span').append(simpleSpan);
