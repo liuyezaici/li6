@@ -133,15 +133,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return newOpt;
     }
 
-    //拷贝options原本未解析的属性
-    function getSourceOpt(opt) {
-        $.each(opt, function (k, v) {
-            if(!isUndefined(opt['source_'+ k])) {
-                opt[k] = opt['source_'+ k];
-            }
-        });
-        return opt;
-    }
+
 
     //移除options所有事件
     function removeAllEven(opt) {
@@ -529,14 +521,14 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             //     console.log(thisObj);
             // }
             var tmpStyle = [];
+            var onFormatEven = {};
+            var thisFormatEven = {};
+            console.log('初始化 onFormatEven');
             $.each(options, function (n, v) {
                 class_extend_true_val = '';
-                //系统参数 无须解析
-                if(n.substr(0, 7) =='source_') {
-                    return;
-                }
                 //系统参数 无须解析 当参数解析时 执行回调
                 if(n.substr(0, 9) =='onFormat_') {
+                    onFormatEven[n] = v;
                     return;
                 }
                 //支持字符串中输入{公式} value已经在外部更新 这里只针对属性
@@ -544,14 +536,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //     console.log('each.options.n', n, v);
                 // }
                 if(isStrOrNumber(v) ) {
-                    if(!isUndefined(options['source_' + n])) {
-                        v = options['source_' + n];
-                    }
                     if(strHasKuohao(v)) {
-                        // console.log('strHasKuohao.n', n, v);
-                        if(isUndefined(options['source_' + n])) {
-                            options['source_' + n] = v;
-                        }
                         if(n != 'data') has_kuohao = true; //data 带括号不算是属性包含括号 因为下次格式化也不是通过format来实现的 是通过 renew ObjData
                         if(strHasKuohao(v, 'data')) {
                             var abcList = getJhksAbc(v);//没有输入变量，也可以格式化纯运算符
@@ -569,14 +554,27 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                                 if(hasData(optData)) canFormatAbcWhenNoData = true;
                             }
                             if(n !='value' && n !='src' && (hasSetData || hasData(optData) ||canFormatAbcWhenNoData)) {
+                                //console.log(tmpStyle);
                                 v = strObj.formatStr(v, optData, index, thisObj, n);
                                 options[n] = v; //参数要改变 防止外部取出来的仍是括号
+                                if(!isUndefined(options['onFormat_'+n])) {
+                                    thisFormatEven['onFormat_'+n] = {
+                                        func: options['onFormat_'+n],
+                                        'val': v
+                                    };
+                                }
                             }
                         }
                         if(strHasKuohao(v, 'public')) {
                             if(n !='value' && n !='src') {
                                 v = strObj.formatStr(v, optData, index, thisObj, n);
                                 options[n] = v; //参数要改变 防止外部取出来的仍是括号
+                                if(!isUndefined(options['onFormat_'+n])) {
+                                    thisFormatEven[options['onFormat_'+n]] = {
+                                        func: options['onFormat_'+n],
+                                        'val': v,
+                                    };
+                                }
                             }
                         }
                     }
@@ -736,7 +734,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         thisObj.removeAttr('checked');
                     }
                     //如果checked绑定了bind属性 要更新其他打勾状态
-                    if(options['bind'] == 'checked') {
+                    if(setBind == 'checked') {
                         updateBindObj('checked', setChecked, [thisObj]);
                     }
                 }
@@ -763,6 +761,14 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     return;
                 }
             }
+            console.log('初始化结束，onFormatEven:', onFormatEven);
+            if(hasData(thisFormatEven)) {
+                $.each(thisFormatEven, function(field, item_) {
+                    console.log('初始化结束，field:', field, item_);
+                    item_['func'](thisObj, item_['val']);
+                });
+            }
+            thisObj['onFormatEven'] = onFormatEven;
             return newOpt;
         },
         //绑定属性
@@ -781,7 +787,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             var optData = newOpt['data'];
             // console.log('reFormat.KhAttr.data');
             // console.log(optData);
-            var attrsHasData = thisObj[objHasKhAttrs] || [];
+            var attrsHasData = thisObj[objHasKhAttrs] || {};
             // console.log('reFormat_________________');
             // console.log(thisObj);
             // console.log(attrsHasData);
@@ -797,66 +803,72 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             var newAttr = {};
             var evenOption = {};
             var opt = thisObj['options'];
+            var onFormatEven = thisObj['onFormatEven'] || {};
+            var thisFormatEven = {};
+
             // console.log('attrsHasData', attrsHasData);
-            $.each(attrsHasData, function (index, n) {
-                v = getOptVal(opt, ['source_'+n, n], null);//优先取source_n
-                if(n =='value' || n =='src') {
+            var index = 0;
+            $.each(attrsHasData, function (key_, val_) {
+                if(key_ =='value' || key_ =='src') {
                     callRewObjStringVal(thisObj, newOpt);
                     return;//continue
                 }
                 // console.log(optData);
-                // console.log('format this1:'+ n + ':', v);
-                v = strObj.formatStr(v, optData, index, thisObj, n); //计算v中的公式 {1+2 > 3}
+                console.log('format this1:'+ key_ + ':', val_);
+                val_ = strObj.formatStr(val_, optData, index, thisObj, key_); //计算v中的公式 {1+2 > 3}
                 // console.log('format this2______:'+ n + ':', v);
-                newOpt[n]= v;//参数更新 直接可以外部获取道新的值
-                if(attrIsEven(n)) {
-                    //console.log('attrIsEven this2:'+ n );
-                    evenOption[n] = v;
+                newOpt[key_]= val_;//参数更新 直接可以外部获取道新的值
+                if(attrIsEven(key_)) {
+                    evenOption[key_] = val_;
+                }
+                console.log('onFormatEven:' , onFormatEven);
+                if(!isUndefined(onFormatEven['onFormat_'+ key_])) {
+                    thisFormatEven['onFormat_'+ key_] = {func: onFormatEven['onFormat_'+ key_],val: val_};
                 }
                 //console.log('format this:');
                 //console.log(n + ':'+ v);
                 //style的转译属性：position/width/height/left/top/margin_/padding_
                 //都要提进style=''里
-                if(isStrOrNumber(v) ) {
+                if(isStrOrNumber(val_) ) {
                     var hasGangStr = false;
                     styleHengAttrs.forEach(function (n_) {
                         var reg_ = new RegExp('^'+ n_, "gm");
-                        if(n.match(reg_) && $.inArray(n,styleIgnore) == -1) {
-                            n = n.replace('_', '-');
+                        if(key_.match(reg_)) {
+                            key_ = key_.replace('_', '-');
                             hasGangStr = true;
                             //console.log('hasGangStr '+ n+':'+ v);
                         }
                     });
-                    if(strInArray(n, cantAddCssAttrs) !=-1 || hasGangStr) {
+                    if(strInArray(key_, cantAddCssAttrs) !=-1 || hasGangStr) {
                         //console.log('push '+ n+':'+ v);
-                        tmpStyle.push(n+':'+v);
+                        tmpStyle.push(key_ +':'+v);
                     }
                     //支持data-n
-                    //console.log('add newAttr111 '+ n +':'+ v);
-                    if(n != 'data' && n.substr(0, 4) == 'data' ) {
+                    //console.log('add newAttr111 '+ key_ +':'+ v);
+                    if(key_ != 'data' && key_.substr(0, 4) == 'data' ) {
                         newAttr[n] = v;
                     }
                 }
 
                 //hide or show
-                //console.log(n + ' is:'+ v);
-                if(n =='show' || n =='hidden' || n =='hide') {
-                    setHidden = true;
-                    if(((n =='hide' || n =='hidden') && (v == 'true' ||  v == true ||  v == 1)) || (n =='show' && (v == 'false' || v == false|| v == 0))) {
-                        // console.log('n=='+ n +'::::::v='+ v);
-                        hidden = true;
+                //console.log(key_ + ' is:'+ v);
+                if(key_ =='show' || key_ =='hidden' || key_ =='hide') {
+                    setHiddekey_ = true;
+                    if(((key_ =='hide' || key_ =='hidden') && (v == 'true' ||  v == true ||  v == 1)) || (key_ =='show' && (v == 'false' || v == false|| v == 0))) {
+                        // console.log('n=='+ key_ +'::::::v='+ v);
+                        hiddekey_ = true;
                     }
                 }
-                // console.log(n, 'hidden_________________', hidden);
+                // console.log(key_, 'hidden_________________', hidden);
                 //disabled
-                if(n =='disabled') {
+                if(key_ =='disabled') {
                     if(v == 'false' || !v || v==0 || v =='0') {
                         setDisabled = false;
                     } else {
                         setDisabled = true;
                     }
                 }
-                if(n =='checked') {
+                if(key_ =='checked') {
                     //console.log('checked:'+ v);
                     if(v == 'false' || !v || v==0 || v =='0') {
                         setChecked = false;
@@ -865,7 +877,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
                 //console.log('attr:'+n);
-                if(n == 'class_extend') {
+                if(key_ == 'class_extend') {
                     classExt = true;
                     //console.log('class_extend');
                     //console.log(thisObj);
@@ -877,29 +889,28 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         classExtFlag = false;
                     }
                 }
-                // if(n =='colspan') {
+                // if(key_ =='colspan') {
                 //console.log(optData);
-                //console.log('n:'+ n +',v:'+v);
+                //console.log('n:'+ key_ +',v:'+v);
                 //console.log('canAddAttr:'+ canAddAttr('colspan'));
                 // }
                 //扩展属性不需要显示
-                if((isStrOrNumber(v) || typeof v == 'boolean') && canAddAttr(n)) {
-                    if(thisObj.attr && thisObj.attr(n) && v  && thisObj.attr(n) == v  && n != 'class') {
+                if((isStrOrNumber(val_) || typeof val_ == 'boolean') && canAddAttr(key_)) {
+                    if(thisObj.attr && thisObj.attr(key_) && val_ && thisObj.attr(key_) == val_  && key_ != 'class') {
                         return; //不变的属性不用设置
                     }
-                    newAttr[n] = v;
+                    newAttr[key_] = val_;
                 }
+
             });
-            //console.log('newAttr::');
-            //console.log(thisObj);
-            //console.log(newAttr);
+            // console.log('newAttr::');
+            // console.log(thisObj);
+            // console.log(newAttr);
             if(hasData(tmpStyle)) {
                 if(isUndefined(newAttr['style'])) {
                     newAttr['style'] = '';
                 }
                 tmpStyle.forEach(function (tmp_) {
-                    //console.log("newAttr['style']");
-                    //console.log(newAttr['style']);
                     newAttr['style'] = classAddSubClass(trim(newAttr['style'], ';'), tmp_, true, ';');
                 });
                 //获取旧的class 当class中不包含{}时 需要继续使用
@@ -908,17 +919,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     newAttr['style'] = classAddSubClass(oldStyle, newAttr['style'], ';');
                 }
             }
-            //console.log('options3__________::');
-            //console.log('newAttr::');
-            //console.log(thisObj);
-            //console.log(newAttr);
-            //console.log('setDisabled::'+ setDisabled);
             var lastClassTrueVal = '';
             if(thisObj['class_extend_true_val']) {
                 lastClassTrueVal = thisObj['class_extend_true_val'];
             }
-            //console.log('lastClassTrueVal::'+ lastClassTrueVal);
-            //console.log('options4::');
             if(classExt) {
                 //console.log('has classExt:'+ classExt);
                 if(classExtFlag) {
@@ -995,25 +999,14 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
             }
-            // console.log('renew obj_attr:');
-            // console.log(thisObj);
-            // console.log(newAttr);
-            //console.log(hasData(newAttr));
-            //console.log(thisObj.attr);
-            //console.log(thisObj);
-            //console.log('attr_class:'+ newAttr['class']);
             if(hasData(newAttr) && thisObj.attr ) {//更新属性
                 //console.log('call_____renew obj_attr:');
                 //一样的class不需要重写
                 //获取用户自定义的class 如果不包含{}时 需要继续保留
                 var oldClass = thisObj.diyClass;
-                //console.log(thisObj);
-                // console.log('oldClass :'+ oldClass);
                 if(oldClass) {
                     newAttr['class'] = classAddSubClass(oldClass, newAttr['class'], ' ');
                 }
-                //console.log('add_____________');
-                //console.log(newAttr);
                 var oldExtendClass = getOptVal(opt, 'class_extend', '');
                 if(oldExtendClass) {
                     newAttr['class'] = classAddSubClass(newAttr['class'], oldExtendClass, ' ');
@@ -1024,23 +1017,22 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     // console.log('replace_____Class:');
                     newAttr['class'] = newAttr['class'].replace(/\s*hidden/ig, '');
                 }
-                // console.log('attr_class2:'+ newAttr['class']);
-                //console.log('attr_class2:'+ thisObj.attr('class'));
                 if(newAttr['class'] == thisObj.attr('class')) {
                     // console.log('delete class');
                     //console.log(thisObj);
                     //console.log(newAttr['class']);
                     delete newAttr['class'];
                 }
-                // console.log('renew obj_attr___:');
-                //console.log(oldExtendClass);
-                //console.log(thisObj);
-                // console.log(newAttr);
                 thisObj.attr(newAttr);
             }
             thisObj.events = cloneData(evenOption, thisObj.events);
             // console.log('renew obj_attr___:');
             this.addEvents(thisObj);
+            if(hasData(thisFormatEven)) {
+                $.each(thisFormatEven, function(field, item_) {
+                    item_['func'](thisObj, item_['val']);
+                });
+            }
         },
 
         //字符串转变量
@@ -2210,15 +2202,23 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     };
 
     //强制给Obj加data参数
-    function optionAddData(opt, optData) {
+    function optionAddData(obj_, opt, optData) {
         // if(!hasData(optData)) return [opt, false];//无data返回  //2019.3.16 无data也要返回change
         var dataIsChange = false;//数据是否继承父
-        var optDataString = opt['source_data']||opt['data'];
+        var optDataString = opt['data'];
+        var onFormatEven = obj_['onFormatEven'] || {};
+        var thisFormatEven = {};
         //console.log('optDataString', optDataString);
         if(isStrOrNumber(optDataString)) {
             //console.log(optDataString);
             //console.log(optData);
             opt['data'] = strObj.formatStr(optDataString, optData);
+            if(!isUndefined(onFormatEven['onFormat_data'])) {
+                thisFormatEven = {
+                    func: onFormatEven['onFormat_data'],
+                    val: opt['data']
+                };
+            }
             //console.log(opt['data']);
             dataIsChange = true;
         } else {
@@ -2236,6 +2236,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 opt['data'] = optData;
                 dataIsChange = true;
             }
+        }
+
+        if(hasData(thisFormatEven)) {
+            thisFormatEven['func'](obj_, thisFormatEven['val']);
         }
         return [opt, dataIsChange];
     }
@@ -2414,7 +2418,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //不在常规的可视化属性里
         var inShowStr = $.inArray(attrName,
             ['value', 'src', 'text', 'show', 'value_key', 'valueKey', 'title_key', 'titleKey', 'text_key', 'textKey', 'click', 'is_clone', 'data', 'hide', ignoreBindValsKeyname,
-                'source_data_text', 'obj_val_is_node', 'success_key', 'tag'
+                'obj_val_is_node', 'success_key', 'tag'
             ]) ==-1;
         //console.log('inShowStr:'+ inShowStr);
         return inShowStr && attrName.indexOf('extend') == -1 && !isCssAttr;
@@ -2460,8 +2464,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         var setDisabled = false;//设置不可点击样式
         var setChecked = false;//设置打勾样式
         var sourceVal;
+        var onFormatEven = obj_['onFormatEven'] || {};
+        var thisFormatEven = {};
+
         objBindAttrs.forEach(function (attrName) {
-            sourceVal = options['source_'+ attrName];
+            sourceVal = options[attrName];
             if(attrName=='value') { //value的 {bind_val} 变化  要其自己更新val
                 if(isStrOrNumber(sourceVal) || $.isArray(sourceVal)) { //checkbox是数组
                     callRewObjStringVal(obj_, options);
@@ -2469,6 +2476,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 return;//continue
             }
             v = strObj.formatStr(sourceVal, optData, 0, obj_, attrName);
+            if(!isUndefined(onFormatEven['onFormat_'+ attrName])) {
+                thisFormatEven['onFormat_'+ attrName] = {func: onFormatEven['onFormat_'+ attrName],val:v};
+            }
+
             //console.log('attrName:'+ attrName + ':'+ v);
             //hide or show
             if(attrName =='show' || attrName =='hide') {
@@ -2530,6 +2541,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(hasData(newAttr)) {
             obj_.attr(newAttr);
         }
+
+        if(hasData(thisFormatEven)) {
+            $.each(thisFormatEven, function(field, item_) {
+                item_['func'](obj_, item_['val']);
+            });
+        }
     }
 
 
@@ -2538,24 +2555,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         bindDataKey = bindDataKey || 'value';//绑定全局变量的属性key obj设置了bind 那么全局变量的值会同步更新这个属性
         var setOpts = $.extend({}, options);//用于设置的参数
         if(isUndefined(setOpts['class'])) setOpts['class'] = '';//默认要带上class 否则属性无法被外部修改
-        //补充source_n
+        var setBind = getOptVal(options, ['bind'], '');
         thisObj[objHasKhAttrs] = [];
         thisObj.diyClass = '';//最初定义的class 用于后期渲染class
-        var tmpAttr = [];
+        var tmpAttr = {};
         $.each(setOpts, function (opt_, val_) {
             if (strHasKuohao(val_)) {
-                if(opt_.substr(0, 7) !== 'source_') {
-                    tmpAttr.push(opt_);
-                } else {
-                    tmpAttr.push(opt_.replace(/^source_/g, ''));
-                }
+                tmpAttr[opt_] = val_;
             } else {
                 if(opt_=='class') {
                     thisObj.diyClass = val_;
                 }
             }
         });
-        tmpAttr = uniqueArray(tmpAttr);
         thisObj[objHasKhAttrs] = tmpAttr;
         if(thisObj.hasOwnProperty('options')) {
             // console.log(thisObj, 'hasOwnProperty');
@@ -2620,9 +2632,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 get: function () {
                     // console.log('get opt_:', thisObj, opt_, options[opt_]);
                     //如果当前数值已经绑定 读取公共的数据
-                    if(options['bind'] && bindDataKey == opt_ ) {
+                    if(setBind && bindDataKey == opt_ ) {
                         //console.log('get::bindDataKey'+opt_ + ':' + val_);
-                        return getObjData($.trim(options['bind']));
+                        return getObjData($.trim(setBind));
                     }
                     return options[opt_];
                 },
@@ -2850,10 +2862,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(isStrOrNumber(newData)) return;//非data
         var options = obj['options'];
         var newPushData = cloneData(newData);
-        // console.log('renew-ObjData', obj, newData);
-        // console.log(obj[objAttrHasKh]);
         //options在此赋值data
-        var OptBack = optionAddData(options, newPushData);
+        var OptBack = optionAddData(obj, options, newPushData);
         var newOpt = OptBack[0];
         newPushData = newOpt['data'];
         if(obj[objAttrHasKh]) {
@@ -2978,7 +2988,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             clone:  function() {
                 var  newOpt = cloneData(defaultOps);
-                newOpt = getSourceOpt(newOpt);
                 if(!isUndefined(newOpt['name'])) {
                     //tr li的name由用户自己定义区分，因为有时候用户不需要自动加下标
                     // var oldName = newOption['name'];
@@ -3718,7 +3727,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     parent_box: parentBox,
                     li_height: liHeight,
                     mousedown_data: [mouseDown, thisObj, parentLi, parentBox],
-                    draging_data: [movingBar, thisObj, parentLi, parentBox],
+                    draging_data: [movingobj, thisObj, parentLi, parentBox],
                     drag_up_data: [movingEnd, thisObj, parentLi, parentBox]
                 });
             }, 200);
@@ -4027,8 +4036,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //console.log(objToJson(valObj['options']));
                 //console.log(objToJson(sonOpt));
                 //准备data 如果是克隆的子对象 data不应该提前修改 否则子对象的data就默认不需要继承父了
-                //console.log('clone sonOpt', sonOpt);
-                sonOpt = getSourceOpt(sonOpt);
                 newObj = valObj.cloneSelf(sonOpt);
                 if(valObj['extendParentData'] && isStrOrNumber(sonOpt['data']) && hasData(optData)) {
                     //console.log('callClone set_data ::::::::');
@@ -4124,11 +4131,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     }
     //拷贝源配置文件 主要是value为对象的要获取原参数
     function copySourceOpt(opt) {
+        var isClone = getOptVal(opt, ['isClone'], false);
         // console.log('____copy SourceOpt', opt);
         var getArray = function (array_) {
             var arrayBack = [];
             $.each(array_, function (index_, val2_) {
                 if(isOurObj(val2_)) {
+                    //如果是提前创建好的
                     // console.log('isOurObj', val2_, 'data:', val2_['data']);
                     arrayBack.push(val2_.sor_opt);
                     // console.log('isOurObj_sour', arrayBack);
@@ -4155,9 +4164,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     // td: [{},{}]
                     backData[k] = getArray(val_);
                 } else if(isOurObj(val_)) {
-                    // console.log('isOurObj1', val_.sor_opt);
                     backData[k] = val_.sor_opt;
-                    // console.log('isOurObj2.sor_opt', val_.sor_opt);
                 }  else if(isObj(val_)) {
                     // console.log('isObj', val_);
                     backData[k] = checkAll(val_);
@@ -4170,6 +4177,35 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return checkAll(opt);
     }
 
+    //格式化val 公告方法
+    function _onFormatVal(obj, data_, sourceVal, valKey)  {
+        valKey = valKey || 'value';
+        var newVal = '';
+        var onFormatEven = obj['onFormatEven'] || {};
+        var thisFormatEven = {};
+        //每次格式化 优先取格式化前的source value
+        if (strHasKuohao(sourceVal)) {
+            if (strHasKuohao(sourceVal, 'public')) {
+                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
+                obj[objAttrHasKh] = true;
+            } else {
+                newVal = strObj.formatStr(sourceVal, data_, 0, obj, 'value');
+                obj[objAttrHasKh] = true;
+            }
+            if(!isUndefined(onFormatEven['onFormat_'+ valKey])) {
+                thisFormatEven = {func: onFormatEven['onFormat_'+ valKey],val: newVal};
+            }
+            obj[objAttrHasKh] = true;
+        }  else {
+            newVal = sourceVal;
+        }
+
+        if(hasData(thisFormatEven)) {
+            thisFormatEven['func'](obj, thisFormatEven['val']);
+        }
+        return newVal;
+    }
+
     //创建文本dom /a/p/span/div/li/td/em/b/i/
     //sureSource 可以提前确定好配置参数 不用递归取子集
     function makeDom(sourceOptions) {
@@ -4179,14 +4215,14 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         var sureSource = opt['sureSource'] || false;
         var defaultOps = cloneData(opt['options'] || {});//必须克隆
         defaultOps['tag'] = tag;
-        var extendAttr = opt['extend_attr'] || {};
         var obj = $('<'+ tag +'></'+ tag +'>');
-        // console.log('makeDom', tag, 'sor_opt:',obj.sor_opt);
+        // console.log('makeDom', tag,  'sor_opt:',obj.sor_opt);
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
+            obj.sor_opt = sureSource ?  cloneData(defaultOps || {}) : cloneData(copySourceOpt(defaultOps));
         }
-        // console.log('makeDom2', tag, 'sor_opt:',obj.sor_opt);
+        var sourceVal = getOptVal(defaultOps, ['value'], '');
+        // console.log('makeDom2', tag, obj, 'sor_opt:',obj.sor_opt, defaultOps);
         //必须设置name 否则拖动换排序时无法切换对象的子name
         if(isUndefined(defaultOps['name'])) {
             //td span 不需要加name 因为它们不参与循环
@@ -4197,20 +4233,18 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 defaultOps['name'] = newname;
             }
         }
-        var options = $.extend({}, defaultOps);
-        options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
         obj.whenUpdate = null; //当被更新时触发事件 比如makeBar的update
         obj.nodeObj = []; //初始化dom节点
         obj.htmObj = [];//初始化element节点
         obj[objValObjKey] = [];//初始化对象的子对象
         obj[objLastValKey] = [];//初始化对象最后更新的子对象
-        obj['last_options'] = getOptVal(options, 'last_options', {});
+        obj['last_options'] = getOptVal(defaultOps, 'last_options', {});
         obj[objValIsNode] = getOptVal(opt, [objValIsNode], true);
         //允许在外部定义 如btn
         if(!isUndefined(opt[objValIsNode])) {
             obj[objValIsNode] = opt[objValIsNode];
         } else {
-            if(!isStrOrNumber(options['value']||'')) {
+            if(!isStrOrNumber(sourceVal)) {
                 obj[objValIsNode] = false;
             }
         }
@@ -4262,11 +4296,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             if(!isUndefined(opt['extendParentData'])) {
                 setExtData = true;
             }
+            var data_ = getOptVal(opt, ['data'], {});
+            // console.log('domAppendVal************_', opt, data_);
             //这里生成的dom都是提前获取好sor_opt的
             var createDom = function (newOpt) {
                 // console.log('create Dom************_', newOpt);
                 if(newOpt['tag']) {
-                    var data_ = opt['data'] || {};
                     if(hasData(data_)) {
                         newOpt['data'] = data_;
                     }
@@ -4298,17 +4333,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             };
             //console.log(obj_);
             if(tag == 'tr') {
-                var optData = opt['data'] || {};
                 var optNewVal = opt['td'] || opt['th'] || {}; //tr的value参数 只能是td th
                 var valForCompare = $.isArray(optNewVal) ? optNewVal : [optNewVal];
-                // console.log('tr___AppendVal,data', optData, 'optNewVal', optNewVal);
+                // console.log('tr___AppendVal,data', data_, 'optNewVal', optNewVal);
                 //console.log(dataIsSame(obj_[objLastValKey], valForCompare));
                 if(hasData(obj_[objLastValKey]) && dataIsSame(obj_[objLastValKey], valForCompare)) { // val未变 不用append
                     // console.log('tr val no change ::::::::');
                 } else {
-                    // console.log('创建新的TD', optData, opt, opt['td']);
+                    // console.log('创建新的TD', optData, optNewVal, opt['td']);
                     //所以这里的克隆属性要在maketr时判断是否克隆的TD，如果是，则tr无须再克隆，并且注销这个TD的克隆属性
-                    var newVal = tdToObj(optData, optNewVal, setExtData, (isUndefined(opt['td']) ? 'th':'td') );//创建新的[TD]
+                    var newVal = tdToObj(data_, optNewVal, setExtData, (isUndefined(opt['td']) ? 'th':'td') );//创建新的[TD]
                     // console.log('tr newVal_______||||||||||||||||||||||||||||||end:',newVal);
                     newVal.forEach(function(td_) {
                         objPushVal(obj_, td_);
@@ -4324,11 +4358,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 }
             } else if(tag == 'td') { //value is {}
                  var valObj = opt['value'] || {};
-                 var data_ = opt['data'] || {};
 
                 // console.log('AppendTd@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_', opt, valObj);
                  if(valObj instanceof $) { //jq对象
-                     console.log('jq对象 ', valObj);
+                     // console.log('jq对象 ', valObj, data_);
                      if(hasData(data_)) {
                          renewObjData(valObj, data_);
                      }
@@ -4355,11 +4388,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                              obj_.append(val_);
                              val_[parentObjKey] = obj_;
                          } else {
+                             // console.log('isObj 111', valObj);
                              createDom(val_);
                          }
                      });
                  } else if(isObj(valObj)) {
-                     // console.log('isObj ', valObj);
+                     // console.log('isObj 222', valObj);
                      createDom(valObj);
                  } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
                      domAppendNode(obj_, opt, hasSetData);
@@ -4411,18 +4445,17 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 return makeDom({
                     'tag': tag,
                     'options': optionsGet,
-                    'extend_attr': extendAttr,
                 });
             },
             updates: function(dataName, exceptObj) {//数据被动同步
                 //console.log('updates this');
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(obj);
                     //console.log('updateNodeText this');
-                    updateNodeText(this,$.trim(options['bind']), exceptObj);
+                    updateNodeText(this,$.trim(setBind), exceptObj);
                     if(this.whenUpdate) {
-                        this.whenUpdate(this, getObjData($.trim(options['bind'])));
+                        this.whenUpdate(this, getObjData($.trim(setBind)));
                     }
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) {
@@ -4444,12 +4477,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
     //创建简单的标签对象
     global.makeA = function(defaultOps) {
-        var extendAttr = {};
-        if(isUndefined(defaultOps['href'])) extendAttr = {'href' : 'javascript: void(0);'};
         return makeDom({
             'tag': 'a',
             'options': defaultOps,
-            'extend_attr': extendAttr,
         });
     };
     global.makeDiv = function(defaultOps) {
@@ -4577,7 +4607,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
      */
     global.makeList = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         var obj = $('<ul></ul>');
         obj[objValObjKey] = [];//初始化对象的子对象
         obj[objLastValKey] = [];//初始化对象的子对象
@@ -4604,6 +4633,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //更新list.data
         obj.renewSonLen = function (opt) {
+            var newData = getOptVal(opt, ['data'], {});
             if(liIsArray) {
                 return ;//数组格式的li不需要执行渲染
             }
@@ -4611,7 +4641,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             var sonFirst = sons[0];
             if(isUndefined(opt['data'])) return;
             var maxNum = getOptVal(opt, ['maxNum', 'max_num', 'maxLen', 'max_len'], false);
-            var newData = cloneData(opt['data']);
             if(hasData(newData) && maxNum && isNumber(maxNum)) {
                 newData = newData.slice(0, maxNum);
             }
@@ -4630,7 +4659,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(nowValLen ==0 && !obj['default_li'] ) {
                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                     var newOpt = cloneData(sonFirst['options']);
-                    newOpt = getSourceOpt(newOpt);
                     newOpt['tag'] = 'li';
                     obj['default_li'] = sonFirst.cloneSelf(newOpt);
                 }
@@ -4662,7 +4690,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         if(!hasData(sons)) {
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(obj['default_li']['options']);
-                            newOpt = getSourceOpt(newOpt);
                             newOpt['tag'] = 'li';
                             newLi = obj['default_li'].cloneSelf(newOpt);
                             sonFirst = newLi;
@@ -4673,7 +4700,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(sonFirst['options']);
                             newOpt['tag'] = 'li';
-                            newOpt = getSourceOpt(newOpt);
                             newLi = sonFirst.cloneSelf(newOpt);
                             //console.log('sonFirst.clone');
                             //console.log(newLi);
@@ -4752,12 +4778,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 } else {
                     var liObj;
                     //console.log('index:'+ index);
-                    var checkDataChange = optionAddData(newTestOpt, tmpNewData_);
+                    var checkDataChange = optionAddData(obj, newTestOpt, tmpNewData_);
                     var dataHashChange = checkDataChange[1];
                     //console.log('liOpt');
-                    //console.log('liOptWidthNewData');
-                    //console.log(liOptWidthNewData);
-                    liOpt = getSourceOpt(liOpt);
                     liOpt['tag'] = 'li';
                     // //首次空时直接用第一份参数创建li
                     if(obj[objValObjKey].length == 0) {
@@ -4788,7 +4811,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         optionsData = optionsData[0];
                     }
                     //console.log(liOpt);
-                    var OptBack = optionAddData(liOpt, optionsData);
+                    var OptBack = optionAddData(obj, liOpt, optionsData);
                     liOpt = OptBack[0];
                     var liObj = obj.makeSonLi(liOpt);
                     //console.log(liObj);
@@ -4936,7 +4959,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             cloneTr['tag'] = 'tr';
             cloneTr['data'] = tmpData;
             cloneTr['extendParentData'] = true;//强制继承父data更新
-            // console.log('cloneTr', index, cloneTr, tmpData);
+            // console.log('cloneRepeatTr', index, cloneTr, tmpData);
             var newTr = global.makeTr(cloneTr);
             newTr[parentObjKey] = obj;//分配父对象
             if(isUndefined(obj[objValObjKey])) {
@@ -5043,17 +5066,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //创建多个子对象
         function makeRepeatTrs(trOpts, trOneData, dataIndex) {
-            var hasSetData = hasData(trOpts['data']);
+            var hasSetData = hasData(trOneData);
             var extendParentData = hasSetData ? false : true;
             // console.log('make RepeatTrs ________dataIndex:', dataIndex, trOneData, extendParentData);
             //new trs
             var trObj;
             //第一行data直接用子对象生成 span->td->tr
             if(dataIndex == 0) {
+                // console.log('line1_________', trOneData, trOpts);
                 $.each(trOpts, function (n, tmpOpt_) {
-                    tmpOpt_ = copySourceOpt(tmpOpt_);//克隆
                     tmpOpt_['extendParentData'] = extendParentData;
-                    // console.log('trData_________', trOneData, tmpOpt_);
                     if(hasSetData) tmpOpt_['data'] = trOneData; //必须克隆完再更新data
                     // console.log('make 000000000000:', tmpOpt_);
                     var newTrObj = global.makeTr(tmpOpt_);
@@ -5068,9 +5090,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 });
             } else {
                 //第2行data开始 要用sor_opt重新生成新的 tr->td->span
-                var opts = obj.sor_opt;
-                // console.log('line2_________', opts);
-                $.each(opts['tr'], function (n, tmpOpt_) {
+                // console.log('line2_________', trOpts);
+                $.each(trOpts, function (n, tmpOpt_) {
+                    tmpOpt_ = copySourceOpt(tmpOpt_);//克隆
+                    // console.log('tmpOpt_', tmpOpt_);
                     if(hasSetData) tmpOpt_['data'] = trOneData;
                     tmpOpt_['extendParentData'] = extendParentData;
                     var newTrObj = global.makeTr(tmpOpt_);
@@ -5127,7 +5150,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                             var trObj = global.makeTr(trOpt);
                             var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
                             if(!tabDataFrom && hasData(tabData)) {
-                                var sonOptBack = optionAddData(trOpt, tabData);
+                                var sonOptBack = optionAddData(trObj, trOpt, tabData);
                                 var tmpData = sonOptBack[0]['data'];
                                 trObj['data'] = tmpData; //data不能提前赋予  否则会导致无法继承父data
                             }
@@ -5247,11 +5270,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     /* 创建 输入框  */
     global.makeInput = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         //input不能直接带form-control样式 会被外层div引起弯角变化
         var obj = $('<span></span>');
         var inputBind = $.trim(getOptVal(options, ['bind'], '')); //数据绑定
         var inputType = $.trim(getOptVal(options, ['type'], 'text')); //数据绑定
+        var sourceVal = getOptVal(options, 'value', '');
         obj.textClearObj  = null; //input右侧清除内容的小x
         obj.menu = null;
         obj.input = null;
@@ -5279,18 +5302,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         //更新input的可读状态
         obj.renewReadonly = function(opt) {
-            var sourceReadonly = opt['source_readonly'] || opt['readonly'] || opt['readOnly'];
-            var newVal;
-            var newData = opt['data'];
-            if(strHasKuohao(sourceReadonly, 'public')) {
-                newVal = strObj.formatStr(sourceReadonly, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else if(strHasKuohao(sourceReadonly, 'data')) {
-                newVal = strObj.formatStr(sourceReadonly, newData||{}, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceReadonly;
-            }
+            var sourceReadonly = getOptVal(opt, ['readonly','readOnly'], '');
+            var readKey = isUndefined(opt['readonly']) ? 'readonly' : 'readOnly';
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceReadonly, readKey);
             if(strInArray(newVal, [true, 'true', 'readonly', 'readOnly']) !==-1) {
                 obj.input.attr('readonly', true);
             } else {
@@ -5299,30 +5314,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         //更新input插件val
         obj.formatVal = function (opt) {
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal;
-            var newData = opt['data'] || {};
-            // console.log('format.InputVal:', newData, sourceVal);
-            var sourceValIsPub = strHasKuohao(sourceVal, 'public');
-            var sourceValIsData = strHasKuohao(sourceVal, 'data');
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             var renewBind = true;
-            if(sourceValIsPub ||sourceValIsData) {
-                if(!opt['source_value']) opt['source_value'] = sourceVal;
-                if(sourceValIsPub) {
-                    newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                } else if(sourceValIsData) {
-                    newVal = strObj.formatStr(sourceVal, newData||{}, 0, obj, 'value');
-                }
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
             obj[objAttrHasKh] = true;
             obj.setRealInputVal(newVal, renewBind, true, [obj]);
             if(obj.setLrBtnDisable) obj.setLrBtnDisable();
             if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                obj.lazyCall(obj, newData, livingObj);
             }
+
         };
         //更新size的样式
         obj.renewSizeClass = function (newSize) {
@@ -5870,7 +5871,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     if($.inArray(obj, exceptObj) ==-1) {
                         // console.log('exceptObj.push:');
                         exceptObj.push(obj);
-                        obj.setRealInputVal(getObjData($.trim(options['bind'])), false);
+                        obj.setRealInputVal(getObjData($.trim(setBind)), false);
                     }
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
@@ -5904,46 +5905,34 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     //创建图片
     global.makeImg = function (sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         var obj = $('<img />');
+        var sourceVal = getOptVal(options, ['src', 'value'], '');
+        var setBind = getOptVal(options, ['bind'], '');
+        var valKey = !isUndefined(options['src']) ? 'src': '';
+        if(!valKey) {
+            valKey = !isUndefined(options['value']) ? 'value': '';
+        }
+        if(!valKey) {
+            valKey = 'src';
+        }
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
         var valueStrFormatdSuccess = false;
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
-            // console.log('formatImg.src');
             opt = opt || [];
-            var sourceVal = opt['source_src'] || opt['src'];
-            var hasData = !isUndefined(opt['data']) ? opt['data'] : false;
-            var newVal;
-            var canSetSrc = false;//有data或允许渲染才可以设置src 防止src访问的是未渲染的字符串
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-                canSetSrc = true;
-            }else if(strHasKuohao(sourceVal, 'data')) {
-                if(hasData) {
-                    newVal = strObj.formatStr(sourceVal, opt['data'], 0, obj, 'value');
-                    obj[objAttrHasKh] = true;
-                    canSetSrc = true;
-                }
-            } else {
-                newVal = sourceVal;
-                canSetSrc = true;
-            }
-            if (!optionIsSame(obj, opt, 'src')) {
-                valueStrFormatdSuccess = true;
-            }
-            if(canSetSrc && valueStrFormatdSuccess) {
+            var newData = !isUndefined(opt['data']) ? opt['data'] : false;
+            var newVal = _onFormatVal(obj, newData,  sourceVal, valKey);
+            if(newVal && !strHasKuohao(newVal)) {
                 obj.attr('src', newVal);
             }
             var renewBind = obj[objAttrHasKh]==true;
-            if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
-                updateBindObj($.trim(options['bind']), newVal, [obj]);
+            if(setBind && renewBind) {//触发数据同步  触发赋值 */
+                updateBindObj($.trim(setBind), newVal, [obj]);
             }
             if(valueStrFormatdSuccess) {
                 if(obj.lazyCall) {
-                    obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                    obj.lazyCall(obj, newData, livingObj);
                 }
             }
         };
@@ -5971,9 +5960,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             updates: function(dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.attr('src', getObjData($.trim(options['bind'])));
+                    this.attr('src', getObjData($.trim(setBind)));
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     renewObjBindAttr(this, dataName);
@@ -5993,8 +5982,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             set: function(n) {     //支持外部设值
                 //console.log('set img val:'+ n);
-                if (!isUndefined(options['bind'])) {
-                    updateBindObj($.trim(options['bind']), n, [obj]);//同步更新
+                if (!isUndefined(setBind)) {
+                    updateBindObj($.trim(setBind), n, [obj]);//同步更新
                 }
                 this.attr('src', n);
             }
@@ -6006,8 +5995,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 return this.attr('src');
             },
             set: function(n) {     //支持外部设值
-                if (!isUndefined(options['bind'])) {
-                    updateBindObj($.trim(options['bind']), n, [obj]);//同步更新
+                if (!isUndefined(setBind)) {
+                    updateBindObj($.trim(setBind), n, [obj]);//同步更新
                 }
                 this.attr('src', n);
             }
@@ -6023,9 +6012,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     //num 后面跟随数值
     global.makeBtn = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
-        var extendAttr = {};
-        if(isUndefined(options['type'])) extendAttr['type'] = 'button';
         var optData = !isUndefined(options['data']) ? options['data'] : {};
         var valueStr = !isUndefined(options['value']) ? options['value'] : "";
         var restNum = !isUndefined(options['rest_time']) ? options['rest_time'] : 0;
@@ -6084,7 +6070,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     setTimeout(function () {
                         rest_time -= parseFloat(option_.step);
                         optData['rest_time'] = rest_time;
-                        let val_ = option_.source_value + '{{rest_time}>0?"({rest_time})":""}';
+                        let val_ = sourceVal + '{{rest_time}>0?"({rest_time})":""}';
                         var newStr = strObj.formatStr(val_, optData, 0, thisObj, 'value');
                         thisObj.renewVal(newStr);
                         if(rest_time == 0) {
@@ -6112,23 +6098,20 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         options[objValIsNode] = false; //不允许再append val
         options['afterCreate'] = funcAfterCreate; //不允许再append val
-        var newBtn = makeDom({tag:'button', 'options':options, 'extend_attr':extendAttr});
+        var newBtn = makeDom({tag:'button', 'options':options});
         return newBtn;
     };
 //生成表单
     global.makeForm = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
-        var extendAttr = {};
         if(isUndefined(options['type'])) options['type'] = 'post';//post/get//upload
         var url = options['url'] || '#';//post url
-        extendAttr['class_extend'] = 'form-horizontal';
         var formType = options['type'];
         var defaultSubmit = options['submit'] || null;
         var replaceDataFunc = getOptVal(options, ['replaceData', 'replace_data'], null);
         var postData = getOptVal(options, ['post_data', 'postData'], null);
         var afterCreate = getOptVal(options, ['afterCreate', 'after_create'], false);
-        if(formType == 'upload') extendAttr['enctype'] = 'multipart/form-data'; //文件上传表单
+        if(formType == 'upload') options['enctype'] = 'multipart/form-data'; //文件上传表单
         var autoFunc = function (thisObj, options_) {
             //支持打包uri
             thisObj.extend({
@@ -6177,12 +6160,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         options['submit'] = submitSys;
         options[objValIsNode] = false; //不允许再append val
-        return makeDom({tag:'form', 'options': options, 'extend_attr':extendAttr, 'afterCreate':autoFunc});
+        return makeDom({tag:'form', 'options': options, 'afterCreate':autoFunc});
     };
 //生成快速编辑的表单
     global.makeFormEdit = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         var topTitle = options['top_title'] ||  options['topTitle'] || null;
         var optionsBox = $.extend({}, options);
         var editVal = options['value'] || [];
@@ -6219,7 +6201,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         */
     global.makeSwitch = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         if(isUndefined(options['value'])) options['value'] = '';
         var selectVal = options['value'];
         var obj = $('<span></span>');
@@ -6230,6 +6211,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj[objValIsNode] = false;
         obj['switchVal'] = selectVal;
         obj['switchText'] = '';
+        var sourceVal = getOptVal(options, 'value', '');
         var iconObj = global.makeSpan({
             'class': 'icon_box',
             'value': '<span class="icon_par"><i class="icon"></i></span><span class="text1"></span><span class="text2"></span>'
@@ -6240,23 +6222,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newData = opt['data']||{};
-            var newVal ;
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
-            selectVal = newVal;
-            opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
-            obj.valChange(newVal, [obj], false);//自身格式化 不能更新自己的bind 会导致死循环
+            var newData = getOptVal(opt, ['data'], {});
+            var selectVal = _onFormatVal(obj, newData,  sourceVal);
+            opt['value'] = selectVal; //参数要改变 防止外部取出来的仍是括号
+            obj.valChange(selectVal, [obj], false);//自身格式化 不能更新自己的bind 会导致死循环
             if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                obj.lazyCall(obj, newData, livingObj);
             }
         };
 
@@ -6311,16 +6282,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 // console.log('newText', newVal, setText, renewBind, newText);
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
                 if(renewBind) {
-                    if(newVal.length && options['bind'] && renewBind) {
-                        updateBindObj($.trim(options['bind']), newVal, exceptObj);
+                    if(newVal.length && setBind && renewBind) {
+                        updateBindObj($.trim(setBind), newVal, exceptObj);
                     } else {
-                        var lastVal = isUndefined(livingObj['data'][options['bind']]) ? null : livingObj['data'][options['bind']];
+                        var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
                         if(lastVal) {
                             obj.value = lastVal;
                         }
                     }
-                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                        renewObjBindAttr(obj, options['bind']);
+                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                        renewObjBindAttr(obj, setBind);
                     }
                 }
                 if(setText && newText !=='') {
@@ -6389,9 +6360,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             updates: function(dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
                 console.log('updates.switch');
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.valChange(getObjData($.trim(options['bind'])), exceptObj, false)
+                    this.valChange(getObjData($.trim(setBind)), exceptObj, false)
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     renewObjBindAttr(this, dataName);
@@ -6414,14 +6385,23 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     };
 
     //创建多个选项的开关
-    global.makeSwitchs = function(sourceOptions) {
+    global.makeSwitchs = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        var obj = $('<span></span>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
         var options = cloneData(sourceOptions);
-        options = options || {};
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
         if(isUndefined(options['name'])) options['name'] = 'no_name';
         if(isUndefined(options['value'])) options['value'] = '';
         var selectVal = options['value'];
         var optItems = options['items'] || [];
-        var obj = $('<span></span>');
         options['class_extend'] = 'diy_switch';
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
@@ -6433,23 +6413,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newData = opt['data']||{};
-            var newVal ;
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
-            selectVal = newVal;
-            opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
-            obj.valChange(newVal, [obj], false);//自身格式化 不能更新自己的bind 会导致死循环
+            var newData = getOptVal(opt, ['data'], {});
+            selectVal = _onFormatVal(obj, newData,  sourceVal);
+            opt['value'] = selectVal; //参数要改变 防止外部取出来的仍是括号
+            obj.valChange(selectVal, [obj], false);//自身格式化 不能更新自己的bind 会导致死循环
             if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                obj.lazyCall(obj, newData, livingObj);
             }
         };
 
@@ -6485,16 +6454,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 // console.log('newText', newVal, setText, renewBind, newText);
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
                 if(renewBind) {
-                    if(newVal.length && options['bind'] && renewBind) {
-                        updateBindObj($.trim(options['bind']), newVal, exceptObj);
+                    if(newVal.length && setBind && renewBind) {
+                        updateBindObj($.trim(setBind), newVal, exceptObj);
                     } else {
-                        var lastVal = isUndefined(livingObj['data'][options['bind']]) ? null : livingObj['data'][options['bind']];
+                        var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
                         if(lastVal) {
                             obj.value = lastVal;
                         }
                     }
-                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                        renewObjBindAttr(obj, options['bind']);
+                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                        renewObjBindAttr(obj, setBind);
                     }
                 }
                 if(setText && newText !=='') {
@@ -6534,9 +6503,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             updates: function(dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.valChange(getObjData($.trim(options['bind'])), exceptObj, false)
+                    this.valChange(getObjData($.trim(setBind)), exceptObj, false)
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     renewObjBindAttr(this, dataName);
@@ -6556,10 +6525,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj; //makeSwitch
     };
     //创建Nav选项卡
-    global.makeNav = function(sourceOptions) {
+    global.makeNav = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        var obj = $('<div></div>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
         var options = cloneData(sourceOptions);
-        options = options || {};
-        if(isUndefined(options['value'])) options['value'] = '';
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
         var navVal = options['value'];
         var navUl = options['ul']||[];
         var navData = options['data']||[];
@@ -6580,7 +6558,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(objExtendClass) options['class'] = classAddSubClass(options['class'], objExtendClass, 'add');
         if(navVal) delete options['value'];
         options['data-value'] = navVal;
-        var obj = global.makeDiv(options);
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
         obj['nav_obj'] = [];
@@ -6618,18 +6595,18 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             });
             obj.attr('data-value', newVal);
             //触发数据同步  触发赋值 */
-            if(renewBind && options['bind']) {
+            if(renewBind && setBind) {
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
                 if(newVal.length) {
-                    updateBindObj($.trim(options['bind']), newVal, exceptObj);
+                    updateBindObj($.trim(setBind), newVal, exceptObj);
                 } else {
-                    var lastVal = isUndefined(livingObj['data'][options['bind']]) ? null : livingObj['data'][options['bind']];
+                    var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
                     if(lastVal) {
                         obj['navClick'](lastVal, [obj]);
                     }
                 }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                    renewObjBindAttr(obj, options['bind']);
+                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                    renewObjBindAttr(obj, setBind);
                 }
 
             }
@@ -6756,9 +6733,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             updates: function(dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    this.valChange(getObjData($.trim(options['bind'])), exceptObj, false)
+                    this.valChange(getObjData($.trim(setBind)), exceptObj, false)
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     //console.log('updates');
@@ -6778,17 +6755,25 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj; //makeSwitch
     };
     //创建items
-    global.makeItems = function(sourceOptions) {
-        var options = cloneData(sourceOptions);
-        options = options || {};
+    global.makeItems = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
         var obj = $('<dd></dd>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var options = cloneData(sourceOptions);
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
         obj['tag'] = 'dd';
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
         obj['createItem'] = false;
         obj['multi'] = undefined;
         obj['itemValArray'] = [];
-        var itemClassName = 'item_container';//带data的ul的classname
         obj.valueSeted = false;//当前对象的value是否设置完成
         obj.menuXuanranSuccess = false;//当前对象的menu是否渲染完成 [menu需要渲染 才会用到]
         var autoRenewMenuText = false;//当前对象的menu的text和val是否同时渲染完成
@@ -6796,18 +6781,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj.formatVal = function (opt) {
             // console.log('format -- ObjVal', opt);
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal;
-            //每次格式化 优先取格式化前的source value
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            }else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             obj.valueSeted = true;
             obj.setItemVal(newVal);
@@ -6818,8 +6793,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 obj['multi'] = true;
             }
             if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                obj.lazyCall(obj, newData, livingObj);
             }
+
         };
 
         //支持外部设置 取值
@@ -6950,19 +6926,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 obj.attr('data-value', valStr);
             }
             obj.itemValArray = newValArray;
-            if(renewBind && options['bind']) {
+            if(renewBind && setBind) {
                 //触发数据同步  触发赋值 */
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
                 if(valStr.length) {
-                    updateBindObj($.trim(options['bind']), valStr, exceptObj);
+                    updateBindObj($.trim(setBind), valStr, exceptObj);
                 } else {
-                    var lastVal = isUndefined(livingObj['data'][options['bind']]) ? null : livingObj['data'][options['bind']];
+                    var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
                     if(lastVal) {
                         obj.value = lastVal;
                     }
                 }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                    renewObjBindAttr(obj, options['bind']);
+                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                    renewObjBindAttr(obj, setBind);
                 }
             }
         };
@@ -7117,9 +7093,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             updates: function(dataName, exceptObj) {//数据同步
                 //console.log(dataName);
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    this.setItemVal(getObjData($.trim(options['bind'])), exceptObj, false);
+                    this.setItemVal(getObjData($.trim(setBind)), exceptObj, false);
                     renewMenuTextByVal();
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
@@ -7142,9 +7118,20 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj; //makeItems
     };
 //生成 下拉菜单
-    global.makeSelect = function(sourceOptions) {
+    global.makeSelect = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        var obj = $('<div></div>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
         var options = cloneData(sourceOptions);
-        options = options || {};
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
+
         //div + contenteditable="true" 可输入 tabindex 用于触发丢焦
         var objExtendClass = 'btnGLr';
         var inputSize = options['size'] || '';
@@ -7162,14 +7149,14 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             options['default_text'] = selectDefaultText;
             delete options['defaultText'];
         }
-        var obj = $('<div>\
-            <div class="inner"> \
+        obj.append($('<div class="inner"> \
                 <div class="title_wrap '+ objExtendClass +' ">\
                     <div class="select_text btnLr btnLrDefault" tabindex="1">'+ selectDefaultText +'</div>\
                     <span class="btnLr btnLrDefault" type="button"><span class="caret"></span></> \
                 </div> \
-             </div>\
-         </div>');
+             </div>'));
+
+
         var objInner = obj.find('.inner');
         obj['multi'] = undefined;
         obj['last_options'] = getOptVal(options, 'last_options', {});
@@ -7262,19 +7249,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal;
             //每次格式化 优先取格式化前的source value
-            var newData = {};
-            if(strHasKuohao(sourceVal, 'public')) {
-                newData = livingObj['data'];
-                newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-            } else if(strHasKuohao(sourceVal, 'data')) {
-                newData = opt['data'] || {};
-                newVal = strObj.formatStr(sourceVal, newData, 0, obj, 'value');
-            } else {
-                newVal = sourceVal;
-            }
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             if(obj.menu.menuXuanranSuccess === true && !obj.hasRenewSonObj) {
                 if(obj[sonSelectKey]) {
                     obj.hasRenewSonObj = true;
@@ -7293,8 +7270,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 autoRenewSelectMenu = true;
             }
             if(obj.lazyCall) {
-                obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                obj.lazyCall(obj, newData, livingObj);
             }
+
         };
 
         //更新选中的值和文本
@@ -7303,19 +7281,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             renewBind = isUndefined(renewBind) ? true : renewBind;
             if(obj['menu'].value != newVal) obj['menu'].value = newVal;
             // console.log('setSelectVal', newVal, renewBind);
-            if(renewBind && options['bind']) {
+            if(renewBind && setBind) {
                 //触发数据同步  触发赋值 */
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
                 if(newVal !== '') {
-                    updateBindObj($.trim(options['bind']), newVal, exceptObj);
+                    updateBindObj($.trim(setBind), newVal, exceptObj);
                 } else {
-                    var lastVal = isUndefined(livingObj['data'][options['bind']]) ? null : livingObj['data'][options['bind']];
+                    var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
                     if(lastVal !== '') {
                         obj.setSelectVal(lastVal, [obj]);
                     }
                 }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                    renewObjBindAttr(obj, options['bind']);
+                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                    renewObjBindAttr(obj, setBind);
                 }
             }
         };
@@ -7603,8 +7581,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             updates: function(dataName, exceptObj) {//数据同步
                 //console.log('updates:'+dataName);
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
-                    this.value = (getObjData($.trim(options['bind'])));
+                if(setBind && $.inArray(this, exceptObj) == -1) {
+                    this.value = (getObjData($.trim(setBind)));
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     renewObjBindAttr(this, dataName);
@@ -7628,15 +7606,23 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     //创建check
     var onlyCheckeds = {};
     global.makeCheck = global.makeChecked = global.makeCheckbox = function(sourceOptions, sureSource) {
-        sureSource = sureSource || false;
         sourceOptions = sourceOptions || {};
-        sourceOptions['tag'] = 'checked';
+        sureSource = sureSource || false;
         var obj = $('<i></i>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var options = cloneData(sourceOptions);
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
+        sourceOptions['tag'] = 'checked';
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
         }
-        var options = cloneData(sourceOptions);
         if(isUndefined(options['name'])) {
             var newname = createRadomName('check');
             options['name'] = newname;
@@ -7655,24 +7641,15 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj.formatVal = function (opt) {
             // console.log('format Val', obj);
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal;
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             //每次格式化 优先取格式化前的source value
-            if (strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else if (strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, opt['data'] || {}, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
             if ($.isArray(newVal)) newVal = newVal.join(',');
             var renewBind = strHasKuohao(newVal, 'public');
             obj.callRenewBind(newVal, [obj], renewBind);
             if(opt.lazyCall) {
                 // console.log('format Val.lazyCall');
-                opt.lazyCall(obj, opt['data'] || {}, livingObj);
+                opt.lazyCall(obj, newData, livingObj);
             }
         };
 
@@ -7685,13 +7662,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             } else {
                 obj.checked_value = newVal;
             }
-            if (options['bind'] && renewBind) {
+            if (setBind && renewBind) {
                 if($.inArray(obj, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    updateBindObj(options['bind'], newVal, exceptObj);
+                    updateBindObj(setBind, newVal, exceptObj);
                 }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                    renewObjBindAttr(obj, options['bind']);
+                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                    renewObjBindAttr(obj, setBind);
                 }
             }
             var setText = getOptVal(options, ['set_text', 'setText'], null);
@@ -7843,8 +7820,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //console.log(dataName);
                 //console.log(obj[objBindAttrsName]);
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
-                    var checked = (getObjData($.trim(options['bind'])));
+                if(setBind && $.inArray(this, exceptObj) == -1) {
+                    var checked = (getObjData($.trim(setBind)));
                     if(!checked || checked==0 || checked=='false') {
                         this.removeAttr('checked');
                     } else {
@@ -7886,8 +7863,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
         }
-        console.log('makeCheck sor_opt', obj.sor_opt);
         var options = cloneData(sourceOptions);
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
+
         var objInner = obj.find('.inner');
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
@@ -7898,20 +7879,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj.formatVal = function (opt) {
             // console.log('radio format Val', opt);
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal;
-            //每次格式化 优先取格式化前的source value
-            if (strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else if (strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, opt['data'] || {}, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
-            // console.log('valueStrFormatdSuccess', valueStrFormatdSuccess);
-
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             if (!optionIsSame(obj, opt, 'value')) {
                 valueStrFormatdSuccess = true;
             }
@@ -7919,7 +7888,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             if(valueStrFormatdSuccess) {
                 // console.log('(obj.lazyCall', obj.lazyCall);
                 if(opt.lazyCall) {
-                    opt.lazyCall(obj, opt['data'] || {}, livingObj);
+                    opt.lazyCall(obj, newData, livingObj);
                 }
             }
             //console.log(obj);
@@ -7936,13 +7905,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             } else {
                 obj.value = newVal;
             }
-            if (options['bind'] && renewBind) {
+            if (setBind && renewBind) {
                 if($.inArray(obj, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    updateBindObj(options['bind'], newVal, exceptObj);
+                    updateBindObj(setBind, newVal, exceptObj);
                 }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][options['bind']])) {
-                    renewObjBindAttr(obj, options['bind']);
+                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                    renewObjBindAttr(obj, setBind);
                 }
             }
             var setText = getOptVal(options, ['set_text', 'setText'], null);
@@ -8049,11 +8018,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             updates: function (dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
-                var newVal = getObjData($.trim(options['bind']));
+                var newVal = getObjData($.trim(setBind));
                 if( $.inArray(obj, exceptObj) == -1 && strInArray(newVal, obj['menu']['disableVals']) == -1) {
                     // console.log('newVal', newVal, obj['menu']['disableVals']);
                     exceptObj.push(obj);
-                    if(options['bind']) {
+                    if(setBind) {
                         obj.callRenewBind(newVal, exceptObj, false);
                     }
                     if (obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
@@ -8386,11 +8355,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
 
     //创建编辑器[属性：name,width,height,content urlencode , type:'uEditor|xheditor', editorObj: 回调的编辑器对象', 'remote':{ url: '/upload.php',success_val: '0308'}]
-    global.makeEditor = function(sourceOptions) {
-        var options = cloneData(sourceOptions);
-        options = options || {};
-        var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';
+    global.makeEditor = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        var editorId =  getOptVal(options, 'id', 'editormd');
         var obj = $('<textarea id="'+ editorId +'"></textarea>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var options = cloneData(sourceOptions);
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj['tag'] = 'editor';
         obj[objValIsNode] = false;
@@ -8399,18 +8376,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
-            var sourceVal = opt['source_value'] || opt['value'];
-            var newVal;
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            }else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
             opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             obj.renewVal(newVal);
             if (!optionIsSame(obj, opt, 'value')) {
@@ -8418,12 +8386,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 valueStrFormatdSuccess = true;
             }
             var renewBind = obj[objAttrHasKh]==true;
-            if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
-                updateBindObj($.trim(options['bind']), newVal, [obj]);
+            if(setBind && renewBind) {//触发数据同步  触发赋值 */
+                updateBindObj($.trim(setBind), newVal, [obj]);
             }
             if(valueStrFormatdSuccess) {
                 if(obj.lazyCall) {
-                    obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                    obj.lazyCall(obj, newData, livingObj);
                 }
             }
             if(obj[editorOut] && obj[editorOut].setContent) {
@@ -8635,9 +8603,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             updates: function(dataName, exceptObj) {//数据同步
                 //console.log(dataName);
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.renewVal(getObjData($.trim(options['bind'])));
+                    this.renewVal(getObjData($.trim(setBind)));
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     //console.log('updates datas');
@@ -8714,9 +8682,15 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return menu;
     }
 //创建上一页 下一页的分页功能
-    global.makePage = function(sourceOptions) {
+    global.makePage = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
         var options = cloneData(sourceOptions);
         var pageBody = $('<ul></ul>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
+        }
         pageBody['current_page'] = 1;
         pageBody.totalPage = 0;
         pageBody.fromPage  = 0;
@@ -8738,11 +8712,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             setPage: function (newP, exceptObj) {//数据被动同步
                 if(newP > pageBody.totalPage) return;
                 exceptObj = exceptObj || [];
-                if(options['bind']) {//触发数据同步  触发赋值 */
+                if(setBind) {//触发数据同步  触发赋值 */
                     if($.inArray(this, exceptObj) == -1) {
                         exceptObj.push(this);
                     }
-                    updateBindObj($.trim(options['bind']), newP, exceptObj);
+                    updateBindObj($.trim(setBind), newP, exceptObj);
                 }
                 var opt = options;
                 var li = pageBody.find("li[data-page='"+ newP +"']");
@@ -8979,9 +8953,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             updates: function(dataName, exceptObj) {//数据被动同步
                 //console.log('updates this');
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.setPage(getObjData($.trim(options['bind'])), exceptObj);
+                    this.setPage(getObjData($.trim(setBind)), exceptObj);
                 }
                 if(this[objBindAttrsName] && this[objBindAttrsName][dataName]) {
                     //console.log(getObjData(dataName));
@@ -9026,20 +9000,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //外部data 变化时更新type
         obj.renewType = function (opt) {
             opt = opt || [];
-            var type_ = opt['source_type'] || opt['type'] || ''; //每次格式化 优先取格式化前的value
-            if(strHasKuohao(type_, 'data')) {
-                opt['source_type'] = type_;
-                //console.log('has kuohao');
-                //console.log(val);
-                //console.log(opt['data']);
-                type_ = strObj.formatStr(type_, opt['data']||{}, 0, obj, 'type');
-                //console.log(type_);
-                obj[objAttrHasKh] = true;
-            } else if(strHasKuohao(type_, 'public')) {
-                opt['source_type'] = type_;
-                type_ = strObj.formatStr(type_, livingObj['data'], 0, obj, 'type');
-                obj[objAttrHasKh] = true;
-            }
+            var newData = getOptVal(opt, ['data'], {});
+            var type_ =  opt['type'] || ''; //每次格式化 优先取格式化前的value
+            var type_ = _onFormatVal(obj, newData,  type_, 'type');
             opt['type'] = type_; //参数要改变 防止外部取出来的仍是括号
             obj.setType(type_);
         };
@@ -9059,9 +9022,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(strInArray(newType, allowType) ==-1) newType = 's';
                 newType = formatType(newType);
                 exceptObj = exceptObj || [];
-                if(options['bind']) {//触发数据同步  触发赋值 */
+                if(setBind) {//触发数据同步  触发赋值 */
                     if($.inArray(this, exceptObj) == -1) exceptObj.push(this);
-                    updateBindObj($.trim(options['bind']), newType, exceptObj);
+                    updateBindObj($.trim(setBind), newType, exceptObj);
                 }
                 obj['current_type'] = newType;
                 sanjiaoIcon.attr('class', newType);
@@ -9094,9 +9057,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 dataName = $.trim(dataName);
                 //console.log('updates this');
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.setType(getObjData($.trim(options['bind'])), exceptObj);
+                    this.setType(getObjData($.trim(setBind)), exceptObj);
                 }
                 if(this[objBindAttrsName] && this[objBindAttrsName][dataName]) {
                     //console.log(getObjData(dataName));
@@ -9155,17 +9118,21 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     global.makeBar = function (sourceOptions, sureSource) {
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
-        var defaultOps = cloneData(sourceOptions);
         var obj = $('<div></div>');
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
         }
-        var extendAttr = defaultOps['extend_attr'] || {};
-        var afterCreate = getOptVal(sourceOptions, ['afterCreate', 'after_create'], false);
-        var options = $.extend({}, defaultOps);
-        options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
-        obj.returnVal = opt['value'] || '';
+        var options = cloneData(sourceOptions);
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
+        obj.returnVal = sourceVal;
         obj.htmObj = [];//初始化element节点
         if(isUndefined(options['value'])) options['value'] = '';
         obj['last_options'] = [];
@@ -9173,7 +9140,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj[objAttrHasKh] = false;
         var valueStrFormatdSuccess = false;
         // //支持外部设置值
-        Object.defineProperty(bar, 'value', {
+        Object.defineProperty(obj, 'value', {
             get: function () {
                 return obj.returnVal;
             },
@@ -9185,28 +9152,20 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         });
         //更新val
         obj.formatVal = function (opt) {
-            var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, bar, 'value');
-                bar[objAttrHasKh] = true;
-            }else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, bar, 'value');
-                bar[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             obj.returnVal = newVal; //参数要改变 防止外部取出来的仍是括号
-            if (!optionIsSame(bar, opt, 'value')) {
+            if (!optionIsSame(obj, opt, 'value')) {
                 valueStrFormatdSuccess = true;
             }
-            var renewBind = bar[objAttrHasKh]==true;
-            if(options['bind'] && renewBind) {//触发数据同步  触发赋值 */
-                updateBindObj($.trim(options['bind']), newVal, [bar]);
+            var renewBind = obj[objAttrHasKh]==true;
+            if(setBind && renewBind) {//触发数据同步  触发赋值 */
+                updateBindObj($.trim(setBind), newVal, [obj]);
             }
             if(valueStrFormatdSuccess) {
                 if(obj.lazyCall) {
-                    obj.lazyCall(bar, opt['data'] || {}, livingObj);
+                    obj.lazyCall(obj, newData, livingObj);
                 }
             }
             obj.moveBtnByVal(newVal);
@@ -9216,11 +9175,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj.extend({
             //主动更新数据
             renew: function(options_) {
-                options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
                 if(!options_)  return;
                 var barVal = options_['value'] || '';
                 var hasSetData = !isUndefined(options_['data']);
-                optionDataFrom(bar, options_);
+                optionDataFrom(obj, options_);
                 //console.log(dataFrom);
                 //console.log(data_);
                 var iconOpt = options_['icon']|| {};
@@ -9402,18 +9360,18 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //console.log('updates this:'+ dataName);
                 //console.log(exceptObj);
                 exceptObj = exceptObj || [];
-                if(options['bind']) {
+                if(setBind) {
                     if($.inArray(this, exceptObj) == -1) {
                         exceptObj.push(this);
                         //console.log('update this');
                         //console.log(exceptObj);
-                        var pubVal = getObjData($.trim(defaultOps['bind']));
+                        var pubVal = getObjData($.trim(setBind));
                         //console.log('updateNodeText this：'+ pubVal);
                         obj.returnVal = pubVal;
                         obj.moveBtnByVal(pubVal);
                     }
                 }
-                if(bar[objBindAttrsName] && bar[objBindAttrsName][dataName]) {
+                if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) {
                     //attrs(如:class) 中含{公式 {dataName} > 2}
                     //如果value中含{}也会由此处开始更新
                     //console.log('renew ObjAttr this');
@@ -9426,11 +9384,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //console.log('herea:');
         //console.log(bar);
         //console.log(defaultOps['value']);
-        obj.renew(defaultOps);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
-        optionGetSet(bar, defaultOps);
-        objBindVal(bar, defaultOps);//数据绑定
-        addCloneName(bar, defaultOps);//支持克隆
-        return bar;
+        obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        optionGetSet(obj, options);
+        objBindVal(obj, options);//数据绑定
+        addCloneName(obj, options);//支持克隆
+        return obj;
     };
     
     //创建树菜单对象 只能更新、修改起data的长度 data不能设置对象
@@ -9456,16 +9414,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         };
         //更新tree.data 如果含有带循环的tree 则只更新data的tr；反之更新全部tr
         obj.renewSonLen = function(opt) {
-            var demoData = opt['data'];
+            var newData = getOptVal(opt, ['data'], {});
             //console.log(obj);
-            //console.log(demoData);
-            //console.log(JSON.stringify(demoData));
-            var nowValLen = demoData.length;
+            var nowValLen = newData.length;
             var sons;
             if(hasData(this['treeLines'])) {
                 //console.log('hasData _____o');
                 sons = this['treeLines'];
-                var newData = cloneData(demoData);
                 if(!$.isArray(newData)) newData = [newData];
                 //如果之前产生过多的儿子而新数量变少要剔除
                 var lastValLen = sons.length;
@@ -9519,7 +9474,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                             //console.log('clone_tmpIndex:'+ tmpIndex);
                             //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                             var newOpt = cloneData(sons[0]['options']);
-                            newOpt = getSourceOpt(newOpt);
                             newChecked = sons[0].cloneSelf(newOpt);
                             //console.log('cloneOpt newChecked');
                             //console.log(newChecked);
@@ -9541,12 +9495,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj;
     };
     //创建树形分类 用于快速管理树形分类
-    global.makeTree = global.makeTrees = function(sourceOptions) {
-        var options = cloneData(sourceOptions);
-        //console.log('makeItems:');
-        //console.log(options);
-        options = options || {};
+    global.makeTree = global.makeTrees = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
         var obj = $('<div></div>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var options = cloneData(sourceOptions);
+        var setBind = getOptVal(options, ['bind'], '');
+        var sourceVal = getOptVal(options, ['value'], '');
+        //统一头部判断结束
+
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
         obj['createTree'] = false;
@@ -9568,18 +9529,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var sourceVal = opt['source_value'] || opt['value'];
             //每次格式化 优先取格式化前的source value
-            var newVal;
-            if(strHasKuohao(sourceVal, 'public')) {
-                newVal = strObj.formatStr(sourceVal, livingObj['data'], 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else if(strHasKuohao(sourceVal, 'data')) {
-                newVal = strObj.formatStr(sourceVal, opt['data']||{}, 0, obj, 'value');
-                obj[objAttrHasKh] = true;
-            } else {
-                newVal = sourceVal;
-            }
+            var newData = getOptVal(opt, ['data'], {});
+            var newVal = _onFormatVal(obj, newData,  sourceVal);
             opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             if(strHasKuohao(sourceVal)) {
                 if(!optionIsSame(obj, opt, 'value')) {
@@ -9598,7 +9550,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
             if(valueHasSeted) {
                 if(obj.lazyCall) {
-                    obj.lazyCall(obj, opt['data'] || {}, livingObj);
+                    obj.lazyCall(obj, newData, livingObj);
                 }
             }
         };
@@ -9620,12 +9572,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     obj_.checked = 0;
                 }
             });
-            if(options['bind'] && notifyOther) {
+            if(setBind && notifyOther) {
                 if($.inArray(obj, exceptObj) ==-1) {
                     exceptObj.push(obj);
                 }
                 //console.log('tree.updateBindObj:'+ newVal);
-                updateBindObj($.trim(options['bind']), newVal, exceptObj);
+                updateBindObj($.trim(setBind), newVal, exceptObj);
             }
         };
         //支持外部设置 取值
@@ -9739,8 +9691,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                             //所有父都要打勾
                             __parAddChecked(obj_);
                         }
-                        if(options['bind']) {
-                            updateBindObj($.trim(options['bind']), obj.value, [obj]);
+                        if(setBind) {
+                            updateBindObj($.trim(setBind), obj.value, [obj]);
                         }
                     };
 
@@ -9771,7 +9723,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                                 if(isOurObj(tmpObj)) {
                                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                                     var newOpt = cloneData(tmpObj['options']);
-                                    newOpt = getSourceOpt(newOpt);
                                     newSon = tmpObj.cloneSelf(newOpt);
 
                                 } else {
@@ -9793,7 +9744,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                                 if(isOurObj(tmpObj)) {
                                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
                                     var newOpt = cloneData(tmpObj['options']);
-                                    newOpt = getSourceOpt(newOpt);
                                     newSon = tmpObj.cloneSelf(newOpt);
                                 } else {
                                     newSon = tmpObj.clone();
@@ -9892,12 +9842,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             updates: function(dataName, exceptObj) {//数据同步
                 //console.log('uptree.dates______:'+dataName);
                 //console.log(exceptObj);
-                //console.log(getObjData($.trim(options['bind'])));
+                //console.log(getObjData($.trim(setBind)));
                 //console.log(getObjData(dataName));
                 exceptObj = exceptObj || [];
-                if(options['bind'] && $.inArray(this, exceptObj) == -1) {
+                if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    this.setTreeVal(getObjData($.trim(options['bind'])), false, exceptObj);
+                    this.setTreeVal(getObjData($.trim(setBind)), false, exceptObj);
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     //console.log('renewObjBindAttr');
@@ -10285,7 +10235,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     //创建嵌入的窗口
     global.makeIframe = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         if(!isUndefined(options['url']) && isUndefined(options['src'])) {
             options['src'] = options['url'];
         }
@@ -10331,7 +10280,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     //创建js头
     global.makeScript = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        options = options || {};
         if(!isUndefined(options['url']) && isUndefined(options['src'])) {
             options['src'] = options['url'];
         }

@@ -35,7 +35,6 @@
             }
         });
         require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-            var getDataUrl = '/index/tool/get_rows?num=2';
             //js造一个简单的表格
             var table = lrEle.makeTable({
                 'class': 'well',
@@ -67,7 +66,7 @@
                             // },
                             {
                                 value: lrEle.makeSpan({
-                                    value: 'dddd',
+                                    value: 'id:{id}',
                                     id_: '{id}',
                                     click: function (o) {
                                         lrBox.msgTisf(o.id_);
