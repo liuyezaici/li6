@@ -535,6 +535,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 if(n.substr(0, 7) =='source_') {
                     return;
                 }
+                //系统参数 无须解析 当参数解析时 执行回调
+                if(n.substr(0, 9) =='onFormat_') {
+                    return;
+                }
                 //支持字符串中输入{公式} value已经在外部更新 这里只针对属性
                 // if(options['tag'] =='div') {
                 //     console.log('each.options.n', n, v);
@@ -2993,7 +2997,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             },
             addline:  function(afterFlag) {
                 if(isUndefined(afterFlag)) afterFlag = 'before';
-                var newOpt = thisObj.source_opt;
+                var newOpt = thisObj.sor_opt;
                 var newName;
                 newName = createRadomName(defaultOps['tag']); //为当前对象补充name
                 var parentObj = thisObj['parent'];//其父
@@ -4121,13 +4125,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     //拷贝源配置文件 主要是value为对象的要获取原参数
     function copySourceOpt(opt) {
         // console.log('____copy SourceOpt', opt);
-        var newOpt = {};
         var getArray = function (array_) {
             var arrayBack = [];
             $.each(array_, function (index_, val2_) {
                 if(isOurObj(val2_)) {
-                    console.log('isOurObj', val2_);
-                    arrayBack.push(val2_.source_opt);
+                    // console.log('isOurObj', val2_, 'data:', val2_['data']);
+                    arrayBack.push(val2_.sor_opt);
+                    // console.log('isOurObj_sour', arrayBack);
                 } else if($.isArray(val2_)) {
                     arrayBack.push(getArray(val2_));
                 }  else if(isObj(val2_)) {
@@ -4147,13 +4151,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 }
                 // console.log('k__',k, val_);
                 if($.isArray(val_)) {
-                    console.log('isArray', val_, val_[0]);
+                    // console.log('isArray', val_, val_[0]);
                     // td: [{},{}]
                     backData[k] = getArray(val_);
                 } else if(isOurObj(val_)) {
-                    // console.log('isOurObj1', val_.source_opt);
-                    backData[k] = val_.source_opt;
-                    // console.log('isOurObj2.source_opt', val_.source_opt);
+                    // console.log('isOurObj1', val_.sor_opt);
+                    backData[k] = val_.sor_opt;
+                    // console.log('isOurObj2.sor_opt', val_.sor_opt);
                 }  else if(isObj(val_)) {
                     // console.log('isObj', val_);
                     backData[k] = checkAll(val_);
@@ -4163,21 +4167,26 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             });
             return backData;
         };
-        newOpt = checkAll(opt);
-        return newOpt;
+        return checkAll(opt);
     }
 
     //创建文本dom /a/p/span/div/li/td/em/b/i/
+    //sureSource 可以提前确定好配置参数 不用递归取子集
     function makeDom(sourceOptions) {
         var opt = cloneData(sourceOptions);
         opt = opt || {};
         var tag = opt['tag'] || 'span';
-        var defaultOps = opt['options'] || {};
+        var sureSource = opt['sureSource'] || false;
+        var defaultOps = cloneData(opt['options'] || {});//必须克隆
         defaultOps['tag'] = tag;
         var extendAttr = opt['extend_attr'] || {};
         var obj = $('<'+ tag +'></'+ tag +'>');
-        if(!obj.source_opt) obj.source_opt = copySourceOpt(cloneData(defaultOps));
-        console.log('obj.source_opt', obj.source_opt);
+        // console.log('makeDom', tag, 'sor_opt:',obj.sor_opt);
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
+        }
+        // console.log('makeDom2', tag, 'sor_opt:',obj.sor_opt);
         //必须设置name 否则拖动换排序时无法切换对象的子name
         if(isUndefined(defaultOps['name'])) {
             //td span 不需要加name 因为它们不参与循环
@@ -4249,27 +4258,32 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             opt= opt || [];
             if(!hasData(opt)) return '';
             tag = tag || 'span';
+            var setExtData = false;//子对象是否继承 在tr有data的情况下 td强制设为继承
+            if(!isUndefined(opt['extendParentData'])) {
+                setExtData = true;
+            }
+            //这里生成的dom都是提前获取好sor_opt的
             var createDom = function (newOpt) {
-                if(setExtData) {// 延续继承data
-                    newOpt['extendParentData'] = true;
-                }
-                // console.log('createDom************_', newOpt);
+                // console.log('create Dom************_', newOpt);
                 if(newOpt['tag']) {
+                    var data_ = opt['data'] || {};
                     if(hasData(data_)) {
                         newOpt['data'] = data_;
                     }
+                    if(setExtData) {// 延续继承data
+                        newOpt['extendParentData'] = true;
+                    }
                     if(newOpt['tag']=='checked') {
-                        valObj = global.makeCheck(newOpt);
+                        valObj = global.makeCheck(newOpt, true);
                     } else if(newOpt['tag']=='radio') {
-                        valObj = global.makeRadio(newOpt);
+                        valObj = global.makeRadio(newOpt, true);
                     } else {
-                        // console.log('makeDom ', valObj);
                         valObj = makeDom({
                             'tag': newOpt['tag'],
-                            'options': newOpt
+                            'options': newOpt,
+                            'sureSource': true,
                         });
                     }
-
                     if(isUndefined(obj_[objValObjKey])) {
                         obj_[objValObjKey] = [];
                     }
@@ -4294,10 +4308,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 } else {
                     // console.log('创建新的TD', optData, opt, opt['td']);
                     //所以这里的克隆属性要在maketr时判断是否克隆的TD，如果是，则tr无须再克隆，并且注销这个TD的克隆属性
-                    var setExtData = false;//子对象是否继承 在tr有data的情况下 td强制设为继承
-                    if(!isUndefined(opt['extendParentData'])) {
-                        setExtData = true;
-                    }
                     var newVal = tdToObj(optData, optNewVal, setExtData, (isUndefined(opt['td']) ? 'th':'td') );//创建新的[TD]
                     // console.log('tr newVal_______||||||||||||||||||||||||||||||end:',newVal);
                     newVal.forEach(function(td_) {
@@ -4312,15 +4322,11 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         });
                     }
                 }
-            }
-            else if(tag == 'td') { //value is {}
+            } else if(tag == 'td') { //value is {}
                  var valObj = opt['value'] || {};
                  var data_ = opt['data'] || {};
-                var setExtData = false;//子对象是否继承 在tr有data的情况下 td强制设为继承
-                if(!isUndefined(opt['extendParentData'])) {
-                    setExtData = true;
-                }
-                console.log('AppendTd@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_', opt, valObj);
+
+                // console.log('AppendTd@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_', opt, valObj);
                  if(valObj instanceof $) { //jq对象
                      console.log('jq对象 ', valObj);
                      if(hasData(data_)) {
@@ -4333,7 +4339,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                  } else if($.isArray(valObj)) {
                      $.each(valObj, function (n, val_){
                          if(val_ instanceof $) { //jq对象
-                             console.log('array.jq对象 ', val_);
+                             // console.log('array.jq对象 ', val_);
                              if(hasData(data_)) {
                                  renewObjData(val_, data_);
                              }
@@ -4349,28 +4355,30 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                              obj_.append(val_);
                              val_[parentObjKey] = obj_;
                          } else {
-                             // console.log('createDom', val_);
                              createDom(val_);
                          }
                      });
                  } else if(isObj(valObj)) {
-                     console.log('isObj ', valObj);
+                     // console.log('isObj ', valObj);
                      createDom(valObj);
                  } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
-                     return;
                      domAppendNode(obj_, opt, hasSetData);
                  }
-            }
-            else {
+            } else {
                 if(isUndefined(opt['value']) || opt['value']=='') opt['value'] = ' ';//必须输入空文本只能执行node替换
                 var optValStr = opt['value'] || '';
-                console.log('AppendVal+++++++++++++', optValStr);
+                // console.log('AppendVal+++++++++++++', optValStr);
                 if(isStrOrNumber(optValStr) ) {
                     domAppendNode(obj_, opt, hasSetData);
                 } else if($.isArray(optValStr) ) {
-                    $.each(optValStr, function (i_, opt_) {
-                        console.log('isArray +++++++++++++', opt_);
-                        // createDom(opt_);
+                    $.each(optValStr, function (i_, val_) {
+                        if(val_ instanceof $ || isOurObj(val_)) {
+                            // console.log('objPushVal+++++++++++++', val_);
+                            objPushVal(obj_, val_);
+                        } else {
+                            // console.log('create Dom++++++++++++', opt, val_);
+                            createDom(val_);
+                        }
                     });
                 } else {  //value is obj
                     // __clearSons(obj_); //如果是对象的val被修改，提前清空sons
@@ -4383,6 +4391,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             //主动更新数据
             renew: function(optionsGet) {
                 optionsGet = optionsGet || {};
+                // console.log('renew _________:', optionsGet['data'], this);
                 var hasSetData = !isUndefined(optionsGet['data']);
                 // if(tag == 'tr') {
                 //     console.log('renew tr:', optionsGet['data'], hasSetData);
@@ -4890,11 +4899,16 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
      //已选id
      obj.selected(idname)
      */
-    global.makeTable = function(sourceOptions) {
-        var options = cloneData(sourceOptions);
-        options = options || {};
+    global.makeTable = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
         var obj = $('<table width="100%" border="0"></table>');
         var tbody = $('<tbody></tbody>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var options = cloneData(sourceOptions);
         obj.append(tbody);
         obj.tag = 'table';
         obj.tBody = tbody;
@@ -4903,9 +4917,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         obj[objLastValKey] = [];
         obj['last_options'] = getOptVal(options, 'last_options', {});
         obj[objValIsNode] = false;
-        if(!obj.source_opt) {
-            obj.source_opt = copySourceOpt(sourceOptions);
-        }
         var tableIsClone = options[optionCallCloneKey] === true;
         //获取tr的循环个数
         var _getTrNum = function(opt) {
@@ -4921,9 +4932,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //更新table.data 如果含有带循环的tr 则只更新data的tr；反之更新全部tr
         var cloneRepeatTr = function(index, tmpData) {
-            var cloneTr = obj['source_opt']['tr'][index];
+            var cloneTr = cloneData(obj['sor_opt']['tr'][index]); //必须新克隆一个  不然会污染上一个tr的source opt
             cloneTr['tag'] = 'tr';
-            cloneTr['data'] = cloneData(tmpData);
+            cloneTr['data'] = tmpData;
             cloneTr['extendParentData'] = true;//强制继承父data更新
             // console.log('cloneTr', index, cloneTr, tmpData);
             var newTr = global.makeTr(cloneTr);
@@ -4940,7 +4951,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //数据循环时 使用此方法更新数据列表
         var renewSonLen_ = function (newData) {
             var sons;
-            var trOptLen = _getTrNum(obj.source_opt);
+            var trOptLen = _getTrNum(obj.sor_opt);
             sons = obj[objValObjKey] ;
             if(!$.isArray(newData)) newData = [newData];
             //如果之前产生过多的儿子而新数量变少要剔除
@@ -4998,7 +5009,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     }
                 }
             } else {
-                console.log('更新旧的tr ', newData);
+                // console.log('更新旧的tr ', newData);
                 obj.renewOldRepeatTr(newData);
             }
         };
@@ -5034,7 +5045,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         function makeRepeatTrs(trOpts, trOneData, dataIndex) {
             var hasSetData = hasData(trOpts['data']);
             var extendParentData = hasSetData ? false : true;
-            console.log('make RepeatTrs ________dataIndex:', dataIndex, trOneData, extendParentData);
+            // console.log('make RepeatTrs ________dataIndex:', dataIndex, trOneData, extendParentData);
             //new trs
             var trObj;
             //第一行data直接用子对象生成 span->td->tr
@@ -5042,7 +5053,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 $.each(trOpts, function (n, tmpOpt_) {
                     tmpOpt_ = copySourceOpt(tmpOpt_);//克隆
                     tmpOpt_['extendParentData'] = extendParentData;
-                    console.log('trData_________', trOneData, tmpOpt_);
+                    // console.log('trData_________', trOneData, tmpOpt_);
                     if(hasSetData) tmpOpt_['data'] = trOneData; //必须克隆完再更新data
                     // console.log('make 000000000000:', tmpOpt_);
                     var newTrObj = global.makeTr(tmpOpt_);
@@ -5056,9 +5067,9 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     obj.tBody.append(newTrObj);
                 });
             } else {
-                //第2行data开始 要用source_opt重新生成新的 tr->td->span
-                var opts = obj.source_opt;
-                console.log('line2_________', opts);
+                //第2行data开始 要用sor_opt重新生成新的 tr->td->span
+                var opts = obj.sor_opt;
+                // console.log('line2_________', opts);
                 $.each(opts['tr'], function (n, tmpOpt_) {
                     if(hasSetData) tmpOpt_['data'] = trOneData;
                     tmpOpt_['extendParentData'] = extendParentData;
@@ -5073,7 +5084,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
         //克隆多行的可数据循环的tr
         function createRepeatDataTrs(options) {
-            console.log('create RepeatDataTrs RepeatTrs _________');
+            // console.log('create RepeatDataTrs RepeatTrs _________');
             var optionsData = options['data'] || null; // data: {son_data}
             var trOptions = options['tr'] || {};//子的公共配置 tr: {}
             var trGroupLen = 0; //循环的tr内部数量
@@ -6212,7 +6223,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         if(isUndefined(options['value'])) options['value'] = '';
         var selectVal = options['value'];
         var obj = $('<span></span>');
-        if(!obj.source_opt) obj.source_opt = copySourceOpt(cloneData(options));
+        if(!obj.sor_opt) obj.sor_opt = copySourceOpt(cloneData(options));
         options['class_extend'] = 'diy_switch';
         obj['last_options'] = getOptVal(options, 'last_options', {});
         var afterCreate = getOptVal(options, ['afterCreate', 'after_create'], false);
@@ -7616,12 +7627,15 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     };
     //创建check
     var onlyCheckeds = {};
-    global.makeCheck = global.makeChecked = global.makeCheckbox = function(sourceOptions) {
+    global.makeCheck = global.makeChecked = global.makeCheckbox = function(sourceOptions, sureSource) {
+        sureSource = sureSource || false;
         sourceOptions = sourceOptions || {};
         sourceOptions['tag'] = 'checked';
         var obj = $('<i></i>');
-        if(!obj.source_opt) obj.source_opt = copySourceOpt(sourceOptions);
-        // console.log('makeCheck source_opt', obj.source_opt);
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
+        }
         var options = cloneData(sourceOptions);
         if(isUndefined(options['name'])) {
             var newname = createRadomName('check');
@@ -7860,15 +7874,19 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj;
     };
     //单选框
-    global.makeRadio = global.makeRadios = function(sourceOptions) {
-        options = options || {};
+    global.makeRadio = global.makeRadios = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
         var obj = $('<div>\
             <div class="inner"> \
              </div>\
          </div>');
         sourceOptions['tag'] = 'radio';
-        if(!obj.source_opt) obj.source_opt = copySourceOpt(sourceOptions);
-        console.log('makeCheck source_opt', obj.source_opt);
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
+        }
+        console.log('makeCheck sor_opt', obj.sor_opt);
         var options = cloneData(sourceOptions);
         var objInner = obj.find('.inner');
         obj['last_options'] = getOptVal(options, 'last_options', {});
@@ -8077,6 +8095,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
          });
          } */
         options = options || {};
+        var obj = $('<div></div>');
         var riliVal = isUndefined(options['value']) ? '' : options['value'];
         var yearMenuWidth = isUndefined(options['year_menu_width']) ? '228px' : options['year_menu_width'];
         var monthMenuWidth = isUndefined(options['month_menu_width']) ? '113px' : options['month_menu_width'];
@@ -8097,6 +8116,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             yearData.push({'value':i, 'title':i});
             allYears.push(i);
         }
+        obj.append(global.makeInput(options));
         //获取年月日
         function getStrYMD(riliVal) {
             riliVal = riliVal || '';  //riliVal //当前输入的年月
@@ -8137,7 +8157,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             var ymd_ = getStrYMD(keyupObj.value);
             makeDays_(ymd_[0], ymd_[1], ymd_[2]);
         };
-        var obj = global.makeInput(options);
         var menuName = 'calendar_menu_'+ parseInt(global.makeRadom(10));
         obj._rili = $('<div class="calendar_menu '+ menu_pub_class_name +'" id="'+ menuName +'"></div>');
         $('body').append(obj._rili);
@@ -8365,135 +8384,6 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         return obj;
     };
 
-//在某个对象上定位内容
-    $.fn.fixContent = function(content) {
-        var target = $(this);
-        var objPosition = target.offset();
-        var newObj = global.makeDiv({
-            style: {
-                'position': 'absolute',
-                'width': target.outerWidth() + 'px',
-                'height': target.outerHeight() + 'px',
-                'left': objPosition.left + 'px',
-                'top': objPosition.top + 'px'
-            },
-            value: content
-        });
-        $('body').append(newObj);
-        return newObj;
-    };
-
-//批量上传的表单
-    global.makeUploadForm = function(sourceOptions) {
-        var options = cloneData(sourceOptions);
-        var previewId = !isUndefined(options.id) ? options.id : 'multip_upload_prev_images_'+ parseInt(global.makeRadom(22));
-        var uploadInput = global.makeInput({type: 'file', multi: 'true'});
-        var submitUploadBtn = global.makeBtn({value: '上传',  'type': 'button', 'class': 'btnLr btnLrInfo'});
-        var previewObj = global.makeDiv({
-            'class': 'multip_upload_prev_images'
-        });
-        var formObj = global.makeForm({
-            'type': 'upload',
-            'id': previewId,
-            elements: [
-                {
-                    obj: previewObj
-                },
-                {
-                    obj: [
-                        uploadInput, submitUploadBtn
-                    ]
-                }]
-        });
-        var params = {
-            fileInput: uploadInput.find('input')[0],
-            upButton: submitUploadBtn[0],
-            url: '',
-            filter: function(files) {
-                var arrFiles = [];
-                for (var i = 0, file; file = files[i]; i++) {
-                    if (file.type.indexOf("image") == 0) {
-                        if (file.size >= 512000) {
-                            alert('您这张"'+ file.name +'"图片大小过大，应小于500k');
-                        } else {
-                            arrFiles.push(file);
-                        }
-                    } else {
-                        alert('文件"' + file.name + '"不是图片。');
-                    }
-                }
-                return arrFiles;
-            },
-            onSelect: function(files) {
-                var html = '', i = 0;
-                previewObj.html('<div class="upload_loading"></div>');
-                var funAppendImage = function() {
-                    file = files[i];
-                    if (file) {
-                        var reader = new FileReader()
-                        reader.onload = function(e) {
-                            html = html + '<div id="uploadList_'+ i +'" class="upload_append_list"><p><strong>' + file.name + '</strong>'+
-                                '<a href="javascript:" class="upload_delete" title="删除" data-index="'+ i +'">删除</a><br />' +
-                                '<img id="uploadImage_' + i + '" src="' + e.target.result + '" class="upload_image" /></p>'+
-                                '<span id="uploadProgress_' + i + '" class="upload_progress"></span>' +
-                                '</div>';
-
-                            i++;
-                            funAppendImage();
-                        }
-                        reader.readAsDataURL(file);
-                    } else {
-                        previewObj.html(html);
-                        if (html) {
-                            //删除方法
-                            $(".upload_delete").click(function() {
-                                ZXXFILE.funDeleteFile(files[parseInt($(this).attr("data-index"))]);
-                                return false;
-                            });
-                            //提交按钮显示
-                            submitUploadBtn.show();
-                        } else {
-                            //提交按钮隐藏
-                            submitUploadBtn.hide();
-                        }
-                    }
-                };
-                funAppendImage();
-            },
-            onDelete: function(file) {
-                $("#uploadList_" + file.index).fadeOut();
-                formObj[0].reset();
-            },
-            onDragOver: function() {
-                $(this).addClass("upload_drag_hover");
-            },
-            onDragLeave: function() {
-                $(this).removeClass("upload_drag_hover");
-            },
-            onProgress: function(file, loaded, total) {
-                var eleProgress = $("#uploadProgress_" + file.index), percent = (loaded / total * 100).toFixed(2) + '%';
-                eleProgress.show().html(percent);
-            },
-            onSuccess: function(file, response) {
-                $("#uploadInf").append("<p>上传成功，图片地址是：" + response + "</p>");
-            },
-            onFailure: function(file) {
-                $("#uploadInf").append("<p>图片" + file.name + "上传失败！</p>");
-                $("#uploadImage_" + file.index).css("opacity", 0.2);
-            },
-            onComplete: function() {
-                //提交按钮隐藏
-                submitUploadBtn.hide();
-                //file控件value置空
-                formObj[0].reset();
-                // 成功提示
-                $("#uploadInf").append("<p>当前图片全部上传完毕，可继续添加上传。</p>");
-            }
-        };
-        ZXXFILE = $.extend(ZXXFILE, params);
-        ZXXFILE.init();
-        return formObj;
-    };
 
     //创建编辑器[属性：name,width,height,content urlencode , type:'uEditor|xheditor', editorObj: 回调的编辑器对象', 'remote':{ url: '/upload.php',success_val: '0308'}]
     global.makeEditor = function(sourceOptions) {
@@ -9106,11 +8996,17 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
     }
 
     //创建黑三角
-    global.makeSanjiao = function(sourceOptions) {
+    global.makeSanjiao = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        var obj = $('<span><em class="icon"></em></span>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
+        }
         var options = cloneData(sourceOptions);
-        var sanjiaoBody = $('<span><em class="icon"></em></span>');
-        var sanjiaoIcon = sanjiaoBody.children();
-        sanjiaoBody['current_type'] = 's'; //上s 右y 下x 左z 上下sx ♦ &#9830;
+        var sanjiaoIcon = obj.children();
+        obj['current_type'] = 's'; //上s 右y 下x 左z 上下sx ♦ &#9830;
         var allowType = ['s','shang','u','up','t','top', 'y','you','r','right', 'x','xia','d','down','b','bottom', 'z','zuo','l','left','sx'];
         options['class_extend'] = 'diy_sanjiao';
         function formatType(type_) {
@@ -9128,7 +9024,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             }
         }
         //外部data 变化时更新type
-        sanjiaoBody.renewType = function (opt) {
+        obj.renewType = function (opt) {
             opt = opt || [];
             var type_ = opt['source_type'] || opt['type'] || ''; //每次格式化 优先取格式化前的value
             if(strHasKuohao(type_, 'data')) {
@@ -9136,20 +9032,20 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 //console.log('has kuohao');
                 //console.log(val);
                 //console.log(opt['data']);
-                type_ = strObj.formatStr(type_, opt['data']||{}, 0, sanjiaoBody, 'type');
+                type_ = strObj.formatStr(type_, opt['data']||{}, 0, obj, 'type');
                 //console.log(type_);
-                sanjiaoBody[objAttrHasKh] = true;
+                obj[objAttrHasKh] = true;
             } else if(strHasKuohao(type_, 'public')) {
                 opt['source_type'] = type_;
-                type_ = strObj.formatStr(type_, livingObj['data'], 0, sanjiaoBody, 'type');
-                sanjiaoBody[objAttrHasKh] = true;
+                type_ = strObj.formatStr(type_, livingObj['data'], 0, obj, 'type');
+                obj[objAttrHasKh] = true;
             }
             opt['type'] = type_; //参数要改变 防止外部取出来的仍是括号
-            sanjiaoBody.setType(type_);
+            obj.setType(type_);
         };
 
         //支持 type 定义
-        Object.defineProperty(sanjiaoBody, 'type', {
+        Object.defineProperty(obj, 'type', {
             get: function () {
                 return this['current_type'];
             },
@@ -9157,7 +9053,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 this.setType(newType);
             }
         });
-        sanjiaoBody.extend({
+        obj.extend({
             //设置页面
             setType: function (newType, exceptObj) {//数据被动同步
                 if(strInArray(newType, allowType) ==-1) newType = 's';
@@ -9167,7 +9063,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     if($.inArray(this, exceptObj) == -1) exceptObj.push(this);
                     updateBindObj($.trim(options['bind']), newType, exceptObj);
                 }
-                sanjiaoBody['current_type'] = newType;
+                obj['current_type'] = newType;
                 sanjiaoIcon.attr('class', newType);
             },
             //主动更新数据
@@ -9185,8 +9081,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     options['type'] = formatType(options['type']);
                 }
                 optionDataFrom(strObj, options);
-                strObj.formatAttr(sanjiaoBody, options, 0, hasSetData);//基本属性 无需再修改value
-                sanjiaoBody['last_options'] = $.extend({}, options);//设置完所有属性 要更新旧的option
+                strObj.formatAttr(obj, options, 0, hasSetData);//基本属性 无需再修改value
+                obj['last_options'] = $.extend({}, options);//设置完所有属性 要更新旧的option
             },
             //克隆当前对象
             cloneSelf: function(optionsGet) {
@@ -9208,10 +9104,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 }
             }
         });
-        objBindVal(sanjiaoBody, options, 'type');//数据绑定
-        optionGetSet(sanjiaoBody, options); //允许外部修改
-        sanjiaoBody.renew(options);
-        return sanjiaoBody;
+        objBindVal(obj, options, 'type');//数据绑定
+        optionGetSet(obj, options); //允许外部修改
+        obj.renew(options);
+        return obj;
     };
 
 //创建验证码
@@ -9256,34 +9152,39 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
 
     //创建拖动条
     //创建文本dom /a/p/span/div/li/td/em/i////
-    global.makeBar = function (sourceOptions) {
-        var opt = cloneData(sourceOptions);
-        var defaultOps = opt || {};
-        var extendAttr = opt['extend_attr'] || {};
+    global.makeBar = function (sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        var defaultOps = cloneData(sourceOptions);
+        var obj = $('<div></div>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
+        }
+        var extendAttr = defaultOps['extend_attr'] || {};
         var afterCreate = getOptVal(sourceOptions, ['afterCreate', 'after_create'], false);
         var options = $.extend({}, defaultOps);
         options = $.extend({}, options, extendAttr);//支持外部扩展属性 如 a 的 href
-        var bar = $('<div></div>');
-        bar.returnVal = opt['value'] || '';
-        bar.htmObj = [];//初始化element节点
+        obj.returnVal = opt['value'] || '';
+        obj.htmObj = [];//初始化element节点
         if(isUndefined(options['value'])) options['value'] = '';
-        bar['last_options'] = [];
-        bar[objValIsNode] = false;
-        bar[objAttrHasKh] = false;
+        obj['last_options'] = [];
+        obj[objValIsNode] = false;
+        obj[objAttrHasKh] = false;
         var valueStrFormatdSuccess = false;
         // //支持外部设置值
         Object.defineProperty(bar, 'value', {
             get: function () {
-                return bar.returnVal;
+                return obj.returnVal;
             },
             set: function (newVal) {
                 if($.isArray(newVal)) newVal = newVal.join(',');
-                bar.returnVal = newVal;
-                bar.moveBtnByVal(newVal);
+                obj.returnVal = newVal;
+                obj.moveBtnByVal(newVal);
             }
         });
         //更新val
-        bar.formatVal = function (opt) {
+        obj.formatVal = function (opt) {
             var sourceVal = opt['source_value'] || opt['value'];
             var newVal;
             if(strHasKuohao(sourceVal, 'public')) {
@@ -9295,7 +9196,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
             } else {
                 newVal = sourceVal;
             }
-            bar.returnVal = newVal; //参数要改变 防止外部取出来的仍是括号
+            obj.returnVal = newVal; //参数要改变 防止外部取出来的仍是括号
             if (!optionIsSame(bar, opt, 'value')) {
                 valueStrFormatdSuccess = true;
             }
@@ -9304,15 +9205,15 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 updateBindObj($.trim(options['bind']), newVal, [bar]);
             }
             if(valueStrFormatdSuccess) {
-                if(bar.lazyCall) {
-                    bar.lazyCall(bar, opt['data'] || {}, livingObj);
+                if(obj.lazyCall) {
+                    obj.lazyCall(bar, opt['data'] || {}, livingObj);
                 }
             }
-            bar.moveBtnByVal(newVal);
+            obj.moveBtnByVal(newVal);
         };
 
         //外部设置val
-        bar.extend({
+        obj.extend({
             //主动更新数据
             renew: function(options_) {
                 options_ = $.extend({}, options_, extendAttr);//支持外部扩展属性 如 a 的 href
@@ -9343,14 +9244,14 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                 var iconObj = global.makeSpan(iconOpt);
                 options_['class_extend'] = 'diy_bar';
                 options_['style'] = 'border:1px solid #ddd';
-                bar.html('').append(iconObj);
+                obj.html('').append(iconObj);
                 //根据value定位拖动按钮
-                bar.moveBtnByVal = function(newVal) {
+                obj.moveBtnByVal = function(newVal) {
                     var iconWidth = toNumber(iconObj.outerWidth());
-                    var barWidth = toNumber(bar.width);
+                    var barWidth = toNumber(obj.width);
                     var maxLeft = barWidth - iconWidth -2;
                     var iconHeight = toNumber(iconObj.outerHeight());
-                    var maxTop = bar.outerHeight() - iconHeight -2;
+                    var maxTop = obj.outerHeight() - iconHeight -2;
                     if(direction=='x') {
                         var newLeft = (newVal / maxVal) * barWidth;
                         if(iconMinLeft) newLeft = Math.max(newLeft, iconMinLeft);
@@ -9369,7 +9270,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     var clientPos = '',xy;
                     if(direction=='x') {
                         var btnWidth = toNumber(iconObj.outerWidth(true));
-                        var barWidth = toNumber(bar.width);
+                        var barWidth = toNumber(obj.width);
                         clientPos = e.clientX - obj_.offset().left;
                         clientPos -= btnWidth/2; //居中按钮
                         if(clientPos + btnWidth > barWidth -2) clientPos = barWidth - btnWidth -2;
@@ -9382,7 +9283,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         iconObj.css('left', clientPos);
                     } else {
                         var btnHeight = toNumber(iconObj.outerHeight(true));
-                        var barHeight = toNumber(bar.height);
+                        var barHeight = toNumber(obj.height);
                         clientPos = e.clientY - obj_.offset().top;
                         clientPos -= btnHeight/2; //居中按钮
                         if(clientPos + btnHeight > barHeight -2) clientPos = barHeight - btnHeight -2;
@@ -9390,12 +9291,12 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         xy = [0, clientPos];
                         iconObj.css('top', clientPos);
                     }
-                    xy = bar.countVal(xy);
+                    xy = obj.countVal(xy);
                     var newVal = direction =='x' ? xy[0] : xy[1];
                     if(!isUndefined(options_['bind']) && options_['bind']) {
                         updateBindObj($.trim(options_['bind']), newVal, [bar]);
                     }
-                    bar.returnVal = newVal;
+                    obj.returnVal = newVal;
                 };
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 //先设定options_参数 下面才可以修改options_
@@ -9415,13 +9316,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     if(direction=='x') {
                         barHeight = iconOpt['height'] || iconHeight;
                     } else {
-                        barHeight = options['height'] || bar.outerHeight();
+                        barHeight = options['height'] || obj.outerHeight();
                     }
                     barHeight = toNumber(barHeight);
-                    var barWidth = options['width'] ||  bar.outerWidth();
+                    var barWidth = options['width'] ||  obj.outerWidth();
                     barWidth = toNumber(barWidth);
                     //计算刻度尺 当前位置应该得到的值
-                    bar.countVal = function (xy) {
+                    obj.countVal = function (xy) {
                         var distance_,newVal;
                         if(!maxVal) maxVal = barWidth;
                         if(direction=='x') {
@@ -9443,26 +9344,26 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                     };
                     var movingBackFunc = function (xy, icon, bar_) {
                         //console.log(xy);
-                        xy = bar.countVal(xy);
+                        xy = obj.countVal(xy);
                         var newVal = direction =='x' ? xy[0] : xy[1];
                         if(!isUndefined(options_['bind']) && options_['bind']) {
                             updateBindObj($.trim(options_['bind']), newVal, [bar]);
                         }
-                        bar.returnVal = newVal;
+                        obj.returnVal = newVal;
                         if(movingFunc) movingFunc(xy, icon, bar_);
                     };
                     var movingUpBackFunc = function (xy, icon, bar_) {
                         //console.log(xy);
-                        xy = bar.countVal(xy);
+                        xy = obj.countVal(xy);
                         var newVal = direction =='x' ? xy[0] : xy[1];
                         if(!isUndefined(options_['bind']) && options_['bind']) {
                             updateBindObj($.trim(options_['bind']), newVal, [bar]);
                         }
-                        bar.returnVal = newVal;
+                        obj.returnVal = newVal;
                         //console.log(xy);
                         if(mouseUpFunc) mouseUpFunc(xy, icon, bar_);
                     };
-                    var maxTop = bar.outerHeight() - iconHeight -2;
+                    var maxTop = obj.outerHeight() - iconHeight -2;
                     var maxLeft = barWidth - iconWidth -2;
                     if(maxLeft <iconMinLeft) maxLeft = iconMinLeft;
                     //console.log('iconWidth:'+ iconWidth);
@@ -9483,10 +9384,10 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         if(pubVal ==='') {
                             pubVal = barVal;
                         }
-                        bar.moveBtnByVal(pubVal);
+                        obj.moveBtnByVal(pubVal);
                     } else if(barVal) {
                         if(isNumber(barVal)){
-                            bar.moveBtnByVal(barVal);
+                            obj.moveBtnByVal(barVal);
                         }
                     }
                 }, 20);
@@ -9508,8 +9409,8 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
                         //console.log(exceptObj);
                         var pubVal = getObjData($.trim(defaultOps['bind']));
                         //console.log('updateNodeText this：'+ pubVal);
-                        bar.returnVal = pubVal;
-                        bar.moveBtnByVal(pubVal);
+                        obj.returnVal = pubVal;
+                        obj.moveBtnByVal(pubVal);
                     }
                 }
                 if(bar[objBindAttrsName] && bar[objBindAttrsName][dataName]) {
@@ -9525,13 +9426,13 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         //console.log('herea:');
         //console.log(bar);
         //console.log(defaultOps['value']);
-        bar.renew(defaultOps);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
+        obj.renew(defaultOps);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
         optionGetSet(bar, defaultOps);
         objBindVal(bar, defaultOps);//数据绑定
         addCloneName(bar, defaultOps);//支持克隆
-        if(afterCreate) afterCreate(bar, defaultOps); //初始化内容再写入内容
         return bar;
     };
+    
     //创建树菜单对象 只能更新、修改起data的长度 data不能设置对象
     var __makeTreeInnerObj = function(sourceOptions) {
         var options = cloneData(sourceOptions);
@@ -10426,471 +10327,7 @@ $.extend({handleError:function(s,xhr,status,e){if(s.error){s.error.call(s.contex
         }
         return obj;
     };
-    //创建批量上传文件框
-    global.batchUploadForm = function(options) {
-        options = options || {};
-        var defaultOption = {
-            'workPath' : '/include/lib/webuploader',
-            'url' : '/include/lib/webuploader/upload.php',
-            'id': 'diy_batch_uploader',
-            'class': 'diy_batch_uploader',
-            'post': {},
-            auto: true,
-            'one_finish': function (data) {
-                if(data.id !=='0388') {
-                    if(data.info) data.msg += data.info;
-                    msg(data.msg);
-                } else {
-                    hideNewBox();
-                    msgHide(data.msg);
-                }
-            },
-            'all_finish': function () {
-
-            },
-            'accept': {
-                title: 'Images',
-                extensions: 'gif,jpg,jpeg,bmp,png,avi,mp4',
-                mimeTypes: 'image/jpg,image/jpeg,image/png'
-            }
-        };
-        options = $.extend({}, defaultOption, options);
-        var wrapObj = $('<div></div>'),
-            queueList = $('<div class="queue_list"></div>'),
-            pickBtn1Id = 'batch_upload_btn_pick_1',
-            pickBtn2Id = 'batch_upload_btn_pick_2';
-        wrapObj.attr({
-            'id': options['id'],
-            'class': options['class']
-        });
-        var placeHolder= $('<div class="placeholder">\
-                            <div id="'+ pickBtn1Id +'" class="pick_btn"> </div>\
-                            </div>');
-        var fileListClassName = isPc() ? 'is_pc' : 'is_wap';
-        var fileList= $('<ul class="filelist '+ fileListClassName +'"></ul>');
-        // 状态栏，包括进度和控制按钮
-        var statusBar = $('<div class="statusBar" style="display:none;">\
-                            <div class="progress" style="display: none;">\
-                                <span class="text">0%</span>\
-                                <span class="percentage" style="width: 0%;"></span>\
-                            </div>\
-                            <div class="info">共0张（0B），已上传0张</div>\
-                            <div class="btnGLr btnGLrSm">\
-                                <div id="'+ pickBtn2Id +'" class="btnGLr btnGLrSm pick_btn"></div>\
-                                <button class="uploadBtn btnLr btnLrSuccess">开始上传</button>\
-                            </div>\
-                    </div>');
-
-        // 上传按钮
-        var uploadObj = statusBar.find('.uploadBtn'),
-            infoObj = statusBar.find('.info'), // 文件总体选择信息
-            progressObj = statusBar.find('.progress').hide(),
-            fileCount = 0,// 添加的文件数量
-            fileSize = 0, // 添加的文件总大小
-            // 优化retina, 在retina下这个值是2
-            ratio = window.devicePixelRatio || 1,
-            // 缩略图大小
-            thumbnailWidth = 110 * ratio,
-            thumbnailHeight = 110 * ratio,
-            // 可能有pedding, success, ready, uploading, confirm, done.
-            state = 'pedding',
-            // 所有文件的进度信息，key为file id
-            percentages = {},
-            supportTransition = (function () {
-                var s = document.createElement('p').style,
-                    r = 'transition' in s ||
-                        'WebkitTransition' in s ||
-                        'MozTransition' in s ||
-                        'msTransition' in s ||
-                        'OTransition' in s;
-                s = null;
-                return r;
-            })(),
-            uploader;
-        // WebUploader实例
-        if ( !WebUploader.Uploader.support('flash') && WebUploader.browser.ie ) {
-            // flash 安装了但是版本过低。
-            if (flashVersion) {
-                (function(container) {
-                    window['expressinstallcallback'] = function( state ) {
-                        switch(state) {
-                            case 'Download.Cancelled':
-                                alert('您取消了更新！')
-                                break;
-
-                            case 'Download.Failed':
-                                alert('安装失败')
-                                break;
-
-                            default:
-                                alert('安装已成功，请刷新！');
-                                break;
-                        }
-                        delete window['expressinstallcallback'];
-                    };
-
-                    var swf = './expressInstall.swf';
-                    // insert flash object
-                    var html = '<object type="application/' +
-                        'x-shockwave-flash" data="' +  swf + '" ';
-
-                    if (WebUploader.browser.ie) {
-                        html += 'classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" ';
-                    }
-
-                    html += 'width="100%" height="100%" style="outline:0">'  +
-                        '<param name="movie" value="' + swf + '" />' +
-                        '<param name="wmode" value="transparent" />' +
-                        '<param name="allowscriptaccess" value="always" />' +
-                        '</object>';
-
-                    container.html(html);
-
-                })($wrap);
-                // 没有安转。
-            } else {
-                $wrap.html('<a href="http://www.adobe.com/go/getflashplayer" target="_blank" border="0"><img alt="get flash player" src="http://www.adobe.com/macromedia/style_guide/images/160x41_Get_Flash_Player.jpg" /></a>');
-            }
-
-            return;
-        } else if (!WebUploader.Uploader.support()) {
-            alert( 'Web Uploader 不支持您的浏览器！');
-            return;
-        }
-        queueList.append(placeHolder).append(fileList).append(statusBar);
-        wrapObj.append(queueList);
-        //等待按钮渲染完成，再生成准确的点击层
-        setTimeout(function () {
-            // 实例化
-            uploader = WebUploader.create({
-                pick: {
-                    id: '#'+pickBtn1Id,
-                    'class': 'btnLr btnLrInfo',
-                    btnText: '浏览本地图片'
-                },
-                dnd: queueList,
-                paste: document.body,
-                accept: options.accept, //允许的格式
-                // swf文件路径
-                swf: options.workPath + '/js/Uploader.swf',
-
-                disableGlobalDnd: true,
-                auto: options.auto, //是否自动上传
-                chunked: true,
-                // server: 'http://webuploader.duapp.com/server/fileupload.php',
-                server: options.url,
-                formData: options['post'],
-                fileNumLimit: 3000,//最多3000个文件
-                resize: false,// 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
-                fileSizeLimit: 2000 * 1024 * 1024,    // 200 M
-                fileSingleSizeLimit: 100 * 1024 * 1024    // 单张图片限制大小  100M
-            });
-            // 添加“添加文件”的按钮，
-            uploader.addButton({
-                id: '#'+pickBtn2Id,
-                'class': 'btnLr btnLrDefault',
-                btnText: '继续添加'
-            });
-            // 当有文件添加进来时执行，负责view的创建
-            function addFile(file) {
-                var liObj = $('<li id="' + file.id + '">' +
-                    '<p class="imgWrap"></p>' +
-                    '<p class="progress"><span></span></p>' +
-                    '</li>'),
-                    btns = $('<div class="file-panel">' +
-                        '<span class="cancel">删除</span>' +
-                        '<span class="rotateRight">向右旋转</span>' +
-                        '<span class="rotateLeft">向左旋转</span></div>').appendTo(liObj),
-                    prgressObj = liObj.find('p.progress span'),
-                    wrapObj = liObj.find('.imgWrap'),
-                    infoObj = $('<p class="error"></p>'),
-                    text,
-                    showError = function (code) {
-                        switch (code) {
-                            case 'exceed_size':
-                                text = '文件大小超出';
-                                break;
-
-                            case 'interrupt':
-                                text = '上传暂停';
-                                break;
-
-                            default:
-                                text = '上传失败，请重试';
-                                break;
-                        }
-                        infoObj.text(text).appendTo(liObj);
-                    };
-
-                if (file.getStatus() === 'invalid') {
-                    showError(file.statusText);
-                } else {
-                    // @todo lazyload
-                    wrapObj.text('预览中');
-                    uploader.makeThumb(file, function (error, src) {
-                        if (error) {
-                            wrapObj.text('不能预览');
-                            return;
-                        }
-                        wrapObj.empty().append($('<img src="' + src + '">'));
-                    }, thumbnailWidth, thumbnailHeight);
-
-                    percentages[file.id] = [file.size, 0];
-                    file.rotation = 0;
-                }
-                file.on('statuschange', function (cur, prev) {
-                    if (prev === 'progress') {
-                        prgressObj.hide().width(0);
-                    } else if (prev === 'queued') {
-                        liObj.off('mouseenter mouseleave');
-                        btns.remove();
-                    }
-
-                    // 成功
-                    if (cur === 'error' || cur === 'invalid') {
-                        showError(file.statusText);
-                        percentages[file.id][1] = 1;
-                    } else if (cur === 'interrupt') {
-                        showError('interrupt');
-                    } else if (cur === 'queued') {
-                        percentages[file.id][1] = 0;
-                    } else if (cur === 'progress') {
-                        infoObj.remove();
-                        prgressObj.css('display', 'block');
-                    } else if (cur === 'complete') {
-                        liObj.append('<span class="success"></span>');
-                    }
-
-                    liObj.removeClass('state-' + prev).addClass('state-' + cur);
-                });
-                liObj.on('mouseenter', function () {
-                    btns.stop().animate({height: 30});
-                });
-                liObj.on('mouseleave', function () {
-                    btns.stop().animate({height: 0});
-                });
-                btns.on('click', 'span', function () {
-                    var btn = $(this);
-                    var className = btn.attr('class'),
-                        deg;
-                    switch (className) {
-                        case 'cancel':
-                            uploader.removeFile(file);
-                            return;
-                        case 'rotateRight':
-                            file.rotation += 90;
-                            break;
-
-                        case 'rotateLeft':
-                            file.rotation -= 90;
-                            break;
-                    }
-
-                    if (supportTransition) {
-                        deg = 'rotate(' + file.rotation + 'deg)';
-                        wrapObj.css({
-                            '-webkit-transform': deg,
-                            '-mos-transform': deg,
-                            '-o-transform': deg,
-                            'transform': deg
-                        });
-                    } else {
-                        wrapObj.css('filter', 'progid:DXImageTransform.Microsoft.BasicImage(rotation=' + (~~((file.rotation / 90) % 4 + 4) % 4) + ')');
-                    }
-                });
-                liObj.appendTo(fileList);
-            }
-            // 负责view的销毁
-            function removeFile(file) {
-                var liObj = wrapObj.find('#'+ file.id);
-                delete percentages[file.id];
-                updateTotalProgress();
-                liObj.off().find('.file-panel').off().end().remove();
-            }
-            //更新图片总数
-            function updateTotalProgress() {
-                var loaded = 0,
-                    total = 0,
-                    spans = progressObj.children(),
-                    percent;
-
-                $.each(percentages, function (k, v) {
-                    total += v[0];
-                    loaded += v[0] * v[1];
-                });
-
-                percent = total ? loaded / total : 0;
-
-                spans.eq(0).text(Math.round(percent * 100) + '%');
-                spans.eq(1).css('width', Math.round(percent * 100) + '%');
-                updateStatus();
-            }
-            function updateStatus() {
-                var text = '', stats;
-                if (state === 'ready') {
-                    text = '选中' + fileCount + '张图片，共' +
-                        WebUploader.formatSize(fileSize) + '。';
-                } else if (state === 'confirm') {
-                    stats = uploader.getStats();
-                    if (stats.uploadFailNum) {
-                        text = '已成功上传' + stats.successNum + '张照片至XX相册，' +
-                            stats.uploadFailNum + '张照片上传失败，<a class="retry" href="#">重新上传</a>失败图片或<a class="ignore" href="#">忽略</a>'
-                    }
-
-                } else {
-                    stats = uploader.getStats();
-                    text = '共' + fileCount + '张（' +
-                        WebUploader.formatSize(fileSize) +
-                        '），已上传' + stats.successNum + '张';
-
-                    if (stats.uploadFailNum) {
-                        text += '，失败' + stats.uploadFailNum + '张';
-                    }
-                }
-
-                infoObj.html(text);
-            }
-            function setState(val, arg1, arg2) {
-                var file, stats;
-                if (val === state) {
-                    return;
-                }
-
-                uploadObj.removeClass('state-' + state);
-                uploadObj.addClass('state-' + val);
-                state = val;
-
-                switch (state) {
-                    case 'pedding':
-                        placeHolder.removeClass('element-invisible');
-                        fileList.parent().removeClass('filled');
-                        fileList.hide();
-                        statusBar.addClass('element-invisible');
-                        uploader.refresh();
-                        break;
-
-                    case 'ready':
-                        placeHolder.addClass('element-invisible');
-                        wrapObj.find('#'+ pickBtn1Id).removeClass('element-invisible');
-                        fileList.parent().addClass('filled');
-                        fileList.show();
-                        statusBar.removeClass('element-invisible');
-                        uploader.refresh();
-                        break;
-
-                    case 'uploading':
-                        wrapObj.find('#'+ pickBtn2Id).addClass('element-invisible');
-                        progressObj.show();
-                        uploadObj.text('暂停上传');
-                        break;
-
-                    case 'paused':
-                        progressObj.show();
-                        uploadObj.text('继续上传');
-                        break;
-
-                    case 'confirm':
-                        progressObj.hide();
-                        uploadObj.text('开始上传').addClass('disabled');
-
-                        stats = uploader.getStats();
-                        if (stats.successNum && !stats.uploadFailNum) {
-                            setState('finish');
-                            return;
-                        }
-                        break;
-                    case 'complete'://完成一次上传时提示
-                        if(typeof arg2['_raw'] != 'undefined') {
-                            var data={};
-                            eval("data = "+arg2['_raw']);
-                            if(typeof options.one_finish != 'undefined') options.one_finish(data);
-                        }
-                        break;
-                    case 'finish':// 完成全部文件上传时
-                        stats = uploader.getStats();
-                        if (stats.successNum) {
-                            if(typeof options.all_finish != 'undefined') options.all_finish(stats);
-                        } else {
-                            // 没有成功的图片，重设
-                            state = 'done';
-                            location.reload();
-                        }
-                        break;
-                }
-                updateStatus();
-            }
-            uploader.onUploadProgress = function (file, percentage) {
-                var liObj = wrapObj.find('#'+ file.id),
-                    $percent = liObj.find('.progress span');
-                $percent.css('width', percentage * 100 + '%');
-                percentages[file.id][1] = percentage;
-                updateTotalProgress();
-            };
-            uploader.onFileQueued = function (file) {
-                fileCount++;
-                fileSize += file.size;
-
-                if (fileCount === 1) {
-                    placeHolder.addClass('element-invisible');
-                    statusBar.show();
-                }
-                addFile(file);
-                setState('ready');
-                updateTotalProgress();
-            };
-            uploader.onFileDequeued = function (file) {
-                fileCount--;
-                fileSize -= file.size;
-                if (!fileCount) {
-                    setState('pedding');
-                }
-                removeFile(file);
-                updateTotalProgress();
-            };
-            uploader.on('all', function (type, arg1, arg2) {
-                var stats;
-                switch (type) {
-                    case 'uploadSuccess':
-                        setState('complete', arg1, arg2);
-                        break;
-                    case 'uploadFinished':
-                        setState('confirm', arg1, arg2);
-                        break;
-
-                    case 'startUpload':
-                        setState('uploading', arg1, arg2);
-                        break;
-
-                    case 'stopUpload':
-                        setState('paused', arg1, arg2);
-                        break;
-
-                }
-            });
-            uploader.onError = function (code) {
-                alert('Eroor: ' + code);
-            };
-            uploadObj.on('click', function () {
-                if ($(this).hasClass('disabled')) return false;
-                if (state === 'ready') {
-                    uploader.upload();
-                } else if (state === 'paused') {
-                    uploader.upload();
-                } else if (state === 'uploading') {
-                    uploader.stop();
-                }
-            });
-            infoObj.on('click', '.retry', function () {
-                uploader.retry();
-            });
-            infoObj.on('click', '.ignore', function () {
-                alert('todo');
-            });
-            uploadObj.addClass('state-' + state);
-            updateTotalProgress();
-        }, 300);
-        return wrapObj;
-    };
+    
     //创建js头
     global.makeScript = function(sourceOptions) {
         var options = cloneData(sourceOptions);

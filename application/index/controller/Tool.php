@@ -28,6 +28,14 @@ class Tool extends Frontend
         $this->keyword = input('keyword', '', 'trim');
     }
 
+    public function get_info() {
+        $info = [
+            'time' => Str::getRam(5),
+            'title' => Str::getRandChar(5),
+            'content' => json_encode(['a'=>Str::getRam(3), 'b'=>Str::getRam(6)]),
+        ];
+        $this->success('', '', $info);
+    }
     public function get_rows() {
         $list = [];
         $num = input('num', 3, 'intval');

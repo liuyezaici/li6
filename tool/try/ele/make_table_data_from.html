@@ -35,7 +35,7 @@
         }
     });
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-        var getDataUrl = '/index/tool/get_rows?num=3';
+        var getDataUrl = '/index/tool/get_rows?num=8';
         //js造一个简单的表格
         var table = lrEle.makeTable({
             'class': 'well',
@@ -78,7 +78,7 @@
                                   }),
                                   lrEle.makeSpan({
                                       id_: '{id}',
-                                      value: 'tt:{id}',
+                                      value: 'tt:{title}',
                                       click: function (o) {
                                           lrBox.msgTisf(o.id_);
                                       }
@@ -111,6 +111,14 @@
         $('#show_table').append(
             table
         );
+
+        $('#show_reload_btn').append(lrEle.makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btnLrSuccess',
+            click: function (obj, ev, scope) {
+                table.renewData();
+            }
+        }));
     });
 
 
