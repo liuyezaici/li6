@@ -549,14 +549,18 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                                 if(hasData(optData)) canFmatAbcWhenNoData = true;
                             }
                             if(n !='value' && n !='src' && (hasSetData || hasData(optData) ||canFmatAbcWhenNoData)) {
+                                // console.log('before____formatStr',  hasSetData, hasData(optData), canFmatAbcWhenNoData);
                                 v = strObj.formatStr(v, optData, index, thisObj, n);
                                 options[n] = v; //参数要改变 防止外部取出来的仍是括号
-                                if(!isUndefined(options['onFormat_'+n])) {
-                                    thisFormatEven['onFormat_'+n] = {
-                                        func: options['onFormat_'+n],
-                                        'val': v,
-                                        'data': optData
-                                    };
+                                // console.log('after formatStr',  n, 'data:',optData, 'v:',v);
+                                if(hasData(optData)) { //有data才执行初始化
+                                    if(!isUndefined(options['onFormat_'+n])) {
+                                        thisFormatEven['onFormat_'+n] = {
+                                            func: options['onFormat_'+n],
+                                            'val': v,
+                                            'data': optData
+                                        };
+                                    }
                                 }
                             }
                         }
@@ -815,7 +819,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 }
                 // console.log('onFormatEven:' , onFormatEven);
                 if(!isUndefined(onFormatEven['onFormat_'+ key_])) {
-                    thisFormatEven['onFormat_'+ key_] = {func: onFormatEven['onFormat_'+ key_],val: val_, data: optData};
+                    thisFormatEven['onFormat_'+ key_] = {func: onFormatEven['onFormat_'+ key_],'val': val_, data: optData};
                 }
                 //console.log('format this:');
                 //console.log(n + ':'+ v);
@@ -2181,9 +2185,9 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         var optDataString = getOptVal(opt, 'data', {});
         // if(!hasData(optData)) return [opt, false];//无data返回  //2019.3.16 无data也要返回change
         var dataIsChange = false;//数据是否继承父
-        var onFormatEven = getOptVal(opt, 'onFormatEven', {});
         var backData = {};
-        //console.log('optDataString', optDataString);
+        // console.log('optDataString', optDataString);
+        // console.log('optData', optData);
         if(isStrOrNumber(optDataString)) {
             // console.log('optDataString', optDataString);
             // console.log(optData);
@@ -2191,16 +2195,13 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             if(isString(backData)) {
                 backData = JSON.parse(backData);
             }
-            console.log('backData', backData);
+            // console.log('backData', backData);
             dataIsChange = true;
         } else {
             //console.log(opt['data']);
             //console.log(optData);
-            if(optDataString) {//has set data
-                if((hasData(optDataString) && !dataIsSame(optDataString, optData))
-                    || (!hasData(optDataString) && !dataIsSame(optData, makeNullData()))
-                ) {
-                    //console.log('!==');
+            if(hasData(optDataString)) {//has set data
+                if(!dataIsSame(optDataString, optData)) {
                     backData = optData;
                     dataIsChange = true;
                 }
@@ -2811,14 +2812,15 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
     function renewObjData(obj, newData) {
         if(!isOurObj(obj)) return;//非自定义的对象不能更data
         if(isStrOrNumber(newData)) return;//非data
-        var options = obj['sor_opt'] || {};
+        var options = cloneData(obj['sor_opt']) || {};//必须克隆 否则会修改opt
         var newPushData = cloneData(newData);
-        // console.log('newPushData', newPushData, obj);
+        // console.log('renewObjData', newPushData, obj.tag, options['data']);
         //options在此赋值data
+        // console.log('renewObjData options ',obj,  options['data']);
         var OptBack = optionAddData(options, newPushData);
         var backData = OptBack[0];
         options['data'] = backData;
-        // console.log('reFormatKhAttr',obj, 'options', options,'backData', backData);
+        // console.log('renewObjData optionAddData', 'backData', backData);
         if(obj[objAttrHasKh]) {
             //这个opt是纯字符串的 所以不会更新bj.option 每次获取值的时候,还是会返回的{abc}
             strObj.reFormatKhAttr(obj, options);
@@ -3879,6 +3881,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 }
                 ,set: function (newVal) {
                     //value修改，统一全部更新
+                    // console.log('setVal', newVal);
                     _renewNodeVal(newVal);//更新node
                 }
             });
@@ -4056,8 +4059,10 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 newVal = strObj.formatStr(sourceVal, data_, 0, obj, valKey);
                 obj[objAttrHasKh] = true;
             }
-            if(!isUndefined(opt['onFormat_'+ valKey])) {
-                thisFormatEven = {func: opt['onFormat_'+ valKey],val: newVal, data: formatData};
+            if(hasData(formatData)) {
+                if(!isUndefined(opt['onFormat_'+ valKey])) {
+                    thisFormatEven = {func: opt['onFormat_'+ valKey],val: newVal, data: formatData};
+                }
             }
             obj[objAttrHasKh] = true;
         }  else {
@@ -4115,7 +4120,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         //when value is changed by outside
         obj.renewVal = function(newV, opt_) {
             if(isUndefined(opt_)) opt_ = obj['options'];
-            // console.log('renewVal', newV);
+            // console.log('renew Val', newV);
             opt_['value'] = newV;
             if(isStrOrNumber(newV)) {
                 obj[objValIsNode] = true; //修改obj的内容类型
@@ -4215,8 +4220,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     });
                 }
             } else if(tag == 'td') { //value is {}
-                var valObj = opt['value'] || {};
-
+                var valObj = isUndefined(opt['value']) ? '': opt['value'];
                 // console.log('AppendTd@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_', opt, valObj);
                 if(valObj instanceof $) { //jq对象
                     // console.log('jq对象 ', valObj, data_);
@@ -4254,11 +4258,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     // console.log('isObj 222', valObj);
                     createDom(valObj);
                 } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
+                    // console.log('AppendVal+++++++++++++', valObj);
                     domAppendNode(obj_, opt, hasSetData);
                 }
             } else {
-                if(isUndefined(opt['value']) || opt['value']=='') opt['value'] = ' ';//必须输入空文本只能执行node替换
-                var optValStr = opt['value'] || '';
+                if(isUndefined(opt['value'])) opt['value'] = ' ';//必须输入空文本只能执行node替换
+                var optValStr = opt['value'];
                 // console.log('AppendVal+++++++++++++', optValStr);
                 if(isStrOrNumber(optValStr) ) {
                     domAppendNode(obj_, opt, hasSetData);
@@ -4351,11 +4356,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         });
     };
     global.makeLi = function(defaultOps) {
-        if(!isUndefined(defaultOps['data'])) {
-            if(isUndefined(defaultOps['data']['index'])) {
-                defaultOps['data']['index'] = 0;
-            }
-        }
         return makeDom({
             'tag': 'li',
             'options': defaultOps
@@ -4526,7 +4526,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 });
                 for(tmpIndex = 0; tmpIndex < nowValLen ; tmpIndex++) {
                     newTmpData = newData[tmpIndex];
-                    newTmpData['index'] = tmpIndex;
                     renewObjData(sons[tmpIndex], newData[tmpIndex]);
                 }
             } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个li
@@ -4563,7 +4562,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         newLi[parentObjKey] = obj;
                         sons[sons.length] = newLi;
                         //等克隆完li的属性才能更新data 不然提早渲染的data可能无法再次刷新
-                        newData[tmpIndex]['index'] = tmpIndex;
                         newLi['data'] = newData[tmpIndex];
                         this.append(newLi);
                     }
@@ -4602,7 +4600,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     // console.log('son__'+ n);
                     // console.log(son);
                     sonData = newData[n]||[];
-                    if(isUndefined(sonData['index'])) sonData['index'] = n;
                     renewObjData(son, sonData);
                 });
             }
@@ -4628,7 +4625,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     lastLi.renew(liOpt);
                 } else {
                     var liObj;
-                    //console.log('index:'+ index);
                     var checkData = optionAddData(newTestOpt, tmpNewData_);
                     liOpt['tag'] = 'li';
                     liOpt['data'] = checkData[0];
@@ -4664,7 +4660,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         if (Array.isArray(optionsData)) {
                             //console.log('isArray optionsData');
                             tmpNewData = val_;
-                            tmpNewData['index'] = index;
                         } else {
                             //console.log('isObj optionsData');
                             tmpNewData = {};
@@ -4762,7 +4757,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         var tbody = $('<tbody></tbody>');
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : copySourceOpt(sourceOptions);
         }
         var options = cloneData(sourceOptions);
         obj.append(tbody);
@@ -4773,7 +4768,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         obj[objValIsNode] = false;
         //获取tr的循环个数
         var _getTrNum = function(opt) {
-            var trOpt = opt['tr'] || opt['tr_repeat'];
+            var trOpt = opt['tr'] || opt['tr_repeat'] || [];
             var trOptLen;
             if(!$.isArray(trOpt)) {
                 trOptLen = 1;
@@ -4783,23 +4778,11 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             return trOptLen;
         };
 
-        //更新table.data 如果含有带循环的tr 则只更新data的tr；反之更新全部tr
-        var cloneRepeatTr = function(index, tmpData) {
-            var cloneTr = cloneData(obj['sor_opt']['tr'][index]); //必须新克隆一个  不然会污染上一个tr的source opt
-            cloneTr['tag'] = 'tr';
-            cloneTr['data'] = tmpData;
-            cloneTr['extendParentData'] = true;//强制继承父data更新
-            // console.log('cloneRepeatTr', index, cloneTr, tmpData);
-            var newTr = global.makeTr(cloneTr);
-            newTr[parentObjKey] = obj;//分配父对象
-            obj['repeatSons'].push(newTr);
-            obj.tBody.append(newTr);
-            return newTr;
-        };
 
         //数据循环时 使用此方法更新数据列表
-        var renewSonLen_ = function (repeatSons, newData) {
+        var renewRepeatSonLen = function (repeatSons, newData) {
             var trOptLen = _getTrNum(obj.sor_opt);
+            if(!trOptLen) return;
             if(!$.isArray(newData)) newData = [newData];
             //如果之前产生过多的儿子而新数量变少要剔除
             var lastValLen = repeatSons.length;
@@ -4810,7 +4793,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             var tmpTrGroupFromIndex;
             var tmpIndex;
             var tmpData;
-            // console.log('renew SonLen_,sons:', repeatSons, lastValLen, nowValLen);
             // return;
             if(lastValLen > nowValLen) { //多出来 裁掉
                 // console.log('多出来 裁掉');
@@ -4825,7 +4807,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 for(tmpTrGroupid = 0; tmpTrGroupid < dataLines; tmpTrGroupid++) {
                     tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                     tmpData =  newData[tmpTrGroupid];
-                    tmpData['index'] = tmpTrGroupid;
                     //一组组更新(创建)tr
                     for(var i2 = 0 ; i2 < trOptLen; i2 ++) {
                         tmpIndex =  tmpTrGroupFromIndex ++;
@@ -4835,7 +4816,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     }
                 }
             } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
-                // console.log(' 数据累加,sons:', sons);
+                // console.log('tr累加:');
                 for(tmpTrGroupid = 0; tmpTrGroupid < dataLines; tmpTrGroupid++) {
                     tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                     tmpData =  newData[tmpTrGroupid];
@@ -4843,46 +4824,52 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     for(var i2 = 0 ; i2 < trOptLen; i2 ++) {
                         tmpIndex =  tmpTrGroupFromIndex ++; //在所有son里面 当前是第几个tr
                         if(!isUndefined(repeatSons[tmpIndex])) {
-                            // console.log('更新旧的tr ', tmpIndex, sons[tmpIndex]);
+                            // console.log('更新旧的tr ',repeatSons[tmpIndex]);
                             repeatSons[tmpIndex]['data'] = tmpData;
                             // console.log('renew_tmpIndex, i2:', i2, 'tmpIndex', tmpIndex);
                         } else {
                             // console.log('直接用虚拟tr进行克隆 ', i2, tmpData);
-                            cloneRepeatTr(i2, tmpData);
+                            var cloneTr = cloneData(obj['sor_opt']['tr'][i2]); //必须新克隆一个  不然会污染上一个tr的source opt
+                            cloneTr['tag'] = 'tr';
+                            //data不能提前设置 因为sor_opt本来就是空的
+                            cloneTr['extendParentData'] = true;//强制继承父data更新
+                            var newTr = global.makeTr(cloneTr);
+                            newTr[parentObjKey] = obj;//分配父对象
+                            newTr['data'] = tmpData;//更新data
+                            obj['repeatSons'].push(newTr);
+                            obj.tBody.append(newTr);
+
                             tmpIndex ++;
                         }
                     }
                 }
             } else {
                 // console.log('更新旧的tr ', newData);
-                obj.renewOldRepeatTr(newData);
+                // console.log('renew sons');
+                // console.log(repeatSons);
+                var sonData;
+                $.each(repeatSons, function (n, son) {
+                    sonData = newData[Math.ceil((n+1)/trOptLen)-1]; //数据要每隔一组tr再更新
+                    if(!sonData) sonData = []; //数据突然为空
+                    renewObjData(son, sonData);
+                })
             }
         };
         //外部触发更新子data
         obj.renewSonData = function (newData) {
-            // console.log('renewSonData');
+            // console.log('renewSonData newData', newData);
             var sons = obj['repeatSons'] ;
             //更新循环的tr数组
-            renewSonLen_(sons, newData);
+            if(sons.length) {
+                renewRepeatSonLen(sons, newData);
+            }
             //更新不循环的tr数组
             var sons = obj['noRepSons'] ;
             $.each(sons, function (n, son) {
+                // console.log('son.opt', son, son.sor_opt.data, newData);
                 renewObjData(son, newData);
             });
-        };
-        //更新循环的tr的date
-        obj.renewOldRepeatTr = function(newData) {
-            var sons = obj['repeatSons'] ;
-            // console.log('renew sons');
-            // console.log(sons);
-            var sonData;
-            var trOptLen = _getTrNum(obj['options']||[]);
-            $.each(sons, function (n, son) {
-                sonData = newData[Math.ceil((n+1)/trOptLen)-1]; //数据要每隔一组tr再更新
-                if(!sonData) sonData = []; //数据突然为空
-                renewObjData(son, sonData);
-            })
-        };
+        }; 
 
         //创建多个子对象
         function makeRepeatTrs(trOpts, trOneData, dataIndex) {
@@ -4890,11 +4877,11 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             var extendParentData = hasSetData ? false : true;
             // console.log('make RepeatTrs ________dataIndex:', dataIndex, trOneData, extendParentData);
             //new trs
-            var trObj;
             //第一行data直接用子对象生成 span->td->tr
             if(dataIndex == 0) {
                 // console.log('line1_________', trOneData, trOpts);
-                $.each(trOpts, function (n, tmpOpt_) {
+                $.each(trOpts, function (n, _opt_) {
+                    var tmpOpt_ = cloneData(_opt_);
                     tmpOpt_['extendParentData'] = extendParentData;
                     if(hasSetData) tmpOpt_['data'] = trOneData; //必须克隆完再更新data
                     // console.log('make 000000000000:', tmpOpt_);
@@ -4911,12 +4898,13 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             } else {
                 //第2行data开始 要用sor_opt重新生成新的 tr->td->span
                 // console.log('line2_________', trOpts);
-                $.each(trOpts, function (n, tmpOpt_) {
-                    tmpOpt_ = copySourceOpt(tmpOpt_);//克隆
+                $.each(trOpts, function (n, _opt_) {
+                    tmpOpt_ = cloneData(copySourceOpt(tmpOpt_));//克隆
                     // console.log('tmpOpt_', tmpOpt_);
-                    if(hasSetData) tmpOpt_['data'] = trOneData;
+                    //这里不应该提前设置data 会让tr的sor_opt误以为先天d带data
                     tmpOpt_['extendParentData'] = extendParentData;
                     var newTrObj = global.makeTr(tmpOpt_);
+                    if(hasSetData) newTrObj['data'] = trOneData;
                     // console.log('make RepeatTrs newTrObj:', newTrObj);
                     newTrObj[parentObjKey] = obj;
                     obj['repeatSons'].push(newTrObj); // 子对象
@@ -4949,7 +4937,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             //提取所有的tr_ ,tr
             var tabData = options_['data'] || [];
             var i_ = 0;//计算tr出现的位置
-            var findRepeatTr = false;//是否找到循环的tr
             $.each(options_, function (key_, val_) {
                 if(key_.substr(0,2) == 'tr' || key_.substr(0,3) == 'tr_') {
                     if(key_ == 'tr' || key_ == 'tr_repeat') {
@@ -4958,7 +4945,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         }
                         //console.log('create____RepeatDataTrs_:::::::::::::', key_);
                         createRepeatDataTrs(options_);
-                        findRepeatTr = true;
                     } else if(key_.substr(0,2) == 'tr') {//生成不循环的tr_n 也是可以配置无循环的data的
                         //console.log(val_);
                         if(!$.isArray(val_)) { //tr_2:{td: {}}  => tr_2:[{td: {}},{td: {}}]
@@ -5064,7 +5050,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     }
                 });
             } else {
-                inputs = [];
                 $.each(obj['value'], function (k, tr) {
                     if(tr.findName(inputName) && tr.findName(inputName).checked) {
                         selectIds.push(tr.findName(inputName).value);
@@ -8944,7 +8929,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             //主动更新数据
             renew: function(options_) {
                 if(!options_)  return;
-                var barVal = options_['value'] || '';
+                var barVal = isUndefined(options_['value']) ? '': options_['value'];
                 var hasSetData = !isUndefined(options_['data']);
                 optionDataFrom(obj, options_);
                 //console.log(dataFrom);
@@ -9173,7 +9158,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 $.each(sons, function (n, son) {
                     sonData = newData[n];
                     if(!sonData) sonData = []; //数据突然为空
-                    if(isUndefined(sonData['index'])) sonData['index'] = n;
                     renewObjData(son, sonData);
                 })
             }
@@ -9211,7 +9195,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     var tmpData;
                     for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
                         tmpData =  newData[tmpTreeCheckDataId];
-                        tmpData['index'] = tmpTreeCheckDataId;
                         //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
                         if(!isUndefined(sons[tmpTreeCheckDataId])) {
                             //console.log('renew_tmpIndex:'+ tmpIndex);
@@ -9227,7 +9210,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     var tmpData;
                     for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
                         tmpData =  newData[tmpTreeCheckDataId];
-                        tmpData['index'] = tmpTreeCheckDataId;
                         //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
                         //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
                         //console.log('tmpData');
@@ -9522,7 +9504,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     liObj = global.makeLi(cloneData(copyLiOpt));
                     liObj[parentObjKey] = obj;//分配父对象
                     obj[objValObjKey].push(checkObj);//累计子对象li
-                    _treeData['index'] = n;
                     liObj['data'] = tmpData; //必须克隆完再更新data
                     //console.log('append li :');
                     //console.log(liObj);

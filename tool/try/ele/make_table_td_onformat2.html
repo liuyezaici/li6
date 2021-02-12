@@ -35,7 +35,7 @@
         }
     });
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-        var getDataUrl = '/index/tool/get_rows?num=2';
+        var getDataUrl = '/index/tool/get_info';
         //js造一个简单的表格
         var table = lrEle.makeTable({
             'class': 'well',
@@ -50,47 +50,29 @@
                     lrBox.msgTisf(e.msg);
                 }
             },
-            tr_default: [
-                {
-                    show: '{!this.data}',
-                    td: [
-                        {
-                            style: 'padding-left: 15px;',
-                            value: 'No Data',
-                        }
-                    ]
-                }
-            ],
-            tr: [
+            tr_1: [
                 {
                     show: '{this.data}',
                     td: [
                       {
                           title: '{title}',
-                          id_: '{id}',
-                          value: 'tt:{title}',
-                          click: function (o) {
-                              lrBox.msgTisf(o.id_);
+                          time: '{time}',
+                          value: '',
+                          onFormat_time:function (o, v) {
+                              // console.log('time:', o, v);
+                              o.value = v;
                           }
+                          // value: lrEle.makeSpan({
+                          //
+                          //     title: '{title}',
+                          //     time: '{time}',
+                          //     value: '',
+                          //     onFormat_time:function (o, v) {
+                          //         console.log('time:', o, v);
+                          //         o.value = v;
+                          //     }
+                          // })
                         },
-                     // {
-                     //     id_: '{id}',
-                     //        value:  lrEle.makeA({
-                     //            value: 'dddd',
-                     //            click: function (o) {
-                     //                lrBox.msgTisf(o.parent.id_);
-                     //            }
-                     //        })
-                     //    },
-                        // {
-                        //     value: [
-                        //         lrEle.makeInput({
-                        //             width: '200px',
-                        //             name: 'u_nick',
-                        //             value: '{title}'
-                        //         })
-                        //     ]
-                        // }
                     ]
                 }
             ]
@@ -99,14 +81,14 @@
             table
         );
 
-        $('#show_reload_btn').append(lrEle.makeA({
-            value: '点此更新数据',
-            'class': 'btnLr btnLrSuccess',
-            click: function (obj, ev, scope) {
-                // console.log(table.data);
-                table.data = table.data;
-            }
-        }));
+        // $('#show_reload_btn').append(lrEle.makeA({
+        //     value: '点此更新数据',
+        //     'class': 'btnLr btnLrSuccess',
+        //     click: function (obj, ev, scope) {
+        //         // console.log(table.data);
+        //         table.renewData();
+        //     }
+        // }));
     });
 
 
