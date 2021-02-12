@@ -35,7 +35,7 @@
         }
     });
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-        var getDataUrl = '/index/tool/get_rows?num=3';
+        var getDataUrl = '/index/tool/get_rows?num=5';
         //js造一个简单的表格
         var table = lrEle.makeTable({
             'class': 'well',
@@ -50,26 +50,23 @@
                     lrBox.msgTisf(e.msg);
                 }
             },
-            // tr_top: [
-            //     {
-            //         th: [
-            //             { value: 'ID'  },
-            //             { value: '标题' }
-            //         ]
-            //     }
-            // ],
+            tr_default: [
+                {
+                    show: '{!this.data}',
+                    td: [
+                        {
+                            style: 'padding-left: 15px;',
+                            value: 'No Data',
+                        }
+                    ]
+                }
+            ],
             tr: [
                 {
-                    // show: '{this.data}',
+                    show: '{this.data}',
                     td: [
-                      // {
-                      //     id_: '{id}',
-                      //     value: '{id}.{title}',
-                      //     click: function (o) {
-                      //         lrBox.msgTisf(o.id_);
-                      //     }
-                      //   },
                       {
+                          title: '{title}',
                           value: lrEle.makeDiv({
                               // ct_: '{content}',
                               value: [

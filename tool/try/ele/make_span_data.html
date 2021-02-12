@@ -33,14 +33,30 @@
             }
         });
         require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-            var simpleSpan = lrEle.makeDiv({
-                data: {'ps': '没什么特别的技能'},
-                show: '{this.data}',
-                value: ' ps:{ps}',
+            var getDataUrl = '/index/tool/get_info';
+            var demo = lrEle.makeDiv({
+                'class': 'well',
+                data_from: {
+                    url: getDataUrl,
+                    data_key: 'data',
+                    post_data: {},
+                    success_key: 'code',
+                    success_value: '1',
+                    err_func: function (e) {
+                        lrBox.msgTisf(e.msg);
+                    }
+                },
+                title: '{title}',
+                value: '{title}',
+                onFormat_value: function (o, v) {
+                    console.log('value', o, o.title);
+                }
             });
-            $('#show_span').append(simpleSpan);
+            $('#show_span').append(
+                demo
+            );
+
 
         });
-
 
     </script>

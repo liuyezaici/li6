@@ -35,9 +35,11 @@
         }
     });
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-        var getDataUrl = '/index/tool/get_info';
-        var demo = lrEle.makeDiv({
+        var getDataUrl = '/index/tool/get_rows?num=3';
+        //js造一个简单的表格
+        var table = lrEle.makeTable({
             'class': 'well',
+            'name': 'login_table',
             data_from: {
                 url: getDataUrl,
                 data_key: 'data',
@@ -48,22 +50,42 @@
                     lrBox.msgTisf(e.msg);
                 }
             },
-            ct_ : '{content}',
-            value: '',
-            onFormat_ct_:function (o, v) {
-                console.log(v);
-                o.value = v;
-            }
+            tr_default: [
+                {
+                    show: '{!this.data}',
+                    show1: '{this.data}',
+                    td: [
+                        {
+                            style: 'padding-left: 15px;',
+                            value: 'No Data',
+                        }
+                    ]
+                }
+            ],
+            tr: [
+                {
+                    show: '{this.data}',
+                    td: [
+                      {
+                          id_: '{id}',
+                          value: '{id}.{title}',
+                          click: function (o) {
+                              lrBox.msgTisf(o.id_);
+                          }
+                    }
+                    ]
+                }
+            ]
         });
         $('#show_table').append(
-            demo
+            table
         );
 
         $('#show_reload_btn').append(lrEle.makeA({
             value: '点此更新数据',
             'class': 'btnLr btnLrSuccess',
             click: function (obj, ev, scope) {
-                demo.renewData();
+                table.renewData();
             }
         }));
     });

@@ -23,14 +23,17 @@
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
         var imgObj = lrEle.makeImg({
                 'class': 'thumbnail'
-                ,'name': 'demo'
-                ,data: {'url': '/resource/pub/images/logo.png'}
+                ,'z_index': 12
+                ,'name': 'imgggg'
                 ,src: '{url}'
-                ,onFormat_src: function (o,e) {
-                    console.log('渲染src');
+                , load: function (o,e) {
+                    console.log('下载完成');
                 }
         });
 
         $('#show_pic').append(imgObj);
+
+        $('#show_bind1').append(lrEle.makeDiv({value: 'this key is :{{key}}' }));
+        $('#show_bind3').append(lrEle.makeInput({value: '1', bind: 'key'}));
     });
 </script>

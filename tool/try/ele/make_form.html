@@ -2,10 +2,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+<script src="/assets/js/require.min.js"></script>
 <style>
     .js_table .left_em {
         width: 100px;
@@ -25,86 +22,100 @@
 <div id="show_form"></div>
 <script>
 
-    //js造一个简单的表格
-    var table = makeTable({
-        'class': 'well js_table',
-        'name': 'login_table',
-        'id': '',
-        tr_1: [{
-            id: 'account_tr',
-            td: [ {
-                value: '帐号',
-                'class': 'left_em'
-            },
-                {
-                    value: [
-                        makeInput({
-                            width: 200,
-                            name: 'user_nick',
-                            null_func: function () {
-                                msgTisf('请输入帐号');
-                            }
-                        }),
-                        makeSpan({
-                            value: '*',left: 10,'class': 'red'
-                        })
-                    ]
-                }
-            ]
-        },{
-            td: [
-                {
-                value: '密码',
-                'class': 'left_em'
-                }, {
-                value:  [
-                    makeInput({
-                        width: 200,
-                        type: 'password',
-                        name: 'user_pwd'
-                    }),makeSpan({
-                        value: '*',left: 10,'class': 'red'
-                    })
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        //js造一个简单的表格
+        var table = lrEle.makeTable({
+            'class': 'well js_table',
+            'name': 'login_table',
+            'id': '',
+            tr_1: [{
+                id: 'account_tr',
+                td: [{
+                    value: '帐号',
+                    'class': 'left_em'
+                },
+                    {
+                        value: [
+                            lrEle.makeInput({
+                                width: 200,
+                                name: 'user_nick',
+                                null_func: function () {
+                                    lrBox.msgTisf('请输入帐号');
+                                }
+                            }),
+                            lrEle.makeSpan({
+                                value: '*', left: 10, 'class': 'red'
+                            })
+                        ]
+                    }
                 ]
-            }
-            ]
-        },{
-            'class': 'submit_tr',
-            td: {
+            }, {
+                td: [
+                    {
+                        value: '密码',
+                        'class': 'left_em'
+                    }, {
+                        value: [
+                            lrEle.makeInput({
+                                width: 200,
+                                type: 'password',
+                                name: 'user_pwd'
+                            }), lrEle.makeSpan({
+                                value: '*', left: 10, 'class': 'red'
+                            })
+                        ]
+                    }
+                ]
+            }, {
+                'class': 'submit_tr',
+                td: {
                     colspan: '2',
                     'class': 'submit_box',
-                    value: makeBtn({
+                    value: lrEle.makeBtn({
                         value: '登 录',
                         type: 'submit',
                         'class': 'btnLr btnLrSuccess'
                     })
                 }
-        }]
-    });
-    //js造一个简单的表单
-    var diyForm = makeForm({
-        'name': '',
-        'type': 'post',
-        'url' : '/?s=tool/test',
-        value: table,
-        submit: function (obj, ev) {//提交时回调
-            // ev.preventDefault();
-            // console.log(obj);
-            // console.log(ev);
-            // ev.preventDefault();
-            // console.log('on submit');
-            // return false;// 可以让表单停止提交 但要记得 ev.preventDefault();
-        },
-        success_key: 'id',
-        success_value: ['0043', '0113'],
-        success_func: function (data) {
-            msgTisf('success');
-        },
-        err_func: function (data) {
+            }]
+        });
+        //js造一个简单的表单
+        var diyForm = lrEle.makeForm({
+            'name': '',
+            'type': 'post',
+            'url': '/?s=tool/test',
+            value: table,
+            'replaceData': function (data) {
+                console.log('submitData:', data);
+                return (data);
+            },
+            submit: function (obj, ev) {//提交时回调
+                // ev.preventDefault();
+                console.log(obj);
+                // console.log(ev);
+                // ev.preventDefault();
+                // console.log('on submit');
+                // return false;// 可以让表单停止提交 但要记得 ev.preventDefault();
+            },
+            success_key: 'code',
+            success_value: 1,
+            success_func: function (data) {
+                lrBox.msgTisf('success');
+            },
+            err_func: function (data) {
 
-        }
+            }
+        });
+        $('#show_form').append(
+            diyForm
+        );
     });
-    $('#show_form').append(
-        diyForm
-    );
 </script>

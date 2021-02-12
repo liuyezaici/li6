@@ -48,12 +48,15 @@
                     lrBox.msgTisf(e.msg);
                 }
             },
-            ct_ : '{content}',
-            value: '',
-            onFormat_ct_:function (o, v) {
-                console.log(v);
-                o.value = v;
-            }
+            value: lrEle.makeP({
+                data : '{content}',
+                value : lrEle.makeSpan({
+                    value : '{a}',
+                    onFormat_value:function (o, v) {
+                        console.log('onFormat_value:', v);
+                    }
+                }),
+            }),
         });
         $('#show_table').append(
             demo
