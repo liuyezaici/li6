@@ -669,9 +669,9 @@ define(['jquery'], function ($) {
         boxObj.css('z-index', currentBoxIndex);
         boxObj.beforeClose = getOptVal(options,['beforeClose'], false);//关闭前执行事件
         var setLeftTop = false;
+        var cssObj = {};
         if(diyCss) {
             if(!isObj(diyCss)) {
-                var cssObj = {};
                 var array_ = diyCss.split(';');
                 array_.forEach (function (v, n) {
                     var array2_ = v.split(':');
@@ -684,7 +684,7 @@ define(['jquery'], function ($) {
                 cssObj['display'] = 'none';
                 cssObj['opacity'] = 0;
             }
-            setLeftTop = cssObj.left || cssObj.top;
+            setLeftTop = cssObj.left || cssObj.top || false;
             boxObj.css(cssObj);
         }
         //支持外部触发标题闪烁
@@ -990,8 +990,12 @@ define(['jquery'], function ($) {
         };
         if(fadeIn) {
             var reCss = {'display': 'none', width: boxWidth};
-            if(x_) reCss['left'] = x_;
-            if(y_) reCss['top'] = y_;
+            if(x_ !='0px') {
+                reCss['left'] = x_;
+            }
+            if(y_ != '0px') {
+                reCss['top'] = y_;
+            }
             boxObj.css(reCss);
             setTimeout(function () {
                 boxObj.fadeIn(fadeInTime, function () {

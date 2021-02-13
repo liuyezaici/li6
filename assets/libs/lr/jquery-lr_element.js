@@ -5986,7 +5986,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
     global.makeSwitch = function(sourceOptions) {
         var options = cloneData(sourceOptions);
         if(isUndefined(options['value'])) options['value'] = '';
-        var selectVal = options['value'];
+        var selectVal = getOptVal(options, ['value'], '');
+        var setBind = getOptVal(options, ['bind'], '');
         var obj = $('<span></span>');
         if(!obj.sor_opt) obj.sor_opt = copySourceOpt(cloneData(options));
         options['class_extend'] = 'diy_switch';
