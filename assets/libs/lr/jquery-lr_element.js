@@ -842,7 +842,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     //支持data-n
                     //console.log('add newAttr111 '+ key_ +':'+ v);
                     if(key_ != 'data' && key_.substr(0, 4) == 'data' ) {
-                        newAttr[n] = v;
+                        newAttr[key_] = v;
                     }
                 }
 
@@ -2782,10 +2782,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             //value不需要渲染时才可以执行延迟事件 否则要待渲染完成才可以执行此方法
             //否则等待父值渲染成功再取值,触发此接口即可更新此对象的data
             obj_.getDataFromParentData = function (parentObj, newParentVal, sonObj) {
-                var valueKey =  getOptVal(parentObj.options, ['value_key', 'valueKey']);
+                // console.log('getDataFromParentData');
+                // console.log(parentObj.sor_opt, parentObj.menu.menu.data);
+                var valueKey =  getOptVal(parentObj.sor_opt, ['value_key', 'valueKey'], '');
                 var parentData =  parentObj.menu.menu.data;
                 var findData = null;
-                //console.log('get DataFrom ParentData', obj_, parentData);
+                // console.log('valueKey', valueKey, 'newParentVal', newParentVal);
                 if(hasData(parentData)) {
                     $.each(parentData, function(key, tmp) {
                         if(tmp[valueKey] == newParentVal) {
@@ -2796,6 +2798,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         }
                     });
                 }
+                // console.log('findData', findData);
                 if(findData) {
                     //console.log('findData', sonObj, findData);
                     sonObj.menu_data = findData;
@@ -6599,8 +6602,9 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         obj.reGetValAndText = function () {
             var valArray_ = [];
             var textArray_ = [];
-            var ulLis = obj['menu'];
+            var ulLis = obj['menu'].value;
             var liVal, liTitle;
+            console.log('ulLis', ulLis);
             $.each(ulLis, function(n, tmpItem) {
                 liVal = tmpItem.attr('data-value');
                 liTitle = tmpItem.attr('data-title');
@@ -6896,10 +6900,9 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         }
         var options = cloneData(sourceOptions);
         var setBind = getOptVal(options, ['bind'], '');
+        var setText = getOptVal(options, ['set_text', 'setText'], null);
         var sourceVal = getOptVal(options, ['value'], '');
         //统一头部判断结束
-
-
         //div + contenteditable="true" 可输入 tabindex 用于触发丢焦
         var objExtendClass = 'btnGLr';
         var inputSize = options['size'] || '';
@@ -6986,7 +6989,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             }
             obj.attr('data-text', newTextStr);
             obj.textObj.setSelectMenuText(newTextArray, newTextStr);
-            var setText = getOptVal(options, ['set_text', 'setText'], null);
             if(setText) {//触发数据同步  触发赋值 */
                 updateBindObj($.trim(setText), newTextStr, [obj]);
                 if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setText])) {
@@ -7048,19 +7050,31 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             renewBind = isUndefined(renewBind) ? true : renewBind;
             if(obj['menu'].value != newVal) obj['menu'].value = newVal;
             // console.log('setSelectVal', newVal, renewBind);
-            if(renewBind && setBind) {
-                //触发数据同步  触发赋值 */
-                if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
-                if(newVal !== '') {
-                    updateBindObj($.trim(setBind), newVal, exceptObj);
-                } else {
-                    var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
-                    if(lastVal !== '') {
-                        obj.setSelectVal(lastVal, [obj]);
+            if(renewBind) {
+                if(setBind) {
+                    //触发数据同步  触发赋值 */
+                    if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
+                    if(newVal !== '') {
+                        updateBindObj($.trim(setBind), newVal, exceptObj);
+                    } else {
+                        var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
+                        if(lastVal !== '') {
+                            obj.setSelectVal(lastVal, [obj]);
+                        }
+                    }
+                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
+                        renewObjBindAttr(obj, setBind);
                     }
                 }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
-                    renewObjBindAttr(obj, setBind);
+                if(setText) {
+                    //触发数据同步  触发赋值 */
+                    if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
+                    if(newVal !== '') {
+                        updateBindObj($.trim(setText), obj.text, exceptObj);
+                    }
+                    if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setText])) {
+                        renewObjBindAttr(obj, setText);
+                    }
                 }
             }
         };
@@ -7127,7 +7141,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 obj.INeedParentValFlag = getOptVal(options_, ['need_parent_val', 'needParentVal'], false);//需要父参数渲染好才能请求url
                 var needParentKey = getOptVal(options_, ['need_parent_key', 'needParentKey', 'need_parent_name', 'needParentName'], null);
                 var itemsMenuOpt = getOptVal(options_, ['li'], {});
-                var pageOpt = getOptVal(options_, ['pagemenu','pageMenu','page_menu'], null);
+                var pageObj = getOptVal(options_, ['pageObj'], null);
                 var optData = options_['data'] || {};
                 var lazyCall = getOptVal(options_, ['lazy_call', 'lazyCall'], null);
                 obj['multi'] = getOptVal(options_, ['mul', 'multi', 'multity'], undefined); //是否支持多选
@@ -7251,7 +7265,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     //刷新data的事件交由list去做 先把属性给Items
                     itemsMenuOpt['need_parent_val'] = obj.INeedParentValFlag;
                     itemsMenuOpt['need_parent_key'] = needParentKey;
-                    // itemsMenuOpt['bind'] = options_['bind'] || '';
                     menuOpt = $.extend({}, menuOpt, {
                         'items': itemsMenuOpt,
                         'multi': obj['multi'],
@@ -7260,7 +7273,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     //item自身不能继承data菜单
                     delete menuOpt['data_from'];
                     delete menuOpt['dataFrom'];
-                    // console.log('itemsMenuOpt', JSON.stringify(itemsMenuOpt));
                     var menu_obj = global.makeItems(menuOpt);
                     //console.log('menu_obj',menu_obj);
                     menu_obj[parentObjKey] = obj;//设置其父对象
@@ -7274,76 +7286,23 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         menu_obj.show();
                         obj.addClass(menuZindexClass);
                     });
-                    if(pageOpt) {
-                        //console.log('create_page');
-                        var pageNowKey = pageOpt['page_now_key'] || pageOpt['current_page_key'] || 'page';
-                        var pageObj = global.makePage({
-                            data: '{'+ pageOpt['data_key'] +'}',
-                            page: pageNowKey ? '{'+ pageNowKey +'}' : 'page',
-                            total: pageOpt['result_total_key'] ? '{'+ pageOpt['result_total_key'] +'}' : 'total',
-                            pagesize: pageOpt['page_size_key'] ? '{'+ pageOpt['page_size_key'] +'}' : 5,
-                            size: pageOpt['menu_size'] ? pageOpt['menu_size'] : 'sm',
-                            pagenum: pageOpt['page_btn_num'] ? pageOpt['page_btn_num'] : 5,
-                            click: function (tmpObj, page) {
-                                obj['menu'].renewData(null, page);
-                            }
-                        });
+                    if(pageObj) {
                         obj['menu'].append(pageObj);
                     }
                     obj['createMenu'] = true;
                 }
                 //console.log(obj);
-                //添加数据
-                var selectAdd = options_['add'] || {};
-                var selectAddUrl = selectAdd['url'] || '';
-                var postAddName = selectAdd['post_name'] || options_['name'];
-                var canEnter = false;
-                if(selectAddUrl && successAddVal) {//可填写
-                    obj.textObj.attr('contenteditable', true);
-                    this.attr('url', selectAddUrl);
-                    canEnter = true;
-                }
                 //单独给input分配的事件
                 var newInputEven = {};
-                //keyup 事件扩展
-                if(canEnter) {
-                    //keyup 默认为事件 触发内容更新和同步
-                    newInputEven['keyup_extend'] = function () {
-                        formatInputContent(obj, options_, false);//限制内容格式、最大值
-                    };
-                }
-                //blur事件扩展
-                if(canEnter) {
-                    newInputEven['blur_extend'] = function () {
-                        var oldVal = obj.textObj.attr('data-old');
-                        var thisVal = obj.textObj.text();
-                        obj.textObj.attr('data-old', thisVal);//丢焦时才更新旧值
-                        //ajax添加
-                        if(canEnter && thisVal && oldVal !=thisVal ) {
-                            var postAddData = {};
-                            postAddData[postAddName] = $.trim(thisVal);//name必须重新获取 因为上面的是临时变量
-                            global.postAndDone({
-                                post_url: selectAddUrl,
-                                post_data: postAddData,
-                                success_value: successAddVal,
-                                success_key: successAddKey,
-                                success_func: successAddFunc
-                            }, obj.textObj);
-                        }
-                    };
-                }
                 options_['class_extend'] = 'select_box';
                 delete newInputEven['value'];
-                //console.log(options_);
                 obj.bindEvenObj = obj.textObj;
-                strObj.formatAttr(obj.textObj, newInputEven, 0, hasSetData);/// 给input分配的事件 如 blur
                 //强制加value参数 否则无法触发初始化渲染value事件：format Val
                 var formatOpt = cloneData(options_);
                 if(isUndefined(formatOpt['value'])) formatOpt['value'] = '';
                 strObj.formatAttr(obj, formatOpt, 0, hasSetData);
-
             },
-            updates: function(dataName, exceptObj) {//数据同步
+            updates: function(dataName, exceptObj) {//bind数据同步
                 //console.log('updates:'+dataName);
                 exceptObj = exceptObj || [];
                 if(setBind && $.inArray(this, exceptObj) == -1) {
@@ -7520,9 +7479,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 if(disabled == 1) options_['disabled'] = true;
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 optionDataFrom(obj, options_);//
-                var data_ = getOptVal(options_, 'data', {});
-                //console.log('options11_');
-                //console.log(options_);
                 //只生成一次子对象
                 if(!obj['createCheck']) {
                     var sonObj = $('<span class="_inner">' +
@@ -7571,9 +7527,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         options_['click'] = defaultClickFunc;
                     }
                 }
-                //console.log('options_');
-                // console.log('obj.before_formatAttr');
-                // console.log(options_);
                 strObj.formatAttr(obj, options_, 0, hasSetData);
             },
             updates: function(dataName, exceptObj) {//数据同步

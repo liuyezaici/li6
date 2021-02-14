@@ -25,6 +25,14 @@ class Index extends Frontend
         header("Access-Control-Allow-Headers:DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type, Accept-Language, Origin, Accept-Encoding");
     }
 
+    public function getArea() {
+        $area_id = input('area_id', '');
+        $list = [];
+        if($area_id) {
+            $list = Db('area')->field('s_id,s_name')->where(['s_parent_id' => $area_id])->select();
+        }
+        $this->success('success', '', $list);
+    }
     public function saveTask() {
         $caijiId = input('id', '');
         $list = input('urls', '');

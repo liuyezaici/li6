@@ -7,10 +7,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 
 <style>
     .simple_btn {
@@ -24,97 +21,112 @@
 <div id="show_select"></div>
 <br />
 <script>
-    var i,selectData=[];
-    for(i=65; i <91; i++) { //91
-        selectData.push({
-            u_id: i,
-            u_nick: String.fromCharCode(i)
-        });
-    }
-    var allTypes = [{"id": 0,"title":"default"},{"id":1,"title":"\u667a\u80fd\u5bb6\u5c45"},{"id":2,"title":"\u667a\u6167\u793e\u533a"
-    },{"id":3,"title":"\u667a\u80fd\u786c\u4ef6"},{"id":4,"title":"\u667a\u80fd\u5065\u5eb7"},{"id":5,"title"
-            :"\u697c\u5b87\u529e\u516c"},{"id":6,"title":"\u667a\u6167\u5de5\u4e1a"}];
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var i, selectData = [];
+        for (i = 65; i < 91; i++) { //91
+            selectData.push({
+                u_id: i,
+                u_nick: String.fromCharCode(i)
+            });
+        }
+        var allTypes = [{"id": 0, "title": "default"}, {"id": 1, "title": "\u667a\u80fd\u5bb6\u5c45"}, {
+            "id": 2, "title": "\u667a\u6167\u793e\u533a"
+        }, {"id": 3, "title": "\u667a\u80fd\u786c\u4ef6"}, {"id": 4, "title": "\u667a\u80fd\u5065\u5eb7"}, {
+            "id": 5, "title": "\u697c\u5b87\u529e\u516c"
+        }, {"id": 6, "title": "\u667a\u6167\u5de5\u4e1a"}];
 
-  $('#show_select').append([
-      makeSelect({
-          'default_text': '请选择',
-          'name': 'diy_select',
-          'text': 'chose',
-          'style': 'width: 120px;',
-          'value_key': "id",//取值的键名
-          'data': allTypes,
-          size: 'x', //x/s/m/l sm/md/lg/ small/middle/large/
-          menu: {
-              'multi': true,
-              width: '220px'
-          },
-          li: {
-              value: "{title}",
-              click: function (obj, eve, ff) {
+        $('#show_select').append([
+            lrEle.makeSelect({
+                'default_text': '请选择',
+                'name': 'diy_select',
+                'text': 'chose',
+                'style': 'width: 120px;',
+                'value_key': "id",//取值的键名
+                'title_key': "title",//取文本的键名
+                'data': allTypes,
+                size: 'x', //x/s/m/l sm/md/lg/ small/middle/large/
+                menu: {
+                    'multi': true,
+                    width: '220px'
+                },
+                li: {
+                    value: "{title}",
+                    click: function (obj, eve, ff) {
 
-              }
-          }
-      }),
-      makeSelect({
-          'name': 'diy_select',
-          'value': 0,
-          'text': 'chose',
-          // 'multi': true,
-          'value_key': "id",//取值的键名
-          'data': allTypes,
-          size: 's', //x/s/m/l sm/md/lg/ small/middle/large/
-          menu: {
-              width: '320px'
-          },
-          li: {
-              value: "{title}",
-              click: function (obj, eve, ff) {
-                  console.log(obj);
-                  console.log(eve);
-                  console.log(ff);
-              }
-          }
-      }),
-      makeSelect({
-          'name': 'diy_select',
-          'value': 0,
-          'text': 'chose',
-          // 'multi': true,
-          'value_key': "id",//取值的键名
-          'data': allTypes,
-          size: 'm', //s/m/l sm/md/lg/ small/middle/large/
-          menu: {
-              width: '320px'
-          },
-          li: {
-              value: "{title}",
-              click: function (obj, eve, ff) {
-                  console.log(obj);
-                  console.log(eve);
-                  console.log(ff);
-              }
-          }
-      }),
-      makeSelect({
-          'name': 'diy_select',
-          'value': 0,
-          'text': 'chose',
-          // 'multi': true,
-          'value_key': "id",//取值的键名
-          'data': allTypes,
-          size: 'l', //s/m/l sm/md/lg/ small/middle/large/
-          menu: {
-              width: '320px'
-          },
-          li: {
-              value: "{title}",
-              click: function (obj, eve, ff) {
-                  console.log(obj);
-                  console.log(eve);
-                  console.log(ff);
-              }
-          }
-      })
-  ]);
-
+                    }
+                }
+            }),
+            lrEle.makeSelect({
+                'name': 'diy_select',
+                'value': 0,
+                'text': 'chose',
+                // 'multi': true,
+                'value_key': "id",//取值的键名
+                'title_key': "title",//取文本的键名
+                'data': allTypes,
+                size: 's', //x/s/m/l sm/md/lg/ small/middle/large/
+                menu: {
+                    width: '320px'
+                },
+                li: {
+                    value: "{title}",
+                    click: function (obj, eve, ff) {
+                        console.log(obj);
+                        console.log(eve);
+                        console.log(ff);
+                    }
+                }
+            }),
+            lrEle.makeSelect({
+                'name': 'diy_select',
+                'value': 0,
+                'text': 'chose',
+                // 'multi': true,
+                'value_key': "id",//取值的键名
+                'title_key': "title",//取文本的键名
+                'data': allTypes,
+                size: 'm', //s/m/l sm/md/lg/ small/middle/large/
+                menu: {
+                    width: '320px'
+                },
+                li: {
+                    value: "{title}",
+                    click: function (obj, eve, ff) {
+                        console.log(obj);
+                        console.log(eve);
+                        console.log(ff);
+                    }
+                }
+            }),
+            lrEle.makeSelect({
+                'name': 'diy_select',
+                'value': 0,
+                'text': 'chose',
+                // 'multi': true,
+                'value_key': "id",//取值的键名
+                'title_key': "title",//取文本的键名
+                'data': allTypes,
+                size: 'l', //s/m/l sm/md/lg/ small/middle/large/
+                menu: {
+                    width: '320px'
+                },
+                li: {
+                    value: "{title}",
+                    click: function (obj, eve, ff) {
+                        console.log(obj);
+                        console.log(eve);
+                        console.log(ff);
+                    }
+                }
+            })
+        ]);
+});
 </script>

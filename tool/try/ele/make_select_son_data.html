@@ -6,10 +6,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 
 //共用一个data的select框
 <div id="show_select1"></div>
@@ -17,107 +14,140 @@
 <div id="show_select3"></div>
 
 <script>
-    var allData = [
-            {'id': 1, 'name': 'a', 'child':
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var allData = [
+            {
+                'id': 1, 'name': 'a', 'child':
                     [
-                        {'id': 11, 'name': 'aa', 'child':
+                        {
+                            'id': 11, 'name': 'aa', 'child':
                                 [
                                     {'id': 111, 'name': 'aaa'},
                                     {'id': 112, 'name': 'aab'},
                                     {'id': 113, 'name': 'aac'},
-                                ]},
-                        {'id': 12, 'name': 'ab', 'child':
+                                ]
+                        },
+                        {
+                            'id': 12, 'name': 'ab', 'child':
                                 [
                                     {'id': 121, 'name': 'aba'},
                                     {'id': 122, 'name': 'abb'},
                                     {'id': 123, 'name': 'abc'},
-                                ]},
-                        {'id': 13, 'name': 'ac', 'child':
+                                ]
+                        },
+                        {
+                            'id': 13, 'name': 'ac', 'child':
                                 [
                                     {'id': 131, 'name': 'aca'},
                                     {'id': 132, 'name': 'acb'},
                                     {'id': 133, 'name': 'acc'},
-                                ]},
+                                ]
+                        },
                     ]
             },
-            {'id': 2, 'name': 'b', 'child':
+            {
+                'id': 2, 'name': 'b', 'child':
                     [
-                        {'id': 21, 'name': 'ba', 'child':
+                        {
+                            'id': 21, 'name': 'ba', 'child':
                                 [
                                     {'id': 211, 'name': 'baa'},
                                     {'id': 212, 'name': 'bab'},
                                     {'id': 213, 'name': 'bac'},
-                                ]},
-                        {'id': 22, 'name': 'bb', 'child':
+                                ]
+                        },
+                        {
+                            'id': 22, 'name': 'bb', 'child':
                                 [
                                     {'id': 221, 'name': 'bba'},
                                     {'id': 222, 'name': 'bbb'},
                                     {'id': 223, 'name': 'bbc'},
-                                ]},
-                        {'id': 23, 'name': 'bc', 'child':
+                                ]
+                        },
+                        {
+                            'id': 23, 'name': 'bc', 'child':
                                 [
                                     {'id': 231, 'name': 'bca'},
                                     {'id': 232, 'name': 'bcb'},
                                     {'id': 233, 'name': 'bcc'},
-                                ]},
-                    ]},
-            {'id': 3, 'name': 'c', 'child':
+                                ]
+                        },
+                    ]
+            },
+            {
+                'id': 3, 'name': 'c', 'child':
                     [
-                        {'id': 31, 'name': 'ca', 'child':
+                        {
+                            'id': 31, 'name': 'ca', 'child':
                                 [
                                     {'id': 311, 'name': 'caa'},
                                     {'id': 312, 'name': 'cab'},
                                     {'id': 313, 'name': 'cac'},
-                                ]},
-                        {'id': 32, 'name': 'cb', 'child':
+                                ]
+                        },
+                        {
+                            'id': 32, 'name': 'cb', 'child':
                                 [
                                     {'id': 321, 'name': 'cba'},
                                     {'id': 322, 'name': 'cbb'},
                                     {'id': 323, 'name': 'cbc'},
-                                ]},
-                        {'id': 33, 'name': 'cc', 'child':
+                                ]
+                        },
+                        {
+                            'id': 33, 'name': 'cc', 'child':
                                 [
                                     {'id': 331, 'name': 'cca'},
                                     {'id': 332, 'name': 'ccb'},
                                     {'id': 333, 'name': 'ccc'},
-                                ]},
+                                ]
+                        },
                     ]
             },
         ];
-    var select = makeSelect({
-        name: 'demo1',
-        'value': 2, // 支持字符串或数组
-        'default_text': '请选择',
-        'value_key': "id",//取值的键名
-        'title_key': "name",//取值的键名
-        menu: {
-            width: '500px',
-            'data': allData,
-        },
-        li: {
-            value: "{name}",
-        },
-        son: {//2级
-            name: 'demo2',
-            value: 22,
+        var select = lrEle.makeSelect({
+            name: 'demo1',
+            'value': 2, // 支持字符串或数组
+            'default_text': '请选择',
             'value_key': "id",//取值的键名
-            need_parent_val: true,
+            'title_key': "name",//取值的键名
             menu: {
-                width: '300px',
-                data_from: 'child',
+                width: '200px',
+                'data': allData,
             },
-            son: {//3级
-                name: 'demo3',
-                value: 222,
+            li: {
+                value: "{name}",
+            },
+            son: {//2级
+                name: 'demo2',
+                value: 22,
+                'value_key': "id",//取值的键名
                 need_parent_val: true,
                 menu: {
-                    width: '320px',
-                    data_from: 'child'
+                    width: '200px',
+                    data_from: 'child',
+                },
+                son: {//3级
+                    name: 'demo3',
+                    value: 222,
+                    need_parent_val: true,
+                    menu: {
+                        width: '220px',
+                        data_from: 'child'
+                    }
                 }
             }
-        }
-    });
-  $('#show_select1').append(select);
-  $('#show_select2').append(select['son']);
-  $('#show_select3').append(select['son']['son']);
+        });
+        $('#show_select1').append(select);
+        $('#show_select2').append(select['son']);
+        $('#show_select3').append(select['son']['son']);
+
+});
 </script>

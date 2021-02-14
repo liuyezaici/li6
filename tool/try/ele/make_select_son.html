@@ -6,10 +6,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+<script src="/assets/js/require.min.js"></script>
 
 <style>
     .demo {
@@ -20,23 +17,34 @@
 </style>
 //创建一个带下级的select框
 
-<div id="show_select1"></div>
-<div id="show_select2"></div>
-<div id="show_select3"></div>
-<div id="show_bind1"></div>
-<div id="show_bind2"></div>
+<div class="well">
+    <div id="show_bind1"></div>
+    <div id="show_bind2"></div>
+</div>
+    <div id="show_select1"></div>
+    <div id="show_select2"></div>
+    <div id="show_select3"></div>
 <br />
 <script>
-    var select = makeSelect({
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    var select = lrEle.makeSelect({
         name: 'demo1',
         'value': 450000, // 支持字符串或数组
         'default_text': '请选择',
         'value_key': "s_id",//取值的键名
         'title_key': "s_name",//取值的键名
-        bind: 'province__id',
-        // bind_text: 'some_val1',
+        'bind': 'provinceId',
+        'setText': 'provinceTitle',
         menu: {
-            width: '620px',
+            width: '320px',
             'data': [{"s_id":"110000","s_name":"\u5317\u4eac"},
                 {"s_id":"120000","s_name":"\u5929\u6d25"},
                 {"s_id":"130000","s_name":"\u6cb3\u5317\u7701"},
@@ -65,7 +73,6 @@
         },
         li: {
             value: "{s_name}",
-            width: '120px'
         }
         , son: {
             //市区
@@ -74,44 +81,47 @@
             value: '450500',
             need_parent_val: true, //数据来源于父值确认后
             need_parent_key: 'area_id', //数据来源于父值确认后
+            'bind': 'cityId',
+            setText: 'cityTitle',
             menu: {
-                width: '500px',
+                width: '280px',
                 data_from: {
-                    url: '/?s=tool/get_area&city', //子数据来源
-                    success_key: 'id',
-                    success_value: '0038',
-                    data_key: 'info'
+                    url: '/tool/index/getArea', //子数据来源
+                    success_key: 'code',
+                    success_value: 1,
+                    data_key: 'data'
                 },
             },
             li: {
                 value: "{s_name}",
-                width: '100px',
                 click: function (obj, eve, ff) {
+                    lrBox.msgTisf(obj.value);
                 }
             }
-            // ,son: {//乡镇
-            //     name: 'towns',
-            //     menu: {
-            //         width: '600px'
-            //     },
-            //     need_parent_val: true, //数据来源于父值确认后
-            //     need_parent_key: 'area_id', //数据来源于父值确认后
-            //     bind_text: 'some_val3',
-            //     // value: '',
-            //     value: '450521',
-            //     data_from: {
-            //         url: '/?s=tool/get_area&town', //子数据来源 有data时可不设置
-            //         success_key: 'id',
-            //         success_value: '0038',
-            //         data_key: 'info'
-            //     },
-            //     li: {
-            //         value: "{s_name}",
-            //         width: '100px',
-            //         click: function (obj, par) {
-            //         }
-            //     }
-            // }
+            ,son: {//乡镇
+                name: 'town',
+                menu: {
+                    width: '200px'
+                },
+                need_parent_val: true, //数据来源于父值确认后
+                need_parent_key: 'area_id', //数据来源于父值确认后
+                'bind': 'townId',
+                setText: 'townTitle',
+                // value: '',
+                value: '450521',
+                data_from: {
+                    url: '/tool/index/getArea', //子数据来源
+                    success_key: 'code',
+                    success_value: 1,
+                    data_key: 'data'
+                },
+                li: {
+                    value: "{s_name}",
+                    click: function (obj, par) {
+                        lrBox.msgTisf(obj.value);
+                    }
+                }
+            }
         }
     });
   $('#show_select1').append(select);
@@ -119,12 +129,12 @@
   $('#show_select2').append(select['son']).append(select['son']['son']);
   //
   //   //text数据绑定
-  //   $('#show_bind1').append( makeInput({
-  //       bind: 'province__id',
-  //       value: ''
-  //   }));
-  //   //text数据绑定
-  //   $('#show_bind2').append( makeDiv({
-  //       value: '文本: {{some_val1}} {{some_val2}} {{some_val3}}'
-  //   }));
+    $('#show_bind1').append( lrEle.makeInput({
+        value: 'id: {{provinceId}} {{cityId}} {{townId}}'
+    }));
+  //  //text数据绑定
+    $('#show_bind2').append( lrEle.makeDiv({
+        value: '文本: {{provinceTitle}} {{cityTitle}} {{townTitle}}'
+    }));
+});
 </script>

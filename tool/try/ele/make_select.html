@@ -7,11 +7,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
-
+    <script src="/assets/js/require.min.js"></script>
 <style>
     .simple_btn {
         border: 1px solid #dedede;
@@ -24,35 +20,45 @@
 <div id="show_select"></div>
 <br />
 <script>
-    var i,selectData=[];
-    for(i=65; i <91; i++) { //91
-        selectData.push({
-            id: i,
-            title: String.fromCharCode(i)
-        });
-    }
-    var select = makeSelect({
-        'name': 'demo',
-        'default_text': '请选择',
-        'value': '66',
-        'clear': true,
-        'value_key': "id",//取值的键名
-        'title_key': "title",//取文本的键名
-        // 'multi': true,
-        menu: {
-            width: '320px',
-            'data': selectData
-        },
-        li: {
-            value: "{title}",
-            style: 'margin:0;padding: 0 5px;',
-            click: function (obj, eve, ff) {
-                // console.log(obj);
-                // console.log(eve);
-                // console.log(ff);
-            }
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
         }
     });
-  $('#show_select').append(select);
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var i,selectData=[];
+        for(i=65; i <91; i++) { //91
+            selectData.push({
+                id: i,
+                title: String.fromCharCode(i)
+            });
+        }
+        var select = lrEle.makeSelect({
+            'name': 'demo',
+            'default_text': '请选择',
+            'value': '66',
+            'clear': true,
+            'value_key': "id",//取值的键名
+            'title_key': "title",//取文本的键名
+            // 'multi': true,
+            menu: {
+                width: '320px',
+                'data': selectData
+            },
+            li: {
+                value: "{title}",
+                style: 'margin:0;padding: 0 5px;',
+                click: function (obj, eve, ff) {
+                    // console.log(obj);
+                    // console.log(eve);
+                    // console.log(ff);
+                }
+            }
+        });
+      $('#show_select').append(select);
+    });
 
 </script>
