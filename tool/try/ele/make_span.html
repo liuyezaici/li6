@@ -4,16 +4,6 @@
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
 
     <script src="/assets/js/require.min.js"></script>
-<style>
-    .simple_span.active {
-        font-weight: bold;
-    }
-    .simple_span.hover {
-        font-style: italic;
-        background-color: #efefef;
-    }
-</style>
-
 <div id="show_span"></div>
 
 <script>
@@ -31,15 +21,11 @@
 // 如果数据是数组: index 作为每个循环的序号 ;
 // value/class 属性支持js语法. 变量用{}括起
         var simpleSpan = lrEle.makeSpan({
-            name: 'test_span',
-            data: {'ps': '没什么特别的技能'},
-            value: '我只是一串文本: {ps}',
-            'class': "simple_span"
-            , hover: function (o) {
-                o.addClass('hover');
-            }
-            , mouseout: function (o) {
-                o.removeClass('hover');
+            name: 'demo',
+            value: '我只是一个文本',
+            'class': "well"
+            ,click: function (o,e) {
+                console.log(o, o.value);
             }
         });
         $('#show_span').append(simpleSpan);

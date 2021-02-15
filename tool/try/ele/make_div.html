@@ -2,13 +2,10 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 
 <style>
-    .a, .b {
+    .a {
         width: 240px;
         border-radius: 5px;
         margin-bottom: 10px;
@@ -16,25 +13,31 @@
         padding: 20px 0;
     }
     .a {
-        background-color: #abefad;
-    }
-    .b {
-        background-color: #c3d4ef;
+        background-color: #d6efea;
     }
 </style>
 //一个简单的div
 <div id="show_div"></div>
 
 <script>
-//一个简单的div
-    var div = makeDiv({
-        'value': '单纯的div',
-        'class': 'a', //支持样式名
-        'style': 'color: #ff0000;font-size: 20px;', //支持style样式
-        'margin_left': '200px',//支持单个css样式
-        'name': 'demo'
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
     });
-  $('#show_div').append(div);
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+//一个简单的div
+        var div = lrEle.makeDiv({
+            'value': '单纯的div',
+            'class': 'a', //支持样式名
+            'style': 'color: #ff0000;font-size: 20px;', //支持style样式
+            'margin_left': '100px',//支持单个css样式
+            'name': 'demo'
+        });
+        $('#show_div').append(div);
 
-
+});
 </script>

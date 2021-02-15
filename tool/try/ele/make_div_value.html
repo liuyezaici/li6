@@ -2,48 +2,56 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 
-
-//makeDiv的value支持字符串、单个对象、多个对象的数组, 当然其他makeSpan,makeForm,makeTable也一样支持
-// value里可以用{}写语法
-<div id="show_div"></div>
-<div id="show_reload_btn"></div>
-<script>
+<style>
+    .a {
+        width: 240px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+        padding: 20px 0;
+    }
+    .a {
+        background-color: #d6efea;
+    }
+</style>
 //一个简单的div
-    var div = makeDiv({
-        'name': 'div_data',
-        'class':'panel',
-         data: {'title': '插件名字', 'status': '1'},
-         value: makeDiv({
-             'class': 'panel-body bg-success',
-             value: [
-                 makeBtn({
-                     margin_left: '5px',
-                     'class': 'btnLr btn-xs {{status}==1 ? \'btnLrSuccess\' : \'btn-default\'}',
-                     value: "{{status}==1 ? '已装' : '未装'}",
-                 }),
-                 makeBtn({
-                     margin_left: '5px',
-                     'class': 'btnLr btn-warning btn-xs',
-                     value: "状态: {status}",
-                 }),
-             ]
-         })
-     });
-  $('#show_div').append(div);
+<div id="show_div"></div>
 
-$('#show_reload_btn').append(makeA({
-        value: '更新数据',
-        target: '_self',
-        'class': 'btnLr btn-info btn-sm',
-        click: function (obj, ev) {
-            var lastStatus = div['data']['status'];
-            div['data'] =  {'status': lastStatus == 1 ? 0:1};
+<script>
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
         }
-    })
-);
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+//一个简单的div
+        var div = lrEle.makeDiv({
+            'class': 'a', //支持样式名
+            'value': [
+                lrEle.makeP({
+                    'value': 'a',
+                    'name': 'a'
+                }),
+                lrEle.makeP({
+                    'value': 'b',
+                    'name': 'b'
+                }),
+                lrEle.makeP({
+                    'value': 'c',
+                    'name': 'c'
+                })
+            ],
+            click: function (o) {
+                console.log(o.value);
+            }
+
+        });
+        $('#show_div').append(div);
+
+});
 </script>

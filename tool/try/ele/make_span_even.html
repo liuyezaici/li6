@@ -4,6 +4,16 @@
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
 
     <script src="/assets/js/require.min.js"></script>
+<style>
+    .simple_span.active {
+        font-weight: bold;
+    }
+    .simple_span.hover {
+        font-style: italic;
+        background-color: #efefef;
+    }
+</style>
+
 <div id="show_span"></div>
 
 <script>
@@ -24,9 +34,12 @@
             name: 'test_span',
             data: {'ps': '没什么特别的技能'},
             value: '我只是一串文本: {ps}',
-            'class': "well"
-            ,click: function (o,e) {
-                console.log(o, o.value);
+            'class': "simple_span"
+            , hover: function (o) {
+                o.addClass('hover');
+            }
+            , mouseout: function (o) {
+                o.removeClass('hover');
             }
         });
         $('#show_span').append(simpleSpan);

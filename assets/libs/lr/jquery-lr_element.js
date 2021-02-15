@@ -3712,11 +3712,13 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             var objVal;
             var objName = obj_['name'];
             objVal = obj_['value'];
-            // console.log('2.objVal_');
+            // console.log('getObjVal');
             // console.log(obj_);
-            // console.log('get obj name: '+ objName);
+            // console.log('objVal');
+            // console.log(objVal);
             if($.isArray(objVal))  {//[obj, obj] 或 [1,2,3]
                 if(isOurObj(objVal[0])) {
+                    // console.log('isOurObj 0: ');
                     $.each(objVal, function (i, item_) {
                         getObjVal(item_);
                     });
@@ -3727,7 +3729,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     }
                 }
             } else {
-                // console.log('objVal not Array');
+                // console.log('objVal not Array', objVal, typeof objVal);
                 // return;
                 if(isOurObj(objVal)) {
                     getObjVal(objVal);
@@ -3744,7 +3746,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             var formVals = obj[objValObjKey];//form的value -> table/list/ [ [ obj{input},obj{input}+.. ]+ obj{input} + obj{btn} ]
             //如果formVals是对象，直接取值；如果是数组，遍历对象，再取值
             if(!$.isArray(formVals)) formVals = [formVals];
-            console.log('formVals', formVals);
+            // console.log('formVals', formVals);
             getArrayObjVal(formVals);
         } else {
             console.log('not our obj', obj);
@@ -3871,6 +3873,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 });
             });
         }
+
         //如果一开始value是html格式，突然换个obj格式，所以要在这里做格式判断
         if(!obj_.hasOwnProperty('value')) {
             Object.defineProperty(obj_, 'value', {
@@ -3884,16 +3887,17 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 }
                 ,set: function (newVal) {
                     //value修改，统一全部更新
-                    // console.log('setVal', newVal);
                     _renewNodeVal(newVal);//更新node
                 }
             });
         }
+
     }
     //对象写入son val
     function objPushVal(obj_, valObj) {
         valObj[parentObjKey] = obj_;
         obj_.append(valObj);
+        if(!obj_[objValObjKey]) obj_[objValObjKey] = [];
         obj_[objValObjKey].push(valObj);
     }
 
@@ -3906,24 +3910,18 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         }
         //console.log(obj_);
         if(_valIsAy(optNewVal)) {
-            //console.log('_valIsAy optNewVal');
-            if(hasData(obj_[objValObjKey])) {
-            } else {
-                $.each(optNewVal, function (n, valObj) {
-                    __appendOneOurObj(valObj, n);
-                });
-            }
+            $.each(optNewVal, function (n, valObj) {
+                __appendOneOurObj(valObj);
+            });
         } else {
-            __appendOneOurObj(optNewVal, 0);
+            __appendOneOurObj(optNewVal);
         }
         //创建对象的儿子对象
         //如果一开始value是obj格式 突然换个html格式，所以要在这里做格式判断
         function __appendOneOurObj(valObj) {
-            //console.log('__appendOneOurObj');
             if(isUndefined(valObj)) {
                 return;
             }
-            var valForCompare = $.isArray(valObj) ? valObj : [valObj];
             if(valObj) {
                 objPushVal(obj_, valObj);
             }
@@ -3935,21 +3933,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     renewObjData(valObj, optData);
                 }
             }
-        }
-        if(!obj_.hasOwnProperty('value')) {
-            Object.defineProperty(obj_, 'value', {
-                configurable: true,//允许删除
-                get: function () {
-                    if(obj_[objValIsNode]) {
-                        return obj_.html();
-                    }
-                    return this[objValObjKey];
-                }
-                ,set: function (V) {
-                    this[objValObjKey] = V;
-                    V[parentObjKey] = this;
-                }
-            });
         }
     }
 
@@ -3998,8 +3981,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
     }
     //拷贝源配置文件 主要是value为对象的要获取原参数
     function copySourceOpt(opt) {
-        var isClone = getOptVal(opt, ['isClone'], false);
-        // console.log('____copy SourceOpt', opt);
         var getArray = function (array_) {
             var arrayBack = [];
             $.each(array_, function (index_, val2_) {
@@ -4110,15 +4091,30 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         obj.nodeObj = []; //初始化dom节点
         obj.htmObj = [];//初始化element节点
         obj[objValObjKey] = [];//初始化对象的子对象
-        obj[objValIsNode] = getOptVal(opt, [objValIsNode], true);
-        //允许在外部定义 如btn
-        if(!isUndefined(opt[objValIsNode])) {
-            obj[objValIsNode] = opt[objValIsNode];
-        } else {
-            if(!isStrOrNumber(sourceVal)) {
-                obj[objValIsNode] = false;
+
+
+        //value是dom对象的时候的value读写操作
+        var dimValObj = function() {
+            obj[objValIsNode] = false;
+            //如果一开始value是html格式，突然换个obj格式，所以要在这里做格式判断
+            if(!obj.hasOwnProperty('value')) {
+                Object.defineProperty(obj, 'value', {
+                    get: function () {
+                        return obj[objValObjKey];
+                    }
+                    ,set: function (newVal) {
+                        __clearSons(obj);
+                        if(_valIsAy(newVal)) {
+                            $.each(newVal, function (n, valObj) {
+                                objPushVal(obj, valObj);
+                            });
+                        } else {
+                            objPushVal(obj, newVal);
+                        }
+                    }
+                });
             }
-        }
+        };
         //当外部修改obj的val时，直接更新
         //when value is changed by outside
         obj.renewVal = function(newV, opt_) {
@@ -4159,6 +4155,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             obj.renewVal(newObj, obj['options']);
         };
         obj.domAppendVal = function(opt, hasSetData) {
+
             var obj_ = this;
             opt= opt || [];
             if(!hasData(opt)) return '';
@@ -4171,6 +4168,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             // console.log('domAppendVal************_', opt, data_);
             //这里生成的dom都是提前获取好sor_opt的
             var createDom = function (newOpt) {
+                newOpt = newOpt || {};
                 // console.log('create Dom************_', newOpt);
                 if(newOpt['tag']) {
                     if(hasData(data_)) {
@@ -4205,37 +4203,34 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             //console.log(obj_);
             if(tag == 'tr') {
                 var optNewVal = opt['td'] || opt['th'] || {}; //tr的value参数 只能是td th
-                var valForCompare = $.isArray(optNewVal) ? optNewVal : [optNewVal];
                 // console.log('tr___AppendVal,data', data_, 'optNewVal', optNewVal);
                 // console.log('创建新的TD', optData, optNewVal, opt['td']);
                 //所以这里的克隆属性要在maketr时判断是否克隆的TD，如果是，则tr无须再克隆，并且注销这个TD的克隆属性
                 var newVal = tdToObj(data_, optNewVal, setExtData, (isUndefined(opt['td']) ? 'th':'td') );//创建新的[TD]
-                // console.log('tr newVal_______||||||||||||||||||||||||||||||end:',newVal);
+                // console.log('tr newVal_______|||||||||||||||||||||||||||||| :', obj_, newVal);
                 newVal.forEach(function(td_) {
                     objPushVal(obj_, td_);
                 });
-                //tr只能取 不用重置td
-                if(!obj_.hasOwnProperty('value')) {
-                    Object.defineProperty(obj_, 'value', {
-                        get: function () {
-                            return newVal;
-                        }
-                    });
-                }
+                dimValObj();
             } else if(tag == 'td') { //value is {}
                 var valObj = isUndefined(opt['value']) ? '': opt['value'];
                 // console.log('AppendTd@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_', opt, valObj);
                 if(valObj instanceof $) { //jq对象
+                    dimValObj();
                     // console.log('jq对象 ', valObj, data_);
                     if(hasData(data_)) {
                         renewObjData(valObj, data_);
                     }
                     obj_.append(valObj);
+                    //
+                    // console.log('写入td的value ', valObj);
                     obj_[objValObjKey] = [valObj];
                     obj_['value'] = [valObj];
                     valObj[parentObjKey] = obj_;
                 } else if($.isArray(valObj)) {
+                    dimValObj();
                     $.each(valObj, function (n, val_){
+                        if(!val_) return;
                         if(val_ instanceof $) { //jq对象
                             // console.log('array.jq对象 ', val_);
                             if(hasData(data_)) {
@@ -4245,11 +4240,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                             if(isUndefined(obj_[objValObjKey])) {
                                 obj_[objValObjKey] = [];
                             }
-                            if(isUndefined(obj_['value'])) {
-                                obj_['value'] = [];
-                            }
                             obj_[objValObjKey].push(val_);
-                            obj_['value'].push(val_);
                             obj_.append(val_);
                             val_[parentObjKey] = obj_;
                         } else {
@@ -4258,10 +4249,11 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         }
                     });
                 } else if(isObj(valObj)) {
-                    // console.log('isObj 222', valObj);
+                    dimValObj();
                     createDom(valObj);
                 } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
                     // console.log('AppendVal+++++++++++++', valObj);
+                    obj[objValIsNode] = true;
                     domAppendNode(obj_, opt, hasSetData);
                 }
             } else {
@@ -4269,11 +4261,15 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 var optValStr = opt['value'];
                 // console.log('AppendVal+++++++++++++', optValStr);
                 if(isStrOrNumber(optValStr) ) {
+                    obj[objValIsNode] = true;
                     domAppendNode(obj_, opt, hasSetData);
                 } else if($.isArray(optValStr) ) {
+                    dimValObj();
+                    // console.log('isArray', optValStr);
                     $.each(optValStr, function (i_, val_) {
+                        if(!val_) return;
                         if(val_ instanceof $ || isOurObj(val_)) {
-                            // console.log('objPushVal+++++++++++++', val_);
+                            // console.log('obj PushVal+++++++++++++', val_);
                             objPushVal(obj_, val_);
                         } else {
                             // console.log('create Dom++++++++++++', opt, val_);
@@ -4281,6 +4277,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         }
                     });
                 } else {  //value is obj
+                    dimValObj();
                     // __clearSons(obj_); //如果是对象的val被修改，提前清空sons
                     domAppendObj(obj_, opt);
                 }
@@ -5230,7 +5227,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             if(/([a-zA-Z_]+[a-zA-Z_\d.]*)(\[([a-zA-Z_]+[a-zA-Z_\d.]*)\])*\[([a-zA-Z_]+[a-zA-Z_\d.]*)\]$/.test(parentName) && inputTypeAuto  == 'file') {
                 parentName = createRadomName('file');
             }
-            obj.input =  $('<input class="diy_input" type="'+ inputTypeAuto +'" autocomplete="'+ autocomplete +'" name="'+ parentName +'" />');
+            obj.input =  $('<input class="diy_input" type="'+ inputTypeAuto +'" autocomplete="'+ autocomplete +'" />');
             if(readonly !== null) {
                 obj.input.attr('readOnly', true);
             }
@@ -5518,7 +5515,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             obj.events = cloneData(optionsEvent, obj.events);
             //console.log(obj);
             //console.log(obj.events);
-            obj.bindEvenObj = obj.input;
+            obj.bindEvenObj = obj.input;//定义 绑定事件的对象
             //input清除按钮
             if(input_useClearBtn) {
                 obj.textClearObj = global.makeSpan({
@@ -6604,7 +6601,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             var textArray_ = [];
             var ulLis = obj['menu'].value;
             var liVal, liTitle;
-            console.log('ulLis', ulLis);
             $.each(ulLis, function(n, tmpItem) {
                 liVal = tmpItem.attr('data-value');
                 liTitle = tmpItem.attr('data-title');

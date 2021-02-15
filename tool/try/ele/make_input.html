@@ -20,8 +20,8 @@
         var demoObj = lrEle.makeInput({
             'class': 'form-control'
             ,'name': 'demo'
-            ,null_func: function (o,e) {
-                console.log('不能为空');
+            ,click: function (o,e) {
+                console.log(o, o.value);
             }
         });
 
