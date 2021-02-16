@@ -3766,12 +3766,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         function getArrayObjVal(array_) {
             array_.forEach(function (arrayItem) {
                 if(_valIsAy(arrayItem)) {//将所有数组都递归 转交给单个对象的方法
-                    //console.log(arrayItem);
-                    //console.log('is array');
                     getArrayObjVal(arrayItem);
                 } else {
-                    //console.log('getObjNullVal:');
-                    //console.log(arrayItem);
                     getObjNullVal(arrayItem);
                 }
             });
@@ -3779,6 +3775,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         //取单个obj的值
         function getObjNullVal(obj_) {
             if(isOurObj(obj_)) { // obj{input/div/p}
+                // console.log('obj_', obj_, obj_.value);
                 var itsVal = obj_.value;
                 var objVal = isUndefined(itsVal) ? '': itsVal;
                 if(typeof objVal == 'object')  {
@@ -3947,20 +3944,22 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
 
         var trVal = [], newTd;
         // console.log('makeTD__before,data:',  TdOpts);
-        if (Array.isArray(TdOpts)) {
-            TdOpts.forEach(function (opt_) {
-                var tmpOpt = cloneData(opt_);//这里必须克隆 否则会被下一个循环给覆盖前一个data
-                if(setExtData) tmpOpt['extendParentData'] = true;//tr是克隆来的话，会继承data  td必须也要继续
-                tmpOpt['data'] = trData;
-                // console.log('makeTD__before,opt_:',  tmpOpt, trData);
-                newTd = makeTD_(tmpOpt);
-                trVal.push(newTd);
-            })
-        } else {
-            if(setExtData) TdOpts['extendParentData'] = true;//tr是克隆来的话，会继承data  td必须也要继续
-            newTd = makeTD_(TdOpts);
-            trVal.push(newTd);
+        if (!$.isArray(TdOpts)) {
+            TdOpts = [TdOpts];
         }
+        TdOpts.forEach(function (opt_) {
+            //opt_ 的value可能是提前渲染好的span数组
+            var optVal = opt_['value'] || [];
+            //强制转数组
+            if(!$.isArray(optVal)) {
+              //  opt_['value'] = [optVal];
+            }
+            // console.log('forEach___val', opt_['value']);
+            if(setExtData) opt_['extendParentData'] = true;//tr是克隆来的话，会继承data  td必须也要继续
+            newTd = makeTD_(opt_);
+            if(hasData(trData)) newTd['data'] = trData;
+            trVal.push(newTd);
+        });
         //创建单个TD
         function makeTD_(opt) {
             // console.log('makeTD_____________________', opt['data']);
@@ -4074,7 +4073,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  cloneData(defaultOps || {}) : cloneData(copySourceOpt(defaultOps));
         }
-        var sourceVal = getOptVal(defaultOps, ['value'], '');
         var setBind = getOptVal(defaultOps, ['bind'], '');
         // console.log('makeDom2', tag, obj, 'sor_opt:',obj.sor_opt, defaultOps);
         //必须设置name 否则拖动换排序时无法切换对象的子name
@@ -4204,7 +4202,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             if(tag == 'tr') {
                 var optNewVal = opt['td'] || opt['th'] || {}; //tr的value参数 只能是td th
                 // console.log('tr___AppendVal,data', data_, 'optNewVal', optNewVal);
-                // console.log('创建新的TD', optData, optNewVal, opt['td']);
                 //所以这里的克隆属性要在maketr时判断是否克隆的TD，如果是，则tr无须再克隆，并且注销这个TD的克隆属性
                 var newVal = tdToObj(data_, optNewVal, setExtData, (isUndefined(opt['td']) ? 'th':'td') );//创建新的[TD]
                 // console.log('tr newVal_______|||||||||||||||||||||||||||||| :', obj_, newVal);
@@ -4212,21 +4209,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     objPushVal(obj_, td_);
                 });
                 dimValObj();
-            } else if(tag == 'td') { //value is {}
+            } else if(tag == 'td') { // td的value必须转数组
                 var valObj = isUndefined(opt['value']) ? '': opt['value'];
                 // console.log('AppendTd@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@_', opt, valObj);
-                if(valObj instanceof $) { //jq对象
+                if(isOurObj(valObj)) {
                     dimValObj();
-                    // console.log('jq对象 ', valObj, data_);
-                    if(hasData(data_)) {
-                        renewObjData(valObj, data_);
-                    }
-                    obj_.append(valObj);
-                    //
-                    // console.log('写入td的value ', valObj);
-                    obj_[objValObjKey] = [valObj];
-                    obj_['value'] = [valObj];
-                    valObj[parentObjKey] = obj_;
+                    objPushVal(obj_, valObj);
                 } else if($.isArray(valObj)) {
                     dimValObj();
                     $.each(valObj, function (n, val_){
@@ -4249,6 +4237,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         }
                     });
                 } else if(isObj(valObj)) {
+                    // console.log('isObj+++++++++++++', valObj);
                     dimValObj();
                     createDom(valObj);
                 } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
@@ -4859,10 +4848,9 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         obj.renewSonData = function (newData) {
             // console.log('renewSonData newData', newData);
             var sons = obj['repeatSons'] ;
-            //更新循环的tr数组
-            if(sons.length) {
-                renewRepeatSonLen(sons, newData);
-            }
+            //更新循环的tr数组 可能被清空过 需要恢复循环
+            renewRepeatSonLen(sons, newData);
+
             //更新不循环的tr数组
             var sons = obj['noRepSons'] ;
             $.each(sons, function (n, son) {
@@ -4899,7 +4887,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 //第2行data开始 要用sor_opt重新生成新的 tr->td->span
                 // console.log('line2_________', trOpts);
                 $.each(trOpts, function (n, _opt_) {
-                    tmpOpt_ = cloneData(copySourceOpt(tmpOpt_));//克隆
+                    var tmpOpt_ = cloneData(copySourceOpt(_opt_));//克隆
                     // console.log('tmpOpt_', tmpOpt_);
                     //这里不应该提前设置data 会让tr的sor_opt误以为先天d带data
                     tmpOpt_['extendParentData'] = extendParentData;
@@ -4945,7 +4933,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         }
                         //console.log('create____RepeatDataTrs_:::::::::::::', key_);
                         createRepeatDataTrs(options_);
-                    } else if(key_.substr(0,2) == 'tr') {//生成不循环的tr_n 也是可以配置无循环的data的
+                    } else if(key_.substr(0,2) == 'tr') {//生成不循环的tr_n 也可以解析data
                         //console.log(val_);
                         if(!$.isArray(val_)) { //tr_2:{td: {}}  => tr_2:[{td: {}},{td: {}}]
                             val_ = [val_];

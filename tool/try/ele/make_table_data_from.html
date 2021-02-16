@@ -63,7 +63,7 @@
             ],
             tr: [
                 {
-                    show: '{this.data}',
+                    // show: '{this.data}',
                     td: [
                       {
                           title: '{title}',
@@ -104,7 +104,7 @@
             'class': 'btnLr btnLrSuccess',
             click: function (obj, ev, scope) {
                 // console.log(table.data);
-                table.data = table.data;
+                table.renewData();
             }
         }));
     });

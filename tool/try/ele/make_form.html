@@ -36,12 +36,13 @@
             'class': 'well js_table',
             'name': 'login_table',
             'id': '',
-            tr_1: [{
+            tr_1: {
                 id: 'account_tr',
-                td: [{
-                    value: '帐号',
-                    'class': 'left_em'
-                },
+                td: [
+                    {
+                        value: '帐号',
+                        'class': 'left_em'
+                    },
                     {
                         value: [
                             lrEle.makeInput({
@@ -58,7 +59,7 @@
                     }
                 ]
             },
-                {
+            tr_2: {
                 td: [
                     {
                         value: '密码',
@@ -68,7 +69,10 @@
                             lrEle.makeInput({
                                 width: 200,
                                 type: 'password',
-                                name: 'user_pwd'
+                                name: 'user_pwd',
+                                null_func: function () {
+                                    lrBox.msgTisf('请输入密码');
+                                }
                             }), lrEle.makeSpan({
                                 value: '*', left: 10, 'class': 'red'
                             })
@@ -76,18 +80,18 @@
                     }
                 ]
             },
-                {
-                'class': 'submit_tr',
-                td: {
-                    colspan: '2',
-                    'class': 'submit_box',
-                    value: lrEle.makeBtn({
-                        value: '登 录',
-                        type: 'submit',
-                        'class': 'btnLr btnLrSuccess'
-                    })
+            tr_3: {
+                    'class': 'submit_tr',
+                    td: {
+                        colspan: '2',
+                        'class': 'submit_box',
+                        value: lrEle.makeBtn({
+                            value: '登 录',
+                            type: 'submit',
+                            'class': 'btnLr btnLrSuccess'
+                        })
+                    }
                 }
-            }]
         });
         //js造一个简单的表单
         var diyForm = lrEle.makeForm({
