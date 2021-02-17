@@ -668,7 +668,8 @@ define(['jquery'], function ($) {
         boxObj.zIndex = currentBoxIndex;
         boxObj.css('z-index', currentBoxIndex);
         boxObj.beforeClose = getOptVal(options,['beforeClose'], false);//关闭前执行事件
-        var setLeftTop = false;
+        var setLeft_ = false;
+        var setTop_ = false;
         var cssObj = {};
         if(diyCss) {
             if(!isObj(diyCss)) {
@@ -684,8 +685,12 @@ define(['jquery'], function ($) {
                 cssObj['display'] = 'none';
                 cssObj['opacity'] = 0;
             }
-            setLeftTop = cssObj.left || cssObj.top || false;
+            setLeft_ = cssObj.left || cssObj.x || false;
+            setTop_ = cssObj.top || cssObj.y || false;
             boxObj.css(cssObj);
+        } else {
+            setLeft_ = options.x || false;
+            setTop_ = options.y || false;
         }
         //支持外部触发标题闪烁
         boxObj.shanShuo =  boxObj.twinkle = function () {
@@ -740,7 +745,7 @@ define(['jquery'], function ($) {
             }
             if(text_ && typeof text_ == 'string' && text_.substr(0, 5) =='[url]') {
                 contentIsUrl = true;
-                var obj_ = $('<div>' +
+                var obj_ = $('<div style="display: block;width:100%;">' +
                     '<img src="data:image/gif;base64,R0lGODlhEAAQALMPAHp6evf394qKiry8vJOTk83NzYKCgubm5t7e3qysrMXFxe7u7pubm7S0tKOjo////yH/C05FVFNDQVBFMi4wAwEAAAAh+QQJCAAPACwAAAAAEAAQAAAETPDJSau9NRDAgWxDYGmdZADCkQnlU7CCOA3oNgXsQG2FRhUAAoWDIU6MGeSDR0m4ghRa7JjIUXCogqQzpRxYhi2HILsOGuJxGcNuTyIAIfkECQgADwAsAAAAABAAEAAABGLwSXmMmjhLAQjSWDAYQHmAz8GVQPIESxZwggIYS0AIATYAvAdh8OIQJwRAQbJkdjAlUCA6KfU0VEmyGWgWnpNfcEAoAo6SmWtBUtCuk9gjwQKeQAeWYQAHIZICKBoKBncTEQAh+QQJCAAPACwAAAAAEAAQAAAEWvDJORejGCtQsgwDAQAGGWSHMK7jgAWq0CGj0VEDIJxPnvAU0a13eAQKrsnI81gqAZ6AUzIonA7JRwFAyAQSgCQsjCmUAIhjDEhlrQTFV+lMGLApWwUzw1jsIwAh+QQJCAAPACwAAAAAEAAQAAAETvDJSau9L4QaBgEAMWgEQh0CqALCZ0pBKhRSkYLvM7Ab/OGThoE2+QExyAdiuexhVglKwdCgqKKTGGBgBc00Np7VcVsJDpVo5ydyJt/wCAAh+QQJCAAPACwAAAAAEAAQAAAEWvDJSau9OAwCABnBtQhdCQjHlQhFWJBCOKWPLAXk8KQIkCwWBcAgMDw4Q5CkgOwohCVCYTIwdAgPolVhWSQAiN1jcLLVQrQbrBV4EcySA8l0Alo0yA8cw+9TIgAh+QQFCAAPACwAAAAAEAAQAAAEWvDJSau9WA4AyAhWMChPwXHCQRUGYARgKQBCzJxAQgXzIC2KFkc1MREoHMTAhwQ0Y5oBgkMhAAqUw8mgWGho0EcCx5DwaAUQrGXATg6zE7bwCQ2sAGZmz7dEAAA7"/> ' +
                     'loading...</div>');
                 contentObj.append(obj_);
@@ -946,9 +951,11 @@ define(['jquery'], function ($) {
             boxWidth = parseFloat(boxObj.outerWidth());
         }
         //如果css未定义坐标 允许重置居中
-        if(!setLeftTop) {
-            var widthXY = getBoxXy(boxWidth, options.top);
+        var widthXY = getBoxXy(boxWidth, options.top);
+        if(!setLeft_) {
             x_ = widthXY.x;
+        }
+        if(!setTop_) {
             y_ = widthXY.y;
         }
         if(!isUndefined(options.x))  x_ = options.x;//直接传入绝对位置时
@@ -990,12 +997,8 @@ define(['jquery'], function ($) {
         };
         if(fadeIn) {
             var reCss = {'display': 'none', width: boxWidth};
-            if(x_ !='0px') {
-                reCss['left'] = x_;
-            }
-            if(y_ != '0px') {
-                reCss['top'] = y_;
-            }
+            reCss['left'] = x_;
+            reCss['top'] = y_;
             boxObj.css(reCss);
             setTimeout(function () {
                 boxObj.fadeIn(fadeInTime, function () {
@@ -1249,13 +1252,13 @@ define(['jquery'], function ($) {
             "<img class='rote_img' alt='预览图片' />" +
             "</div></div>");
         var viewImgBox = $("<div id='view_list_img_box'><div class='inner'></div></div>");
-        var closeBtn = $("<div class='close_btn'> <img src='/Static/box/close.png' width='100%' alt='关闭预览' title='关闭预览' /></div>");
+        var closeBtn = $("<div class='close_btn'> <img src='/assets/img/lr/close.png' width='100%' alt='关闭预览' title='关闭预览' /></div>");
         closeBtn.click(function () {
             loadingObj.removeLastLoadingBox();//把loading也一起关闭
             global.removeBoxObj(global.viewFullImgObj);
         });
-        var downloadObj = $("<a class='control_btn' href='javascript: void(0);'> <img class='download_img' src='/Static/box/download.png' width='100%' alt='下载' title='下载图片' /></a>");
-        var rotateObj = $("<div class='control_btn'> <img class='rotate_img' src='/Static/box/rotate.png' width='100%' alt='向右转90度' title='向右转90度' /></div>");
+        var downloadObj = $("<a class='control_btn' href='javascript: void(0);'> <img class='download_img' src='/assets/img/lr/download.png' width='100%' alt='下载' title='下载图片' /></a>");
+        var rotateObj = $("<div class='control_btn'> <img class='rotate_img' src='/assets/img/lr/rotate.png' width='100%' alt='向右转90度' title='向右转90度' /></div>");
         var imgWrap = mapObj.find('.img-wrap');
         var previewImg = mapObj.find('.rote_img');
         downloadObj.find('img').on('click', function (e) {
@@ -1282,11 +1285,11 @@ define(['jquery'], function ($) {
         });
         var preObj, nextObj;
         preObj = $("<div class='control_btn'>" +
-            "<img  class='pre_img' src='/Static/box/pre.png' width='100%' alt='上一张' title='查看上一张("+ (currentViewImgIndex + 1) +")' /></a></div>");
+            "<img  class='pre_img' src='/assets/img/lr/pre.png' width='100%' alt='上一张' title='查看上一张("+ (currentViewImgIndex + 1) +")' /></a></div>");
         preObj.find('img').on('click', function (e) {
             callPrev(e);
         });
-        nextObj = $("<div class='control_btn'><img class='next_img' src='/Static/box/next.png' width='100%' alt='下一张' title='查看下一张("+ (currentViewImgIndex + 2) +")' /></div>");
+        nextObj = $("<div class='control_btn'><img class='next_img' src='/assets/img/lr/next.png' width='100%' alt='下一张' title='查看下一张("+ (currentViewImgIndex + 2) +")' /></div>");
         nextObj.find('img').on('click', function (e) {
             callNext(e);
         });
