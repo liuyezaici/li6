@@ -3991,7 +3991,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 } else if($.isArray(val2_)) {
                     arrayBack.push(getArray(val2_));
                 }  else if(isObj(val2_)) {
-                    arrayBack.push(checkAll(val2_));
+                    if(val2_ instanceof $) {
+                        arrayBack = val2_;
+                    } else {
+                        arrayBack.push(checkAll(val2_));
+                    }
+
                 }
             });
             // console.log('objBack', array_, arrayBack);
@@ -4013,8 +4018,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 } else if(isOurObj(val_)) {
                     backData[k] = val_.sor_opt;
                 }  else if(isObj(val_)) {
-                    // console.log('isObj', val_);
-                    backData[k] = checkAll(val_);
+                    if(val_ instanceof $) {
+                        backData[k] = val_;
+                    } else {
+                        // console.log('isObj', val_);
+                        backData[k] = checkAll(val_);
+                    }
                 } else {
                     backData[k] = val_;
                 }

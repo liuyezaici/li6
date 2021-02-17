@@ -32,7 +32,20 @@
 //一个简单的div
         var div = lrEle.makeDiv({
             'class': 'a', //支持样式名
-            'value': $('<span>jquery对象</span>'),
+            'value': [
+                lrEle.makeP({
+                    'value': 'a',
+                    'name': 'a'
+                }),
+                lrEle.makeP({
+                    'value': 'b',
+                    'name': 'b'
+                }),
+                lrEle.makeP({
+                    'value': 'c',
+                    'name': 'c'
+                })
+            ],
             click: function (o) {
                 console.log(o.value);
             }
