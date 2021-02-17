@@ -4248,7 +4248,17 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 } else if(isObj(valObj)) {
                     // console.log('isObj+++++++++++++', valObj);
                     dimValObj();
-                    createDom(valObj);
+                    if(valObj instanceof $) {
+                        obj_.append(valObj);
+                        if(isUndefined(obj_[objValObjKey])) {
+                            obj_[objValObjKey] = [];
+                        }
+                        obj_[objValObjKey].push(valObj);
+                        obj_.append(valObj);
+                        valObj[parentObjKey] = obj_;
+                    } else {
+                        createDom(valObj);
+                    }
                 } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
                     // console.log('AppendVal+++++++++++++', valObj);
                     obj[objValIsNode] = true;
