@@ -2383,7 +2383,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         //不在常规的可视化属性里
         var inShowStr = $.inArray(attrName,
             ['value', 'src', 'text', 'show', 'value_key', 'valueKey', 'title_key', 'titleKey', 'text_key', 'textKey', 'click', 'data', 'hide', ignoreBindValsKeyname,
-                'obj_val_is_node', 'success_key', 'tag'
+                'obj_val_is_node','need_parent_val', 'success_key', 'tag'
             ]) ==-1;
         //console.log('inShowStr:'+ inShowStr);
         return inShowStr && attrName.indexOf('extend') == -1 && !isCssAttr;
@@ -7293,7 +7293,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         options['tag'] = 'checked';
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(defaultOps));
         }
         if(isUndefined(options['name'])) {
             var newname = createRadomName('check');
@@ -7522,59 +7522,42 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         return obj;
     };
     //单选框
-    global.makeRadio = global.makeRadios = function(sourceOptions, sureSource) {
+    global.makeRadio = function(sourceOptions, sureSource) {
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
-        var obj = $('<div>\
-            <div class="inner"> \
-             </div>\
-         </div>');
+        var obj = $('<div><div class="inner"></div></div>');
         sourceOptions['tag'] = 'radio';
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(opt['options'] || {}) : cloneData(copySourceOpt(defaultOps));
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
         }
         var options = cloneData(sourceOptions);
         var setBind = getOptVal(options, ['bind'], '');
         var sourceVal = getOptVal(options, ['value'], '');
         //统一头部判断结束
-
-
         var objInner = obj.find('.inner');
         obj[objValIsNode] = false;
         obj['createItem'] = false;
         obj['itemsObj'] = null;
-        var valueStrFormatdSuccess = true;//当前value是否渲染完成
         //select:单独的格式化value的括号 更新data时会触发
         obj.formatVal = function (opt) {
             // console.log('radio format Val', opt);
             opt = opt || [];
             var newData = getOptVal(opt, ['data'], {});
             var newVal = _onFormatVal(obj, newData,  sourceVal);
-            if(newVal  != sourceVal) {
-                valueStrFormatdSuccess = true;
-            }
             if ($.isArray(newVal)) newVal = newVal.join(',');
-            if(valueStrFormatdSuccess) {
-                // console.log('(obj.lazyCall', obj.lazyCall);
-                if(opt.lazyCall) {
-                    opt.lazyCall(obj, newData, livingObj);
-                }
-            }
             //console.log(obj);
-            var renewBind = obj[objAttrHasKh] == true;
-            // console.log('radio renewBind', renewBind);
-            obj.callRenewBind(newVal, [obj], renewBind);
+            obj.callRenewBind(newVal);
         };
         //更像绑定的值
-        obj.callRenewBind = function(newVal, exceptObj, renewBind) {
-            exceptObj = exceptObj || [];
-            renewBind = isUndefined(renewBind) ? true : renewBind;
+        obj.callRenewBind = function(newVal) {
             if(isUndefined(newVal)) {
                 newVal = obj.value;
             } else {
                 obj.value = newVal;
             }
+            var exceptObj = [obj];
+            var renewBind = obj[objAttrHasKh] == true;
             if (setBind && renewBind) {
                 if($.inArray(obj, exceptObj) == -1) {
                     exceptObj.push(obj);
@@ -7634,55 +7617,47 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     objExtendClass = 'radios-lg';
                 }
                 if(type_ && type_!=1) objExtendClass += ' radioType'+ type_;
-                if(strHasKuohao(options_['value'])) {
-                    //console.log('set false:');
-                    valueStrFormatdSuccess = false;
-                }
                 //console.log('size:'+ objExtendClass);
-                options_['class_extend'] = 'diy_radio '+objExtendClass;
+                options_['class_extend'] = 'diy_radio '+ objExtendClass;
                 optionDataFrom(obj, options_);
-                //只生成一次下拉菜单
-                if (!obj['createItem']) {
-                    //旧版会把这两个配置写在opt里 也支持读取覆盖
-                    var itemsTitleKey = getOptVal(itemsOpt, ['title_key', 'titleKey', 'text_key', 'textKey'], null);
-                    var itemsValKey = getOptVal(itemsOpt, ['value_key', 'valueKey'], null);
-                    if(!itemsTitleKey) {
-                        var optTitKey = getOptVal(options_, ['title_key', 'titleKey', 'text_key', 'textKey'], 'title');
-                        if (optTitKey) {
-                            itemsTitleKey = itemsOpt['title_key'] = optTitKey;
-                        }
+                //title_key 配置支持写在 opt/items里
+                var itemsTitleKey = getOptVal(itemsOpt, ['title_key', 'titleKey', 'text_key', 'textKey'], null);
+                var itemsValKey = getOptVal(itemsOpt, ['value_key', 'valueKey'], null);
+                if(!itemsTitleKey) {
+                    var optTitKey = getOptVal(options_, ['title_key', 'titleKey', 'text_key', 'textKey'], 'title');
+                    if (optTitKey) {
+                        itemsTitleKey = itemsOpt['title_key'] = optTitKey;
                     }
-                    if(!itemsValKey) {
-                        var optValKey = getOptVal(options_, ['value_key', 'valueKey'], 'value');
-                        if (optValKey) {
-                            itemsValKey = itemsOpt['value_key'] = optValKey;
-                        }
-                    }
-                    itemsOpt['click_extend'] = function (o_, e_, s_) {
-                        obj.callRenewBind();
-                    };
-                    // console.log('itemsTitleKey:', itemsTitleKey);
-                    itemsOpt['text'] = "<span class='_icon'></span><span class='text'>{"+ itemsTitleKey +"}</span>";
-                    itemsOpt['disabled'] = "{disabled}";
-                    var menuOpt =  {
-                        'items': itemsOpt,
-                        'value': sValueStr
-                    };
-                    //item自身不能继承data菜单
-                    // console.log('makeItems', menuOpt);
-                    var menu_obj = global.makeItems(menuOpt);
-                    menu_obj[parentObjKey] = obj;//设置其父对象
-                    obj['itemsObj'] = menu_obj;
-                    obj['menu'] = menu_obj;//对外方便更新和获取菜单
-                    obj['items'] = menu_obj;//对外方便更新和获取菜单
-                    objInner.append(menu_obj);
                 }
+                if(!itemsValKey) {
+                    var optValKey = getOptVal(options_, ['value_key', 'valueKey'], 'value');
+                    if (optValKey) {
+                        itemsValKey = itemsOpt['value_key'] = optValKey;
+                    }
+                }
+                itemsOpt['click_extend'] = function (o_, e_, s_) {
+                    obj.callRenewBind();
+                };
+                // console.log('itemsTitleKey:', itemsTitleKey);
+                itemsOpt['text'] = "<span class='_icon'></span><span class='text'>{"+ itemsTitleKey +"}</span>";
+                itemsOpt['disabled'] = "{disabled}";
+                var menuOpt =  {
+                    'items': itemsOpt,
+                    'value': sValueStr
+                };
+                //item自身不能继承data菜单
+                // console.log('makeItems', menuOpt);
+                var menu_obj = global.makeItems(menuOpt);
+                menu_obj[parentObjKey] = obj;//设置其父对象
+                obj['itemsObj'] = menu_obj;
+                obj['menu'] = menu_obj;//对外方便更新和获取菜单
+                obj['items'] = menu_obj;//对外方便更新和获取菜单
+                objInner.append(menu_obj);
                 //console.log('options_');
                 //console.log(this);
                 removeAllEven(options_);
                 //添加数据
                 strObj.formatAttr(obj, options_, 0, hasSetData);//无需再设置value //给input分配的事件 如 blur
-                //如果值是确定的 需要检测是否刷新子对象data
             },
             updates: function (dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
@@ -7707,9 +7682,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         obj.renew(options);
         optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
         addCloneName(obj, options);//支持克隆
-        //console.log('select_obj');
-        //console.log(obj);
-        return obj; //makeSelect
+        return obj;
     };
 
 //创建日历
@@ -8791,10 +8764,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
         }
         var options = cloneData(sourceOptions);
-        if(!obj.sor_opt) {
-            //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
-        }
         var setBind = getOptVal(options, ['bind'], '');
         var sourceVal = getOptVal(options, ['value'], '');
         //统一头部判断结束

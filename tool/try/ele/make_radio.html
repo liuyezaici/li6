@@ -2,10 +2,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 
 //创建单选radio
 <div id="show_normal1">性别：</div>
@@ -15,35 +12,35 @@
 <div id="show_input1"></div>
 <br />
 <script>
-    $('#show_normal1').append([
-        makeRadios({
-            value: 1,
-            name: 'demo',
-            items: {
-                data: [
-                    {value1: 0, text1: '女'},
-                    {value1: 1, text1: '男'},
-                    {value1: 2, text1: '保密'},
-                    {value1: 3, text1: '人妖', disabled: true}
-                ]
-                , click: function (obj_, e_, s_) {
-                    console.log('diy_click');
-                    console.log(e_);
-                    console.log(s_);
-                },
-                value_key: 'value1',
-                title_key: 'text1',
-            }
-        }),
-        makeDiv({
-            value: '------------------',
-            style: 'margin-top: 10px;margin-bottom: 10px;'
-        }),
-        makeA({
-            'class': 'btnLr btn-xs btn-info',
-            value: '查看所有样式',
-            href: '/tool/try/ele/make_radio_type.html'
-        })
-    ]); //单独输出单元   //也可以分开输出单个单元 sexRadios[0] sexRadios[1] sexRadios[2]
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
 
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        $('#show_normal1').append([
+            lrEle.makeRadio({
+                value: 1,
+                name: 'demo',
+                items: {
+                    data: [
+                        {value1: 0, text1: '女'},
+                        {value1: 1, text1: '男'},
+                        {value1: 2, text1: '保密'},
+                        {value1: 3, text1: '人妖', disabled: true}
+                    ]
+                    ,click: function (item, parent_, e_) {
+                        console.log('diy_click');
+                        console.log(parent_.value);
+                    },
+                    value_key: 'value1',
+                    title_key: 'text1',
+                }
+            })
+        ]); //单独输出单元   //也可以分开输出单个单元 sexRadios[0] sexRadios[1] sexRadios[2]
+    });
 </script>

@@ -724,13 +724,13 @@ div.form-control,
 }
 .diy_radio ._icon {
     display: inline-block;
-    vertical-align: middle;
     border-radius: 12px;
     width: 18px;
     height: 18px;
     border: 1px solid #aaa;
     background-color: #fafafa;
     text-align: center;
+    vertical-align: text-top;
 }
 .diy_radio.radios-primary ._icon {
     border-color: #2e6da4;
@@ -766,18 +766,18 @@ div.form-control,
     height: 28px;
     margin-right: 2px;
 }
-.diy_radio .item_container ul li {
+.diy_radio .diy_items ul li {
     display: inline-block;
     margin-right: 10px;
     cursor: pointer;
 }
-.diy_radio.radios-sm .item_container ul li {
+.diy_radio.radios-sm .diy_items ul li {
     margin-right: 10px;
 }
-.diy_radio.radios-lg .item_container ul li {
+.diy_radio.radios-lg .diy_items ul li {
     margin-right: 25px;
 }
-.diy_radio .item_container ul li ._icon:hover {
+.diy_radio .diy_items ul li ._icon:hover {
     background-color: #eee;
 }
 
@@ -866,13 +866,13 @@ div.form-control,
     height: 16px;
     margin: 5px auto;
 }
-.diy_radio .item_container ul li.active ._icon i {
+.diy_radio .diy_items ul li.active ._icon i {
     display: block;
 }
 .diy_radio .text {
     display: inline-block;
     vertical-align: bottom;
-    margin-left: 4px;
+    margin-left: 3px;
 }
 .diy_radio.radios-xs .text {
     font-size: 10px;
@@ -886,11 +886,11 @@ div.form-control,
 .diy_radio .active .text {
     color: #333;
 }
-.diy_radio .item_container ul li[disabled] {
+.diy_radio .diy_items ul li[disabled] {
     color: #777;
     cursor: not-allowed;
 }
-.diy_radio .item_container ul li[disabled] ._icon{
+.diy_radio .diy_items ul li[disabled] ._icon{
     border: 1px solid #bcbcbc;
     background-color: #eee;
 }
@@ -1674,6 +1674,7 @@ div.form-control,
 }
 .diy_items ul li {
     display: inline-block;
+    padding-right: 10px;
 }
 .diy_items ul li.active {
     color: #00a0e9;

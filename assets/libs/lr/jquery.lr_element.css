@@ -1194,47 +1194,6 @@ div.form-control,
     margin-left: 0.5em;
     margin-right: 0.4em;
 }
-
-/* 输出表格列表数据 */
-.data_table {
-    border: 1px solid#dedede;
-    border-top: 0;
-    background-color: #fff;
-}
-.data_table tr.top_tr td {
-    background-color: #f1f1f7;
-    border-top: 1px solid #fff;
-    height: 38px;
-    padding: 0;
-    font-weight: bold;
-    font-size: 14px;
-    color: #666;
-}
-.data_table tr td {
-    padding: 6px 0;
-    line-height: 18px;
-}
-.data_table tr td .checkbox_ {
-    cursor: pointer;
-}
-.data_table tr td.page_tr {
-    padding: 0;
-}
-.data_table tr td .data_list {
-    border: 1px solid #dedede;
-    margin-right: 5px;
-}
-.data_table tr td .data_list .member_items {
-    padding: 5px 0;
-}
-.data_table tr td .data_list .member_items + .member_items {
-    border-top: 1px solid #dedede;
-}
-.data_table tr td .data_list .member_items .item_son {
-    box-sizing: border-box;
-    display: inline-block;
-    vertical-align: top;
-}
 .new_pages {
     background-color: #eee;
     border-top: 1px solid #dedede;
@@ -1346,6 +1305,23 @@ div.form-control,
     height: 22px;
     text-indent: 4px;
 }
+
+/* items */
+.diy_items {
+    position: relative;
+}
+.diy_items ul,
+.diy_items ul li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.diy_items ul li {
+    display: inline-block;
+}
+.diy_items ul li.active {
+    color: #00a0e9;
+}
 /* radio 样式 */
 .diy_radio {
     display: inline-block;
@@ -1404,8 +1380,8 @@ div.form-control,
 }
 .diy_radio ul li {
     display: inline-block;
-    margin-right: 10px;
     cursor: pointer;
+    padding-right: 10px;
 }
 .diy_radio.radios-sm ul li {
     margin-right: 10px;
@@ -1581,8 +1557,8 @@ div.form-control,
 }
 .diy_radio .text {
     display: inline-block;
-    vertical-align: bottom;
-    margin-left: 4px;
+    vertical-align: text-bottom;
+    margin-left: 3px;
 }
 .diy_radio.radios-xs .text {
     font-size: 10px;
@@ -2727,22 +2703,6 @@ div.form-control,
     font-size: 18px;
     line-height: 1.33333;
     padding: 10px 16px;
-}
-/* items */
-.diy_items {
-    position: relative;
-}
-.diy_items ul,
-.diy_items ul li {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.diy_items ul li {
-    display: inline-block;
-}
-.diy_items ul li.active {
-    color: #00a0e9;
 }
 
 .pagination {
