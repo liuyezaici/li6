@@ -4184,6 +4184,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         valObj = global.makeCheck(newOpt, true);
                     } else if(newOpt['tag']=='radio') {
                         valObj = global.makeRadio(newOpt, true);
+                    } else if(newOpt['tag']=='switch') {
+                        valObj = global.makeSwitch(newOpt, true);
                     } else {
                         valObj = makeDom({
                             'tag': newOpt['tag'],
@@ -4253,6 +4255,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         obj_.append(valObj);
                         valObj[parentObjKey] = obj_;
                     } else {
+                        // console.log('createDom +++++++++++++', valObj);
                         createDom(valObj);
                     }
                 } else if(isStrOrNumber(valObj)) {//td的value可以是字符串
@@ -5936,22 +5939,25 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             text: 'girl'
         }],
         */
-    global.makeSwitch = function(sourceOptions) {
+    global.makeSwitch = function(sourceOptions, sureSource) {
+        sourceOptions = sourceOptions || {};
+        sureSource = sureSource || false;
+        sourceOptions['tag'] = 'switch';
+        var obj = $('<span></span>');
+        if(!obj.sor_opt) {
+            //必须克隆 否则后面更新会污染sor_opt
+            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
+        }
         var options = cloneData(sourceOptions);
         if(isUndefined(options['value'])) options['value'] = '';
         var selectVal = getOptVal(options, ['value'], '');
         var setBind = getOptVal(options, ['bind'], '');
-        var obj = $('<span></span>');
-        if(!obj.sor_opt) obj.sor_opt = copySourceOpt(cloneData(options));
         options['class_extend'] = 'diy_switch';
         obj[objValIsNode] = false;
         obj['switchVal'] = selectVal;
         obj['switchText'] = '';
         var sourceVal = getOptVal(options, 'value', '');
-        var iconObj = global.makeSpan({
-            'class': 'icon_box',
-            'value': '<span class="icon_par"><i class="icon"></i></span><span class="text1"></span><span class="text2"></span>'
-        });
+        var iconObj = $('<span class="icon_box"><span class="icon_par"><i class="icon"></i></span><span class="text1"></span><span class="text2"></span></span>');
         var innerText1 = iconObj.find('.text1');
         var innerText2 = iconObj.find('.text2');
         obj.append(iconObj);

@@ -1848,8 +1848,9 @@ div.form-control,
 }
 .diy_switch.switch-sm .icon_box,
 .diy_switch2.switch-sm .icon_box {
-    height: 22px;
-    line-height: 22px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 11px;
 }
 .diy_switch.switch-lg .icon_box,
 .diy_switch2.switch-lg .icon_box {
@@ -1906,6 +1907,7 @@ div.form-control,
 .diy_switch.switch-sm .icon_box .icon {
     width: 18px;
     height: 18px;
+    top: 1px;
 }
 .diy_switch2.switch-lg .icon_box .icon,
 .diy_switch.switch-lg .icon_box .icon {
