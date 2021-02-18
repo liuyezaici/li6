@@ -7591,6 +7591,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 return $.isArray(texts) ? texts.join(',') : texts;
             }
         });
+        //支持外部取其中的某个元素单独显示
+        obj.getItem = function(i) {
+            console.log(obj.items['menu']['value']);
+            obj.items['menu']['value'][i].siblings('li').hide();
+            return obj;
+        };
         obj.extend({
             //主动更新数据
             renew: function (optionsGet) {

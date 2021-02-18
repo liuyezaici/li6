@@ -5,7 +5,12 @@
     <script src="/assets/js/require.min.js"></script>
 
 //创建单选radio
-<div id="show_demo">性别：</div>
+<div id="show_normal1">性别：</div>
+
+<div id="show_bind1"></div>
+<div id="show_bind2"></div>
+<div id="show_input1"></div>
+<br />
 <script>
     require.config({
         paths: {
@@ -17,8 +22,7 @@
     });
 
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-        $('#show_demo').append([
-            lrEle.makeRadio({
+        var radioObj = lrEle.makeRadio({
                 value: 1,
                 name: 'demo',
                 items: {
@@ -35,7 +39,7 @@
                     value_key: 'value1',
                     title_key: 'text1',
                 }
-            })
-        ]);
+            });
+        $('#show_normal1').append([radioObj.getItem(1),radioObj.getItem(3)]); //单独输出单元
     });
 </script>
