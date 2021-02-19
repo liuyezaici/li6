@@ -2309,28 +2309,6 @@ div.form-control,
 }
 
 
-/* 树形菜单 */
-
-/* 自定义编辑表单 */
-.diy_modify_form {
-    padding-top: 20px;
-}
-.diy_modify_form tr td {
-    padding-bottom: 10px;
-}
-.diy_modify_form .left_em {
-    text-align: right;
-    padding-right: 10px;
-    padding-top: 10px;
-    font-size: 14px;
-    white-space: nowrap;
-}
-.diy_modify_form .line_em { /* 单行li的em */
-    font-size: 14px;
-    white-space: nowrap;
-    color: #c44012;
-    display: inline-block;
-}
 /* 多层级树形菜单 */
 .diy_trees {
 }
@@ -2377,81 +2355,6 @@ div.form-control,
     width: 12px; /* 谷歌浏览器底下莫名其妙缩小了 */
 }
 
-/* 表格列表排序数据 */
-.move_data_list {
-    border: 1px solid#dedede;
-    background-color: #fff;
-}
-.move_data_list tr.top_tr td {
-    background-color: #f1f1f7;
-    height: 38px;
-    padding: 0;
-    font-weight: bold;
-    font-size: 14px;
-    color: #666;
-}
-.move_data_list tr td {
-    padding: 6px 0;
-    line-height: 18px;
-}
-.move_data_list tr td.err_result {
-    background-color: #ffffee;
-    text-indent: 10px;
-    color: #ff4400;
-    font-size: 14px;
-    padding: 10px 0;
-}
-/* 人工验证按钮 */
-.validate_append_box {
-    position: absolute;
-    display: block;
-    left: 0;
-    top: 0;
-    background-color: rgba(0, 0, 0, 0.56);
-    z-index: 19860906;
-}
-.validate_append_box .validate_menu_box {
-    position: absolute;
-    width: 260px;
-    height: 116px;
-    background-color: #ddd;
-}
-
-/* 上一页 下一页 */
-.prev_next_pages_box {
-    display: inline-block;
-    vertical-align: middle;
-}
-.prev_next_pages_box .item {
-    display: inline-block;
-    margin-right: 5px;
-    vertical-align: middle;
-}
-.prev_next_pages_box .item a {
-    display: block;
-    width: 20px;
-    height: 20px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-indent: 300px;
-}
-.prev_next_pages_box .item .next {
-    background: url("/resource/pub/images/pages/next.png") no-repeat 0 0/ 20px 20px;
-}
-.prev_next_pages_box .item .next_err {
-    background: url("/resource/pub/images/pages/next_err.png") no-repeat 0 0/ 20px 20px;
-}
-.prev_next_pages_box .item .prev {
-    background: url("/resource/pub/images/pages/prev.png") no-repeat 0 0/ 20px 20px;
-}
-.prev_next_pages_box .item .prev_err {
-    background: url("/resource/pub/images/pages/prev_err.png") no-repeat 0 0/ 20px 20px;
-}
-.huanhang {
-    display: inline-block;
-    white-space:normal;
-    word-break:break-all
-}
 /* 小黑三角 */
 .diy_sanjiao {
     display: inline-block;
@@ -2864,4 +2767,53 @@ div.form-control,
 }
 .pagination.goto li+li a {
     margin-left: 10px;
+}
+.pagination  li.selectPageSize {
+    position: relative;
+    display: inline-block;
+}
+.pagination  li.selectPageSize .btn {
+    border-left-width: 0;
+    border-radius: 0 3px 3px 0;
+    outline: none;
+}
+.pagination  li.selectPageSize .sizeMenu {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 1000;
+    display: none;
+    float: left;
+    width: 100%;
+    padding: 0;
+    margin: -2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+    box-shadow: 0 6px 12px rgb(0 0 0 / 18%);
+}
+
+.pagination  li.selectPageSize .sizeMenu.showUp {
+    top: auto;
+    bottom: 100%;
+    margin-bottom: 2px;
+}
+.pagination  li.selectPageSize .sizeMenu li {
+    text-align: center;
+}
+.pagination  li.selectPageSize .sizeMenu li a {
+    text-decoration: none;
+    display: block;
+    padding: 5px 0;
+    color: #333;
+}
+.pagination  li.selectPageSize .sizeMenu li a:hover {
+    background-color: #dedede;
 }

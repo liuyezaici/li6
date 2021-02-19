@@ -3985,6 +3985,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     arrayBack.push(val2_.sor_opt);
                     // console.log('isOurObj_sour', arrayBack);
                 } else if($.isArray(val2_)) {
+                    console.log('getArray', val2_);
                     arrayBack.push(getArray(val2_));
                 }  else if(isObj(val2_)) {
                     if(val2_ instanceof $) {
@@ -4009,8 +4010,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 // console.log('k__',k, val_);
                 if($.isArray(val_)) {
                     // console.log('isArray', val_, val_[0]);
+                    if(isStrOrNumber(val_[0])) {
+                        backData[k] = val_;
+                    } else {
+                        backData[k] = getArray(val_);
+                    }
                     // td: [{},{}]
-                    backData[k] = getArray(val_);
                 } else if(isOurObj(val_)) {
                     backData[k] = val_.sor_opt;
                 }  else if(isObj(val_)) {
@@ -8375,23 +8380,22 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     }
                     updateBindObj($.trim(setBind), newP, exceptObj);
                 }
-                var opt = options;
                 var li = pageBody.find("li[data-page='"+ newP +"']");
                 if(li.length == 0 || newP-pageBody.fromPage<=2  || newP-pageBody.fromPage>= pageBody.pageBtnNum-2 ) { //跳度太大 页面不存在 需要重新生成
-                    opt['page'] = newP;
-                    this.renew(opt);
+                    options['page'] = newP;
+                    // console.log('options', options);
+                    this.renew(options);
                 } else {
                     li.addClass('active').siblings('.active').removeClass('active');
                 }
                 pageBody['current_page'] = newP;
-                //console.log(this);
-                //为何要出发点击事件 如果是外部data赋值page数 这个方法会再次出发自身循环
-                if(opt['click']) opt['click'](li, newP, livingObj);
+                //触发点击事件 如果是外部data赋值page数 这个方法会再次出发自身循环
+                if(options['click']) options['click'](li, newP, livingObj);
             },
             //主动更新数据
-            renew: function (options) {
-                options = options || {};
-                var hasSetData = !isUndefined(options['data']);
+            renew: function (opt) {
+                opt = opt || {};
+                var hasSetData = !isUndefined(opt['data']);
                 var defaultCfg = {
                     page: 1,
                     pageSize: 10,//单页数量
@@ -8400,50 +8404,59 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     total: 1
                 };
                 //兼容各自语法
-                var data_ = options['data'] ||{};
-                // console.log(JSON.stringify(options));
-                //console.log(options['total']);
-                //console.log(data_);
-                var pageSize = getOptVal(options, ['pagesize','page_size', 'pageSize'], 10);//单页显示数量
-                // console.log('pageSize1:');
-                // console.log(pageSize);
-                var pageBtnNum = getOptVal(options, ['pagenum', 'pageNum'], 5);//分页按钮显示的数量
-                var pageType = getOptVal(options, ['type'], 'default');//分页样式 default/btn
-                var goto = getOptVal(options, ['goto'], null);
-                var pageClass = getOptVal(options, ['class'], '');
-                options['page'] = options['page'] || 1;
-                options['btnSize'] = (!options['size'] || !setSize(options['size'])) ? 'md' : options['size'];//过滤size
+                var data_ = opt['data'] ||{};
+                var pageSize = getOptVal(opt, ['pagesize','page_size', 'pageSize'], 10);//单页显示数量
+                // console.log('pageSize', pageSize, opt);
+                var pageBtnNum = getOptVal(opt, ['pagenum', 'pageNum'], 5);//分页按钮显示的数量
+                var pageType = getOptVal(opt, ['type'], 'default');//分页样式 default/btn
+                var goto = getOptVal(opt, ['goto'], null);
+                var selectPageSize = getOptVal(opt, ['selectPageSize', 'select_page_size'], null);//自定义单页的数量
+                var pageClass = getOptVal(opt, ['class'], '');
+                opt['page'] = opt['page'] || 1;
+                opt['btnSize'] = (!opt['size'] || !setSize(opt['size'])) ? 'md' : opt['size'];//过滤size
                 pageSize = parseInt(formatIfHasKuohao(pageSize, data_));
                 pageBtnNum = formatIfHasKuohao(pageBtnNum, data_);
-                options['btnSize'] = formatIfHasKuohao(getOptVal(options, ['btnSize'], 1), data_);
-                options['page'] = parseInt(formatIfHasKuohao(getOptVal(options, ['page'], 1), data_));
-                options['total'] = parseInt(formatIfHasKuohao(getOptVal(options, ['total'], 0), data_));
-                if(!isUndefined(options['pagesize'])) delete options['pagesize'];//统一大小写
-                if(!isUndefined(options['page_size'])) delete options['page_size'];//统一大小写
-                options['pageSize'] = pageSize;//统一输出
-                options = $.extend({}, defaultCfg, options);
+                opt['btnSize'] = formatIfHasKuohao(getOptVal(opt, ['btnSize'], 'sm'), data_);
+                //为兼容自定义页数菜单按钮，强制转两位数
+                if(strInArray(opt['btnSize'], ['sm', 'small', 's']) !=-1) {
+                    opt['btnSize'] = 'sm';
+                } else if(strInArray(opt['btnSize'], ['x', 'xs']) !=-1) {
+                    opt['btnSize'] = 'xs';
+                } else if(strInArray(opt['btnSize'], ['x', 'xs']) !=-1) {
+                    opt['btnSize'] = 'xs';
+                } else if(strInArray(opt['btnSize'], ['m', 'md', 'middle', 'normal']) !=-1) {
+                    opt['btnSize'] = 'md';
+                } else if(strInArray(opt['btnSize'], ['l', 'lg', 'large', 'big']) !=-1) {
+                    opt['btnSize'] = 'lg';
+                }
+                opt['page'] = parseInt(formatIfHasKuohao(getOptVal(opt, ['page'], 1), data_));
+                opt['total'] = parseInt(formatIfHasKuohao(getOptVal(opt, ['total'], 0), data_));
+                if(!isUndefined(opt['pagesize'])) delete opt['pagesize'];//统一大小写
+                if(!isUndefined(opt['page_size'])) delete opt['page_size'];//统一大小写
+                opt['pageSize'] = pageSize;//统一输出
+                opt = $.extend({}, defaultCfg, opt);
                 var $pageExtClass = 'pagination';
                 if(pageClass) $pageExtClass = pageClass;
-                if(options['btnSize'] == 'lg') {
+                if(opt['btnSize'] == 'lg') {
                     $pageExtClass += ' pagination-lg';
-                } else if(options['btnSize'] == 'sm') {
+                } else if(opt['btnSize'] == 'sm') {
                     $pageExtClass += ' pagination-sm';
-                } else if(sizeIsXs(options['btnSize'])) {
+                } else if(sizeIsXs(opt['btnSize'])) {
                     $pageExtClass += ' pagination-xs';
                 }
-                options['class_extend'] = $pageExtClass;
-                var parentOpt = $.extend({}, options);
+                opt['class_extend'] = $pageExtClass;
+                var parentOpt = $.extend({}, opt);
                 delete parentOpt['click'];//父对象不需要点击事件
                 //console.log(parentOpt);
                 //page只有class无需再修改
-                pageBody.attr('class', options['class_extend']);
+                pageBody.attr('class', opt['class_extend']);
                 //console.log('page:');
-                //console.log(options);
-                optionDataFrom(pageBody, options);
-                var page = parseInt(options.page);
+                //console.log(opt);
+                optionDataFrom(pageBody, opt);
+                var page = parseInt(opt.page);
                 var pageSize = parseInt(pageSize);
                 if(pageSize < 1 ) pageSize = 1;
-                var totalNum = parseInt(options.total);
+                var totalNum = parseInt(opt.total);
                 var totalPage = totalNum / pageSize;
                 //console.log('totalNum:'+totalNum);
                 //console.log('pageSize:'+pageSize);
@@ -8452,7 +8465,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 if(page>totalPage) {
                     page = totalPage;
                 }
-                //console.log(pageBody);
                 pageBody['current_page'] = page;
                 pageBody.totalPage = totalPage;
                 pageBody.pageBtnNum = pageBtnNum;
@@ -8462,7 +8474,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 } else if(pageType == 'btn') {
                     var preLi = $('<li><a href="javascript: void(0)" target="_self" class="endPage"> &lt; </a></li>');
                 }
-                preLi.off().on('click', function (e) {
+                preLi.on('click', function (e) {
                     var nowPage = pageBody['current_page'];
                     var thisToPage = parseInt(nowPage) - 1;
                     if(thisToPage <1) {
@@ -8512,10 +8524,10 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     li = $('<li data-page="'+ i +'"></li>');
                     li.append('<a href="javascript: void(0)" target="_self">'+ i +'</a>');
                     if(page == i) li.addClass('active');
-                    li.off().on('click', function (e) {
-                        // e.stopPropagation();
+                    li.on('click', function (e) {
                         var clickObj = $(this);
                         var pageNew = clickObj.attr('data-page');
+                        // console.log('setPage', pageNew);
                         pageBody.setPage(pageNew);
                         pageBody.gotoPage = '';
                         if(pageBody.gotoPageObj) pageBody.gotoPageObj.val('');
@@ -8538,7 +8550,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     });
                     pageBody.append(nextLi);
                     //设置完所有属性后 再渲染对象属性，因为可能有attr:'{this.totalPage}';
-                    strObj.formatAttr(pageBody, options, 0, hasSetData);
+                    strObj.formatAttr(pageBody, opt, 0, hasSetData);
                 } else if(pageType == 'btn') {
                     var nowPage = pageBody['current_page'];
                     var senglue = (nowPage == totalPage || toPage>=totalPage )? null: $('<li><a href="javascript: void(0)" target="_self" class="endPage"> ... </a></li>');
@@ -8589,8 +8601,58 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         pageBody.prepend(gotoLi);
                     }
                 }
-
-
+                if(selectPageSize) {
+                    var width = getOptVal(selectPageSize, ['width'], 46);
+                    var onchangeEven = getOptVal(selectPageSize, ['onchange', 'onChange'], null);
+                    width = parseInt(width);
+                    var defaultText = getOptVal(selectPageSize, ['text', 'defaultText'], 'Num');
+                    var className = getOptVal(selectPageSize, ['class'], 'default');
+                    if(!width) width = 66;
+                    if(isNumber(width)) width += 'px';
+                    var selectMenuObj = $('<li class="selectPageSize"><button type="button" class="btn btn-'+ opt['btnSize'] +' '+ className +'"> <span class="defaultText">' + pageSize + '</span> <span class="caret"></span>\n' +
+                        '</button></li>');
+                    var listVal = getOptVal(selectPageSize, ['value', 'values', 'val', 'list'], [10, 20, 30, 40, 50, 100, 200]);
+                    var dir = getOptVal(selectPageSize, ['dir'], 'down');
+                    if(strInArray(dir, ['down', 'up', 'd', 'u']) ==-1) dir = 'down';
+                    var sizeMenu = $('<ul class="sizeMenu"></ul>');
+                    if(strInArray(dir, ['down', 'd']) !=-1) {
+                        sizeMenu.addClass('showDown');
+                    } else {
+                        sizeMenu.addClass('showUp');
+                    }
+                    var menuLi = [];
+                    $.each(listVal, function (n, v) {
+                        menuLi.push('<li><a tabindex="-1" href="javascript: void(0);" target="_self" data-val="'+ v +'">'+ v +'</a></li>');
+                    });
+                    sizeMenu.append(menuLi);
+                    sizeMenu.css('width', width);
+                    selectMenuObj.append(sizeMenu);
+                    var textBtn = selectMenuObj.find('.btn');
+                    textBtn.find('.defaultText').attr('title', defaultText);
+                    textBtn.on({
+                        'focus': function (e) {
+                            sizeMenu.show();
+                        },
+                        'blur': function (e) {
+                            setTimeout(function () {
+                                sizeMenu.hide();
+                            }, 160);
+                        }
+                    });
+                    sizeMenu.find('li a').on('click', function (e) {
+                        var newSize = parseInt($(this).attr('data-val'));
+                        if(!isNumber(newSize) || !newSize) newSize = 10;
+                        textBtn.find('.defaultText').html(newSize);
+                        sizeMenu.hide();
+                        //修改默认配置的参数
+                        options['pageSize'] = newSize;
+                        pageBody.renew(options);
+                        if(onchangeEven) {
+                            onchangeEven(newSize, e, pageBody);
+                        }
+                    });
+                    pageBody.append(selectMenuObj);
+                }
             },
             //data更新时  page更新
             renewPageData: function(data) {
@@ -8619,8 +8681,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             }
         });
         objBindVal(pageBody, options);//数据绑定
-        optionGetSet(pageBody, options); //允许外部修改
         pageBody.renew(options);
+        optionGetSet(pageBody, options); //允许外部修改
         return pageBody;
     }
 
@@ -8720,50 +8782,10 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             }
         });
         objBindVal(obj, options, 'type');//数据绑定
-        optionGetSet(obj, options); //允许外部修改
         obj.renew(options);
+        optionGetSet(obj, options); //允许外部修改
         return obj;
     };
-
-//创建验证码
-    global.makeValidate = function(btn, direction) {
-        direction = direction || 'bottom';
-        var boxId = "validate_append_box";
-        var validateBox = $('<div></div>');
-        validateBox.attr({
-            'id': boxId,
-            'class': 'validate_append_box'
-        });
-        validateBox.append('<div class="validate_menu_box"><iframe border="0" vspace="0" hspace="0" marginwidth="0" marginheight="0" framespacing="0" ' +
-            'frameborder="0" scrolling="no" width="260" height="150" src="/any/validate"></iframe></div>');
-        var balidateMenu = validateBox.find('.validate_menu_box');
-        $('body').append(validateBox);
-        var btnWidth = btn.outerWidth();
-        var btnHeight = btn.outerHeight();
-        var winWidth_ = $(window).width();//浏览器可见宽度
-        var winHeight = $(window).height();//浏览器可见高度
-        var winScrolltop = $(document).scrollTop();
-        var y_ = winScrolltop + (winHeight / 2);
-        validateBox.css({'height': winScrolltop+winHeight, 'width': winWidth_});
-        var btnLeft = btn.offset().left;
-        var btnTop = btn.offset().top;
-        if(direction == 'bottom') {//出现在按钮下方
-            balidateMenu.css({'left': btnLeft, 'top': btnTop + btnHeight});
-        } else if(direction == 'top') {//出现在按钮上方
-            balidateMenu.css({'left': btnLeft, 'top': btnTop - 150});
-        } else if(direction == 'right') {//出现在按钮右侧
-            balidateMenu.css({'left': btnLeft + btnWidth, 'top': btnTop});
-        }
-        validateBox.on('click', function () {
-            validateBox.remove();
-        });
-        return validateBox;
-        // window.success_drag_validate_push = function (n) {
-        //     btn.attr('data-validate', n);
-        //     validateBox.remove();
-        //     btn.click();
-        // };
-    }
 
     //创建拖动条
     //创建文本dom /a/p/span/div/li/td/em/i////
