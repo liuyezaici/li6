@@ -2712,7 +2712,7 @@ div.form-control,
 }
 .pagination-xs > li > a,
 .pagination-xs > li > span {
-    padding: 2px 5px;
+    padding: 1px 5px;
     font-size: 11px;
     line-height: 1.5;
 }

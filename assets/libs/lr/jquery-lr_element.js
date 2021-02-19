@@ -8602,13 +8602,9 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     }
                 }
                 if(selectPageSize) {
-                    var width = getOptVal(selectPageSize, ['width'], 46);
                     var onchangeEven = getOptVal(selectPageSize, ['onchange', 'onChange'], null);
-                    width = parseInt(width);
                     var defaultText = getOptVal(selectPageSize, ['text', 'defaultText'], 'Num');
                     var className = getOptVal(selectPageSize, ['class'], 'default');
-                    if(!width) width = 66;
-                    if(isNumber(width)) width += 'px';
                     var selectMenuObj = $('<li class="selectPageSize"><button type="button" class="btn btn-'+ opt['btnSize'] +' '+ className +'"> <span class="defaultText">' + pageSize + '</span> <span class="caret"></span>\n' +
                         '</button></li>');
                     var listVal = getOptVal(selectPageSize, ['value', 'values', 'val', 'list'], [10, 20, 30, 40, 50, 100, 200]);
@@ -8625,7 +8621,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         menuLi.push('<li><a tabindex="-1" href="javascript: void(0);" target="_self" data-val="'+ v +'">'+ v +'</a></li>');
                     });
                     sizeMenu.append(menuLi);
-                    sizeMenu.css('width', width);
                     selectMenuObj.append(sizeMenu);
                     var textBtn = selectMenuObj.find('.btn');
                     textBtn.find('.defaultText').attr('title', defaultText);
