@@ -6068,13 +6068,11 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 innerText1.attr('data-val', selectItem[0][valueKey]);
                 innerText2.attr('data-val', selectItem[1][valueKey]);
                 if(!isUndefined(selectItem[0][textKey])) {
-                    innerText1.attr('data-text', selectItem[0][textKey]);
                     if(showText!==false && showText!==0) {
                         innerText1.html(selectItem[0][textKey]);
                     }
                 }
                 if(!isUndefined(selectItem[1][textKey])) {
-                    innerText2.attr('data-text', selectItem[1][textKey]);
                     if(showText!==false && showText !==0) {
                         innerText2.html(selectItem[1][textKey]);
                     }
@@ -6264,232 +6262,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         obj.valChange(selectVal);//首次赋值
         return obj; //makeSwitch
     };
-    //创建Nav选项卡
-    global.makeNav = function(sourceOptions, sureSource) {
-        sourceOptions = sourceOptions || {};
-        sureSource = sureSource || false;
-        var obj = $('<div></div>');
-        if(!obj.sor_opt) {
-            //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
-        }
-        var options = cloneData(sourceOptions);
-        var setBind = getOptVal(options, ['bind'], '');
-        var sourceVal = getOptVal(options, ['value'], '');
-        //统一头部判断结束
 
-        var navVal = options['value'];
-        var navUl = options['ul']||[];
-        var navData = options['data']||[];
-        var navContent = options['content']||[];
-        var navSize = setSize(options['size']) ? options['size'] : 'md'; //xs/sm/md/lg
-        var objExtendClass = '';
-        if(sizeIsXs(navSize)) {
-            objExtendClass = 'btnGLrXs';
-        } else if(sizeIsSm(navSize)) {
-            objExtendClass = 'btnGLrSm';
-        } else if(sizeIsMd(navSize)) {
-            objExtendClass = 'btnGLrMd';
-        } else if(sizeIsLg(navSize)) {
-            objExtendClass = 'btnGLrLg';
-        }
-        if(isUndefined(options['class'])) options['class'] = 'default';
-        options['class'] = classAddSubClass(options['class'], 'diy_nav', 'add');
-        if(objExtendClass) options['class'] = classAddSubClass(options['class'], objExtendClass, 'add');
-        if(navVal) delete options['value'];
-        options['data-value'] = navVal;
-        obj[objValIsNode] = false;
-        obj['nav_obj'] = [];
-        obj['content_obj'] = [];
-        obj['content_val'] = [];
-        var navliData = [];
-        var navObj = [];
-        //菜单点击事件
-        obj['navClick'] = function(newVal, exceptObj, renewBind) {
-            exceptObj = exceptObj || [obj];
-            renewBind = isUndefined(renewBind) ? true : renewBind;
-            //不能跳过data来更新obj的显示 因为单个内容可能自带data
-            var liList = obj['nav_obj']['value'];
-            var activeN = 0;
-            $.each(liList, function (n, li_) {
-                if(li_.attr('data-value') == newVal) {
-                    activeN = n;
-                    li_.addClass('active');
-                } else {
-                    li_.removeClass('active');
-                }
-            });
-            $.each(obj['content_val'], function (n, ct_) {
-                if(n == activeN) {
-                    if(!isUndefined(ct_['click_renew']) && ct_['click_renew']) {
-                        ct_.renewData(function () {
-                            ct_.addClass('active in');
-                        });
-                    } else {
-                        ct_.addClass('active in');
-                    }
-                } else {
-                    ct_.removeClass('active in');
-                }
-            });
-            obj.attr('data-value', newVal);
-            //触发数据同步  触发赋值 */
-            if(renewBind && setBind) {
-                if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
-                if(newVal.length) {
-                    updateBindObj($.trim(setBind), newVal, exceptObj);
-                } else {
-                    var lastVal = isUndefined(livingObj['data'][setBind]) ? null : livingObj['data'][setBind];
-                    if(lastVal) {
-                        obj['navClick'](lastVal, [obj]);
-                    }
-                }
-                if(obj[objBindAttrsName] && !objIsNull(obj[objBindAttrsName]) && !isUndefined(obj[objBindAttrsName][setBind])) {
-                    renewObjBindAttr(obj, setBind);
-                }
-
-            }
-        };
-        //点击时触发内容改变的事件
-        function clickEven(obj_, e_) {
-            e_.preventDefault();
-            var val = obj_.attr('data-value');
-            obj['navClick'](val, [obj_]);
-        }
-        if(!$.isArray(navUl) && hasData(navData)) {
-            navUl['data-value'] = isUndefined(navUl['value']) ? '': navUl['value'];
-            navUl['value'] = isUndefined(navUl['title']) ? '': navUl['title'];
-            if(!isUndefined(navUl['click'])) {
-                navUl['click_extend'] = navUl['click'];
-                navUl['click'] = function (obj_, e_) {
-                    clickEven(obj_, e_);
-                };
-            } else {
-                navUl['click'] = function (obj_, e_) {
-                    clickEven(obj_, e_);
-                };
-            }
-            if(!isUndefined(navUl['class'])) {
-                navUl['class_extend'] = navUl['class'];
-                navUl['class'] = "{'"+ navVal +"'== '{value}' ? 'active':''}";
-            } else {
-                navUl['class'] = "{'"+ navVal +"'== '{value}' ? 'active':''}";
-            }
-            navObj = global.makeList({
-                'data': navData,
-                'class': 'nav nav-tabs',
-                'li': navUl
-            });
-            $.each(navData, function (n, tmpData) {
-                var tmpD_ = cloneData(tmpData); //data赋值操作必须要克隆
-                tmpD_['data-value'] = isUndefined(tmpD_['value']) ? n: tmpD_['value'];
-                tmpD_['value'] = isUndefined(tmpData['title']) ? n: tmpD_['title'];
-                navliData.push(tmpD_);
-            });
-        }
-        if($.isArray(navUl)) {
-            var liArray = [];
-            $.each(navUl, function (n, tmpLi) {
-                tmpLi['data-value'] = isUndefined(tmpLi['value']) ? n: tmpLi['value'];
-                tmpLi['value'] = isUndefined(tmpLi['title']) ? n: tmpLi['title'];
-                if(!isUndefined(tmpLi['click'])) {
-                    tmpLi['click_extend'] = tmpLi['click'];
-                    tmpLi['click'] = function (obj_, e_) {
-                        clickEven(obj_, e_);
-                    };
-                } else {
-                    tmpLi['click'] = function (obj_, e_) {
-                        clickEven(obj_, e_);
-                    };
-                }
-                if(!isUndefined(tmpLi['class'])) {
-                    tmpLi['class_extend'] = tmpLi['class'];
-                    tmpLi['class'] = navVal == tmpLi['data-value'] ? 'active':'';
-                } else {
-                    tmpLi['class'] = navVal == tmpLi['data-value'] ? 'active':'';
-                }
-                navliData.push(tmpLi);
-                liArray.push(global.makeLi(tmpLi));
-            });
-            navObj = global.makeUl({
-                'data': navData,
-                'class': 'nav nav-tabs',
-                'value': liArray
-            });
-        }
-        var contentObjOpt = {
-            'class': 'tab-content'
-        };
-        //console.log(navliData);
-        if($.isArray(navContent)) {
-            $.each(navContent, function (n, tmpContentOpt) {
-                tmpContentOpt['data-value'] = isUndefined(navliData[n]['data-value']) ? n : navliData[n]['data-value'];
-                if (!isUndefined(tmpContentOpt['class'])) {
-                    tmpContentOpt['class'] = classAddSubClass(tmpContentOpt['class'], 'tab-pane', 'add');
-                    tmpContentOpt['class_extend'] = tmpContentOpt['class'];
-                    tmpContentOpt['class'] = navVal == tmpContentOpt['data-value'] ? 'active in' : '';
-                } else {
-                    tmpContentOpt['class_extend'] = 'tab-pane';
-                    tmpContentOpt['class'] = navVal == tmpContentOpt['data-value'] ? 'active in' : '';
-                }
-                obj['content_val'].push(global.makeDiv(tmpContentOpt));
-            });
-        } else {//当content的配置是对象
-            $.each(navData, function (n, tmpData) {
-                var tmpCntData = cloneData(tmpData);
-                var tmpCntOpt = $.extend({}, navContent);
-                tmpCntOpt['data'] = tmpCntData;
-                if(!isUndefined(tmpCntOpt['class'])) {
-                    tmpCntOpt['class'] = classAddSubClass(tmpCntOpt['class'], 'tab-pane', 'add');
-                    tmpCntOpt['class_extend'] = tmpCntOpt['class'];
-                    tmpCntOpt['class'] = "{"+ navVal +"== '{value}' ? 'active in':''}";
-                } else {
-                    tmpCntOpt['class_extend'] = 'tab-pane';
-                    tmpCntOpt['class'] = "{"+ navVal +"== '{value}' ? 'active in':''}";
-                    //console.log(tmpCntOpt);
-                }
-                obj['content_val'].push(global.makeDiv(tmpCntOpt));
-            });
-        }
-        contentObjOpt['value'] = obj['content_val'];
-        // contentObjOpt['data'] = options['data']; //内容不能设置data 因为可能自带data
-        var contentObj = global.makeDiv(contentObjOpt);
-        obj['content_obj'] = contentObj;
-        obj['nav_obj'] = navObj;
-        obj.append(navObj);
-        obj.append(contentObj);
-
-        //外部设置属性
-        obj.extend({
-            //值的修改
-            valChange: function (newVal, exceptObj, renewBind) {
-                exceptObj = exceptObj || [];
-                renewBind = isUndefined(renewBind) ? true : renewBind;
-                obj['navClick'](newVal, exceptObj, renewBind);
-            },
-            updates: function(dataName, exceptObj) {//数据同步
-                exceptObj = exceptObj || [];
-                if(setBind && $.inArray(this, exceptObj) == -1) {
-                    exceptObj.push(obj);
-                    this.valChange(getObjData($.trim(setBind)), exceptObj, false)
-                }
-                if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
-                    //console.log('updates');
-                    //console.log(options);
-                    renewObjBindAttr(this, dataName);
-                }
-            },
-            //克隆当前对象
-            cloneSelf: function() {
-                var opt = cloneData(obj.sor_opt);
-                return global.makeNav(opt, true);
-            }
-        });
-        objBindVal(obj, options);//数据绑定
-        addCloneName(obj, options);//支持克隆
-        return obj; //makeSwitch
-    };
-    //创建items
+    //创建items 自定义单元
     global.makeItems = function(sourceOptions, sureSource) {
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
@@ -6503,14 +6277,14 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         var sourceVal = getOptVal(options, ['value'], '');
         //统一头部判断结束
 
-        obj['tag'] = 'dd';
+        obj['tag'] = 'items';
         obj[objValIsNode] = false;
         obj['createItem'] = false;
         obj['multi'] = undefined;
-        obj['itemValArray'] = [];
         obj.valueSeted = false;//当前对象的value是否设置完成
         obj.menuXuanranSuccess = false;//当前对象的menu是否渲染完成 [menu需要渲染 才会用到]
         var autoRenewMenuText = false;//当前对象的menu的text和val是否同时渲染完成
+        obj[objValObjKey] = [];
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             // console.log('format -- ObjVal', opt);
@@ -6541,18 +6315,11 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 renewMenuTextByVal();
             },
             get: function () {
-                return obj.itemValArray.join(',');
+                return obj[objValObjKey].join(',');
             }
         });
         //支持外部取选中的文本 返回数组格式
         Object.defineProperty(obj, 'text', {
-            get: function () {
-                //多选时，才返回数组
-                return obj['multi'] ? obj.itemTxtArray : ($.isArray(obj.itemTxtArray) ? obj.itemTxtArray.join('') : obj.itemTxtArray) ;
-            }
-        });
-        //支持外部取选中的文本 返回数组格式
-        Object.defineProperty(obj, 'title', {
             get: function () {
                 //多选时，才返回数组
                 return obj['multi'] ? obj.itemTxtArray : ($.isArray(obj.itemTxtArray) ? obj.itemTxtArray.join('') : obj.itemTxtArray) ;
@@ -6572,10 +6339,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     textArray_.push(liTitle);
                 }
             });
-            obj.itemValArray = valArray_;
+            obj[objValObjKey] = valArray_;
             obj.itemTxtArray = textArray_;
-            obj.attr('data-value', valArray_.join(','));
-            obj.attr('data-text', textArray_.join(','));
             autoRenewMenuText = true;
         };
         //公共的初始化触发渲染菜单和值的方法
@@ -6585,7 +6350,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             if(obj.menuXuanranSuccess && obj.valueSeted) {
                 var textArray = obj.getItemTextByVal();//获取当前li选中的内容
                 var selectText = $.isArray(textArray) ? textArray.join(',') : textArray;
-                obj.attr('data-text', selectText);
                 //当前没有选中的值 要清空子select的菜单 让选中值再加载子select菜单
                 autoRenewMenuText = true;
                 var setText = getOptVal(options, ['set_text', 'setText'], null);
@@ -6601,11 +6365,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         }
         //通过当前val取text
         obj.getItemTextByVal = function () {
-            var newValAy = obj.itemValArray;
-            //console.log('getItem.TextByVal :');
-            //console.log(newValAy);
+            var newValAy = obj[objValObjKey];
             if(!newValAy || !hasData(newValAy)) {
-                //console.log('!newValAy :');
                 return '';
             }
             var textStr = '';
@@ -6635,9 +6396,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 }
             });
             obj.itemTxtArray = textArray_;
-            obj.itemValArray = valArray_;
-            obj.attr('data-value', valArray_.join(','));
-            obj.attr('data-text', textArray_.join(','));
+            obj[objValObjKey] = valArray_;
             return textArray_;
         };
         //更新选中的值和文本
@@ -6659,7 +6418,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             if(valStr !== obj.attr('data-value')) {
                 obj.attr('data-value', valStr);
             }
-            obj.itemValArray = newValArray;
+            obj[objValObjKey] = newValArray;
             if(renewBind && setBind) {
                 //触发数据同步  触发赋值 */
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
@@ -6946,7 +6705,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 }
                 newTextStr = $.isArray(newTextArray) ? newTextArray.join(',') : newTextArray;
             }
-            obj.attr('data-text', newTextStr);
             obj.textObj.setSelectMenuText(newTextArray, newTextStr);
             if(setText) {//触发数据同步  触发赋值 */
                 updateBindObj($.trim(setText), newTextStr, [obj]);
@@ -7603,7 +7361,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         });
         //支持外部取其中的某个元素单独显示
         obj.getItem = function(i) {
-            console.log(obj.items['menu']['value']);
             obj.items['menu']['value'][i].siblings('li').hide();
             return obj;
         };
@@ -7662,7 +7419,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     'value': sValueStr
                 };
                 //item自身不能继承data菜单
-                // console.log('makeItems', menuOpt);
                 var menu_obj = global.makeItems(menuOpt);
                 menu_obj[parentObjKey] = obj;//设置其父对象
                 obj['itemsObj'] = menu_obj;

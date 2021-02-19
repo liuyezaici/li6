@@ -22,18 +22,21 @@
             name: 'demo',
             'items': {
                 data: [
-                    {'id': "1", 'text_3': "单元1"},
-                    {'id': "2", 'text_3': "单元2"},
-                    {'id': "3", 'text_3': "单元3"},
-                    {'id': "4", 'text_3': "单元4"}
+                    {'id': 1, 'text_3': "单元1"},
+                    {'id': 2, 'text_3': "单元2"},
+                    {'id': 3, 'text_3': "单元3"},
+                    {'id': 4, 'text_3': "单元4"}
                 ],
                 value_key: 'id',
                 title_key: 'text_3',
                 text: '{text_3}',
                 width: '20%',
             },
-            width: '520px',
-            value: 1
+            width: '420px',
+            value: 3,
+            click: function (par,e) {
+                console.log(par, par.value);
+            }
         });
         $('#show_div').append(items);
     });
