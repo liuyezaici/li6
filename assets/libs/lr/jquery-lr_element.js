@@ -3985,7 +3985,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     arrayBack.push(val2_.sor_opt);
                     // console.log('isOurObj_sour', arrayBack);
                 } else if($.isArray(val2_)) {
-                    console.log('getArray', val2_);
                     arrayBack.push(getArray(val2_));
                 }  else if(isObj(val2_)) {
                     if(val2_ instanceof $) {
