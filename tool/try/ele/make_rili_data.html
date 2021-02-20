@@ -20,6 +20,9 @@ require.config({
 require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
     var rili = lrEle.makeRili({
         name: 'demo',
+        data: {
+            'today': '2020-12-4'
+        },
         text: {
             'year': '',
             'month': '',
@@ -27,7 +30,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
         },
         // from_year: 1900,
         // place: '选择年月日',
-        'value': '2020-12-4',
+        'value': '{today}',
         width: '80px',
         // year_menu_width: '280px',
         // month_menu_width: '156px',

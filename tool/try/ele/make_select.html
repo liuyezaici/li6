@@ -8,13 +8,7 @@
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
     <script src="/assets/js/require.min.js"></script>
-<style>
-    .simple_btn {
-        border: 1px solid #dedede;
-        background-color: #ffffee;
-        margin: 0 5px 5px 5px;
-    }
-</style>
+
 //a simple select box
 
 <div id="show_select"></div>
@@ -58,7 +52,29 @@
                 }
             }
         });
-      $('#show_select').append(select);
+        var select2 = lrEle.makeSelect({
+            'name': 'demo',
+            'default_text': '请选择',
+            'value': '67',
+            'clear': true,
+            'value_key': "id",//取值的键名
+            'title_key': "title",//取文本的键名
+            // 'multi': true,
+            menu: {
+                width: '320px',
+                'data': selectData
+            },
+            li: {
+                value: "{title}",
+                style: 'margin:0;padding: 0 5px;',
+                click: function (obj, eve, ff) {
+                    // console.log(obj);
+                    // console.log(eve);
+                    // console.log(ff);
+                }
+            }
+        });
+      $('#show_select').append([select, select2]);
     });
 
 </script>

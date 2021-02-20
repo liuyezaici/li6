@@ -6,62 +6,49 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+<script src="/assets/js/require.min.js"></script>
 
-<style>
-    .simple_btn {
-        border: 1px solid #dedede;
-        background-color: #ffffee;
-        margin: 0 5px 5px 5px;
-    }
-</style>
-//a simple select box
+//多选框
 
 <div id="show_select"></div>
-<br />
-<div id="show_input1"></div>
-<br />
-<div id="show_bind1"></div>
-<div id="show_bind2"></div>
+
 <script>
-    var i,selectData=[];
-    for(i=65; i <91; i++) {
-        selectData.push({
-            u_id: i,
-            u_nick: String.fromCharCode(i)
-        });
-    }
-    var select = makeSelect({
-        name: 'diy_select',
-        'default_text': '请选择',
-        'multi': true,
-        value: 3,
-        'value_key': "u_id",//取值的键名
-        'title_key': "u_nick",//取文本的键名
-        menu: {
-            'data': selectData,
-            width: '520px'
-        },
-        li: {
-            value: "{u_nick}",
-            width: '40px',
-            click: function (obj, e, scope) {
-            }
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
         }
-    })
-    ;
-  $('#show_select').append(select);
-    //
-    // $('#show_input1').append( makeInput({value: '2', type: 'text', width: 240, bind: 'some_val1', name: 'input1'}) );
-    // //数据绑定
-    // $('#show_bind1').append( makeDiv({
-    //     value: '{{some_val1}}' //{(some_val1.length)>1 ? \'one\':\'multi\'}
-    // }));
-    // //text数据绑定
-    // $('#show_bind2').append( makeDiv({
-    //     value: 'text:{{some_val2}}'
-    // }));
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var i, selectData = [];
+        for (i = 65; i < 91; i++) {
+            selectData.push({
+                u_id: i,
+                u_nick: String.fromCharCode(i)
+            });
+        }
+        var select = lrEle.makeSelect({
+                name: 'demo',
+                'default_text': '请选择',
+                'multi': true,
+                'value_key': "u_id",//取值的键名
+                'title_key': "u_nick",//取文本的键名
+                value: 3,
+                menu: {
+                    'data': selectData,
+                    width: '520px'
+                },
+                li: {
+                    value: "{u_nick}",
+                    width: '40px',
+                    click: function (obj, e, scope) {
+                    }
+                }
+            })
+        ;
+        $('#show_select').append(select);
+    });
+
 </script>

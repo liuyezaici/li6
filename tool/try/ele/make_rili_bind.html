@@ -6,6 +6,7 @@
 
 //一个简单的日历
 <div id="show_div"></div>
+<div id="show_bind" class="well" style="margin-top: 120px;"></div>
 <script>
 //一个简单的日历
 require.config({
@@ -18,8 +19,14 @@ require.config({
 });
 
 require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    var bindInput = lrEle.makeInput({
+        bind: 'todayis',
+    });
     var rili = lrEle.makeRili({
         name: 'demo',
+        data: {
+            'today': '2020-12-4'
+        },
         text: {
             'year': '',
             'month': '',
@@ -27,7 +34,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
         },
         // from_year: 1900,
         // place: '选择年月日',
-        'value': '2020-12-4',
+        'value': '{today}',
         width: '80px',
         // year_menu_width: '280px',
         // month_menu_width: '156px',
@@ -35,6 +42,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
         // clear: true,
         from_year: 1998,
         to_year: 2021,
+        bind: 'todayIs',
         onChose: function () {
 
         },
@@ -43,6 +51,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
         }
     });
     $('#show_div').append(rili);
+    $('#show_bind').append(bindInput);
 
 });
 

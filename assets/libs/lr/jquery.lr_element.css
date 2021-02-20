@@ -1031,6 +1031,7 @@ div.form-control,
     white-space: nowrap;
     text-overflow: ellipsis;
     display: inline-block;
+    outline: none;
 }
 .select_box .inner.has_clear .select_text {
     padding-right: 26px;
@@ -1164,7 +1165,7 @@ div.form-control,
     border-radius: 4px;
     display: block;
     height: 1.5em;
-    background-color: #ccc;
+    background: transparent;
     text-align: center;
     cursor: pointer;
     margin: 0 0.3em;
@@ -1173,24 +1174,27 @@ div.form-control,
     -ms-user-select:none;
     user-select:none;
 }
+.calendar_table tr td .pre_next_btn:hover {
+    background-color: #c7d8e0;
+}
 .calendar_table tr td .pre_next_btn .icon {
     width: 0;
     height: 0;
     display: block;
     border-style: solid;
-    margin-top: 0.28em;
-    border-width: 0.46em;
+    margin-top: 0.5em;
+    border-width: 0.3em;
     float: left;
 }
 .calendar_table tr td .last_month_btn .icon {
     border-left-width: 0;
-    border-color: transparent #fff transparent transparent;
+    border-color: transparent #709bc7  transparent transparent;
     margin-left: 0.4em;
     margin-right: 0.5em;
 }
 .calendar_table tr td .next_month_btn .icon {
     border-right-width: 0;
-    border-color: transparent transparent transparent #fff;
+    border-color: transparent transparent transparent #709bc7 ;
     margin-left: 0.5em;
     margin-right: 0.4em;
 }

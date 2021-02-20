@@ -79,7 +79,6 @@
             name: 'demo2',
             'class': 'city',
             value: '450500',
-            need_parent_val: true, //数据来源于父值确认后
             need_parent_key: 'area_id', //数据来源于父值确认后
             'bind': 'cityId',
             setText: 'cityTitle',
@@ -103,11 +102,9 @@
                 menu: {
                     width: '200px'
                 },
-                need_parent_val: true, //数据来源于父值确认后
                 need_parent_key: 'area_id', //数据来源于父值确认后
                 'bind': 'townId',
                 setText: 'townTitle',
-                // value: '',
                 value: '450521',
                 data_from: {
                     url: '/tool/index/getArea', //子数据来源
