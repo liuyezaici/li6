@@ -21,7 +21,7 @@
     require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
     //创建一个倒计时按钮 发短信用
     var diyBtn = lrEle.makeBtn({
-        data: {'rest': 3},
+        data: {'rest': 0},
         name: 'sms_btn',
         'class': 'btnLr btnLrDefault',
         value: '剩余数量:{rest}'
@@ -29,8 +29,8 @@
         ,onload: function (btn) {
             lrBox.msgTisf('起始数量:' + btn.restNum);
             btn.timer({
-                time: 100,
-                repeat: true, // 一直循环：true 结合while参数使用; 自定义执行次数：1+ 不需要配置while; 1或0或false：表示执行1次
+                time: 20,
+                repeat: 66, // 一直循环：true 结合while参数使用; 自定义执行次数：1+ 不需要配置while; 1或0或false：表示执行1次
                 func: function (){
                     btn.restNum = parseInt(btn.restNum) + 1;
                     btn.data  = {'rest': btn.restNum};
