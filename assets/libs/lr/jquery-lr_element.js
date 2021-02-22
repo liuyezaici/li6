@@ -7902,6 +7902,7 @@ item: [{
             //主动更新数据
             renew: function (opt) {
                 opt = opt || {};
+                opt = $.extend({}, sourceOptions, opt);
                 var hasSetData = !isUndefined(opt['data']);
                 var defaultCfg = {
                     page: 1,
