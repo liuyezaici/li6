@@ -7,9 +7,7 @@
 <link rel="stylesheet" href="/assets/libs/lr/jquery.lr_element.css" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/resource/pub/bootstrap-3.3.7/js/bootstrap.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script><!-- LR box -->
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script> <!-- LR element -->
+<script src="/assets/js/require.min.js"></script>
 <script type="text/javascript" src="/resource/front/js/front.js"></script><!-- 前端js-->
 <link href="/resource/front/css/front.css" rel="stylesheet" media="all" /> <!-- 模版样式 -->
 <meta property="og:image" content="/resource/front/images/logo.png"/>
@@ -18,7 +16,6 @@
 <meta property="og:locale" content="zh_CN"/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="李瑞的主页"/>
-
 <base target="_blank">
 </head>
 <body>

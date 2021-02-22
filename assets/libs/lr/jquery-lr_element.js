@@ -80,6 +80,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
     //转义正则敏感符 str_.replace(new RegExp(match,"gm"), matchVal); 否则当字符串match中含有以下符号时，无法替换
     function regCodeAddGang(str) {
         if(!str) return '';
+        str = str.replace(/\:/g, '\\\:');
         str = str.replace(/\?/g, '\\\?');
         str = str.replace(/\+/g, '\\\+');
         str = str.replace(/\^/g, '\\\^');

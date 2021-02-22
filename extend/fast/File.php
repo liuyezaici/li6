@@ -132,8 +132,8 @@ class File
     }
     //有些地方post的数据要转url
     public static function post_nr_str($url, $ref, $post_data = array()){
+        $postBodyString = "";
         if (is_array ( $post_data ) && 0 < count ( $post_data )) {
-            $postBodyString = "";
             foreach ( $post_data as $k => $v ) {
                 if(is_string($v)) {
                     $v = urlencode ($v);
