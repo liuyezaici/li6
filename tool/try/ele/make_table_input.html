@@ -45,27 +45,17 @@
                 //         {id: '456', 'user_nick': 'rui6ye', 'number': '9999999999999999'},
                 //       ],
                 data: [
-                    {sons: {a: 666}},
-                    {sons: {a: 777}}
+                    {id: 123},
+                    {id: 777},
                 ],
                 tr: [
                     {
                         td: [
                             {
                                 value: lrEle.makeInput({
-                                        value: '',
+                                        value: '{id}',
                                         click: function (obj, even, scope) {
                                             lrBox.msgTisf(obj.value);
-                                        }
-                                    })
-                            },
-                            {
-                                value: lrEle.makeBtn({
-                                        value: '添加1行:{sons.a}',
-                                        margin_left: '10px',
-                                        'class': 'btnLR btnLrSuccess btnLrXs',
-                                        click: function (obj, even, scope) {
-                                            obj.parent.parent.addline('before');
                                         }
                                     })
                             }
@@ -81,8 +71,8 @@
                     'class': 'btnLr btnLrSuccess',
                     click: function (e) {
                         table['data'] = [
-                            {sons: {a: lrEle.makeRadom(6)}},
-                            {sons: {a: lrEle.makeRadom(6)}}
+                            {id: lrEle.makeRadom(6)},
+                            {id: lrEle.makeRadom(6)},
                         ];
                     }
                 })

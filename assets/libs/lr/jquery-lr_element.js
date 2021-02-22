@@ -3037,6 +3037,66 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             }
         });
     }
+    //绑定定时器
+    function addTimer(thisObj) {
+        thisObj.timer = function (opt){
+            //time: 1000, //时间间隔 单位毫秒 多久执行一次 或 多少秒后执行
+            //  until/while/stop: function () {
+            //      return (btn.restNum == 0);
+            // },
+            //   repeat: true, // 一直循环：true,  自定义次数：1+  0/1：表示执行一次
+            // func: function (){ //执行命令
+            //      btn.value -= 1;
+            //      btn.data  = {'rest': btn.restNum};
+            //  }
+            var time_ = getOptVal(opt, ['time'], 1000);
+            time_ = parseInt(time_);
+            var while_ = getOptVal(opt, ['while','until', 'stop', 'stopWhen', 'stopIf'], null);
+            var repeat = getOptVal(opt, ['repeat'], false);
+            var funcEven = getOptVal(opt, ['func'], false);
+            var endEven = getOptVal(opt, ['end'], false);
+            var timerId = null;
+            if(!funcEven || typeof funcEven !=='function') {
+                console.log('func参数缺省');
+                return;
+            }
+            if(repeat) {
+                var repeatForTime = false;
+                var repeatCount = 0;
+                if(isNumber(repeat)) {
+                    repeatForTime = true;
+                }
+                timerId = setInterval(function() {
+                    funcEven(thisObj);
+                    if(while_ && typeof while_ =='function') {
+                        var result = while_(thisObj);
+                        if(result === true) {
+                            clearInterval(timerId);
+                            if(endEven) {
+                                endEven(thisObj);
+                            }
+                        }
+                    }
+                    if(repeatForTime) {
+                        repeatCount ++;
+                        if(repeatCount >=repeat) {
+                            clearInterval(timerId);
+                            if(endEven) {
+                                endEven(thisObj);
+                            }
+                        }
+                    }
+                }, time_);
+            } else {
+                timerId = setTimeout(function () {
+                    funcEven(thisObj);
+                    clearTimeout(timerId);
+                }, time_);
+            }
+
+        };
+    }
+
     //dom批量绑定事件 mouseenter/mouseleave/click/dblclick/blur/change
     function objSetOptEven(bindToObj, options, callBackObj) {
         options = options || {};
@@ -3937,6 +3997,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                     }
                     // td: [{},{}]
                 } else if(isOurObj(val_)) {
+                    // console.log('isOurObj', val_, val_.sor_opt);
                     backData[k] = val_.sor_opt;
                 }  else if(isObj(val_)) {
                     if(val_ instanceof $) {
@@ -4004,6 +4065,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             obj.sor_opt = sureSource ?  cloneData(defaultOps || {}) : cloneData(copySourceOpt(defaultOps));
         }
         var setBind = getOptVal(defaultOps, ['bind'], '');
+        var onReadyEven = getOptVal(defaultOps, ['onload', 'onLoad', 'ready', 'onReady'], null);
         // console.log('makeDom2', tag, obj, 'sor_opt:',obj.sor_opt, defaultOps);
         //必须设置name 否则拖动换排序时无法切换对象的子name
         if(isUndefined(defaultOps['name'])) {
@@ -4083,7 +4145,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             obj.renewVal(newObj, obj['options']);
         };
         obj.domAppendVal = function(opt, hasSetData) {
-
             var obj_ = this;
             opt= opt || [];
             if(!hasData(opt)) return '';
@@ -4111,6 +4172,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         valObj = global.makeRadio(newOpt, true);
                     } else if(newOpt['tag']=='switch') {
                         valObj = global.makeSwitch(newOpt, true);
+                    } else if(newOpt['tag']=='input') {
+                        valObj = global.makeInput(newOpt, true);
                     } else {
                         valObj = makeDom({
                             'tag': newOpt['tag'],
@@ -4263,8 +4326,12 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
         // console.log('afterRenew', JSON.stringify(defaultOps));
         objBindVal(obj, defaultOps);//数据绑定
         addCloneName(obj, defaultOps);//支持克隆
+        addTimer(obj);//添加定时器绑定
         //绑定拖拽事件
         callBindDragObj(obj, defaultOps);
+        if(onReadyEven) {
+            onReadyEven(obj);
+        }
         return obj;
     }
 
@@ -4943,6 +5010,7 @@ obj.selected(idname)
     global.makeInput = function(sourceOptions, sureSource) {
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
+        sourceOptions['tag'] = 'input';
         var obj = $('<span></span>');
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
@@ -5685,7 +5753,6 @@ obj.selected(idname)
         addCloneName(obj, options);//支持克隆
         return obj;
     };
-    //创建按钮 [属性：name,type,value,class,left,func 按钮事件, rest_time]
     //rest_time 按钮可添加 剩余时间倒计时
     //num 后面跟随数值
     global.makeBtn = function(sourceOptions) {
@@ -5716,67 +5783,7 @@ obj.selected(idname)
         if(lrBtnSizeClass) {
             options['class_extend'] = lrBtnSizeClass;
         }
-        var sourceVal = options['value'];
-        var funcAfterCreate = function (thisObj, option_) {
-            //设置倒计时初始化剩余数字
-            thisObj.setRestNum = function (restTime) { //倒计时
-                if(restTime <= minNum) {
-                    thisObj.removeAttr('disabled');
-                } else {
-                    thisObj.attr('disabled', true);
-                }
-                var optData = !isUndefined(option_['data']) ? cloneData(option_['data']) : {};
-                //console.log(optData);
-                //console.log(thisObj);
-                optData['rest_time'] = restTime;
-                //console.log(optData);
-                thisObj['data'] = optData;
-                let val_ = sourceVal + '{{rest_time}>0?"({rest_time})":""}';
-                var newStr = strObj.formatStr(val_, optData, 0, thisObj, 'value');
-                thisObj.renewVal(newStr);
-            };
-            //外部使用的倒计时触发方法
-            thisObj.subTime = function (restTime) { //倒计时
-                thisObj.setRestNum(restTime);
-                thisObj.__inSubTime(restTime);
-            };
-            //内部使用的倒计时事件
-            thisObj.__inSubTime = function (rest_time) { //倒计时
-                if(isUndefined(option_.step)) option_.step = 1;
-                var optData = !isUndefined(option_['data']) ? cloneData(option_['data']) : {};
-                if(rest_time > minNum) {
-                    //1秒后触发btn内容更新
-                    setTimeout(function () {
-                        rest_time -= parseFloat(option_.step);
-                        optData['rest_time'] = rest_time;
-                        let val_ = sourceVal + '{{rest_time}>0?"({rest_time})":""}';
-                        var newStr = strObj.formatStr(val_, optData, 0, thisObj, 'value');
-                        thisObj.renewVal(newStr);
-                        if(rest_time == 0) {
-                            optData['rest_time'] = 0;
-                            thisObj.removeAttr('disabled');
-                        } else {
-                            thisObj.__inSubTime(rest_time);
-                        }
-                    }, 1000);
-                    thisObj.attr('disabled', true);
-                } else {
-                    //要等按钮渲染好data属性 才能重置它的data
-                    setTimeout(function() {
-                        thisObj['data'] = optData;
-                        thisObj.removeAttr('disabled');
-                    }, 50);
-                }
-            };
-            //带倒计时的按钮
-            if(!isUndefined(option_['rest_time']) ) {
-                thisObj.__inSubTime(parseFloat(option_['rest_time']));
-            }
-            //绑定拖拽事件
-            callBindDragObj(thisObj, option_);
-        };
         options[objValIsNode] = false; //不允许再append val
-        options['afterCreate'] = funcAfterCreate; //不允许再append val
         var newBtn = makeDom({tag:'button', 'options':options});
         return newBtn;
     };

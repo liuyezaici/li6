@@ -1,43 +1,58 @@
-<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+<script src="/assets/js/require.min.js"></script>
 
-//l_r input max min
-<div id="show_bind"></div>
+<div id="show_demo"></div>
 <br />
-<div id="show_select"></div>
-
 <script>
-    //数据绑定
-    $('#show_bind').append(
-        makeInput({
-            value: '2',
-            type: 'text',
-            width: '180px',
-            size: 'x' //x/s/m/l sm/md/lg/ x/small/middle/large/
-        }),
-        makeInput({
-            value: '2',
-            type: 'text',
-            width: '180px',
-            size: 's'
-        }),
-        makeInput({
-            value: '2',
-            type: 'text',
-            width: '180px',
-            size: 'm'
-        }),
-        makeInput({
-            value: '2',
-            type: 'text',
-            width: '180px',
-            size: 'l'
-        }),
-    );
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBase: '/assets/libs/lr/jquery-lr_base',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        $('#show_demo').append([
+            lrEle.makeInput({
+               'width': '100px'
+                ,'size': 'x'
+                ,click: function (o,e) {
+                    lrBox.msgTisf('我是最小号:xs');
+                }
+            }),
+            lrEle.makeInput({
+               'width': '110px'
+                ,'size': 's'
+                ,click: function (o,e) {
+                    lrBox.msgTisf('我是小号:small');
+                }
+            }),
+            lrEle.makeInput({
+               'width': '120px'
+                ,'size': 'm'
+                ,click: function (o,e) {
+                    lrBox.msgTisf('我是中号:middle');
+                }
+            }),
+            lrEle.makeInput({
+               'width': '140px'
+                ,'size': 'b'
+                ,click: function (o,e) {
+                    lrBox.msgTisf('我是大号:big');
+                }
+            }),
+            lrEle.makeInput({
+               'width': '160px'
+                ,'size': 'l'
+                ,click: function (o,e) {
+                    lrBox.msgTisf('我是超大号:large');
+                }
+            })
+        ]);
+    });
 </script>

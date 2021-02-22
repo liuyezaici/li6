@@ -27,13 +27,21 @@
         value: '剩余数量:{rest}'
         ,restNum: '{rest}'
         ,onload: function (btn) {
-            lrBox.msgTisf('起始数量:' + btn.restNum);
+            lrBox.msgTisf('当前数量:' + btn.restNum);
             btn.timer({
-                time: 100,
+                time: 1000,
+                while: function () {
+                    return (btn.restNum == 0);
+                },
+                end: function () {
+                    lrBox.msgTisf('时间结束');
+                    btn.value = '结束';
+                },
                 repeat: true, // 一直循环：true 结合while参数使用; 自定义执行次数：1+ 不需要配置while; 1或0或false：表示执行1次
                 func: function (){
-                    btn.restNum = parseInt(btn.restNum) + 1;
+                    btn.restNum -= 1;
                     btn.data  = {'rest': btn.restNum};
+                    lrBox.msgTisf('剩余数量:' + btn.restNum);
                 }
             });
         }

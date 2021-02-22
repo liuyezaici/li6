@@ -5,10 +5,6 @@
     <script src="/assets/js/require.min.js"></script>
     <div id="show_btn"></div>
     <script>
-        //一个带数据的p
-        //注意：
-        // 如果数据是数组: index 作为每个循环的序号 ;
-        // value/class 属性支持js语法. 变量用{}括起
         require.config({
             paths: {
                 jquery: '/resource/pub/js/jq/jquery-3.2.1',
@@ -20,13 +16,10 @@
         require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
             //创建一个按钮
             var diyBtn = lrEle.makeBtn({
-                'show': 1,
-                'class': 'btnLr btn-sm btn-info',
-                value: '付款信息a',
-                data_id: '{id}',
-                margin_left: '5px',
+                'class': 'btnLr btnLrSm btnLrSuccess',
+                value: '按钮',
                 click: function (obj_) {
-                    var id_ = obj_.attr('data_id');
+                    lrBox.msgTisf('哈喽');
                 },
             });
 
