@@ -5753,20 +5753,9 @@ obj.selected(idname)
         addCloneName(obj, options);//支持克隆
         return obj;
     };
-    //rest_time 按钮可添加 剩余时间倒计时
     //num 后面跟随数值
     global.makeBtn = function(sourceOptions) {
         var options = cloneData(sourceOptions);
-        var optData = !isUndefined(options['data']) ? options['data'] : {};
-        var valueStr = !isUndefined(options['value']) ? options['value'] : "";
-        var restNum = !isUndefined(options['rest_time']) ? options['rest_time'] : 0;
-        var minNum = !isUndefined(options['min_num']) ? options['min_num'] : 0;
-        if(!isUndefined(options['rest_time'])) {
-            var showTimer = (restNum <= minNum) ? '': '('+ restNum +')';
-            optData['rest_time'] = showTimer;
-            options['data'] = optData;
-            options['value'] = valueStr;
-        }
         var lrBtnSizeClass = '';
         var newSize = getOptVal(options, ['size'], null);
         if(sizeIsXs(newSize)) {
