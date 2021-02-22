@@ -6,58 +6,56 @@
     <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-    <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-    <script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-    <script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-    <script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
-
-    <style>
-        .simple_btn {
-            border: 1px solid #dedede;
-            background-color: #ffffee;
-            margin: 0 5px 5px 5px;
-        }
-    </style>
-    //a simple select box
+<script src="/assets/js/require.min.js"></script>
 
     <div id="show_select"></div>
-    <div id="show_bind1"></div>
-    <br />
     <script>
-        var getDataUrl = '/?s=tool/get_current_province';
-        var getParentPowerUrl = '/?s=tool/get_province';
-        var selectBox = makeSelect({
-            name: 'demo',
-            value: '{province}',
-            'clear': true,
-            menu: {
-                width: '520px',
-                data_from: {
-                    url: getParentPowerUrl,
-                    success_key: 'id',
-                    success_value: '0038',
-                    data_key: 'info.list',
-                },
-            },
-            value_key: 's_id',
-            title_key: 's_name',
-            li: {
-                value: '{s_name}'
+        require.config({
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBase: '/assets/libs/lr/jquery-lr_base',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+                lrEle: '/assets/libs/lr/jquery-lr_element',
             }
         });
-        $('#show_select').append(
-            makeDiv({
-                data_from: {
-                    url: getDataUrl,
-                    data_key: 'info',
-                    post_data: {},
-                    success_key: 'id',
-                    success_value: '0038',
-                    err_func: function (e) {
-                        msgTisf(e.msg);
+        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+            var getDataUrl = '/index/tool/get_province';
+            var getAllProvinceUrl = '/index/tool/get_all_province';
+            $('#show_select').append(
+                lrEle.makeDiv({
+                    data_from: {
+                        url: getDataUrl,
+                        data_key: 'data',
+                        post_data: {},
+                        success_key: 'code',
+                        success_value: '1',
+                        err_func: function (res) {
+                            lrBox.msgTisf(res.msg);
+                        }
+                    },
+                    province: '{province}',
+                    value: '',
+                    onFormat_province: function (o, provinceId) {
+                        o.value = lrEle.makeSelect({
+                            name: 'demo',
+                            value: provinceId,
+                            'clear': true,
+                            value_key: 's_id',
+                            title_key: 's_name',
+                            menu: {
+                                width: '320px',
+                                data_from: {
+                                    url: getAllProvinceUrl,
+                                    success_key: 'code',
+                                    success_value: '1',
+                                    data_key: 'data',
+                                },
+                            },
+                            li: {
+                                value: '{s_name}'
+                            }
+                        });
                     }
-                },
-                value: selectBox
-            }));
-
+                }));
+        });
     </script>

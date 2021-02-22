@@ -65,16 +65,16 @@ class Area
     //获取所有省份
     public static function getAllProvince()
     {
-        return mysql::getInstance()->getAll("s_prov_city_area_street", "s_id,s_name,s_parent_id,s_needopen", "s_level='1' order by s_sort asc");
+        return Db::table("s_prov_city_area_street")->field("s_id,s_name")->where("s_level",1)->order('s_sort', 'asc')->select();
     }
     //获取省份的市/区
     public static function getAllCityByArea($areaId=0)
     {
-        $allCity = $db->getAll("s_prov_city_area_street", "s_id,s_name,s_needopen", "s_parent_id = '{$areaId}'  order by s_sort asc");
+        $allCity = Db::table("s_prov_city_area_street")->field("s_id,s_name,s_needopen")->where("s_parent_id",$areaId)->order('s_sort', 'asc')->select();
         $newCity = array();
         foreach($allCity as $n =>&$v) {
             if($v['s_needopen'] == 1) {
-                $newCity1 = $db->getAll("s_prov_city_area_street", "s_id,s_name,s_needopen", "s_parent_id = '{$v['s_id']}'  order by s_sort asc");
+                $newCity1 = Db::table("s_prov_city_area_street")->field("s_id,s_name,s_needopen")->where("s_parent_id",$v['s_id'])->order('s_sort', 'asc')->select();
                 $newCity = array_merge($newCity, $newCity1);
             }
         }
@@ -84,7 +84,7 @@ class Area
     //获取所有省份的市/区
     public static function getAllArea()
     {
-        $allCity = $db->getAll("s_prov_city_area_street_no_open", "s_id,s_name,s_parent_id", "s_level in(1,2,3) order by s_sort asc");
+        $allCity = Db::table("s_prov_city_area_street")->field("s_id,s_name,s_parent_id")->where("s_level", "in","(1,2,3)") ->order('s_sort', 'asc');
         return  $allCity;
     }
     //获取省份/地区名称

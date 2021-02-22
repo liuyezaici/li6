@@ -6,7 +6,7 @@ use app\admin\addon\fujian\model\Fujian;
 use app\common\controller\Frontend;
 use app\common\model\Users;
 use fast\File;
-use fast\Date;
+use fast\Area;
 use fast\Addon;
 use \app\admin\addon\article\model\Article as ArticleModel;
 use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
@@ -28,6 +28,21 @@ class Tool extends Frontend
         $this->keyword = input('keyword', '', 'trim');
     }
 
+    public function get_province() {
+        $info = [
+            'province' => 440000,
+        ];
+        $this->success('', '', $info);
+    }
+
+    public function get_all_area() {
+        $info = Area::getAllArea();
+        $this->success('', '', $info);
+    }
+    public function get_all_province() {
+        $info = Area::getAllProvince();
+        $this->success('', '', $info);
+    }
     public function get_info() {
         $info = [
             'time' => Str::getRam(5),
