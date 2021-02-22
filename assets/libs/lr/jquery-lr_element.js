@@ -7880,7 +7880,7 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 }
                 pageBody['current_page'] = newP;
                 //触发点击事件 如果是外部data赋值page数 这个方法会再次出发自身循环
-                if(options['click']) options['click'](li, newP, livingObj);
+                if(options['click']) options['click'](li, newP, pageBody);
             },
             //主动更新数据
             renew: function (opt) {
@@ -7905,7 +7905,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                 opt['page'] = opt['page'] || 1;
                 opt['btnSize'] = (!opt['size'] || !setSize(opt['size'])) ? 'md' : opt['size'];//过滤size
                 pageSize = parseInt(formatIfHasKuohao(pageSize, data_));
-                pageBtnNum = formatIfHasKuohao(pageBtnNum, data_);
+                pageBtnNum = parseInt(pageBtnNum);
+                if(!pageBtnNum) pageBtnNum = 5;
                 opt['btnSize'] = formatIfHasKuohao(getOptVal(opt, ['btnSize'], 'sm'), data_);
                 //为兼容自定义页数菜单按钮，强制转两位数
                 if(strInArray(opt['btnSize'], ['sm', 'small', 's']) !=-1) {

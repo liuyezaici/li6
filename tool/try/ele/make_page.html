@@ -36,6 +36,9 @@
                 size: 'xs',
                 total: 50,
                 pageSize: 10,
+                click: function (a,b,c,d) {
+                    console.log(a,b,c,d);
+                }
             });
             $('#show_page1').append(pageObj);
         });
