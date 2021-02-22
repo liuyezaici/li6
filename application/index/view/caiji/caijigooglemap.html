@@ -1,0 +1,190 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+    //采集谷歌地图的数据
+    <div id="caijiBox">
+        <textarea class="well contentObj" style="resize: none; width: 600px;height: 300px;"></textarea>
+        <div>
+            开头截取：<input class="fromStr" value="</g-loading-icon>" />
+        </div>
+        <div>
+            末尾截取：<input class="endStr" value="<div class=&#34;std&#34;" />
+        </div>
+        <div>
+            循环体的开始符：<input class="repeatFromStr" value="mouseover:" />
+        </div>
+        <div>
+            循环体的截止符：<input class="repeatEndStr" value="<\/a>" />
+        </div>
+        <div>
+            <button class="btn btn-success getBtn">获取</button>
+        </div>
+    </div>
+    <script>
+        //一个简单的日历
+        require.config({
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBase: '/assets/libs/lr/jquery-lr_base',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+                lrEle: '/assets/libs/lr/jquery-lr_element',
+            }
+        });
+
+        require(['jquery', 'lrEle', 'lrBase', 'lrBox'], function ($, lrEle,lrBase, lrBox) {
+
+            //转义正则敏感符 str_.replace(new RegExp(match,"gm"), matchVal); 否则当字符串match中含有以下符号时，无法替换
+            function regCodeAddGang(str) {
+                if(!str) return '';
+                str = str.replace(/\:/g, '\\\:');
+                str = str.replace(/\?/g, '\\\?');
+                str = str.replace(/\+/g, '\\\+');
+                str = str.replace(/\^/g, '\\\^');
+                str = str.replace(/\(/g, '\\\(');
+                str = str.replace(/\)/g, '\\\)');
+                str = str.replace(/\*/g, '\\\*');
+                str = str.replace(/\$/g, '\\\$');
+                str = str.replace(/\[/g, '\\\[');
+                str = str.replace(/\]/g, '\\\]');
+                str = str.replace(/\{/g, '\\\{');
+                str = str.replace(/\}/g, '\\\}');
+                str = str.replace(/\|/g, '\\\|');
+                str = str.replace(/\=/g, '\\\=');
+                str = str.replace(/\\\\/g, '\\\\\\');
+                return str;
+            }
+
+             var caijiBox = $('#caijiBox');
+            var contentObj = caijiBox.find('.contentObj');
+            var getBtn = caijiBox.find('.getBtn');
+            var fromStrObj = caijiBox.find('.fromStr');
+            var endStrObj = caijiBox.find('.endStr');
+            var repeatFromStrObj = caijiBox.find('.repeatFromStr');
+            var repeatEndStrObj = caijiBox.find('.repeatEndStr');
+            getBtn.click(function () {
+                var allVal = contentObj.val();
+                if(!allVal.length) {
+                    lrBox.msgTisf('输入内容');
+                    return;
+                }
+                var fromStr = fromStrObj.val();
+                if(!fromStr.length) {
+                    lrBox.msgTisf('输入开头内容');
+                    return;
+                }
+                var endStr = endStrObj.val();
+                if(!endStr.length) {
+                    lrBox.msgTisf('输入末尾内容');
+                    return;
+                }
+                var repeatFromStr = repeatFromStrObj.val();
+                if(!repeatFromStr.length) {
+                    lrBox.msgTisf('输入循环体的开始内容');
+                    return;
+                }
+                var repeatEndStr = repeatEndStrObj.val();
+                if(!repeatEndStr.length) {
+                    lrBox.msgTisf('输入循环体的截止内容');
+                    return;
+                }
+                var restHtml = allVal.split(fromStr);
+                if(lrBase.isUndefined(restHtml[1])) {
+                    lrBox.msgTisf('找不到开头内容');
+                    return;
+                }
+                restHtml = restHtml[1];
+                if(restHtml.substr(0, 6) =='</div>') {
+                    restHtml = restHtml.substr(6);
+                }
+                if(restHtml.substr(0, 6) =='</div>') {
+                    restHtml = restHtml.substr(6);
+                }
+                // console.log((restHtml));
+                // console.log($(restHtml));
+                // return;
+                restHtml = restHtml.split(endStr);
+                if(lrBase.isUndefined(restHtml[0])) {
+                    lrBox.msgTisf('找不到末尾内容');
+                    return;
+                }
+                restHtml = restHtml[0];
+                var resStr = regCodeAddGang(repeatFromStr) + '(.+?)'+ regCodeAddGang(repeatEndStr) + '(.+?)<\/div>';
+                var resultList = restHtml.match(new RegExp(resStr, "g"));
+                if(!resultList) {
+                    console.log(resStr);
+                    lrBox.msgTisf('找不到匹配的 循环起始符');
+                    return;
+                }
+                // console.log(resultList);
+                // return;
+
+                var okList = [];
+                $.each(resultList, function (n, v) {
+                    var str_ = v;
+                    var array_ = str_.split('<div>');
+                    var title = array_[1];
+                    var array_ = title.split('</div>');
+                    title = array_[0];
+                    var titleAfter = str_;
+                    if(title.indexOf('<wbr>') !=-1) {
+                        array_ = title.split('<wbr>');
+                        title = array_[0] + '('+ array_[1] +')';
+                    }
+                    if(titleAfter.indexOf('</div></div>') !=-1) {
+                        array_ = titleAfter.split('</div></div>');
+                        var removeLeftStr = array_[0] + '</div></div>';
+                        array_ = titleAfter.split(removeLeftStr);
+                        titleAfter = array_[1];
+                    }
+                    // console.log(title);
+                    //去掉评分
+                    if(titleAfter.indexOf('</g-review-stars>') !=-1) {
+                        array_ = titleAfter.split('</g-review-stars>');
+                        titleAfter = array_[1];
+                    }
+                    //双span包裹的是地址
+                    var address = '';
+                    if(titleAfter.indexOf('<span><span>') !=-1) {
+                        var array1_ = titleAfter.split('<span><span>');
+                        address = array1_[1];
+                        array_ = address.split('</span></span>');
+                        address = array_[0];
+                        //移出左边的地址内容
+                        var removeLeftStr = array1_[0] + '<span><span>';
+                        array_ = titleAfter.split(removeLeftStr);
+                        titleAfter = array_[1];
+                    }
+                    //跟下来的内容是电话
+                    var phone = '';
+                    if(titleAfter.indexOf('</div><div><span>') !=-1) {
+                        var array1_ = titleAfter.split('</div><div><span>');
+                        phone = array1_[1];
+                        array_ = phone.split('</span>');
+                        phone = array_[0];
+                    }
+                    // console.log('titleAfter', titleAfter);
+                    //网站
+                    var site = '';
+                    if(titleAfter.indexOf('<a class\="') !=-1) {
+                        var array_ = titleAfter.split('<a class="');
+                        site = array_[1];
+                        array_ = site.split('href="');
+                        site = array_[1];
+                        array_ = site.split('"');
+                        site = array_[0];
+                    }
+                    okList.push({
+                        title: title,
+                        address: address,
+                        phone: phone,
+                        site: site,
+                    })
+                });
+               console.log(JSON.stringify(okList));
+
+            });
+        });
+
+    </script>
