@@ -19,7 +19,7 @@
 <base target="_blank">
 </head>
 <body>
-<div id="navigation">
+<div id="navigation" class="container">
     <ul>
         <li>
             <a href="/" class="logo" target="_parent"><img src="/resource/front/images/logo.png" alt="logo" /></a>
