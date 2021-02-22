@@ -4175,6 +4175,8 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
                         valObj = global.makeSwitch(newOpt, true);
                     } else if(newOpt['tag']=='input') {
                         valObj = global.makeInput(newOpt, true);
+                    } else if(newOpt['tag']=='img') {
+                        valObj = global.makeImg(newOpt, true);
                     } else {
                         valObj = makeDom({
                             'tag': newOpt['tag'],
@@ -4714,9 +4716,18 @@ obj.selected(idname)
         obj['noRepSons'] = [];//记录所有不循环的tr数组
         obj['repeatSons'] = [];//记录所有循环的tr数组 用于更新数据 新增裁剪等动作
         obj[objValIsNode] = false;
+        var tableRepeatKey = '';
+        // console.log('options', options);
+        if(!isUndefined(options['tr'])) {
+            tableRepeatKey = 'tr';
+        }
         //获取tr的循环个数
         var _getTrNum = function(opt) {
-            var trOpt = opt['tr'] || opt['tr_repeat'] || [];
+            if(!tableRepeatKey) {
+                console.log('no set tr');
+                return ;
+            }
+            var trOpt = opt[tableRepeatKey];
             var trOptLen;
             if(!$.isArray(trOpt)) {
                 trOptLen = 1;
@@ -4725,7 +4736,6 @@ obj.selected(idname)
             }
             return trOptLen;
         };
-
 
         //数据循环时 使用此方法更新数据列表
         var _renewRepeatSonLen = function (repeatSons, newData) {
@@ -4761,7 +4771,7 @@ obj.selected(idname)
                     }
                 }
             } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
-                // console.log('tr累加:');
+                console.log('tr累加:');
                 for(tmpTrGroupid = 0; tmpTrGroupid < dataLines; tmpTrGroupid++) {
                     tmpTrGroupFromIndex = tmpTrGroupid * trOptLen;
                     tmpData =  newData[tmpTrGroupid];
@@ -4773,8 +4783,9 @@ obj.selected(idname)
                             repeatSons[tmpIndex]['data'] = tmpData;
                             // console.log('renew_tmpIndex, i2:', i2, 'tmpIndex', tmpIndex);
                         } else {
-                            // console.log('直接用虚拟tr进行克隆 ', i2, tmpData);
-                            var cloneTr = cloneData(obj['sor_opt']['tr'][i2]); //必须新克隆一个  不然会污染上一个tr的source opt
+                            console.log('直接用虚拟tr进行克隆 ', i2, tmpData);
+                            var cloneTr = cloneData(obj['sor_opt']['tr']); //必须新克隆一个  不然会污染上一个tr的source opt
+                            //console.log('cloneTr', cloneTr);
                             cloneTr['tag'] = 'tr';
                             //data不能提前设置 因为sor_opt本来就是空的
                             cloneTr['extendParentData'] = true;//强制继承父data更新
@@ -4804,7 +4815,9 @@ obj.selected(idname)
         obj.renewSonData = function (newData) {
             var sons = obj['repeatSons'] ;
             //更新循环的tr数组 可能被清空过 需要恢复循环
-            _renewRepeatSonLen(sons, newData);
+            if(tableRepeatKey) {
+                _renewRepeatSonLen(sons, newData);
+            }
             //更新不循环的tr数组
             var sons = obj['noRepSons'] ;
             $.each(sons, function (n, son) {
@@ -4820,37 +4833,33 @@ obj.selected(idname)
             //new trs
             //第一行data直接用子对象生成 span->td->tr
             if(dataIndex == 0) {
-                // console.log('line1_________', trOneData, trOpts);
-                $.each(trOpts, function (n, _opt_) {
-                    var tmpOpt_ = cloneData(_opt_);
-                    tmpOpt_['extendParentData'] = extendParentData;
-                    if(hasSetData) tmpOpt_['data'] = trOneData; //必须克隆完再更新data
-                    // console.log('make 000000000000:', tmpOpt_);
-                    var newTrObj = global.makeTr(tmpOpt_);
-                    // console.log('make RepeatTrs ________newTrObj:', newTrObj);
-                    newTrObj[parentObjKey] = obj;
-                    obj['repeatSons'].push(newTrObj); // 子对象
-                    //之前的son由于提前创建，其data是空的，所以更新
-                    if(hasSetData) {
-                        renewObjData(newTrObj['value'], trOneData);
-                    }
-                    obj.tBody.append(newTrObj);
-                });
+                console.log('line1_________', trOneData, trOpts);
+                var tmpOpt_ = cloneData(trOpts);
+                tmpOpt_['extendParentData'] = extendParentData;
+                if(hasSetData) tmpOpt_['data'] = trOneData; //必须克隆完再更新data
+                // console.log('make 000000000000:', tmpOpt_);
+                var newTrObj = global.makeTr(tmpOpt_);
+                // console.log('make RepeatTrs ________newTrObj:', newTrObj);
+                newTrObj[parentObjKey] = obj;
+                obj['repeatSons'].push(newTrObj); // 子对象
+                //之前的son由于提前创建，其data是空的，所以更新
+                if(hasSetData) {
+                    renewObjData(newTrObj['value'], trOneData);
+                }
+                obj.tBody.append(newTrObj);
             } else {
                 //第2行data开始 要用sor_opt重新生成新的 tr->td->span
-                // console.log('line2_________', trOpts);
-                $.each(trOpts, function (n, _opt_) {
-                    var tmpOpt_ = cloneData(copySourceOpt(_opt_));//克隆
-                    // console.log('tmpOpt_', tmpOpt_);
-                    //这里不应该提前设置data 会让tr的sor_opt误以为先天d带data
-                    tmpOpt_['extendParentData'] = extendParentData;
-                    var newTrObj = global.makeTr(tmpOpt_);
-                    if(hasSetData) newTrObj['data'] = trOneData;
-                    // console.log('make RepeatTrs newTrObj:', newTrObj);
-                    newTrObj[parentObjKey] = obj;
-                    obj['repeatSons'].push(newTrObj); // 子对象
-                    obj.tBody.append(newTrObj);
-                });
+                console.log('line2_________', trOpts);
+                var tmpOpt_ = cloneData(copySourceOpt(trOpts));//克隆
+                // console.log('tmpOpt_', tmpOpt_);
+                //这里不应该提前设置data 会让tr的sor_opt误以为先天d带data
+                tmpOpt_['extendParentData'] = extendParentData;
+                var newTrObj = global.makeTr(tmpOpt_);
+                if(hasSetData) newTrObj['data'] = trOneData;
+                // console.log('make RepeatTrs newTrObj:', newTrObj);
+                newTrObj[parentObjKey] = obj;
+                obj['repeatSons'].push(newTrObj); // 子对象
+                obj.tBody.append(newTrObj);
             }
         }
 
@@ -4858,7 +4867,7 @@ obj.selected(idname)
         function createRepeatDataTrs(options) {
             // console.log('create RepeatDataTrs RepeatTrs _________');
             var optionsData = options['data'] || null; // data: {son_data}
-            var trOptions = options['tr'] || {};//子的公共配置 tr: {}
+            var trOptions = options[tableRepeatKey] || {};//子的公共配置 tr: {}
             var trGroupLen = 0; //循环的tr内部数量
             $.each(trOptions, function () {
                 trGroupLen ++;
@@ -4880,29 +4889,31 @@ obj.selected(idname)
             var i_ = 0;//计算tr出现的位置
             $.each(options_, function (key_, val_) {
                 if(key_.substr(0,2) == 'tr' || key_.substr(0,3) == 'tr_') {
-                    if(key_ == 'tr' || key_ == 'tr_repeat') {
-                        if(!$.isArray(val_)) { //tr: {td: {}}
-                            options_['tr'] = [val_];
+                    if(key_ == 'tr') {
+                        if($.isArray(val_)) { //tr: {td: {}}
+                            console.log('tr的值必须是对象');
+                            return false;
                         }
+                        options_[tableRepeatKey] = val_;
                         //console.log('create____RepeatDataTrs_:::::::::::::', key_);
                         createRepeatDataTrs(options_);
                     } else if(key_.substr(0,2) == 'tr') {//生成不循环的tr_n 也可以解析data
                         //console.log(val_);
-                        if(!$.isArray(val_)) { //tr_2:{td: {}}  => tr_2:[{td: {}},{td: {}}]
-                            val_ = [val_];
+                        if($.isArray(val_)) { //tr: {td: {}}
+                            console.log('tr_n的值必须是对象');
+                            return false;
                         }
-                        val_.forEach(function (trOpt) {
-                            var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
-                            if(!tabDataFrom && hasData(tabData)) {
-                                var sonOptBack = optionAddData(trOpt, tabData);
-                                var tmpData = sonOptBack[0];
-                                trOpt['data'] = tmpData; //data不能提前赋予  否则会导致无法继承父data
-                            }
-                            var trObj = global.makeTr(trOpt);
-                            trObj[parentObjKey] = obj; //分配父对象
-                            obj['noRepSons'].push(trObj);
-                            obj.tBody.append(trObj);
-                        });
+                        var trOpt = val_;
+                        var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
+                        if(!tabDataFrom && hasData(tabData)) {
+                            var sonOptBack = optionAddData(trOpt, tabData);
+                            var tmpData = sonOptBack[0];
+                            trOpt['data'] = tmpData; //data不能提前赋予  否则会导致无法继承父data
+                        }
+                        var trObj = global.makeTr(trOpt);
+                        trObj[parentObjKey] = obj; //分配父对象
+                        obj['noRepSons'].push(trObj);
+                        obj.tBody.append(trObj);
                     }
                 }
                 i_ ++ ;
@@ -5652,6 +5663,7 @@ obj.selected(idname)
     //创建图片
     global.makeImg = function (sourceOptions, sureSource) {
         sourceOptions = sourceOptions || {};
+        sourceOptions['tag'] = 'img';
         sureSource = sureSource || false;
         var obj = $('<img />');
         if(!obj.sor_opt) {

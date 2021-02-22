@@ -50,50 +50,46 @@
                     lrBox.msgTisf(e.msg);
                 }
             },
-            tr_default: [
-                {
-                    show: '{!this.data}',
-                    td: [
-                        {
-                            style: 'padding-left: 15px;',
-                            value: 'No Data',
+            tr_default:  {
+                show: '{!this.data}',
+                td: [
+                    {
+                        style: 'padding-left: 15px;',
+                        value: 'No Data',
+                    }
+                ]
+            },
+            tr:  {
+                // show: '{this.data}',
+                td: [
+                    {
+                        title: '{title}',
+                        id_: '{id}',
+                        value: 'tt:{title}',
+                        click: function (o) {
+                            lrBox.msgTisf(o.id_);
                         }
-                    ]
-                }
-            ],
-            tr: [
-                {
-                    // show: '{this.data}',
-                    td: [
-                      {
-                          title: '{title}',
-                          id_: '{id}',
-                          value: 'tt:{title}',
-                          click: function (o) {
-                              lrBox.msgTisf(o.id_);
-                          }
-                        },
-                     // {
-                     //     id_: '{id}',
-                     //        value:  lrEle.makeA({
-                     //            value: 'dddd',
-                     //            click: function (o) {
-                     //                lrBox.msgTisf(o.parent.id_);
-                     //            }
-                     //        })
-                     //    },
-                        // {
-                        //     value: [
-                        //         lrEle.makeInput({
-                        //             width: '200px',
-                        //             name: 'u_nick',
-                        //             value: '{title}'
-                        //         })
-                        //     ]
-                        // }
-                    ]
-                }
-            ]
+                    },
+                    // {
+                    //     id_: '{id}',
+                    //        value:  lrEle.makeA({
+                    //            value: 'dddd',
+                    //            click: function (o) {
+                    //                lrBox.msgTisf(o.parent.id_);
+                    //            }
+                    //        })
+                    //    },
+                    // {
+                    //     value: [
+                    //         lrEle.makeInput({
+                    //             width: '200px',
+                    //             name: 'u_nick',
+                    //             value: '{title}'
+                    //         })
+                    //     ]
+                    // }
+                ]
+            }
         });
         $('#show_table').append(
             table
