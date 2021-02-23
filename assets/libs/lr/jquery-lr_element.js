@@ -9094,6 +9094,7 @@ item: [{
 
     //传统表单的自定义打包提交方法
     global.formSubmitEven = function(form, opt) {
+        var beforeFunc = getOptVal(opt, ['before'], null);
         form.on('submit', function (e) {
             e.preventDefault();
             e.stopPropagation();
@@ -9110,6 +9111,12 @@ item: [{
                     pData[v.name] = v.value;
                 }
             });
+            if(beforeFunc) {
+                var status = beforeFunc(pData);
+                if(status===false) {
+                    return;
+                }
+            }
             if(!isUndefined(opt['postData'])) {
                 opt['postData'].map(function (v, k) {
                     pData[k] = v;
