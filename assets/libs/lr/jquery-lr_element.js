@@ -4899,21 +4899,21 @@ obj.selected(idname)
                         createRepeatDataTrs(options_);
                     } else if(key_.substr(0,2) == 'tr') {//生成不循环的tr_n 也可以解析data
                         //console.log(val_);
-                        if($.isArray(val_)) { //tr: {td: {}}
-                            console.log('tr_n的值必须是对象');
-                            return false;
+                        if(!$.isArray(val_)) { //tr_2:{td: {}}  => tr_2:[{td: {}},{td: {}}]
+                            val_ = [val_];
                         }
-                        var trOpt = val_;
-                        var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
-                        if(!tabDataFrom && hasData(tabData)) {
-                            var sonOptBack = optionAddData(trOpt, tabData);
-                            var tmpData = sonOptBack[0];
-                            trOpt['data'] = tmpData; //data不能提前赋予  否则会导致无法继承父data
-                        }
-                        var trObj = global.makeTr(trOpt);
-                        trObj[parentObjKey] = obj; //分配父对象
-                        obj['noRepSons'].push(trObj);
-                        obj.tBody.append(trObj);
+                        val_.forEach(function (trOpt) {
+                            var tabDataFrom = getOptVal(options_, ['data_from', 'dataFrom'], null);
+                            if(!tabDataFrom && hasData(tabData)) {
+                                var sonOptBack = optionAddData(trOpt, tabData);
+                                var tmpData = sonOptBack[0];
+                                trOpt['data'] = tmpData; //data不能提前赋予  否则会导致无法继承父data
+                            }
+                            var trObj = global.makeTr(trOpt);
+                            trObj[parentObjKey] = obj; //分配父对象
+                            obj['noRepSons'].push(trObj);
+                            obj.tBody.append(trObj);
+                        });
                     }
                 }
                 i_ ++ ;
