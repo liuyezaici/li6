@@ -273,6 +273,7 @@ lirui lirui
 
 linux ≥ı ºªØ’æµ„ 
 git init
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/larblog.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/fastadmin-oss.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6//treeholes.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6//treeholes.api.git
