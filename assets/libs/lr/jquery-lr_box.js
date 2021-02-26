@@ -1626,6 +1626,7 @@ define(['jquery'], function ($) {
         if(typeof needBg == 'undefined') needBg = false;
         var loadObj = global.makeBox({
             'class': loadClass,
+            'positionType': 'fixed',
             bg: needBg,//背景遮挡
             text: '<svg class="svgLoading" viewBox="25 25 50 50">' +
                 '<circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="'+ border +'" stroke-miterlimit="10"></circle>' +
