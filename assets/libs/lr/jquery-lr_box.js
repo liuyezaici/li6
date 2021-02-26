@@ -1599,6 +1599,7 @@ define(['jquery'], function ($) {
         var loadObj = global.makeBox({
             'class': 'diy_loading',
             bg: needBg,//背景遮挡
+            'positionType': 'fixed',
             text: '<div class="la-ball-spin-clockwise" style="color: #999">' +
                 '<div></div><div></div>' +
                 '<div></div><div></div>' +
