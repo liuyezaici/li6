@@ -9239,6 +9239,14 @@ define(['require','jquery', 'lrBox'], function (require, $, lrBox) {
                 }
                 return scrollbar.reset();
             });
+        },
+
+        //删除属性
+        delProperty : function (obj, propertys) {
+            if(!Array.isArray(propertys)) propertys = [propertys];
+            propertys.map(function (v, n) {
+                Reflect.deleteProperty(obj, v);
+            });
         }
     };
     return backObj;

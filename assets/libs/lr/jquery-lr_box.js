@@ -539,16 +539,15 @@ define(['jquery'], function ($) {
                 backgroundColor: '#fff',
                 left: toX_,
                 top: toY_
-            }, speed, animate, function () {
-                //去掉按钮
-                setTimeout(function () {
-                    fadeBtn.fadeOut(speed, function () {
-                        fadeBtn.remove();
-                    });
-                }, speed);
-            });
+            }, speed, animate);
+            //完成之前就可以开始淡出层了
             setTimeout(function () {
-                box_.stop().animate({'opacity': 1}, speed-200);
+                fadeBtn.fadeOut(speed, function () {
+                    fadeBtn.remove();
+                });
+            }, Math.abs(speed-260));
+            setTimeout(function () {
+                box_.stop().animate({'opacity': 1}, 100);
             }, speed);
         };
         return global.msgView(title, content, width, addTop, opt);
@@ -556,18 +555,19 @@ define(['jquery'], function ($) {
 
     //判断方向
     function _checkDir(fx) {
-        if(strInArray(fx, ['top','up','u','t', '上', 's']) !=-1) {
+        if($.inArray(fx, ['top','up','u','t', '上', 's']) !=-1) {
             return 's';
-        } else if(strInArray(fx, ['right','r', '右', 'y']) !=-1) {
+        } else if($.inArray(fx, ['right','r', '右', 'y']) !=-1) {
             return 'y';
-        }  else if(strInArray(fx, ['down','d','bottom','b', '下', 'x']) !=-1) {
+        }  else if($.inArray(fx, ['down','d','bottom','b', '下', 'x']) !=-1) {
             return 'x';
-        } else if(strInArray(fx, ['left','l', '左', 'z']) !=-1) {
+        } else if($.inArray(fx, ['left','l', '左', 'z']) !=-1) {
             return 'z';
         }else {
             return '';
         }
     }
+
     //创建弹窗
     global.makeBox = function(options) {
         options = options || {};
@@ -954,9 +954,13 @@ define(['jquery'], function ($) {
         var widthXY = getBoxXy(boxWidth, options.top);
         if(!setLeft_) {
             x_ = widthXY.x;
+        } else {
+            x_ = setLeft_;
         }
         if(!setTop_) {
             y_ = widthXY.y;
+        } else {
+            x_ = setTop_;
         }
         if(!isUndefined(options.x))  x_ = options.x;//直接传入绝对位置时
         if(!isUndefined(options.y))  y_ = options.y;//直接传入绝对位置时
@@ -969,9 +973,11 @@ define(['jquery'], function ($) {
         if(subTop) {
             y_ += subTop;
         }
+        // console.log('setLeft_', setLeft_);
+        // console.log('x_', x_);
         //坐标如果是纯数字 要加上单位
-        if(!isNaN(x_)) x_ = x_ + "px";
-        if(!isNaN(y_)) y_ = y_ + "px";
+        if(!isNaN(x_) && x_) x_ = x_ + "px";
+        if(!isNaN(y_) && y_) y_ = y_ + "px";
         //设置data属性
         if(!isUndefined(options.data)) {
             $.each(options.data, function (n, v) {
