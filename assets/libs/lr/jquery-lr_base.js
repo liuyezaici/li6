@@ -7623,6 +7623,8 @@ define(['require','jquery', 'lrBox'], function (require, $, lrBox) {
                             let click_ = v['click'] || null;
                             let class_ = v['class'] || null;
                             let style_ = v['style'] || null;
+                            let href_ = v['href'] || null;
+                            let target_ = v['target'] || null;
                             let li_ = '';
                             if(click_) {
                                 li_ = $('<a class="item"></a>');
@@ -7640,6 +7642,8 @@ define(['require','jquery', 'lrBox'], function (require, $, lrBox) {
                             }
                             if(class_) li_.addClass(class_);
                             if(style_) li_.attr('style', style_);
+                            if(href_) li_.attr('href', href_);
+                            if(target_) li_.attr('target', target_);
                             itemArray_.push(
                                 li_
                             );
@@ -7675,7 +7679,7 @@ define(['require','jquery', 'lrBox'], function (require, $, lrBox) {
                                     menuClass = 'el-dropdown-menu-right';
                                 }
                                 menuObj.addClass(menuClass);
-                            } else if (backObj.backObj.strObj.strInArray(lr, ['l', 'left'])!=-1 ) {
+                            } else if (backObj.strObj.strInArray(lr, ['l', 'left'])!=-1 ) {
                                 left_ -= menuObj.outerWidth() ;
                             }
                             //上边

@@ -843,7 +843,9 @@ define(['jquery'], function ($) {
                     var lastWidth = boxObj.outerWidth();
                     var lastHeight = boxObj.outerHeight();
                     let changeX, changeY;
-                    if (resizeDown) resizeDown(e, resizeBtn, boxObj);
+                    if (resizeDown) {
+                        resizeDown(e, resizeBtn, boxObj);
+                    }
                     var touchMoveEve = function (evt) {
                         if (moveBottomLineAble) {
                             changeX = evt.pageX - mouseX;
@@ -945,6 +947,7 @@ define(['jquery'], function ($) {
         } else {
             boxWidth = options.width ? options.width : boxObj.outerWidth();//允许外部提前定义box的宽度 因为像gif这样的图片会加载完才能获取到box真实的width
         }
+        // console.log('boxWidth', boxWidth);
 
         var x_=0,y_=0;
         if(options.width == 'auto') {
@@ -960,7 +963,7 @@ define(['jquery'], function ($) {
         if(!setTop_) {
             y_ = widthXY.y;
         } else {
-            x_ = setTop_;
+            y_ = setTop_;
         }
         if(!isUndefined(options.x))  x_ = options.x;//直接传入绝对位置时
         if(!isUndefined(options.y))  y_ = options.y;//直接传入绝对位置时
@@ -973,8 +976,9 @@ define(['jquery'], function ($) {
         if(subTop) {
             y_ += subTop;
         }
-        // console.log('setLeft_', setLeft_);
-        // console.log('x_', x_);
+        // console.log('setTop_', setTop_);
+        // console.log('y_', y_);
+        // console.log('boxWidth', boxWidth);
         //坐标如果是纯数字 要加上单位
         if(!isNaN(x_) && x_) x_ = x_ + "px";
         if(!isNaN(y_) && y_) y_ = y_ + "px";
