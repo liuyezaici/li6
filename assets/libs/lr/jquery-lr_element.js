@@ -7892,6 +7892,7 @@ item: [{
                 var goto = getOptVal(opt, ['goto'], null);
                 var selectPageSize = getOptVal(opt, ['selectPageSize', 'select_page_size'], null);//自定义单页的数量
                 var pageClass = getOptVal(opt, ['class'], '');
+                var diyClick = getOptVal(opt, ['click'], null);
                 opt['page'] = opt['page'] || 1;
                 opt['btnSize'] = (!opt['size'] || !setSize(opt['size'])) ? 'md' : opt['size'];//过滤size
                 pageSize = parseInt(formatIfHasKuohao(pageSize, data_));
@@ -8011,6 +8012,7 @@ item: [{
                         pageBody.setPage(pageNew);
                         pageBody.gotoPage = '';
                         if(pageBody.gotoPageObj) pageBody.gotoPageObj.val('');
+                        if(diyClick) diyClick(li, pageNew, pageBody);
                     });
                     pageBody.append(li);
                     repeatNum ++;
