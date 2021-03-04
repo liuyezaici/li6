@@ -7869,8 +7869,7 @@ item: [{
                     li.addClass('active').siblings('.active').removeClass('active');
                 }
                 pageBody['current_page'] = newP;
-                //触发点击事件 如果是外部data赋值page数 这个方法会再次出发自身循环
-                if(options['click']) options['click'](li, newP, pageBody);
+                //不能触发点击事件 因为点击的概念和value更新的意义不是完全吻合
             },
             //主动更新数据
             renew: function (opt) {
