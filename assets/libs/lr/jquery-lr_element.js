@@ -7839,6 +7839,7 @@ item: [{
         pageBody.toPage  = 0;
         pageBody.gotoPage  = '';
         pageBody.gotoPageObj  = null;
+        pageBody.setPageSize = null;//设置select的单页数量值
         pageBody.noNeedEven  = true;//不需要定义任何的点击事件 防止和系统的点击翻页冲突
         //支持value
         Object.defineProperty(pageBody, 'page', {
@@ -7847,6 +7848,27 @@ item: [{
             },
             set: function(newP) {  //支持外部设值
                 this.setPage(newP);
+            }
+        });
+        //支持 page_size(单页数量) 的获取
+        Object.defineProperty(pageBody, 'page_size', {
+            get: function () {
+                return parseInt(options['pageSize']);
+            },
+            set: function(newP) {
+                if(pageBody.setPageSize) {
+                    pageBody.setPageSize(newP);
+                }
+            }
+        });
+        Object.defineProperty(pageBody, 'pageSize', {
+            get: function () {
+                return parseInt(options['pageSize']);
+            },
+            set: function(newP) {
+                if(pageBody.setPageSize) {
+                    pageBody.setPageSize(newP);
+                }
             }
         });
         pageBody.extend({
@@ -8106,6 +8128,11 @@ item: [{
                     selectMenuObj.append(sizeMenu);
                     var textBtn = selectMenuObj.find('.btn');
                     textBtn.find('.defaultText').attr('title', defaultText);
+                    pageBody.setPageSize = function (newSize) {
+                        //修改默认配置的参数
+                        options['pageSize'] = newSize;
+                        textBtn.find('.defaultText').html(newSize);
+                    };
                     textBtn.on({
                         'focus': function (e) {
                             sizeMenu.show();
@@ -8119,10 +8146,8 @@ item: [{
                     sizeMenu.find('li a').on('click', function (e) {
                         var newSize = parseInt($(this).attr('data-val'));
                         if(!isNumber(newSize) || !newSize) newSize = 10;
-                        textBtn.find('.defaultText').html(newSize);
+                        pageBody.setPageSize(newSize);
                         sizeMenu.hide();
-                        //修改默认配置的参数
-                        options['pageSize'] = newSize;
                         pageBody.renew(options);
                         if(onchangeEven) {
                             onchangeEven(newSize, e, pageBody);
