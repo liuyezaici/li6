@@ -2,27 +2,28 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
+
 
 //一个简单的树形菜单
 <div id="show_trees"></div>
 <br />
 
-<div id="show_reload_btn"></div>
-
 <script>
 //一个简单的数据循环
-//注意：
-// 如果数据是数组: index 作为每个循环的序号 ;
-// value/class 属性支持js语法. 变量用{}括起
-
-    var td = makeTrees({
+require.config({
+    paths: {
+        jquery: '/resource/pub/js/jq/jquery-3.2.1',
+        lrBase: '/assets/libs/lr/jquery-lr_base',
+        lrBox: '/assets/libs/lr/jquery-lr_box',
+        lrEle: '/assets/libs/lr/jquery-lr_element',
+    }
+});
+require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    var td = lrEle.makeTrees({
         //分类数据
         items: {
-            'data':  [
+            'data': [
                 {
                     'some_id': 1,
                     'some_title': '分类1',
@@ -30,20 +31,20 @@
                         {
                             'some_id': 11,
                             'some_title': '分类11',
-                        },{
+                        }, {
                             'some_id': 12,
                             'some_title': '分类12'
-                        },{
+                        }, {
                             'some_id': 13,
                             'some_title': '分类13',
                             'sons': [
                                 {
                                     'some_id': 131,
                                     'some_title': '分类131',
-                                },{
+                                }, {
                                     'some_id': 132,
                                     'some_title': '分类132'
-                                },{
+                                }, {
                                     'some_id': 133,
                                     'some_title': '分类133'
                                 }
@@ -58,20 +59,20 @@
                         {
                             'some_id': 21,
                             'some_title': '分类21',
-                        },{
+                        }, {
                             'some_id': 22,
                             'some_title': '分类22'
-                        },{
+                        }, {
                             'some_id': 23,
                             'some_title': '分类23',
                             'sons': [
                                 {
                                     'some_id': 231,
                                     'some_title': '分类231',
-                                },{
+                                }, {
                                     'some_id': 232,
                                     'some_title': '分类232'
-                                },{
+                                }, {
                                     'some_id': 233,
                                     'some_title': '分类233'
                                 }
@@ -86,10 +87,10 @@
                         {
                             'some_id': 31,
                             'some_title': '分类31',
-                        },{
+                        }, {
                             'some_id': 32,
                             'some_title': '分类32'
-                        },{
+                        }, {
                             'some_id': 33,
                             'some_title': '分类33'
                         }
@@ -99,23 +100,22 @@
             'value_key': 'some_id',
             'title_key': 'some_title',
             'son_key': 'sons',//子数据的字段名
-            'click': function (o_) {
-                console.log(o_);
+            'click': function (li_, e_, o_) {
+                console.log(li_);
                 // console.log(o_.value);
             },
-            'li': {//li 附加显示内容
-                value:[
-                    makeBtn({
-                        value: 'aaa',
-                    }),
-                    makeBtn({
-                        value: 'ddd:{some_title}',
+            'li': {
+                //li 附加显示内容
+                value: [
+                    lrEle.makeBtn({
+                        value: '标题:{some_title}',
                     })
                 ]
             },
         },
-        name: 'demo',
         value: '21,22'
-        });
+    });
     $('#show_trees').append(td);
+
+});
 </script>

@@ -8661,6 +8661,7 @@ item: [{
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
         var obj = $('<div></div>');
+        obj.tag = 'tree';
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  cloneData(sourceOptions) : cloneData(copySourceOpt(sourceOptions));
@@ -8955,14 +8956,6 @@ item: [{
                     valueHasSeted = false; //设为未渲染完成
                 }
 
-                //只生成一次子对象
-                var liDataKey = 'data-value';
-                if(valueKey) {//li中输出值
-                    treeOpt[liDataKey] = '{'+ valueKey +'}';
-                }
-                if(titleKey) {//li中输出title值
-                    treeOpt['data-title'] = '{'+ titleKey +'}';
-                }
                 //console.log('treeOpt ______:');
                 //console.log(JSON.stringify(treeOpt));
                 treeOpt['disabled'] = "{{this.disabled}==true || {this.disabled}=='true' || {this.disabled}==1}";
