@@ -1,0 +1,39 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+
+//一个简单的Li
+<div id="show_li"></div>
+<br />
+
+<div id="show_reload_btn"></div>
+
+<script>
+//一个简单的数据循环
+//注意：
+// 如果数据是数组: index 作为每个循环的序号 ;
+// value/class 属性支持js语法. 变量用{}括起
+
+    var li = makeLi({
+        data: {'id': 9527, 'name': '唐白虎'},
+        'class': '{id}',
+        value: '只改变css'
+    });
+    $('#show_li').append(li);
+
+    $('#show_reload_btn').append(
+        makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btnLrSuccess',
+            click: function (e) {
+                li['data'] =  {'id': makeRandomStr(4)};
+            }
+        })
+    );
+
+</script>

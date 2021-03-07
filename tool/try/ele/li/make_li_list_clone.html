@@ -1,0 +1,69 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/assets/js/require.min.js"></script>
+
+//一个带下级的数据循环 初试下拉菜单
+<div id="show_list_son"></div>
+<br />
+<hr />
+<div id="show_btn"></div>
+<script>
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+        }
+    });
+    require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
+        var list1 =   core.makeLi({
+            data: [
+                {
+
+                    'a':core.makeRandomStr(6),
+                    'b':core.makeRandomStr(6)
+                }
+            ],
+                    value: core.makeList({
+                        'class': 'menu',
+                        li: {
+                            'value': '{a}.{b}'
+                        }
+                    })
+        });
+        var list2 =   list1.cloneSelf();
+        $('#show_list_son').append([list1, list2]);
+
+        $('#show_btn').append(core.makeBtn({
+            'value': '更新菜单',
+            'class': 'btnLr btnLrSuccess',
+            click: function () {
+                list1['data'] = [
+                    {
+
+                        'a':core.makeRandomStr(6),
+                        'b':core.makeRandomStr(6)
+                    },
+                    {
+                        'a':core.makeRandomStr(6),
+                        'b':core.makeRandomStr(6)
+                    },
+                ];
+                list2['data'] = [
+                    {
+
+                        'a':core.makeRandomStr(6),
+                        'b':core.makeRandomStr(6)
+                    },
+                    {
+                        'a':core.makeRandomStr(6),
+                        'b':core.makeRandomStr(6)
+                    },
+                ];
+            }
+        }));
+});
+
+</script>

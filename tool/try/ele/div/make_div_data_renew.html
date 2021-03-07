@@ -1,0 +1,95 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+
+<style>
+    .test_box {
+        background-color: #efefef;
+        border: 1px solid #ddd;
+        width: 200px;
+        height: 100px;
+        display: block;
+        text-align: center;
+    }
+    .test_box.active {
+        font-weight: bold;
+        font-size: 55px;
+    }
+    .test_box.hover {
+        color: #000cc0;
+    }
+</style>
+//一个简单的div
+<div id="show_div"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+//一个简单的div
+var isSeller = true;
+var canTixian = true;
+    var div = makeDiv({
+        'name': 'div_data',
+        data: {'item': '中文()""\'',
+        'time': '1535375134','ab': '啊好',
+        'uid': 'uid',
+        'datas': "[{\"title\":\"a1\",\"keyname\":\"b\",\"keyvalue\":\"c\",\"pic\":\"\\\/uploads\\\/20180826\\\/20180826194402000669532081114879.jpg\"},{\"title\":\"a2\",\"keyname\":\"b2\",\"keyvalue\":\"c2\",\"pic\":\"\\\/uploads\\\/20180826\\\/20180826222110386349286423190721.jpg\"}]",
+        'a': 'a',
+        'abee': 'ff',
+        'b': 'b',
+        'c2': '啊好啊',
+        'add': '666这','bdd': '777那', 'bb':'的bb'
+        },
+         value: "setAddonConfig('{abee}')",
+         //  value: '{{{a}+2=="啊2"?"11":"22"} +{bb} == "11的bb"?"11_bb{a}":"22_bb{a}" }',
+         //  value: 'f__ {a+{item}+a==a+{item}+a?{uid}+"a":{uid}+"b"}',
+         //  value: 'f: {a+{{a}+{b}=="a"+b?"22":"33"}==a+22?"a":"b"}',
+         // value: '{""||"中文()\\"\\"\'"==={item}||"收款方式"}'//微信账号/卡号/支付宝账号
+         // value: 'aa  {({item}) == "中文()\\"\\"\'"}',
+         // value: 'a:{"中文()\\"\\"\'" + "中文()\\"\\"\'"== "aa"}',
+         // value: 'aa  {a + b}',
+         // value: '{"title":"a1","keyname":"b","keyvalue":"c","pic":"\\/uploads\\/20180826\\/20180826194402000669532081114879.jpg"}',
+         // value: 'aa  {"=={bdd}6" == "==777那6"}',
+         // value: 'a 中文lllll:  {{add}=={bdd}?"英文 ={c2}":"中文 +{c2}"}',
+         // value: 'a 中文: "中文{a} {b} " {"啊好"=="{a}{b}"?"{add}":"{bdd}"}',
+         // value: 'a中文:  {"ab"=="{a}{b}"&&+3}',
+         // value: 'a 中文: \\"中文{a} {b} \\" {"{ab}"=="{a}{b}"&&1?"666":"777"}',
+         // value: '{1&&({a})}',
+         // value: '1',
+         //  value: 'item {0 % 2==0 ? \'even\': \'odd\'}',
+         // value: ' {item > 12 && abc && {{id}>1 ?"a":"b"} ? "aaaa": "bbbb"}',
+         // value: '{(item > 12 && abc && {{id}>1 ?"a":"b"}) ? "aaaa": "bbbb"}',
+           // value: 'item > 12 && abc && {12 === item ?"a= item2":"b"}',
+         // value: 'abc&& {abc&& true && "&& true && false" ? "abc&& true && false11":"&& true && false22"}',
+         //    value: '{ {a} > 2 && 1==2}'
+         //    value: '{ {addd + cc == adddcc ? 333 : 1 } > 2 && 2==2 ? aaff :"ddd"}'
+         //        value: "{'{install}'==1 ? '<i class=\"fa fa-times\"></i> 禁用{{install}=="a"?"11":"22"}':'<i class=\"fa fa-check\"></i> 启用{install}'}",
+         //     //value: "{{dd}!='123'? 'asdasd_+{dd}}=as{dasd>=a}a{d}}a' : 'dd_++===!!||&&><'}"
+         //     value: "{'{dd}'!='123dd'? 'asdasd_+}=as a }a' : 'dd_++===!!||&&><'}"
+         //     //value: '{status_name} <br /> 审核人 : {audit_uname} <br /> 审核时间 : {noSecond[run]({audit_time})}'
+         //     // value: '编辑 : {{id} +13 +12 +444} ',
+         // makeBtn({
+         //     // show: '{"{install}"==1}',
+         //     'class': '{"{status}" ==1 ? \'btnLr btn-xs btn-warning\':\'btnLr btn-xs btn-info\'}',
+         //     value: "{'{status}'==1 ? '<i class=\"fa fa-ddd\"></i> 禁用' : '<i class=\"fa fa-check\"></i> 启用'}",
+         // }),
+         //  makeSpan({
+         //     value: " <a href=\"#{id}\">{name}</a> <i class=\"glyphicon glyphicon-fire\"></i>  {{id}+10000}",
+         // }),
+    });
+  $('#show_div').append(div);
+//
+  var flag = 'dd';
+$('#show_reload_btn').append(makeA({
+        value: '点此更新数据',
+        'class': 'btnLr btnLrSuccess',
+        click: function (obj, ev, scope) {
+            div['data'] =  {'abee': flag+ makeRandomStr(5),'ctime': '1534782717', 'audit_uname': 'ffffffff' }
+        }
+    })
+);
+</script>

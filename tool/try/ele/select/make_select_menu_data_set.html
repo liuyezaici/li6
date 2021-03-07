@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+
+<style>
+    .simple_btn {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+//a simple select box
+
+<div id="show_select"></div>
+    <div id="show_bind1"></div>
+<br />
+<script>
+    var getParentPowerUrl = '/?s=tool/get_rows';
+    var select = makeSelect({
+        name: 'demo',
+        value: '2',
+        'clear': true,
+        menu: {
+            width: '520px',
+            data: [],
+        },
+        value_key: 'id',
+        title_key: 'title',
+        li: {
+            value: '{title}'
+        }
+    });
+  $('#show_select').append(select).append(makeA({
+      value: '点此更新数据',
+      'class': 'btnLr btnLrSuccess',
+      style: '',
+        click: function (e) {
+            select['menu']['menu']['data'] = [
+                {'id': 1, 'title': '唵->'+ makeRandomStr(6)},
+                {'id': 2, 'title': '嘛->'+ makeRandomStr(6)},
+                {'id': 3, 'title': '呢->'+ makeRandomStr(6)},
+                {'id': 4, 'title': '叭->'+ makeRandomStr(6)},
+                {'id': 5, 'title': '咪->'+ makeRandomStr(6)},
+                {'id': 6, 'title': '吽->'+ makeRandomStr(6)}
+            ];
+        }
+        })
+    );
+</script>

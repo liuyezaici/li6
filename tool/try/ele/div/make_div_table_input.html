@@ -1,0 +1,68 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的table   <br />
+<div id="show_div"></div>
+<div id="show_btn"></div>
+<script>
+
+    //一个简单的 div
+    var getDataUrl = '/index/tool/get_group';
+    var div = makeDiv({
+        'class': 'div',
+        data_from: {
+            url: getDataUrl,
+            data_key: 'info',
+            post_data: {},
+            success_key: 'code',
+            success_value: '1',
+            err_func: function (e) {
+                msgTisf(e.msg);
+            }
+        },
+        // data: {
+        //     son_data: [
+        //          {'id': makeRandomStr(2), 'name': 'aaa_'+ makeRandomStr(2)},
+        //          // {'id': makeRandomStr(2), 'name': 'bbb_'+ makeRandomStr(2)},
+        //     ]
+        // },
+        value: makeTable({
+            'width': '400px',
+            // data: "{son_data}",
+            'class': 'well js_table',
+            'name': 'demo',
+            'id': '',
+            tr: [{
+                td: [
+                    {
+                    value: makeInput({
+                        value: '{group}',
+                    })
+                }
+                ]
+            } ]
+        })
+    });
+    $('#show_div').append(div);
+
+</script>

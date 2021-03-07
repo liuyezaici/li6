@@ -1,0 +1,251 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+
+    <script src="/assets/js/require.min.js"></script>
+
+//一个简单的开关
+<div id="show_demo" class="well"></div>
+<script>
+//一个简单的数据循环
+//注意：
+// 如果数据是数组: index 作为每个循环的序号 ;
+// value/class 属性支持js语法. 变量用{}括起
+
+require.config({
+    paths: {
+        jquery: '/resource/pub/js/jq/jquery-3.2.1',
+        lrBox: '/assets/libs/lr/jquery-lr_box',
+        lrEle: '/assets/libs/lr/jquery-lr_element',
+    }
+});
+require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    $('#show_demo') .append(
+        [
+            lrEle.makeH3({value: 'type:3 文本显示于右侧: ', style: 'margin-top: 50px;'}),
+            lrEle.makeDiv({value: '自定义背景色[active_color/inactive_color]: ', style: 'margin-top: 20px;'}),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-top: 10px;',
+                showText: true,
+                type: 3,
+                width: '65px',
+                active_color: "#4462b2",
+                inactive_color: "#dd99c9",
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeDiv({value: '不显示文本[showText]: ', style: 'margin-top: 20px;'}),
+            lrEle.makeSwitch({
+                width: '65px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                type: 3,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeDiv({value: '不可操作[disabled]: ', style: 'margin-top: 20px;'}),
+            lrEle.makeSwitch({
+                width: '65px',
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-top: 10px;',
+                type: 3,
+                disabled: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+
+            lrEle.makeDiv({value: 'bootStrap样式预览: ', style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                'class': 'switch_success',
+                showText: true,
+                type: 3,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_info',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_warning',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                showText: true,
+                type: 3,
+                'class': 'switch_danger',
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_primary',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeSwitch({
+                value_key: 'value', //默认data的值的键名
+                text_key: 'text', //默认data的文本的键名
+                style: 'margin-left: 40px;',
+                type: 3,
+                'class': 'switch_black',
+                showText: true,
+                item: [{
+                    value: 1,
+                    text: 'boy'
+                }, {
+                    value: 0,
+                    text: 'girl'
+                }],
+                value: 1
+            }),
+            lrEle.makeDiv({
+                value: 'bootStrap样式 class: [switch_success/switch_info/switch_warning/switch_danger/switch_primary/switch_black]',
+                style: 'margin-top: 20px;'
+            }),
+            lrEle.makeDiv({value: 'size: ', style: 'margin-top: 20px;margin-bottom: 10px;'}),
+            lrEle.makeSpan({value: 'xs:'}), lrEle.makeSwitch({
+            width: '30px',
+            size: 'xs',
+            style: 'margin-left: 35px;',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            }, {
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            lrEle.makeSpan({value: 'sm:', style: 'margin-left:45px;'}), lrEle.makeSwitch({
+            width: '35px',
+            size: 'sm',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            }, {
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            lrEle.makeSpan({value: 'md(默认):', style: 'margin-left:45px;'}), lrEle.makeSwitch({
+            width: '50px',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            }, {
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+            lrEle.makeSpan({value: 'lg:', style: 'margin-left:45px;'}), lrEle.makeSwitch({
+            width: '70px',
+            size: 'lg',
+            type: 3,
+            value_key: 'value', //默认data的值的键名
+            text_key: 'text', //默认data的文本的键名
+            'class': 'switch_success',
+            showText: true,
+            item: [{
+                value: 1,
+                text: 'boy'
+            }, {
+                value: 0,
+                text: 'girl'
+            }],
+            value: 1
+        }),
+        ]
+    );
+});
+</script>

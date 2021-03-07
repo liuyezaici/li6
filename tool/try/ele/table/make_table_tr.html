@@ -1,0 +1,56 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+
+//js造一个简单的表格 <br />
+// 如需要登录 还需要创建一个form , 参考：<a href="/tool/try/?filename=lr_ele/make_form" target="_blank">makeForm</a>
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+<script>
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+        }
+    });
+    require(['jquery', 'core',  'lrBox'], function ($, core, lrBox) {
+        //js造一个简单的表格
+        var table = core.makeTable({
+            'width': '500',
+            'class': 'well',
+            'name': 'login_table',
+            data: [
+                {id: '123', 'user_nick': 'lidaye'},
+            ],
+            tr: {
+                td: [
+                    {
+                        'class': 'repeat_td_{id}',
+                        value: [
+                            core.makeSpan({
+                                value: '{id}'
+                            })
+                        ]
+                    },
+                ]
+            },
+        });
+        $('#show_table').append(
+            table
+        );
+        $('#show_reload_btn').append(core.makeBtn({
+            value: '点此更新数据',
+            target: '_self',
+            'class': 'btnLr btnLrSuccess',
+            click: function (e) {
+                table['data'] = [
+                    {id: core.makeRandomStr(6), 'user_nick': 'aaa:'+ core.makeRandomStr(6)},
+                    {id: core.makeRandomStr(6), 'user_nick': 'bbb:'+ core.makeRandomStr(6)},
+                ];
+            }
+        }));
+});
+</script>

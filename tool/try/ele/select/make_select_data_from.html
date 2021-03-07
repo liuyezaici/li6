@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!DOCTYPE html> <html> <head> <meta charset="utf-8">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/assets/js/require.min.js"></script>
+
+    <div id="show_select"></div>
+    <script>
+        require.config({
+            baseUrl: '/assets/libs/lr/ele/',
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+            }
+        });
+        require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
+            var getDataUrl = '/index/tool/get_province';
+            var getAllProvinceUrl = '/index/tool/get_all_province';
+            $('#show_select').append(
+                lrEle.makeDiv({
+                    data_from: {
+                        url: getDataUrl,
+                        data_key: 'data',
+                        post_data: {},
+                        success_key: 'code',
+                        success_value: '1',
+                        err_func: function (res) {
+                            lrBox.msgTisf(res.msg);
+                        }
+                    },
+                    province: '{province}',
+                    value: '',
+                    onFormat_province: function (o, provinceId) {
+                        o.value = lrEle.makeSelect({
+                            name: 'demo',
+                            value: provinceId,
+                            'clear': true,
+                            value_key: 's_id',
+                            title_key: 's_name',
+                            menu: {
+                                width: '320px',
+                                data_from: {
+                                    url: getAllProvinceUrl,
+                                    success_key: 'code',
+                                    success_value: '1',
+                                    data_key: 'data',
+                                },
+                            },
+                            li: {
+                                value: '{s_name}'
+                            }
+                        });
+                    }
+                }));
+        });
+    </script>

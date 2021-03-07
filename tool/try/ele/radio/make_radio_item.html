@@ -1,0 +1,44 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+
+//创建单选radio
+<div id="show_normal1">性别：</div>
+
+<div id="show_bind1"></div>
+<div id="show_bind2"></div>
+<div id="show_input1"></div>
+<br />
+<script>
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var radioObj = lrEle.makeRadio({
+                value: 1,
+                name: 'demo',
+                items: {
+                    data: [
+                        {value1: 0, text1: '女'},
+                        {value1: 1, text1: '男'},
+                        {value1: 2, text1: '保密'},
+                        {value1: 3, text1: '人妖', disabled: true}
+                    ]
+                    ,click: function (item, parent_, e_) {
+                        console.log('diy_click');
+                        console.log(parent_.value);
+                    },
+                    value_key: 'value1',
+                    title_key: 'text1',
+                }
+            });
+        $('#show_normal1').append([radioObj.getItem(1),radioObj.getItem(3)]); //单独输出单元
+    });
+</script>

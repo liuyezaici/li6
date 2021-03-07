@@ -1,0 +1,36 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+
+<script src="/assets/js/require.min.js"></script>
+
+//一个包含I标签的span
+<div id="show_span"></div>
+
+<script>
+    //一个简单的数据循环
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            span: 'span',
+            i: 'i',
+        }
+    });
+    require(['jquery', 'span', 'i', 'lrBox'], function ($, span, i, lrBox) {
+        //创建一个按钮
+        var diyBtn = span.makeSpan({
+            'class': 'btnLr btnLrSm btnLrSuccess',
+            data: {'words': '没什么特别的技能'},
+            value: i.makeI({
+                value:' ps:{words}',
+                click: function (o) {
+                    lrBox.msgTisf(o.value);
+                },
+            }),
+        });
+        $('#show_span').append(diyBtn);
+    });
+</script>

@@ -1,0 +1,106 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的数据循环表格
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+    //js造一个简单的表格
+    var table = makeTable({
+        'width': '500',
+        'class': 'well js_table',
+        'name': 'login_table',
+        data: [
+                {id: '123', 'user_nick': 'lidaye', 'number': '6666666666666666'},
+                {id: '456', 'user_nick': 'rui6ye', 'number': '9999999999999999'},
+              ],
+        tr: [
+            {
+                'class': 'tr_{id}',
+                td: [
+                        {
+                            width: 50,
+                            'style': 'padding-left: 20px;',
+                            value: [
+                                makeSpan({
+                                    value: 'id:'
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                makeSpan({
+                                    value: '{id}'
+                                })
+                            ]
+                        }
+                    ]
+            },
+            {
+                style: 'border-bottom: 1px dashed #ccc',
+                td: [
+                    {
+                        width: 50,
+                        'style': 'padding-left: 20px;',
+                        value: [
+                            makeInput({
+                                width: 200,
+                                name: 'u_nick',
+                                value: '{user_nick}',
+                                click: function (obj) {
+                                    console.log(obj);
+                                }
+                            })
+                        ]
+                    },
+                    {
+                        value:
+                            [
+                                makeSpan({
+                                value: 'number: {number}',
+                                click: "msgTis('{number}')"
+                                })
+                            ],
+                    }]
+            }
+        ]
+    });
+    $('#show_table').append(
+        table
+    );
+    $('#show_reload_btn').append(makeBtn({
+            value: '点此更新数据',
+            'class': 'btnLr btnLrSuccess',
+            click: function (e) {
+                table['data'] =
+                    [
+                        {id: makeRandomStr(3), 'user_nick': 'lidaye_'+ makeRandomStr(2), number: makeRandomStr(6)},
+                        {id: makeRandomStr(3), 'user_nick': 'rui6ye_'+ makeRandomStr(2), number: makeRandomStr(6)},
+                        {id: makeRandomStr(3), 'user_nick': 'halow_'+ makeRandomStr(2), number: makeRandomStr(6)},
+                        {id: makeRandomStr(3), 'user_nick': 'truck_'+ makeRandomStr(2), number: makeRandomStr(6)}
+                    ]
+                ;
+            }
+        })
+    );
+</script>

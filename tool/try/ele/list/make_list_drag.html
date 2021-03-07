@@ -1,0 +1,108 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+
+<style>
+    #show_list .even {
+        background-color: #efefef;
+    }
+    #show_list .odd {
+        background-color: #fff;
+    }
+    #show_list ul {
+        margin: 0;
+        padding: 0;
+    }
+    #show_list ul li {
+        padding: 5px 10px;
+        margin: 0;
+        list-style-type: none;
+    }
+    #show_list .active {
+        color: #c02e00;
+        font-weight: bold;
+    }
+    #show_list .hover {
+        font-style: italic;
+    }
+</style>
+//一个简单的数据排序
+<div id="show_list"></div>
+<br />
+
+<div id="show_reload_btn"></div>
+
+<script>
+    //一个简单的数据循环
+    //注意：
+    // 如果数据是数组: index 作为每个循环的序号 ;
+    // value/class 属性支持js语法. 变量用{}括起
+
+    var liList = makeList({
+        data: [
+            {'id': 1, 'url': '/resource/system/images/face/1.jpg' },
+            {'id': 2, 'url': '/resource/system/images/face/2.jpg' },
+            {'id': 3, 'url': '/resource/system/images/face/3.jpg' },
+            {'id': 4, 'url': '/resource/system/images/face/4.jpg' },
+            {'id': 5, 'url': '/resource/system/images/face/5.jpg' }
+        ],
+        name: 'test_li',
+        title: '共有{this.length}行',
+        // show: '{{this.length} >0}',
+        li: {
+            'class': "item {{index} % 2==0 ? 'even': 'odd'}",
+            value: [
+                makeImg({
+                    'class': 'thumbnail'
+                    ,'height': '50px'
+                    ,'style': 'display: inline-block'
+                    ,src: '{url}'
+                    , click: function (o) {
+                        console.log(o);
+                    }
+                }),
+                makeSpan({
+                    'class': 'btnLr btn-sm btnLrDefault btn-xs',
+                    value: '拖拽',
+                    margin_left: '10px',
+                    move_li: 'parent',
+                    move_box: 'parent.parent'
+                })
+            ]
+        }
+    });
+
+    $('#show_list').append(liList);
+
+    $('#show_reload_btn').append(makeA({
+        value: '点此更新数据',
+        'class': 'btnLr btnLrSuccess',
+        click: function (e) {
+            var newData = [];
+            var i = 0,tmpI,cacheData=[];
+            var getTmp = function () {
+                var num_ =  makeRandomStr(2);
+                if(strInArray(num_, cacheData)!=-1) {
+                    return getTmp();
+                }
+                cacheData.push(num_);
+                return num_;
+            };
+            while( i<5) {
+                tmpI =  getTmp();
+                newData.push({
+                    'id': tmpI, 'url': '/resource/system/images/face/'+ tmpI +'.jpg'
+                });
+                i++;
+            }
+            liList['data'] = newData;
+        }
+    })
+    );
+
+</script>

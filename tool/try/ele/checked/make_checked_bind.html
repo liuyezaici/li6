@@ -1,0 +1,36 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+<style>
+    .demo {
+        width: 240px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        padding: 20px 10px;
+        background-color: #c3d4ef;
+    }
+</style>
+<div id="show_div" class="a"></div>
+<div id="show_val"></div>
+<script>
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+        }
+    });
+    require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
+        var items = core.makeChecked({
+            name:  'demo',
+            value: 3,
+            text: '标题',
+            checked: '3',
+            bind: 'some_val'
+        });
+        $('#show_div').append(items);
+        $('#show_val').append(core.makeDiv({value: '当前值:{{some_val}}'}) );
+});
+</script>

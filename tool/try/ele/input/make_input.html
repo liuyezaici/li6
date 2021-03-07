@@ -1,0 +1,29 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/assets/js/require.min.js"></script>
+
+<div id="show_demo"></div>
+<br />
+<script>
+require.config({
+    baseUrl: '/assets/libs/lr/ele/',
+    paths: {
+        jquery: '/resource/pub/js/jq/jquery-3.2.1',
+        lrBox: '/assets/libs/lr/jquery-lr_box',
+    }
+});
+    require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
+        var demoObj = core.makeInput({
+            'class': 'form-control'
+            ,'name': 'demo'
+            ,click: function (o, e) {
+                lrBox.msgTisf(o.value);
+            }
+        });
+
+        $('#show_demo').append(demoObj);
+    });
+</script>

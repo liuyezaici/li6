@@ -1,0 +1,40 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+
+    <script src="/assets/js/require.min.js"></script>
+//一个简单的开关
+<div id="show_switch1"></div>
+
+<div id="show_input1"></div>
+<div id="show_bind"></div>
+<script>
+//一个简单的数据循环
+//注意：
+// 如果数据是数组: index 作为每个循环的序号 ;
+// value/class 属性支持js语法. 变量用{}括起
+require.config({
+    paths: {
+        jquery: '/resource/pub/js/jq/jquery-3.2.1',
+        lrBox: '/assets/libs/lr/jquery-lr_box',
+        lrEle: '/assets/libs/lr/jquery-lr_element',
+    }
+});
+require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    var switchObj = lrEle.makeSwitch({
+        name: 'diy_kg1',
+        bind: 'some_val1',
+        'class': 'text_wwwwwww',
+        width: 100,
+        text: '开关',
+        value: '1'
+    });
+    $('#show_switch1').append(switchObj);
+
+
+    $('#show_input1').append(lrEle.makeInput({value: '2',type: 'text', width: 240, bind: 'some_val1', name: 'input1'}) );
+    //数据绑定
+    $('#show_bind').append(lrEle.makeDiv({value: '<a href="/{{some_val1}}">{{{some_val1}} ==1 ? " ON ":"OFF"}</a> '}));
+});
+</script>

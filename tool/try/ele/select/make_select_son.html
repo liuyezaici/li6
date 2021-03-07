@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/assets/js/require.min.js"></script>
+
+<style>
+    .demo {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+//创建一个带下级的select框
+
+<div class="well">
+    <div id="show_bind1"></div>
+    <div id="show_bind2"></div>
+</div>
+    <div id="show_select1"></div>
+    <div id="show_select2"></div>
+    <div id="show_select3"></div>
+<br />
+<script>
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+        }
+    });
+    require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
+    var select = lrEle.makeSelect({
+        name: 'demo1',
+        'value': 450000, // 支持字符串或数组
+        'default_text': '请选择',
+        'value_key': "s_id",//取值的键名
+        'title_key': "s_name",//取值的键名
+        'bind': 'provinceId',
+        'setText': 'provinceTitle',
+        menu: {
+            width: '320px',
+            'data': [{"s_id":"110000","s_name":"\u5317\u4eac"},
+                {"s_id":"120000","s_name":"\u5929\u6d25"},
+                {"s_id":"130000","s_name":"\u6cb3\u5317\u7701"},
+                {"s_id":"140000","s_name":"\u5c71\u897f\u7701"},
+                {"s_id":"150000","s_name":"\u5185\u8499\u53e4\u81ea\u6cbb\u533a"},
+                {"s_id":"210000","s_name":"\u8fbd\u5b81\u7701"},
+                {"s_id":"220000","s_name":"\u5409\u6797\u7701"},
+                {"s_id":"230000","s_name":"\u9ed1\u9f99\u6c5f\u7701"},
+                {"s_id":"310000","s_name":"\u4e0a\u6d77"},{"s_id":"320000","s_name":"\u6c5f\u82cf\u7701"},
+                {"s_id":"330000","s_name":"\u6d59\u6c5f\u7701"},{"s_id":"340000","s_name":"\u5b89\u5fbd\u7701"},
+                {"s_id":"350000","s_name":"\u798f\u5efa\u7701"},{"s_id":"360000","s_name":"\u6c5f\u897f\u7701"},
+                {"s_id":"370000","s_name":"\u5c71\u4e1c\u7701"},{"s_id":"410000","s_name":"\u6cb3\u5357\u7701"},
+                {"s_id":"420000","s_name":"\u6e56\u5317\u7701"},
+                {"s_id":"430000","s_name":"\u6e56\u5357\u7701"},{"s_id":"440000","s_name":"\u5e7f\u4e1c\u7701"},
+                {"s_id":"450000","s_name":"\u5e7f\u897f\u58ee\u65cf\u81ea\u6cbb\u533a"},
+                {"s_id":"460000","s_name":"\u6d77\u5357\u7701"},
+                {"s_id":"500000","s_name":"\u91cd\u5e86"},{"s_id":"510000","s_name":"\u56db\u5ddd\u7701"},
+                {"s_id":"520000","s_name":"\u8d35\u5dde\u7701"},
+                {"s_id":"530000","s_name":"\u4e91\u5357\u7701"},{"s_id":"540000","s_name":"\u897f\u85cf\u81ea\u6cbb\u533a"},
+                {"s_id":"610000","s_name":"\u9655\u897f\u7701"},{"s_id":"620000","s_name":"\u7518\u8083\u7701"},
+                {"s_id":"630000","s_name":"\u9752\u6d77\u7701"},{"s_id":"640000","s_name":"\u5b81\u590f\u56de\u65cf\u81ea\u6cbb\u533a"},
+                {"s_id":"650000","s_name":"\u65b0\u7586\u7ef4\u543e\u5c14\u81ea\u6cbb\u533a"},
+                {"s_id":"710000","s_name":"\u53f0\u6e7e"},{"s_id":"810000","s_name":"\u9999\u6e2f\u7279\u522b\u884c\u653f\u533a"},
+                {"s_id":"820000","s_name":"\u6fb3\u95e8\u7279\u522b\u884c\u653f\u533a"}
+            ],
+        },
+        li: {
+            value: "{s_name}",
+        }
+        , son: {
+            //市区
+            name: 'demo2',
+            'class': 'city',
+            value: '450500',
+            need_parent_key: 'area_id', //数据来源于父值确认后
+            'bind': 'cityId',
+            setText: 'cityTitle',
+            menu: {
+                width: '280px',
+                data_from: {
+                    url: '/tool/index/getArea', //子数据来源
+                    success_key: 'code',
+                    success_value: 1,
+                    data_key: 'data'
+                },
+            },
+            li: {
+                value: "{s_name}",
+                click: function (obj, eve, ff) {
+                    lrBox.msgTisf(obj.value);
+                }
+            }
+            ,son: {//乡镇
+                name: 'town',
+                menu: {
+                    width: '200px'
+                },
+                need_parent_key: 'area_id', //数据来源于父值确认后
+                'bind': 'townId',
+                setText: 'townTitle',
+                value: '450521',
+                data_from: {
+                    url: '/tool/index/getArea', //子数据来源
+                    success_key: 'code',
+                    success_value: 1,
+                    data_key: 'data'
+                },
+                li: {
+                    value: "{s_name}",
+                    click: function (obj, par) {
+                        lrBox.msgTisf(obj.value);
+                    }
+                }
+            }
+        }
+    });
+  $('#show_select1').append(select);
+  // $('#show_select2').append(select['son']);
+  $('#show_select2').append(select['son']).append(select['son']['son']);
+  //
+  //   //text数据绑定
+    $('#show_bind1').append( lrEle.makeInput({
+        value: 'id: {{provinceId}} {{cityId}} {{townId}}'
+    }));
+  //  //text数据绑定
+    $('#show_bind2').append( lrEle.makeDiv({
+        value: '文本: {{provinceTitle}} {{cityTitle}} {{townTitle}}'
+    }));
+});
+</script>

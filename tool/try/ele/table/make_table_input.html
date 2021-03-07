@@ -1,0 +1,80 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的数据循环表格
+<div id="show_table"></div>
+<div id="show_reload_btn"></div>
+    <script>
+        //一个带数据的p
+        //注意：
+        // 如果数据是数组: index 作为每个循环的序号 ;
+        // value/class 属性支持js语法. 变量用{}括起
+        require.config({
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+                lrEle: '/assets/libs/lr/jquery-lr_element',
+            }
+        });
+
+        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+            //js造一个简单的表格
+            var table = lrEle.makeTable({
+                'width': '500',
+                'name': 'demo',
+                'class': 'well js_table',
+                // data: [
+                //         {id: '123', 'user_nick': 'lidaye', 'number': '6666666666666666'},
+                //         {id: '456', 'user_nick': 'rui6ye', 'number': '9999999999999999'},
+                //       ],
+                data: [
+                    {id: 123},
+                    {id: 777},
+                ],
+                tr: [
+                    {
+                        td: [
+                            {
+                                value: lrEle.makeInput({
+                                        value: '{id}',
+                                        click: function (obj, even, scope) {
+                                            lrBox.msgTisf(obj.value);
+                                        }
+                                    })
+                            }
+                        ]
+                    }
+                ]
+            });
+            $('#show_table').append(
+                table
+            );
+            $('#show_reload_btn').append(lrEle.makeA({
+                    value: '点此更新数据',
+                    'class': 'btnLr btnLrSuccess',
+                    click: function (e) {
+                        table['data'] = [
+                            {id: lrEle.makeRandomStr(6)},
+                            {id: lrEle.makeRandomStr(6)},
+                        ];
+                    }
+                })
+            );
+        });
+</script>

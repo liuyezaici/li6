@@ -1,0 +1,167 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/assets/js/require.min.js"></script>
+
+<style>
+    #show_list_son .even {
+        background-color: #efefef;
+    }
+    #show_list_son .odd {
+        background-color: #fff;
+    }
+    #show_list_son ul {
+        margin: 0;
+        padding: 0;
+    }
+    #show_list_son ul li {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+    }
+    #show_list_son .hover {
+        background-color: #f0faff;
+    }
+    #show_list_son .hover a {
+        color: #4a5e85;
+    }
+    #show_list_son ul li.item {
+        display: inline-block;
+        width: 200px;
+        position: relative;
+        height: 28px;
+        line-height: 28px;
+    }
+    #show_list_son ul li.item .title {
+        position: relative;
+    }
+    #show_list_son ul li.item .title .icon {
+        position: absolute;
+        right: 50px;
+        top: 10px;
+        font-size: 10px;
+        border-width: 5px 5px 0 5px;
+        border-color: #ccc transparent transparent transparent;
+        border-style: solid;
+        -webkit-transition: -webkit-transform 0.2s ease-out;
+        -moz-transition: -moz-transform 0.2s ease-out;
+        transition: transform 0.2s ease-out;
+    }
+    #show_list_son ul li.item .title:hover .icon {
+        color: #aaa;
+        -webkit-transform: rotate(90deg);
+        -moz-transform: rotate(90deg);
+        transform: rotate(90deg);
+    }
+    #show_list_son .son_menu {
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        line-height: 25px;
+    }
+    #show_list_son .active {
+        font-weight: bold;
+        font-size: 15px;
+    }
+    #show_list_son .hover .son_menu {
+        background-color: #fff;
+        border: 1px solid #dedede;
+        display: block;
+        z-index: 1;
+    }
+</style>
+//一个带下级的数据循环 初试下拉菜单
+<div id="show_list_son"></div>
+<br />
+<hr />
+<div id="show_btn"></div>
+<script>
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+        }
+    });
+    require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
+        var liList = core.makeList({
+            data: [
+                {'id': 1, 'name': 'aaa', son_data: [{'a': '111', 'b': 'uuu1'}, {'a': '112', 'b': 'vvv1'}]}
+                , {'id': 2, 'name': 'bbb', son_data: [{'a': '222', 'b': 'uuu2'}, {'a': '113', 'b': 'vvv2'}]}
+            ],
+            name: 'test_li',
+            li: {
+                'class': 'item',
+                value: [
+                   core.makeP({
+                        'class': 'title',
+                        value: [
+                           core.makeSpan({
+                                value: "{id}.{name}"
+                            })
+                        ]
+                    }),
+                   core.makeDiv({
+                        data: "{son_data}",
+                        'class': 'son_menu',
+                        value: core.makeList({
+                            'class': 'menu',
+                            li: {
+                                'value': '{a}.{b}'
+                            }
+                        })
+                    })
+                ]
+                , click: function (o) {
+                    o.toggleClass('active');
+                    o.siblings().removeClass('active');
+                }
+                , hover: function (o) {
+                    o.addClass('hover');
+                }
+                , mouseleave: function (o) {
+                    o.removeClass('hover');
+                }
+            }
+        });
+        $('#show_list_son').append(liList);
+
+        $('#show_btn').append(core.makeBtn({
+            'value': '更新菜单',
+            'class': 'btnLr btnLrSuccess',
+            click: function () {
+                liList['data'] = [
+                    {
+                        'id': 'l_' +core.makeRandomStr(6),
+                        'name': 'Q' +core.makeRandomStr(6),
+                        son_data: [{'a':core.makeRandomStr(6), 'b':core.makeRandomStr(6)}, {
+                            'a':core.makeRandomStr(6),
+                            'b':core.makeRandomStr(6)
+                        }]
+                    },
+                    {
+                        'id': '2_' +core.makeRandomStr(6),
+                        'name': 'J' +core.makeRandomStr(6),
+                        son_data: [{'a':core.makeRandomStr(6), 'b':core.makeRandomStr(6)}, {
+                            'a':core.makeRandomStr(6),
+                            'b':core.makeRandomStr(6)
+                        }]
+                    },
+                    {
+                        'id': '3_' +core.makeRandomStr(6),
+                        'name': 'K' +core.makeRandomStr(6),
+                        son_data: [{'a':core.makeRandomStr(6), 'b':core.makeRandomStr(6)}, {
+                            'a':core.makeRandomStr(6),
+                            'b':core.makeRandomStr(6)
+                        }]
+                    },
+                ];
+            }
+        }));
+});
+
+</script>

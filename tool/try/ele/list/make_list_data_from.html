@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+    <style>
+        .show_list .even {
+            background-color: #efefef;
+        }
+        .show_list .odd {
+            background-color: #fff;
+        }
+    </style>
+    //js造一个简单的表格 <br />
+    <div id="show_demo"></div>
+    <div id="show_reload_btn"></div>
+
+    <script>
+
+        require.config({
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+                lrEle: '/assets/libs/lr/jquery-lr_element',
+            }
+        });
+        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+            var getDataUrl = '/index/tool/get_rows?num=8';
+            var listObj = lrEle.makeList({
+                'class': 'show_list',
+                data_from: {
+                    url: getDataUrl,
+                    data_key: 'data',
+                    post_data: {},
+                    success_key: 'code',
+                    success_value: '1',
+                    err_func: function (e) {
+                        lrBox.msgTisf(e.msg);
+                    }
+                },
+                name: 'demo',
+                title: '共有{this.length}行',
+                show: '{{this.length} >0}',
+                li: {
+                    'title': '{title}',
+                    'class': "item {{id} % 2==0 ? 'even': 'odd'}",
+                    value: "id:{id}.  {title} "
+                }
+            });
+            $('#show_demo').append(
+                listObj
+            );
+
+            $('#show_reload_btn').append(lrEle.makeA({
+                value: '点此更新数据',
+                'class': 'btnLr btnLrSuccess',
+                click: function (obj, ev, scope) {
+                    listObj.renewData();
+                }
+            }));
+        });
+
+
+    </script>
+
+</script>

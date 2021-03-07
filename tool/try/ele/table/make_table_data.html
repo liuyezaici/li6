@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+    <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+    <style>
+        .js_table .left_em {
+            width: 100px;
+            text-align: right;
+            color: #999;
+            padding-right: 10px;
+        }
+        .js_table tr td {
+            padding: 10px 0;
+        }
+        .js_table .submit_box {
+            padding: 10px 0 10px 120px;
+        }
+    </style>
+    //js造一个简单的表格 <br />
+    <div id="show_table"></div>
+    <div id="show_reload_btn"></div>
+
+    <script>
+
+        require.config({
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+                lrEle: '/assets/libs/lr/jquery-lr_element',
+            }
+        });
+        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+            //js造一个简单的表格
+            var table = lrEle.makeTable({
+                'class': 'well',
+                'name': 'login_table',
+                data: [
+                    {'id': 1,},
+                    {'id': 2}
+                ],
+                // tr_top: [
+                //     {
+                //         th: [
+                //             { value: 'ID'  },
+                //             { value: '标题' }
+                //         ]
+                //     }
+                // ],
+                tr: [
+                    {
+                        // show: '{this.data}',
+                        // id_: '{id}',
+                        td: [
+                            // {
+                            //     value: 'dddd',
+                            //     id_: '{id}',
+                            //     click: function (o) {
+                            //         lrBox.msgTisf(o.id_);
+                            //         // lrBox.msgTisf(o.parent.id_);
+                            //     }
+                            // },
+                            {
+                                value: lrEle.makeSpan({
+                                    value: 'id:{id}',
+                                    id_: '{id}',
+                                    click: function (o) {
+                                        lrBox.msgTisf(o.id_);
+                                        // lrBox.msgTisf(o.parent.id_);
+                                    }
+                                })
+                            },
+                            // {
+                            //     id_: '{id}',
+                            //        value:  lrEle.makeA({
+                            //            value: 'dddd',
+                            //            click: function (o) {
+                            //                lrBox.msgTisf(o.parent.id_);
+                            //            }
+                            //        })
+                            //    },
+                            // {
+                            //     value: [
+                            //         lrEle.makeInput({
+                            //             width: '200px',
+                            //             name: 'u_nick',
+                            //             value: '{title}'
+                            //         })
+                            //     ]
+                            // }
+                        ]
+                    }
+                ]
+            });
+            $('#show_table').append(
+                table
+            );
+        });
+
+
+    </script>

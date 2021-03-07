@@ -1,0 +1,39 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+
+    <script src="/assets/js/require.min.js"></script>
+<style>
+    .simple_span.active {
+        font-weight: bold;
+    }
+    .simple_span.hover {
+        font-style: italic;
+        background-color: #efefef;
+    }
+</style>
+//一个简单span
+
+<div id="show_span"></div>
+
+<script>
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var simpleSpan = lrEle.makeSpan({
+            name: 'test_span',
+            value: '哈喽',
+            'class': "simple_span",
+            click: function (o) {
+                console.log(o.name);
+            }
+        });
+        $('#show_span').append(simpleSpan);
+    });
+</script>

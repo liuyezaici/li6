@@ -1,0 +1,67 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/assets/js/require.min.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//js造一个简单的表单 <br />
+<div id="show_form"></div>
+<script>
+
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        //js造一个简单的表格
+        var diyForm = lrEle.makeForm({
+            'type': 'post',
+            'url': '?do=test',
+            value: lrEle.makeDiv({
+                value: [
+                    lrEle.makeInput({
+                        'class': 'form-control'
+                        ,'name': 'demo'
+                        ,null_func: function (o,e) {
+                            console.log('不能为空');
+                        }
+                    }),
+                    lrEle.makeBtn({
+                        'class': 'btnLr btnLrSuccess'
+                        ,'value': '提交'
+                    })
+                ]
+            }),
+            submit: function (obj, ev) {//提交时回调
+                console.log(obj);
+            },
+            success_key: 'id',
+            success_value: ['0043', '0113'],
+            success_func: function (data) {
+                console.log('success');
+            },
+            err_func: function (data) {
+            }
+        });
+        $('#show_form').append(
+            diyForm
+        );
+    });
+</script>

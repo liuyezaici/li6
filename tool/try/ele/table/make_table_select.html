@@ -1,0 +1,92 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+<style>
+    .js_table .left_em {
+        width: 100px;
+        text-align: right;
+        color: #999;
+        padding-right: 10px;
+    }
+    .js_table tr td {
+        padding: 10px 0;
+    }
+    .js_table .submit_box {
+        padding: 10px 0 10px 120px;
+    }
+</style>
+//在表格中 造一个select <br />
+<div id="show_form"></div>
+<div id="show_input1"></div>
+<script>
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var allTypes = [{"id": 1, "title": "\u667a\u80fd\u5bb6\u5c45"}, {
+            "id": 2, "title": "\u667a\u6167\u793e\u533a"
+        }, {"id": 3, "title": "\u667a\u80fd\u786c\u4ef6"}, {"id": 4, "title": "\u667a\u80fd\u5065\u5eb7"}, {
+            "id": 5, "title": "\u697c\u5b87\u529e\u516c"
+        }, {"id": 6, "title": "\u667a\u6167\u5de5\u4e1a"}];
+
+        //js造一个简单的表格
+        var table = lrEle.makeTable({
+            'width': '500',
+            'class': 'well js_table',
+            'name': 'login_table',
+            'id': '',
+            tr_1: [{
+                id: 'account_tr',
+                td: [
+                    {
+                        value: '选择',
+                        'class': 'left_em'
+                    },
+                    {
+                        value: lrEle.makeSelect({
+                            'name': 'diy_select',
+                            'value': '{pid}',
+                            'text': 'chose',
+                            'class': 'chose_{pid}',
+                            // 'multi': true,
+                            'value_key': "id",//取值的键名
+                            'title_key': "title",//取值的键名
+                            'data': allTypes,
+                            menu: {
+                                width: '320px'
+                            },
+                            li: {
+                                value: "{title}",
+                                click: function (obj, eve, ff) {
+                                    console.log(obj);
+                                    console.log(eve);
+                                    console.log(ff);
+                                }
+                            }
+                        })
+                    }
+                    // ,{
+                    //     value: lrEle.makeSpan({
+                    //         'value': 'pid:{pid}'
+                    //     })
+                    // }
+                ]
+            }]
+        });
+        //js造一个简单的表单
+        var diyForm = lrEle.makeDiv({
+            'name': 'div',
+            value: table
+        });
+        $('#show_form').append(
+            diyForm
+        );
+    });
+</script>

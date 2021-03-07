@@ -1,0 +1,52 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+
+<style>
+    .a, .b {
+        width: 240px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        text-align: center;
+        padding: 20px 0;
+    }
+    .a {
+        background-color: #abefad;
+    }
+    .b {
+        background-color: #c3d4ef;
+    }
+</style>
+<div id="show_div"></div>
+<div id="show_reload_btn"></div>
+
+<script>
+var div = makeDiv({
+    name: 'test_div',
+    'value': '<i class="glyphicon glyphicon-cog"></i> 当show的值为true时,你会看到我',
+    'class': 'a',
+    'show': '{{sex}==1}'
+});
+var div2 = makeDiv({
+    name: 'test_div',
+    'value': '<i class="glyphicon glyphicon-star-empty"></i>  当hide的值为false时,你会看到我',
+    'class': 'b',
+    'hide': '{{sex}==1}'
+});
+$('#show_div').append(div).append(div2);
+$('#show_reload_btn').append(makeA({
+        value: '点此更新数据',
+        'class': 'btnLr btnLrSuccess',
+        click: function (e) {
+            var newVal = makeRandomStr(4) % 2;
+            div['data'] = {'sex': newVal};
+            div2['data'] = {'sex': newVal};
+        }
+    })
+);
+</script>

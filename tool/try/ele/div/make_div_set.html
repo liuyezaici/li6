@@ -1,0 +1,50 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
+<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+
+<style>
+    .test_box {
+        background-color: #efefef;
+        border: 1px solid #ddd;
+        width: 200px;
+        height: 100px;
+        display: block;
+        text-align: center;
+    }
+    .test_box.hover.active {
+        font-weight: bold;
+        font-size: 22px;
+    }
+    .test_box.active {
+        color: #000cc0;
+        font-size: 16px;
+    }
+</style>
+//一个简单的div
+<div id="show_div"></div>
+<div id="show_bind"></div>
+<div id="show_input"></div>
+
+<script>
+//一个简单的div
+    var div = makeDiv({
+        'value': 'im... <span>{{haha}}</span>  ',
+        'class': 'test_box ',
+        name: 'test_div',
+        click: function (obj, even, scope) {
+            scope.haha = makeRandomStr(5);
+            console.log(obj['value']);
+            console.log(obj['options']);
+//            console.log(scope);
+//            obj.toggleClass('active');
+        }
+    });
+  $('#show_div').append(div);
+
+
+</script>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+
+<style>
+    .simple_btn {
+        border: 1px solid #dedede;
+        background-color: #ffffee;
+        margin: 0 5px 5px 5px;
+    }
+</style>
+//a simple select box
+
+<div id="show_select"></div>
+<br />
+    <script>
+        require.config({
+            baseUrl: '/assets/libs/lr/ele/',
+            paths: {
+                jquery: '/resource/pub/js/jq/jquery-3.2.1',
+                lrBox: '/assets/libs/lr/jquery-lr_box',
+            }
+        });
+        require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
+            var i, selectData = [];
+            for (i = 65; i < 91; i++) {
+                selectData.push({
+                    u_id: i,
+                    u_nick: String.fromCharCode(i)
+                });
+            }
+            var select = lrEle.makeSelect({
+                    'default_text': '请选择',
+                    'multi': true,
+                    'value_key': "u_id",//取值的键名
+                    'title_key': "u_nick",//取文本的键名
+                    value: 3,
+                    menu: {
+                        'data': selectData,
+                        width: '520px'
+                    },
+                    li: {
+                        value: "{u_nick}",
+                        width: '40px',
+                        click: function (obj, e, scope) {
+                            lrBox.msgTisf(obj.value);
+                        }
+                    }
+                })
+            ;
+            $('#show_select').append(select);
+        });
+
+    </script>

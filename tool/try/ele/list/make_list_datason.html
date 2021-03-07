@@ -1,0 +1,85 @@
+<!DOCTYPE html> <html> <head> <meta charset="utf-8">
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
+    <script src="/assets/js/require.min.js"></script>
+
+<style>
+    #show_list .even {
+        background-color: #efefef;
+    }
+    #show_list .odd {
+        background-color: #fff;
+    }
+    #show_list ul {
+        margin: 0;
+        padding: 0;
+    }
+    #show_list ul li {
+        padding: 5px 10px;
+        margin: 0;
+        list-style-type: none;
+    }
+    #show_list .active {
+        color: #c02e00;
+        font-weight: bold;
+    }
+    #show_list .hover {
+        font-style: italic;
+    }
+</style>
+//一个简单的数据循环
+<div id="show_list"></div>
+<br />
+
+<div id="show_reload_btn"></div>
+
+<script>
+    //一个简单的数据循环
+    //注意：
+    // 如果数据是数组: index 作为每个循环的序号 ;
+    // value/class 属性支持js语法. 变量用{}括起
+    require.config({
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+            lrEle: '/assets/libs/lr/jquery-lr_element',
+        }
+    });
+
+    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        var listObj = lrEle.makeList({
+            'data':
+                [{
+                    'id': 1 + '.' + lrEle.makeRandomStr(5), 'name': {'firstName': 'rui', 'lastName': 'li'}
+                },
+                    {
+                        'id': 1 + '.' + lrEle.makeRandomStr(5), 'name': {'firstName': 'daye', 'lastName': 'mo'}
+                    }
+                ],
+            li: {
+                'class': "{{index} % 2==0 ? 'even': 'odd'}",
+                value: [lrEle.makeSpan({
+                    value: '{id}',
+                }), lrEle.makeSpan({
+                    value: '{name.firstName}',
+                })],
+            }
+        });
+        $('#show_list').append(listObj);
+
+        $('#show_reload_btn').append(lrEle.makeA({
+            value: '点此更新数据',
+            'class': 'btnLr btn-success',
+            click: function (e) {
+                listObj['data'] = [{
+                    'id':  lrEle.makeRandomStr(5), 'name': {'firstName': 'rui' + lrEle.makeRandomStr(5), 'lastName': 'li'}
+                },
+                    {
+                        'id':  lrEle.makeRandomStr(5), 'name': {'firstName': 'daye' + lrEle.makeRandomStr(5), 'lastName': 'mo'}
+                    }
+                ]
+            }
+        }));
+    });
+</script>
