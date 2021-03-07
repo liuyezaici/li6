@@ -8,10 +8,10 @@
  */
 "use strict";
 define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
-        'items', 'select', 'tree', 'img','radio', 'checked', 'switch',  'bar'
+        'items', 'select', 'tree', 'img','radio', 'checked', 'switch',  'bar',  'rili',  'page'
     ],
     function ($, lrBox, table, form, list, input, str, hObj,
-              items, select, tree, img, radio, checked, switched, bar ) {
+              items, select, tree, img, radio, checked, switched, bar, rili, page) {
     // VERSION 20210222
     // LR 2018.8
     //$.url.decode('http:%%%'); 实际以下插件中并没有使用 urldecode 此处嵌入只是方便以后的调取
@@ -3157,8 +3157,8 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     //out func 暴露内部方法
     var outFunc = [
         'sizeIsXs', 'sizeIsSm','sizeIsMd','sizeIsBg','sizeIsLg',
-        'isObj',   'getOptVal', 'hasData','cloneData','_onFormatVal','strHasKuohao',
-        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat',
+        'isObj',   'getOptVal', 'hasData','cloneData','_onFormatVal','strHasKuohao','formatIfHasKuohao',
+        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize',
         'isUndefined', 'makeRandomInt','makeRandomStr', 'optionDataFrom','strInArray','toNumber','isNumber',
         'copySourceOpt', 'renewObjData', 'getOptNeedParentKey', 'getKuohaoAbc', 'isStrOrNumber','delProperty',
         'renewObjBindAttr', 'getObjData', 'getCallData', 'classAddSubClass', 'objPushVal','getMouseEven',
@@ -3167,7 +3167,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         'makeH1', 'makeH2', 'makeH3', 'makeH4', 'makeH5','makeH6',
         'makeTable', 'makeForm', 'makeTr', 'makeTh', 'makeTd',
         'makeDiv', 'makeSpan', 'makeBtn', 'makeImg', 'makeInput', 'makeItems', 'makeSelect',
-        'makeTree','makeSwitch', 'makeChecked', 'makeRadio', 'makeBar',
+        'makeTree','makeSwitch', 'makeChecked', 'makeRadio', 'makeBar','makeRili','makePage',
     ];
 
     outFunc.map(function (v, n) {
@@ -4323,6 +4323,12 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     }
     function makeBar(options) {
         return bar.makeBar(options);
+    }
+    function makeRili(options) {
+        return rili.makeRili(options);
+    }
+    function makePage(options) {
+        return page.makePage(options);
     }
 
     //格式化 {td: []} 为 {value: makeTd}

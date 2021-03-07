@@ -22,15 +22,16 @@
         //注意：
         // 如果数据是数组: index 作为每个循环的序号 ;
         // value/class 属性支持js语法. 变量用{}括起
+
         require.config({
+            baseUrl: '/assets/libs/lr/ele/',
             paths: {
                 jquery: '/resource/pub/js/jq/jquery-3.2.1',
                 lrBox: '/assets/libs/lr/jquery-lr_box',
-                lrEle: '/assets/libs/lr/jquery-lr_element',
             }
         });
-        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-            var pageObj = lrEle.makePage({
+        require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
+            var pageObj = core.makePage({
                 goto: 'r',
                 size: 'xs',
                 total: 50,
