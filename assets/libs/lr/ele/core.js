@@ -3148,6 +3148,10 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     function makeRandomStr(len) {
         return str.makeRandomStr(len);
     }
+    //四舍五入
+    function formatFloat(float,dec) {
+        return str.formatFloat(float, dec);
+    }
 
 
     //out func 暴露内部方法

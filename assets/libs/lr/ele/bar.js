@@ -8,7 +8,6 @@ define(['require'], function (require) {
     //创建文本dom /a/p/span/div/li/td/em/i////
     global.makeBar = function (sourceOptions, sureSource) {
         var core = require('core');
-        var strObj = require('str');
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
         var obj = $('<div></div>');
@@ -177,14 +176,14 @@ define(['require'], function (require) {
                         if(direction=='x') {
                             distance_ = parseFloat(xy[0]);
                             newVal = maxVal * (distance_ - iconMinLeft) / (barWidth - iconWidth-2);
-                            newVal = strObj.formatFloat(newVal, decNum);
+                            newVal = core.formatFloat(newVal, decNum);
                             if(newVal < minVal) newVal = minVal;
                             if(newVal > maxVal) newVal = maxVal;
                             xy[0] = newVal;
                         } else {
                             distance_ = parseFloat(xy[1]);
                             newVal = maxVal * (distance_ - iconMinLeft) / (barHeight - iconHeight-2);
-                            newVal = strObj.formatFloat(newVal, decNum);
+                            newVal = core.formatFloat(newVal, decNum);
                             if(newVal < minVal) newVal = minVal;
                             if(newVal > maxVal) newVal = maxVal;
                             xy[1] = newVal;
