@@ -9,15 +9,15 @@
 <div id="show_demo" class="well"></div>
 <script>
     require.config({
+        baseUrl: '/assets/libs/lr/ele/',
         paths: {
             jquery: '/resource/pub/js/jq/jquery-3.2.1',
             lrBox: '/assets/libs/lr/jquery-lr_box',
-            lrEle: '/assets/libs/lr/jquery-lr_element',
         }
     });
-    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
     $('#show_demo').append([
-        lrEle.makeSwitch({
+        core.makeSwitch({
         name: 'demo',
         width: '65px',
         value_key: 'value', //默认data的值的键名

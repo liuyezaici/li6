@@ -1165,7 +1165,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                         resultStr = getObjData(abc);
                         // console.log('resultStr', abc, resultStr);
                         if(obj_) {//当前对象的字符串调取了全局变量，则要加入对象
-                            if(attrName && !strInArray(attrName, ['value', 'src']) ==-1) {
+                            if(attrName) {
                                 addObjAttrToBindVal(obj_, attrName, abc);
                             }
                         }
@@ -1173,7 +1173,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                     } else {
                         if(obj_) {
                             //当前对象的字符串调取了全局变量，则要加入被监听对象
-                            if(attrName  && strInArray(attrName, ['value', 'src']) ==-1) {
+                            if(attrName) {
                                 addObjAttrToBindVal(obj_, attrName, abc);
                             }
                         }
