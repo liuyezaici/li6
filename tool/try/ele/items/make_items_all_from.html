@@ -4,9 +4,6 @@
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
     <script src="/assets/js/require.min.js"></script>
 
-<style>
-
-</style>
 <div id="show_div"></div>
 <script>
     require.config({
@@ -19,10 +16,19 @@
     require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
 
     var getInfoUrl = '/index/tool/get_group';
-    var getDataMenuUrl = '/index/tool/get_rows?num=12';
+    var getDataMenuUrl = '/index/tool/get_rows?num=4';
     var items = lrEle.makeItems({
         name:  'demo',
-        data:  {'this_val': [2,3]},
+        data_from: {
+            url: getInfoUrl,
+            data_key: 'data',
+            post_data: {},
+            success_key: 'code',
+            success_value: '1',
+            err_func: function (e) {
+                lrBox.msgTisf(e.msg);
+            }
+        },
         width: '420px',
         'items': {
             data_from: {
@@ -42,7 +48,7 @@
             margin_right: '10px',
             text: '{title}',
         },
-        value: '{this_val}'
+        value: '{group}'
     });
     $('#show_div').append(items);
 });

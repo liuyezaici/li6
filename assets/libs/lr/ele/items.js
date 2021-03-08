@@ -15,6 +15,7 @@ define(['require'], function (require) {
         }
         var options = core.cloneData(sourceOptions);
         var setBind = core.getOptVal(options, ['bind'], '');
+        var onReadyEven = core.getOptVal(options, ['onload', 'onLoad', 'ready', 'onReady'], null);
         var sourceVal = core.getOptVal(options, ['value'], '');
         var realVal = [];
         //统一头部判断结束
@@ -31,10 +32,10 @@ define(['require'], function (require) {
             opt = opt || [];
             var newData = core.getOptVal(opt, ['data'], {});
             realVal = core._onFormatVal(obj, newData,  sourceVal);
-            console.log('format -- ObjVal', realVal);
+            // console.log('format -- ObjVal', realVal);
             valueSetted = true;
+            // console.log('menuListSuccess:', menuListSuccess);
             if(menuListSuccess) {
-                console.log('menuListSuccess');
                 if(realVal !== '') {
                     obj.setItemVal(realVal, [obj], true);
                 }
@@ -53,7 +54,7 @@ define(['require'], function (require) {
         //支持外部设置 取值
         Object.defineProperty(obj, 'value', {
             set: function (newVal) {
-                // console.log('set newVal:' ,newVal);
+                console.log('set newVal:' ,newVal);
                 valueSetted = true;
                 obj.setItemVal(newVal, [obj], true);
                 renewMenuTextByVal();
@@ -78,6 +79,9 @@ define(['require'], function (require) {
             $.each(ulLis, function(n, tmpItem) {
                 liVal = tmpItem.attr('data-value');
                 liTitle = tmpItem.attr('data-title');
+                if(core.isNumber(liVal)) {
+                    liVal = parseFloat(liVal);
+                }
                 if(tmpItem.hasClass('active')) {
                     valArray_.push(liVal);
                     textArray_.push(liTitle);
@@ -104,28 +108,29 @@ define(['require'], function (require) {
         }
         //通过当前val取text
         obj.getItemTextByVal = function () {
-            var newValAy = realVal;
-            if(!newValAy || !core.hasData(newValAy)) {
+            if(!realVal || !realVal.length) {
                 return '';
             }
-            var textStr = '';
-            newValAy = newValAy || [];
-            if(!$.isArray(newValAy)) newValAy = newValAy.toString().split(',');
+            if(!Array.isArray(realVal)) {
+                if(core.isNumber(realVal)) {
+                    realVal = [parseFloat(realVal)];
+                } else {
+                    realVal = realVal.toString().split(',');
+                }
+            }
             //设置(更新)select的text
-            var valArray_ = [];
             var textArray_ = [];
             var ulLis = obj['menu']['value'];
-            // console.log('ulLis', ulLis);
+            // console.log('realVal', realVal);
+            // console.log('ulLis', ulLis.length);
             $.each(ulLis, function(n, tmpItem) {
                 // console.log('tmpItem', n, tmpItem);
                 var liVal = tmpItem.attr('data-value');
                 var liTitle = tmpItem.attr('data-title');
                 //console.log('liVal:'+ liVal);
-                //console.log(newValAy);
-                if(newValAy) {
-                    if(core.strInArray(liVal, newValAy) !=-1) {
+                if(realVal) {
+                    if(core.strInArray(liVal, realVal) !=-1) {
                         tmpItem.addClass('active');
-                        valArray_.push(liVal);
                         textArray_.push(liTitle);
                     } else {
                         tmpItem.removeClass('active');
@@ -135,17 +140,21 @@ define(['require'], function (require) {
                 }
             });
             obj.itemTxtArray = textArray_;
-            realVal = valArray_;
             return textArray_;
         };
         //更新选中的值和文本
         obj.setItemVal = function(newVal, exceptObj, renewBind) {
+            console.log('setItemVal');
+            console.log(newVal);
             exceptObj = exceptObj || [];
             renewBind = core.isUndefined(renewBind) ? true : renewBind;
             var newValArray;
             if(!$.isArray(newVal)) {
-                if(typeof newVal != 'string') newVal = newVal+'';//int转字符串
-                newValArray = newVal.split(',');
+                if(core.isNumber(newVal)) {
+                    newValArray = [parseFloat(newVal)];
+                } else {
+                    newValArray = newVal.toString().split(',');
+                }
             } else {
                 newValArray = newVal;
             }
@@ -160,7 +169,7 @@ define(['require'], function (require) {
             }
             realVal = newValArray;
             var ulLis = obj['menu']['value'];
-            console.log('ulLis', ulLis.length);
+            // console.log('ulLis', ulLis.length);
             $.each(ulLis, function(n, tmpItem) {
                 var liVal = tmpItem.attr('data-value');
                 if(newValArray) {
@@ -178,11 +187,6 @@ define(['require'], function (require) {
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
                 if(valStr.length) {
                     core.updateBindObj($.trim(setBind), valStr, exceptObj);
-                } else {
-                    var lastVal = core.isUndefined(core.livingObj['data'][setBind]) ? null : core.livingObj['data'][setBind];
-                    if(lastVal) {
-                        obj.value = lastVal;
-                    }
                 }
                 if(obj[objBindAttrsName] && !core.objIsNull(obj[objBindAttrsName]) && !core.isUndefined(obj[objBindAttrsName][setBind])) {
                     core.renewObjBindAttr(obj, setBind);
@@ -248,7 +252,6 @@ define(['require'], function (require) {
                     // console.log(JSON.stringify(liOpt));
                     var systemClick = function (clickObj) {//支持点击事件扩展
                         var liVal = clickObj[liDataKey];
-                        // console.log('liVal:', clickObj, liVal);
                         if(obj['multi']) {//多选
                             clickObj.toggleClass('active');
                             obj.reGetValAndText();
@@ -285,12 +288,9 @@ define(['require'], function (require) {
                     listOpt['li'] = liOpt;
                     listOpt['needParentKey'] = core.getOptNeedParentKey(itemsOpt);
                     listOpt['lazyCall'] = function () {
-                        if(!hasDataFrom) {
-                            menuListSuccess = true;
-                        }
-                        console.log('lazyCall');
+                        menuListSuccess = true;
+                        // console.log('lazyCall_menu, valueSetted:', valueSetted);
                         if(valueSetted) {
-                            console.log('renewMenuTextByVal', realVal);
                             renewMenuTextByVal();
                         }
                         setTimeout(function () {
@@ -298,6 +298,7 @@ define(['require'], function (require) {
                             if(lazyCall) lazyCall(obj, itemValueArray, core.livingObj);
                         }, 100);
                     };
+                    console.log('listOpt', JSON.stringify(liOpt));
                     ulListObj = core.makeList(listOpt);
                     var sons = ulListObj.value;
                     var disableVals = [];
@@ -307,7 +308,6 @@ define(['require'], function (require) {
                         }
                     });
                     obj['disableVals'] = disableVals;
-                    core.optionDataFrom(obj, options_);//
                     ulListObj['parent'] = obj;//设置其父对象
                     obj['menu'] = ulListObj;
                     obj.append(ulListObj);
@@ -319,11 +319,11 @@ define(['require'], function (require) {
                 core.strObj.formatAttr(obj, options_, 0, hasSetData);
             },
             updates: function(dataName, exceptObj) {//数据同步
-                console.log('updates items');
+                console.log('update!!');
                 exceptObj = exceptObj || [];
                 if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    this.setItemVal(getObjData($.trim(setBind)), exceptObj, false);
+                    this.setItemVal(core.getObjData($.trim(setBind)), exceptObj, false);
                     renewMenuTextByVal();
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
@@ -336,12 +336,14 @@ define(['require'], function (require) {
                 return global.makeItems(opt, true);
             }
         });
-        core.objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
         obj.renew(options);
         core.optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
+        core.objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
         core.addCloneName(obj);//支持克隆
-        //console.log('item_obj');
-        //console.log(obj);
+        core.addTimer(obj);//添加定时器绑定
+        if(onReadyEven) {
+            onReadyEven(obj);
+        }
         return obj; //makeItems
     };
 

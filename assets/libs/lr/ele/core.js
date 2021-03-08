@@ -327,7 +327,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     var objBindAttrsName = 'bind_attrs';
 
     function addObjAttrToBindVal(obj_, attrName, valueKey) {
-        console.log('add ObjAttrToBindVal attrName  :', obj_, attrName +','+ valueKey );
+        // console.log('add ObjAttrToBindVal attrName  :', obj_, attrName +','+ valueKey );
         var ignoreThisAttrName = false;
 
         if(isUndefined(obj_[objBindAttrsName])) obj_[objBindAttrsName]=  {};
@@ -336,7 +336,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         if($.inArray(attrName, lastValAttrs) ==-1) {
             lastValAttrs.push(attrName);
             obj_[objBindAttrsName][valueKey] = lastValAttrs;
-            console.log('objAddListener  :',obj_, attrName);
+            // console.log('objAdd Listener  :',obj_, attrName);
             objAddListener(obj_, valueKey, ''); //当前对象加入到监控中
         }
     }
@@ -2941,66 +2941,6 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             }
         });
     }
-    //绑定定时器
-    function addTimer(thisObj) {
-        thisObj.timer = function (opt){
-            //time: 1000, //时间间隔 单位毫秒 多久执行一次 或 多少秒后执行
-            //  until/while/stop: function () {
-            //      return (btn.restNum == 0);
-            // },
-            //   repeat: true, // 一直循环：true,  自定义次数：1+  0/1：表示执行一次
-            // func: function (){ //执行命令
-            //      btn.value -= 1;
-            //      btn.data  = {'rest': btn.restNum};
-            //  }
-            var time_ = getOptVal(opt, ['time'], 1000);
-            time_ = parseInt(time_);
-            var while_ = getOptVal(opt, ['while','until', 'stop', 'stopWhen', 'stopIf'], null);
-            var repeat = getOptVal(opt, ['repeat'], false);
-            var funcEven = getOptVal(opt, ['func'], false);
-            var endEven = getOptVal(opt, ['end'], false);
-            var timerId = null;
-            if(!funcEven || typeof funcEven !=='function') {
-                console.log('func参数缺省');
-                return;
-            }
-            if(repeat) {
-                var repeatForTime = false;
-                var repeatCount = 0;
-                if(isNumber(repeat)) {
-                    repeatForTime = true;
-                }
-                timerId = setInterval(function() {
-                    funcEven(thisObj);
-                    if(while_ && typeof while_ =='function') {
-                        var result = while_(thisObj);
-                        if(result === true) {
-                            clearInterval(timerId);
-                            if(endEven) {
-                                endEven(thisObj);
-                            }
-                        }
-                    }
-                    if(repeatForTime) {
-                        repeatCount ++;
-                        if(repeatCount >=repeat) {
-                            clearInterval(timerId);
-                            if(endEven) {
-                                endEven(thisObj);
-                            }
-                        }
-                    }
-                }, time_);
-            } else {
-                timerId = setTimeout(function () {
-                    funcEven(thisObj);
-                    clearTimeout(timerId);
-                }, time_);
-            }
-
-        };
-    }
-
     //dom批量绑定事件 mouseenter/mouseleave/click/dblclick/blur/change
     function objSetOptEven(bindToObj, options, callBackObj) {
         options = options || {};
@@ -3153,30 +3093,68 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         return str.formatFloat(float, dec);
     }
 
+    //绑定定时器
+    function addTimer(thisObj) {
+        thisObj.timer = function (opt){
+            //time: 1000, //时间间隔 单位毫秒 多久执行一次 或 多少秒后执行
+            //  until/while/stop: function () {
+            //      return (btn.restNum == 0);
+            // },
+            //   repeat: true, // 一直循环：true,  自定义次数：1+  0/1：表示执行一次
+            // func: function (){ //执行命令
+            //      btn.value -= 1;
+            //      btn.data  = {'rest': btn.restNum};
+            //  }
+            var time_ = getOptVal(opt, ['time'], 1000);
+            time_ = parseInt(time_);
+            var while_ = getOptVal(opt, ['while','until', 'stop', 'stopWhen', 'stopIf'], null);
+            var repeat = getOptVal(opt, ['repeat'], false);
+            var funcEven = getOptVal(opt, ['func'], false);
+            var endEven = getOptVal(opt, ['end'], false);
+            var timerId = null;
+            if(!funcEven || typeof funcEven !=='function') {
+                console.log('func参数缺省');
+                return;
+            }
+            if(repeat) {
+                var repeatForTime = false;
+                var repeatCount = 0;
+                if(isNumber(repeat)) {
+                    repeatForTime = true;
+                }
+                timerId = setInterval(function() {
+                    funcEven(thisObj);
+                    if(while_ && typeof while_ =='function') {
+                        var result = while_(thisObj);
+                        if(result === true) {
+                            clearInterval(timerId);
+                            if(endEven) {
+                                endEven(thisObj);
+                            }
+                        }
+                    }
+                    if(repeatForTime) {
+                        repeatCount ++;
+                        if(repeatCount >=repeat) {
+                            clearInterval(timerId);
+                            if(endEven) {
+                                endEven(thisObj);
+                            }
+                        }
+                    }
+                }, time_);
+            } else {
+                timerId = setTimeout(function () {
+                    funcEven(thisObj);
+                    clearTimeout(timerId);
+                }, time_);
+            }
 
-    //out func 暴露内部方法
-    var outFunc = [
-        'sizeIsXs', 'sizeIsSm','sizeIsMd','sizeIsBg','sizeIsLg',
-        'isObj',   'getOptVal', 'hasData','cloneData','_onFormatVal','strHasKuohao','formatIfHasKuohao',
-        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize','copyEvens',
-        'isUndefined', 'makeRandomInt','makeRandomStr', 'optionDataFrom','strInArray','toNumber','isNumber',
-        'copySourceOpt', 'renewObjData', 'getOptNeedParentKey', 'getKuohaoAbc', 'isStrOrNumber','delProperty',
-        'renewObjBindAttr', 'getObjData', 'getCallData', 'classAddSubClass', 'objPushVal','getMouseEven',
-        'updateBindObj', 'objIsNull', '_getFormData', 'postAndDone', 'rePost','createRadomName','isOurObj',
-        'makeDom', 'makeA', 'makeB', 'makeI', 'makeP', 'makeList', 'makeLi',
-        'makeH1', 'makeH2', 'makeH3', 'makeH4', 'makeH5','makeH6',
-        'makeTable', 'makeForm', 'makeTr', 'makeTh', 'makeTd',
-        'makeDiv', 'makeSpan', 'makeBtn', 'makeImg', 'makeInput', 'makeItems', 'makeSelect',
-        'makeTree','makeSwitch', 'makeChecked', 'makeRadio', 'makeBar','makeRili','makePage',
-    ];
-
-    outFunc.map(function (v, n) {
-        global[v] = function () {
-            var res = eval(v).apply(this, Array.prototype.slice.call(arguments,0));
-            return res;
         };
-    });
-    global.livingObj = livingObj;//暴露全局变量
+    }
+
+
+
 
     //判断尺寸 小
     function sizeIsXs (str) {
@@ -3241,7 +3219,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 //bindKey: bind/setText
                 if(options[bindKey]) { //数据绑定
                     var bingStr = $.trim(options[bindKey]);
-                    // console.log('bindKeyArray', bindKey, bingStr, valString);
+                    console.log('bindKeyArray', thisObj, bindKey, bingStr, valString);
                     //只有这个obj属性中未定义全局绑定变量，才能加入全局绑定
                     if(!thisObj[objBindAttrsName] || !thisObj[objBindAttrsName][bingStr]) {
                         objAddListener(thisObj, bingStr, valString, valString!=='' ); //当前对象加入到监控中
@@ -3254,7 +3232,9 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     function objAddListener(domObj, dataName, val, update_) {
         update_ = isUndefined(update_) ? true : update_;
         if(!global.notifyObj[dataName]) {
+            console.log('之前没有侦听此key');
             if(!livingObj.hasOwnProperty(dataName)) {
+                console.log('addKey ToListener');
                 addKeyToListener(dataName, val);  //数据监听器
             }
             var notifyClass = new notifyer();
@@ -3262,7 +3242,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             notifyClass.addReceivrs(domObj);
             global.notifyObj[dataName] = notifyClass;
         } else {
-            //如果之前没有设置数据，而我现在有，那么要同步更新绑定数据为我这个数据
+            console.log('之前侦听过此key');
             var lastVal = isUndefined(livingObj['data'][dataName]) ? null : livingObj['data'][dataName];
             if(!lastVal) {
                 if(val) {
@@ -4514,6 +4494,29 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         });
     };
 
+    //out func 暴露内部方法
+    var outFunc = [
+        'sizeIsXs', 'sizeIsSm','sizeIsMd','sizeIsBg','sizeIsLg',
+        'isObj',   'getOptVal', 'hasData','cloneData','_onFormatVal','strHasKuohao','formatIfHasKuohao',
+        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize','copyEvens',
+        'isUndefined', 'makeRandomInt','makeRandomStr', 'optionDataFrom','strInArray','toNumber','isNumber',
+        'copySourceOpt', 'renewObjData', 'getOptNeedParentKey', 'getKuohaoAbc', 'isStrOrNumber','delProperty',
+        'renewObjBindAttr', 'getObjData', 'getCallData', 'classAddSubClass', 'objPushVal','getMouseEven',
+        'updateBindObj', 'objIsNull', '_getFormData', 'postAndDone', 'rePost','createRadomName','isOurObj','addTimer',
+        'makeDom', 'makeA', 'makeB', 'makeI', 'makeP', 'makeList', 'makeLi',
+        'makeH1', 'makeH2', 'makeH3', 'makeH4', 'makeH5','makeH6',
+        'makeTable', 'makeForm', 'makeTr', 'makeTh', 'makeTd',
+        'makeDiv', 'makeSpan', 'makeBtn', 'makeImg', 'makeInput', 'makeItems', 'makeSelect',
+        'makeTree','makeSwitch', 'makeChecked', 'makeRadio', 'makeBar','makeRili','makePage',
+    ];
+
+    outFunc.map(function (v, n) {
+        global[v] = function () {
+            var res = eval(v).apply(this, Array.prototype.slice.call(arguments,0));
+            return res;
+        };
+    });
+    global.livingObj = livingObj;//暴露全局变量
     //direction string 拖拽方向
     //loadFunc function 加载数据
     $.fn.dragToLoadData = function (direction, loadFunc) {
