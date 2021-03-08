@@ -134,6 +134,18 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         });
         return newOpt;
     }
+    //剪切options所有事件 返回无even的opt和带even的opt
+    function cutOptEvens(opt) {
+        var evenOpt = {};
+        var removeEvenOpt = {};
+        $.each(opt, function (k, v) {
+            if(attrIsEven(k)) {
+                evenOpt[k] = opt[k];
+                removeEvenOpt[k] = k;
+            }
+        });
+        return [evenOpt, delProperty(opt, removeEvenOpt)];
+    }
 
     //去掉引号里的内容
     function clearYinhao(str_) {
@@ -3219,7 +3231,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 //bindKey: bind/setText
                 if(options[bindKey]) { //数据绑定
                     var bingStr = $.trim(options[bindKey]);
-                    console.log('bindKeyArray', thisObj, bindKey, bingStr, valString);
+                    // console.log('bindKeyArray', thisObj, bindKey, bingStr, valString);
                     //只有这个obj属性中未定义全局绑定变量，才能加入全局绑定
                     if(!thisObj[objBindAttrsName] || !thisObj[objBindAttrsName][bingStr]) {
                         objAddListener(thisObj, bingStr, valString, valString!=='' ); //当前对象加入到监控中
@@ -3232,17 +3244,17 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     function objAddListener(domObj, dataName, val, update_) {
         update_ = isUndefined(update_) ? true : update_;
         if(!global.notifyObj[dataName]) {
-            console.log('之前没有侦听此key');
+            // console.log('之前没有侦听此key');
             if(!livingObj.hasOwnProperty(dataName)) {
-                console.log('addKey ToListener');
                 addKeyToListener(dataName, val);  //数据监听器
             }
             var notifyClass = new notifyer();
             notifyClass['data_name'] = dataName;
+            // console.log('addReceivrs', domObj, dataName);
             notifyClass.addReceivrs(domObj);
             global.notifyObj[dataName] = notifyClass;
         } else {
-            console.log('之前侦听过此key');
+            // console.log('之前侦听过此key');
             var lastVal = isUndefined(livingObj['data'][dataName]) ? null : livingObj['data'][dataName];
             if(!lastVal) {
                 if(val) {
@@ -3276,7 +3288,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 set: function (newVal) {
                     //console.log('update BindObj  1:'+ newVal);
                     if (newVal === lastVal) return;
-                    // console.log('update__  BindObj  :'+ dataName);
+                    // console.log('update__     :'+ dataName);
                     updateBindObj(dataName, newVal);
                 }
             });
@@ -3292,6 +3304,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     }
     //指定数据更新
     function updateBindObj(dataName, newVal, exceptObj) {
+        // console.log('update BindObj  :',dataName, exceptObj);
         exceptObj = isUndefined(exceptObj) ? [] : exceptObj;
         livingObj['data'][dataName] = newVal;
         if(global.notifyObj[dataName]) {
@@ -4498,7 +4511,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     var outFunc = [
         'sizeIsXs', 'sizeIsSm','sizeIsMd','sizeIsBg','sizeIsLg',
         'isObj',   'getOptVal', 'hasData','cloneData','_onFormatVal','strHasKuohao','formatIfHasKuohao',
-        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize','copyEvens',
+        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize','copyEvens','cutOptEvens',
         'isUndefined', 'makeRandomInt','makeRandomStr', 'optionDataFrom','strInArray','toNumber','isNumber',
         'copySourceOpt', 'renewObjData', 'getOptNeedParentKey', 'getKuohaoAbc', 'isStrOrNumber','delProperty',
         'renewObjBindAttr', 'getObjData', 'getCallData', 'classAddSubClass', 'objPushVal','getMouseEven',

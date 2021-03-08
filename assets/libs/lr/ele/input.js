@@ -56,7 +56,7 @@ define(['require'], function (require) {
         obj.formatVal = function (opt) {
             var newData = core.getOptVal(opt, ['data'], {});
             var newVal = core._onFormatVal(obj, newData,  sourceVal);
-            var renewBind = true;
+            var renewBind = inputBind && newVal !== '' && ! core.livingObj['data'][inputBind];
             obj[core.objAttrHasKh] = true;
             obj.setRealInputVal(newVal, renewBind, true, [obj]);
             if(obj.setLrBtnDisable) obj.setLrBtnDisable();
@@ -73,7 +73,9 @@ define(['require'], function (require) {
             resetDomVal = core.isUndefined(resetDomVal) ? true : resetDomVal;//更新自己内容
             callRenewBindData = core.isUndefined(callRenewBindData) ? true : callRenewBindData;//召唤同步数据
             if(callRenewBindData && inputBind) {
-                if($.inArray(obj, exceptObj) ==-1)  exceptObj.push(obj);
+                if($.inArray(obj, exceptObj) ==-1) {
+                    exceptObj.push(obj);
+                }
                 // console.log('update.BindObj:', inputBind, newVal);
                 core.updateBindObj($.trim(inputBind), newVal, exceptObj);
                 //console.log('sss', obj[core.objBindAttrsName]);

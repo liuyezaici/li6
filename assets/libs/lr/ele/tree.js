@@ -1,398 +1,315 @@
 define(['require'], function (require) {
-
     var global = {};
-
     var objValObjKey = 'obj_val_objs';//当前对象包含的obj  每个人对象创建成功后，其val都会保存当前值或dom对象 字符串形式的value除非
-    var objValIsNode = 'obj_val_is_node';//obj的val是否允许以字符串的形式重新再写入
     var objBindAttrsName = 'bind_attrs';
-    //创建树形分类 用于快速管理树形分类
-    global.makeTree = global.makeTrees = function(sourceOptions, sureSource) {
+    var objValIsNode = 'obj_val_is_node';//obj的val是否允许以字符串的形式重新再写入
+    //创建树形菜单
+    global.makeTree = function(sourceOptions, sureSource) {
         var core = require('core');
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
-        var obj = $('<div></div>');
-        obj.tag = 'tree';
+        var obj = $('<dd></dd>');
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  core.cloneData(sourceOptions) : core.cloneData(core.copySourceOpt(sourceOptions));
         }
         var options = core.cloneData(sourceOptions);
         var setBind = core.getOptVal(options, ['bind'], '');
+        var onReadyEven = core.getOptVal(options, ['onload', 'onLoad', 'ready', 'onReady'], null);
         var sourceVal = core.getOptVal(options, ['value'], '');
-
-
-
-
-        //创建树菜单对象 只能更新、修改起data的长度 data不能设置对象
-        var _makeTreeInnerObj = function(sourceOptions) {
-            var options = core.cloneData(sourceOptions);
-            var obj = core.makeDiv(options);
-            //更新循环的tree的date
-            obj.renewOldTree = function(newData) {
-                //console.log('renew.SonData');
-                //console.log(newData);
-                var sons;
-                if(core.hasData(this['treeFirstSons'])) {//只更新循环部分的tr
-                    sons = this['treeFirstSons'];
-                    if(!$.isArray(newData)) newData = [newData];
-                    var sonData;
-                    $.each(sons, function (n, son) {
-                        sonData = newData[n];
-                        if(!sonData) sonData = []; //数据突然为空
-                        core.renewObjData(son, sonData);
-                    })
-                }
-            };
-            //更新tree.data 如果含有带循环的tree 则只更新data的tr；反之更新全部tr
-            obj.renewSonLen = function(opt) {
-                var newData = core.getOptVal(opt, ['data'], {});
-                //console.log(obj);
-                var nowValLen = newData.length;
-                var sons;
-                if(core.hasData(this['treeFirstSons'])) {
-                    //console.log('core.hasData _____o');
-                    sons = this['treeFirstSons'];
-                    if(!$.isArray(newData)) newData = [newData];
-                    //如果之前产生过多的儿子而新数量变少要剔除
-                    var lastValLen = sons.length;
-                    //console.log('lastValLen:'+ lastValLen);
-                    //console.log('nowValLen:'+ nowValLen);
-                    //console.log('nowValLen:'+ nowValLen);
-                    if(lastValLen > nowValLen) { //多出来 裁掉
-                        sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
-                            o.remove();
-                        });
-                        obj['treeFirstSons'] = sons; //移除son
-                        //console.log('remove more td,now:');
-                        //console.log(sons);
-                        //更新data
-                        var tmpTreeCheckDataId; //第几行
-                        var tmpData;
-                        for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
-                            tmpData =  newData[tmpTreeCheckDataId];
-                            //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
-                            if(!core.isUndefined(sons[tmpTreeCheckDataId])) {
-                                //console.log('renew_tmpIndex:'+ tmpIndex);
-                                sons[tmpTreeCheckDataId]['data'] = tmpData;
-                            }
-                        }
-                    } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
-                        var newChecked;
-                        //console.log('lastValLen < nowValLen');
-                        //console.log('newData');
-                        //console.log(newData);
-                        var tmpTreeCheckDataId; //tr第几组
-                        var tmpData;
-                        for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
-                            tmpData =  newData[tmpTreeCheckDataId];
-                            //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
-                            //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
-                            //console.log('tmpData');
-                            //console.log(tmpData);
-                            if(!core.isUndefined(sons[tmpTreeCheckDataId])) {
-                                //console.log('renew_tmpIndex:'+ tmpIndex);
-                                sons[tmpTreeCheckDataId]['data'] = tmpData;
-                            } else {
-                                newChecked = sons[0].cloneSelf();
-                                //console.log('cloneOpt newChecked');
-                                //console.log(newChecked);
-                                //console.log(tmpData);
-                                newChecked['parent'] = this;
-                                sons[sons.length-1].after(newChecked);
-                                sons[sons.length] = newChecked;
-                                //等克隆完tr的属性才能更新data 不然提早渲染的data可能无法再次刷新
-                                newChecked['data'] = tmpData;
-                            }
-                        }
-                    } else {
-                        //刷新循环的tr
-                        obj.renewOldTree(newData);
-                    }
-                }
-            };
-            return obj;
-        };
-        
+        var realValArray = [];
         //统一头部判断结束
+        obj['tag'] = 'tree';
         obj[objValIsNode] = false;
-        obj['createTree'] = false;
-        obj['multi'] = undefined;
-        obj[objValObjKey] = [];//子checked对象的集合
-        obj['treeFirstSons'] = [];  //一共有多少个首级分类
-        var liOpt = core.getOptVal(options, ['li'], {});
-        var valueKey = core.getOptVal(liOpt, ['value_key', 'valueKey'], '');
-        var titleKey = core.getOptVal(liOpt, ['title_key', 'titleKey', 'text_key', 'textKey'], '');
-        var sonDataKey = core.getOptVal(liOpt, ['son_key', 'sonKey', 'son_data_key', 'sonDataKey'], null);//data子数据
-        var valueHasSeted = true;//当前对象的value是否渲染完成
-        var xuanranTreemenuSuccess = true;//当前对象的menu是否渲染完成
-        var parentCheckedsKey = 'parent_checked';//上级复选框
-        var sonCheckedsKey = 'son_checkeds';//下级复选框
+        obj['createItem'] = false;
+        var isMultity = undefined;
+        var valueSetted = false;//当前对象的value是否格式化完成
+        var menuListSuccess = false;//当前对象的menu是否渲染完成 [menu需要渲染 才会用到]
+        var valIsNumber = false;
+        var parentChecked = 'parent_checked';//上级复选框
+        var sonCheckeds = 'son_checkeds';//下级复选框
+        var menuOpt = core.getOptVal(options, ['menu'], null);
+        var liOpt = core.getOptVal(options, ['li'], null);
+        var liCheckedBox = core.getOptVal(liOpt, ['checkedBox'], null);
+        var liVal = core.getOptVal(liOpt, ['value'], null);
+        if(!menuOpt) {
+            console.log('no set menu');
+            return;
+        }
+        if(!liOpt) {
+            console.log('no set menu.li');
+            return;
+        }
+        var valueKey = core.getOptVal(menuOpt, ['value_key', 'valueKey'], '');
+        var titleKey = core.getOptVal(menuOpt, ['title_key', 'titleKey', 'text_key', 'textKey'], '');
+        if(!valueKey) {
+            console.log('no set menu.valueKey');
+            return;
+        }
+        if(!titleKey) {
+            console.log('no set menu.titleKey');
+            return;
+        }
+        var sonDataKey = core.getOptVal(menuOpt, ['son_key', 'sonKey', 'son_data_key', 'sonDataKey'], null);//data子数据
+
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            //每次格式化 优先取格式化前的source value
             var newData = core.getOptVal(opt, ['data'], {});
-            var newVal = core._onFormatVal(obj, newData,  sourceVal);
-            opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
-            if(core.strHasKuohao(sourceVal)) {
-                if (sourceVal != newVal) {
-                    valueHasSeted = true;
-                    if(xuanranTreemenuSuccess === true) {
-                        obj.setTreeVal(newVal, (newVal !=''));
-                    }
+            realValArray = core._onFormatVal(obj, newData,  sourceVal);
+            // console.log('format -- ObjVal', realValArray);
+            valueSetted = true;
+            // console.log('menuListSuccess:', menuListSuccess);
+            if(menuListSuccess) {
+                if(realValArray !== '') {
+                    valIsNumber = core.isNumber(realValArray);
+                    obj.setItemVal(realValArray, [obj], true);
                 }
-            } else {
-                obj.setTreeVal(newVal, (newVal !=''));
             }
             //console.log('format_val');
             //如果值是数组 并且多个值 并且未定义是否多选，则默认支持多选
-            if($.isArray(newVal) && newVal.length>0 && obj['multi'] == undefined) {
-                obj['multi'] = true;
+            if($.isArray(realValArray) && realValArray.length>0 && isMultity == undefined) {
+                isMultity = true;
             }
-            if(valueHasSeted) {
-                if(obj.lazyCall) {
-                    obj.lazyCall(obj, newData);
-                }
+            if(obj.lazyCall) {
+                obj.lazyCall(obj, newData);
             }
+
         };
 
-        //外部设置tree选中项
-        obj.setTreeVal = function(newVal, notifyOther, exceptObj) {
-            notifyOther = notifyOther || false;
-            exceptObj = exceptObj || [];
-            if(!Array.isArray(newVal)) newVal = newVal.toString().split(',');
-
-            $.each(obj[objValObjKey], function (i, obj_) {
-                if(obj_.value !=='' && strInArray(obj_.value, newVal) !=-1) {
-                    obj_.checked = 1;
-                } else {
-                    obj_.checked = 0;
-                }
-            });
-            if(setBind && notifyOther) {
-                if($.inArray(obj, exceptObj) ==-1) {
-                    exceptObj.push(obj);
-                }
-                core.updateBindObj($.trim(setBind), newVal, exceptObj);
-            }
-        };
         //支持外部设置 取值
         Object.defineProperty(obj, 'value', {
             set: function (newVal) {
-                return obj.setTreeVal(newVal, true);
+                if(valIsNumber) {
+                    newVal = parseFloat(newVal);
+                    // console.log('set number:' ,newVal);
+                }
+                // console.log('set newVal:' , valIsNumber,newVal);
+                valueSetted = true;
+                obj.setItemVal(newVal, [obj], true);
+                renewMenuTextByVal();
             },
             get: function () {
-                var newVal = [];
-                $.each(obj[objValObjKey], function (i, obj_) {
-                    if(obj_.value !=='') newVal.push(obj_.value);
-                });
-                return newVal;
+                if(isMultity) {
+                    return $.isArray(realValArray) ? realValArray : realValArray.toString().split(',');
+                } else {
+                    return $.isArray(realValArray) ? realValArray.join('') : realValArray ;
+                }
             }
         });
         //支持外部取选中的文本 返回数组格式
         Object.defineProperty(obj, 'text', {
             get: function () {
-                var newVal = [];
-                $.each(obj[objValObjKey], function (i, obj_) {
-                    if(obj_.value !=='') newVal.push(obj_.title);
-                });
-                return ($.isArray(newVal) ? newVal.join(',') : newVal) ;
+                //多选时，才返回数组
+                return isMultity ? obj.itemTxtArray : ($.isArray(obj.itemTxtArray) ? obj.itemTxtArray.join('') : obj.itemTxtArray) ;
             }
         });
-
-        //移除所有子checked的选中状态
-        function _sonRemoveChecked(obj_) {
-            if(obj_[sonCheckedsKey]) {
-                $.each(obj_[sonCheckedsKey], function (index, tmpObj) {
-                    if(tmpObj.checked==true) tmpObj.checked = false;
-                    _sonRemoveChecked(tmpObj);
-                });
-            }
-        }
-        //给所有子checked的添加选中状态
-        function _sonAddChecked(obj_) {
-            if(obj_[sonCheckedsKey]) {
-                $.each(obj_[sonCheckedsKey], function (index, tmpObj) {
-                    if(tmpObj.checked == false) tmpObj.checked = true;
-                    _sonAddChecked(tmpObj);
-                });
-            }
-        }
-        //给所有父checked的添加选中状态
-        function _parAddChecked(obj_) {
-            if(obj_[parentCheckedsKey]) {
-                var tmpParObj = obj_[parentCheckedsKey];
-                if(tmpParObj.checked == false) tmpParObj.checked = true;
-                _parAddChecked(tmpParObj);
-            }
-        }
-        //克隆多行的可数据循环的tr
-        function createRepeatDataTree(optionsData, liOpt_, checkOpt, appendTo, parentObj) {
-            var tmpLiOpt = core.cloneData(liOpt_);
-            var tmpCheckOpt = core.cloneData(checkOpt);
-            var dataLen = 0; //循环的tr内部数量
-            $.each(tmpCheckOpt, function () {
-                dataLen ++;
+        //获取当前选中的文本
+        obj.reGetValAndText = function () {
+            var valArray_ = [];
+            var textArray_ = [];
+            var ulLis = obj['menu'].value;
+            var liVal, liTitle;
+            $.each(ulLis, function(n, tmpItem) {
+                liVal = tmpItem.attr('data-value');
+                liTitle = tmpItem.attr('data-title');
+                if(core.isNumber(liVal) && valIsNumber) {
+                    liVal = parseFloat(liVal);
+                }
+                if(tmpItem.hasClass('active')) {
+                    valArray_.push(liVal);
+                    textArray_.push(liTitle);
+                }
             });
-            //创建多个子对象
-            function makeTreeSons(_liOpt, _checkOpt, _treeData, dataParentIndex) {
-                //new trs
-                var liObj;
-                var copyLiOpt = core.cloneData(_liOpt);
-                var checkOpt,diyClick,
-                    sonMenuPbj = null,  //子层data留空
-                    checkObj;
-                $.each(_treeData, function (n, tmpData) {
-                    diyClick = _checkOpt['click'];
-                    checkOpt = core.cloneData(_checkOpt);
-                    //console.log(diyClick.toString());
-                    checkOpt['click'] = function (obj_, e) {
-                        if(diyClick) {
-                            diyClick(obj_, e);
-                        }
-                        //更新父子选项
-                        // 如果当前取消,子选项要全部取消
-                        // 如果当前取消,并且同级都是已取消，父选项要一起取消
-                        // 如果当前选择选中，父选项要选中
-                        //console.log(obj_.checked);
-                        if(!obj_.checked) {
-                            _sonRemoveChecked(obj_);
-                        } else {
-                            //所有子都要打勾
-                            _sonAddChecked(obj_);
-                            //所有父都要打勾
-                            _parAddChecked(obj_);
-                        }
-                        if(setBind) {
-                            core.updateBindObj($.trim(setBind), obj.value, [obj]);
-                        }
-                    };
-
-                    checkObj = core.makeChecked(checkOpt);
-                    if(parentObj) {
-                        checkObj[parentCheckedsKey] = parentObj;
-                        if(parentObj[sonCheckedsKey]) {
-                            parentObj[sonCheckedsKey].push(checkObj);
-                        } else {
-                            parentObj[sonCheckedsKey] = [checkObj];
-                        }
+            realValArray = valArray_;
+            obj.itemTxtArray = textArray_;
+        };
+        //公共的初始化触发渲染菜单和值的方法
+        //当菜单渲染完成，并且item的值渲染完成 才能获取菜单的文本
+        function renewMenuTextByVal() {
+            if(menuListSuccess && valueSetted) {
+                var textArray = obj.getItemTextByVal();//获取当前li选中的内容
+                var setText = core.getOptVal(options, ['set_text', 'setText'], null);
+                //通知更新text
+                if(setText) {
+                    var selectText = $.isArray(textArray) ? textArray.join(',') : textArray;
+                    core.updateBindObj($.trim(setText), selectText, [obj]);
+                    if(obj[objBindAttrsName] && !core.objIsNull(obj[objBindAttrsName]) && !core.isUndefined(obj[objBindAttrsName][setText])) {
+                        core.renewObjBindAttr(obj, setText);
                     }
-                    if(!core.isUndefined(tmpData[sonDataKey])) {
-                        sonMenuPbj = core.makeDiv({
-                            'class': 'son_menu'
-                        });
-                        copyLiOpt['value'] = [
-                            checkObj,
-                            sonMenuPbj
-                        ];
-                        if(liOpt) {
-                            var sonVal = [];
-                            if(!$.isArray(liOpt.value)) {
-                                liOpt.value = [liOpt.value];
-                            }
-                            liOpt.value.forEach(function (tmpObj) {
-                                var  newSon ;
-                                if(core.isOurObj(tmpObj)) {
-                                    //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
-                                    var newOpt = core.cloneData(tmpObj['options']);
-                                    newSon = tmpObj.cloneSelf(newOpt);
-
-                                } else {
-                                    newSon = tmpObj.clone();
-                                }
-                                sonVal.push(newSon);
-                            });
-                            liOpt.value = sonVal;
-                            copyLiOpt['value'].push(core.makeSpan(liOpt));
-                        }
-                    } else {
-                        if(liOpt) {
-                            var sonVal = [];
-                            if(!$.isArray(liOpt.value)) {
-                                liOpt.value = [liOpt.value];
-                            }
-                            liOpt.value.forEach(function (tmpObj) {
-                                var  newSon ;
-                                if(core.isOurObj(tmpObj)) {
-                                    //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
-                                    var newOpt = core.cloneData(tmpObj['options']);
-                                    newSon = tmpObj.cloneSelf(newOpt);
-                                } else {
-                                    newSon = tmpObj.clone();
-                                }
-                                sonVal.push(newSon);
-                            });
-                            liOpt.value = sonVal;
-                            copyLiOpt['value'] = [checkObj, core.makeSpan(liOpt)];
-                        } else {
-                            copyLiOpt['value'] = checkObj;
-                        }
-                    }
-                    liObj = core.makeLi(core.cloneData(copyLiOpt));
-                    liObj['parent'] = obj;//分配父对象
-                    obj[objValObjKey].push(checkObj);//累计子对象li
-                    liObj['data'] = tmpData; //必须克隆完再更新data
-                    //console.log('append li :');
-                    //console.log(liObj);
-                    appendTo.append(liObj);
-                    if(dataParentIndex==0) obj['treeFirstSons'].push(liObj); //带数据的tr 缓存obj的子对象
-                    //子层data渲染
-                    if(!core.isUndefined(tmpData[sonDataKey])) {
-                        //console.log('append_son');
-                        createRepeatDataTree(tmpData[sonDataKey], liOpt_, _checkOpt, sonMenuPbj, checkObj)
-                    }
-                });
+                }
             }
-            //有数组数据才循环
-            makeTreeSons(tmpLiOpt, tmpCheckOpt, optionsData, 0);
         }
+
+        var checkLiIsInVal = function(liVal) {
+            if(Array.isArray(realValArray)) {
+                return core.strInArray(liVal, realValArray) !=-1;
+            } else {
+                return liVal == realValArray;
+            }
+        };
+        //通过当前val取text
+        obj.getItemTextByVal = function () {
+            if(!realValArray || !realValArray.length) {
+                return '';
+            }
+            if(!Array.isArray(realValArray)) {
+                if(core.isNumber(realValArray) && valIsNumber) {
+                    realValArray = [parseFloat(realValArray)];
+                } else {
+                    realValArray = realValArray.toString().split(',');
+                }
+            }
+            //设置(更新)select的text
+            var textArray_ = [];
+            var ulLis = obj[objValObjKey];
+            // console.log('realValArray', realValArray);
+            // console.log('ulLis', ulLis.length);
+            var checkedObj ;
+            $.each(ulLis, function(n, li_) {
+                checkedObj = li_.value;
+                // console.log('tmpItem', n, tmpItem);
+                var liVal = checkedObj.value;
+
+
+                var liTitle = tmpItem.attr('data-title');
+                // console.log('liVal:', liVal);
+                if(realValArray) {
+                    if(checkLiIsInVal(liVal, realValArray)) {
+                        li_.addClass('active');
+                        textArray_.push(liTitle);
+                    } else {
+                        li_.removeClass('active');
+                    }
+                } else {
+                    li_.removeClass('active');
+                }
+            });
+            obj.itemTxtArray = textArray_;
+            return textArray_;
+        };
+        //更新选中的值和文本
+        obj.setItemVal = function(newVal, exceptObj, renewBind) {
+            if(!Array.isArray(newVal)) {
+                if(core.isNumber(newVal) && valIsNumber) {
+                    realValArray = [parseFloat(newVal)];
+                } else {
+                    realValArray = newVal.toString().split(',');
+                }
+            } else {
+                realValArray = newVal;
+            }
+            exceptObj = exceptObj || [];
+            renewBind = core.isUndefined(renewBind) ? true : renewBind;
+            var valStr = realValArray.join(',');
+            if(valStr !== obj.attr('data-value')) {
+                obj.attr('data-value', valStr);
+            }
+            var ulLis = obj[objValObjKey];
+            // console.log('ulLis', ulLis.length);
+            var checkedObj_, checkedVal;
+            $.each(ulLis, function (i, li_) {
+                checkedObj_ = li_.value;
+		        checkedVal = checkedObj_.value;
+                if(checkedVal !=='' && realValArray) {
+                    if(checkLiIsInVal(checkedVal, realValArray)) {
+                        checkedObj_.checked = 1;
+                    } else {
+                        checkedObj_.checked = 0;
+                    }
+                } else {
+                    checkedObj_.checked = 0;
+                }
+            });
+
+            if(renewBind && setBind) {
+                //触发数据同步  触发赋值 */
+                if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
+                if(realValArray.length) {
+                    core.updateBindObj($.trim(setBind), realValArray, exceptObj);
+                }
+                if(obj[objBindAttrsName] && !core.objIsNull(obj[objBindAttrsName]) && !core.isUndefined(obj[objBindAttrsName][setBind])) {
+                    core.renewObjBindAttr(obj, setBind);
+                }
+            }
+        };
+        //创建根菜单 只有根菜单可以带even 其他子节点不能带
+        var createRootMenu = function() {
+            var optArray = core.cutOptEvens(menuOpt);
+            var menuNoEven = optArray[0];
+
+            var liValObj = [];
+            if(liCheckedBox) {
+                var systemClickChecked = function (obj_) {
+                    console.log('toggle checked parent');
+                };
+                var diyClick = core.getOptVal(liCheckedBox, 'click', null);
+                if(diyClick) {
+                    liCheckedBox['click'] = function (obj_, e_, scope) {
+                        systemClickChecked(obj_, e_, scope);
+                        diyClick(obj_, e_, scope);
+                    }
+                } else {
+                    liCheckedBox['click'] = function (obj_, e, scope) {
+                        systemClickChecked(obj_, e_, scope);
+                    }
+                }
+                liValObj.push(core.makeChecked(liCheckedBox));
+            }
+            if(core.isStrOrNumber(liVal)) {
+                liValObj.push(core.makeSpan({value: liVal}));
+            } else {
+                liValObj.push(liVal);
+            }
+            if(sonDataKey) {
+                liValObj.push(core.makeList(menuNoEven));
+            }
+            menuNoEven['li']['value'] = liValObj;
+            return core.makeList(menuNoEven);
+        };
+        //创建子菜单 不能带even
+        var createRootMenu = function() {
+            var menu_Opt = menuOpt;
+            return _createMenu(menu_Opt);
+        };
         obj.extend({
             //主动更新数据
             renew: function(options_) {
-                if(core.isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
-                var sValueStr = !core.isUndefined(options_['value']) ? options_['value'] : [] ;
-                obj['multi'] = core.getOptVal(options, ['mul', 'multi', 'multity'], undefined); //是否支持多选
-                var selectValueArray = sValueStr;
-                //如果值是数组 并且多个值 并且未定义是否多选，则默认多选
-                if($.isArray(sValueStr) && sValueStr.length>0 && obj['multi'] == undefined) {
-                    obj['multi'] = true;
-                }
-                options_['class'] = core.classAddSubClass(options_['class'], 'diy_trees', true);
-                //参数读写绑定 参数可能被外部重置 所以要同步更新参数
-                if(core.isStrOrNumber(selectValueArray) && core.strHasKuohao(selectValueArray)) {
-                    valueHasSeted = false; //设为未渲染完成
-                }
-                liOpt['disabled'] = "{{this.disabled}==true || {this.disabled}=='true' || {this.disabled}==1}";
-                if(core.getOptVal(liOpt, ['data_from', "dataFrom"], null)) {
-                    xuanranTreemenuSuccess = false;
-                }
-                var checkOpt = {
-                    value: "{"+ valueKey +"}",
-                    text: "{"+ titleKey +"}"
-                };
-                liOpt['class_extend'] = 'tree_inner';
-                var objInner = _makeTreeInnerObj(liOpt);
-                obj['son'] = objInner;
-                objInner['parent'] = obj; //设置其父对象
-                obj.append(objInner);
-                //console.log('tree.options_');
-                //console.log(JSON.stringify(options_));
+                options_ = options_ || {};
                 var hasSetData = !core.isUndefined(options_['data']);
-                core.optionDataFrom(objInner, options_);
-                core.delProperty(liOpt, ['data', 'son_key', 'sonKey']);
-                core.copyEvens(liOpt, checkOpt);
-                console.log('liOpt', liOpt);
-                console.log('checkOpt', checkOpt);
-                createRepeatDataTree(liOpt['data'], liOpt, checkOpt, objInner, null);
+                if(core.isUndefined(options_['value'])) options_['value'] = ''; //强制加value 否则外部无法取
+                if(core.isUndefined(options_['text'])) options_['text'] = ''; //强制加text 否则外部无法取
+                var sValueStr = !core.isUndefined(options_['value']) ? options_['value'] : [] ;
+                isMultity = core.getOptVal(options_, ['mul', 'multi', 'multity'], undefined); //是否支持多选
+                var lazyCall = core.getOptVal(options_, ['lazy_call', 'lazyCall'], null);
+                var itemsOpt = core.getOptVal(options_, ['items'], {});
+                var liOpt = core.cloneData(itemsOpt);
+                // console.log('items:');
+                // console.log(JSON.stringify(itemsOpt));
+                //如果值是数组 并且多个值 并且未定义是否多选，则默认多选
+                if($.isArray(sValueStr) && sValueStr.length>0 && isMultity === undefined) {
+                    isMultity = true;
+                } else {
+                    if(sValueStr && core.isNumber(sValueStr)) {
+                        isMultity = false;
+                    }
+                }
+                // console.log('valIsNumber', valIsNumber);
+                // console.log('isMultity', isMultity);
+                options_['class'] = core.classAddSubClass(options_['class'], 'diy_items', true);
+                //参数读写绑定 参数可能被外部重置 所以要同步更新参数
+                obj.rootMenu = createRootMenu();
+                obj.append(obj.rootMenu);
+                core.optionDataFrom(obj, options_);
                 core.strObj.formatAttr(obj, options_, 0, hasSetData);
             },
             updates: function(dataName, exceptObj) {//数据同步
-                //console.log('uptree.dates______:'+dataName);
-                //console.log(exceptObj);
+                // console.log('update!!');
                 exceptObj = exceptObj || [];
                 if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(obj);
-                    this.setTreeVal(core.getObjData($.trim(setBind)), false, exceptObj);
+                    this.setItemVal(core.getObjData($.trim(setBind)), exceptObj, false);
+                    renewMenuTextByVal();
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
                     core.renewObjBindAttr(this, dataName);
@@ -401,14 +318,20 @@ define(['require'], function (require) {
             //克隆当前对象
             cloneSelf: function() {
                 var opt = core.cloneData(obj.sor_opt);
-                return core.makeTree(opt, true);
-            },
+                return global.makeTree(opt, true);
+            }
         });
-        core.objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据text绑定
         obj.renew(options);
         core.optionGetSet(obj, options); // format AttrVals 先获取options遍历更新 再设置读写
-        core.addCloneName(obj, options);//支持克隆 
+        core.objBindVal(obj, options, [{'key_':'bind', 'val_':'value'}, {'key_':'set_text/setText', 'val_':'text'}]);//数据绑定
+        core.addCloneName(obj);//支持克隆
+        core.addTimer(obj);//添加定时器绑定
+        if(onReadyEven) {
+            onReadyEven(obj);
+        }
         return obj; //makeTree
     };
+
     return global;
 });
+

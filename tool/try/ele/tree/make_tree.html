@@ -21,7 +21,7 @@ require.config({
 require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
     var td = lrEle.makeTree({
         //配置单元
-        'li': {
+        'menu': {
             'data': [
                 {
                     'some_id': 1,
@@ -100,15 +100,19 @@ require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
             'title_key': 'some_title',
             'son_key': 'sons',//子数据的字段名
             //li 附加显示内容
-            value: [
-                lrEle.makeBtn({
-                    value: '标题:{some_title}',
-                })
-            ],
-            'click': function (li_, e_, o_) {
-                console.log(li_);
-                // console.log(o_.value);
-            },
+            li: {
+                checkedBox: {
+                    type: 1,
+                    checked: function () {
+
+                    }
+                },
+                value: '标题:{some_title}',
+                'click': function (li_, e_, o_) {
+                    console.log(li_);
+                    // console.log(o_.value);
+                },
+            }
         },
         value: [21,22]
     });
