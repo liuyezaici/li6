@@ -16,33 +16,32 @@ define(['require'], function (require) {
         var options = core.cloneData(sourceOptions);
         var setBind = core.getOptVal(options, ['bind'], '');
         var sourceVal = core.getOptVal(options, ['value'], '');
+        var realVal = [];
         //统一头部判断结束
         obj['tag'] = 'items';
         obj[objValIsNode] = false;
         obj['createItem'] = false;
         obj['multi'] = undefined;
         obj['noNeedEven'] = true;//不需要绑定事件，因为所有的鼠标事件都是items的子单元实现的，让它们继承这些事件的参数即可
-        obj.valueSeted = false;//当前对象的value是否设置完成
-        obj.menuXuanranSuccess = false;//当前对象的menu是否渲染完成 [menu需要渲染 才会用到]
-        var autoRenewMenuText = false;//当前对象的menu的text和val是否同时渲染完成
-        obj[objValObjKey] = [];
+        var valueSetted = false;//当前对象的value是否格式化完成
+        var menuListSuccess = false;//当前对象的menu是否渲染完成 [menu需要渲染 才会用到]
+
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
-            // console.log('format -- ObjVal', opt);
             opt = opt || [];
             var newData = core.getOptVal(opt, ['data'], {});
-            var newVal = core._onFormatVal(obj, newData,  sourceVal);
-            opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
-            obj.valueSeted = true;
-            obj.setItemVal(newVal);
-            if(!autoRenewMenuText) {
-                if(sourceVal !== ''  && !core.strHasKuohao(sourceVal)) {
-                    renewMenuTextByVal();
+            realVal = core._onFormatVal(obj, newData,  sourceVal);
+            console.log('format -- ObjVal', realVal);
+            valueSetted = true;
+            if(menuListSuccess) {
+                console.log('menuListSuccess');
+                if(realVal !== '') {
+                    obj.setItemVal(realVal, [obj], true);
                 }
             }
             //console.log('format_val');
             //如果值是数组 并且多个值 并且未定义是否多选，则默认支持多选
-            if($.isArray(newVal) && newVal.length>0 && obj['multi'] == undefined) {
+            if($.isArray(realVal) && realVal.length>0 && obj['multi'] == undefined) {
                 obj['multi'] = true;
             }
             if(obj.lazyCall) {
@@ -55,12 +54,12 @@ define(['require'], function (require) {
         Object.defineProperty(obj, 'value', {
             set: function (newVal) {
                 // console.log('set newVal:' ,newVal);
-                obj.valueSeted = true;
-                obj.setItemVal(newVal);
+                valueSetted = true;
+                obj.setItemVal(newVal, [obj], true);
                 renewMenuTextByVal();
             },
             get: function () {
-                return obj[objValObjKey].join(',');
+                return obj['multi'] ? realVal : ($.isArray(realVal) ? realVal.join('') : realVal) ;
             }
         });
         //支持外部取选中的文本 返回数组格式
@@ -84,18 +83,14 @@ define(['require'], function (require) {
                     textArray_.push(liTitle);
                 }
             });
-            obj[objValObjKey] = valArray_;
+            realVal = valArray_;
             obj.itemTxtArray = textArray_;
-            autoRenewMenuText = true;
         };
         //公共的初始化触发渲染菜单和值的方法
         //当菜单渲染完成，并且item的值渲染完成 才能获取菜单的文本
         function renewMenuTextByVal() {
-            if(obj.menuXuanranSuccess && obj.valueSeted) {
-                // console.log('renewMenu Text ByVal');
+            if(menuListSuccess && valueSetted) {
                 var textArray = obj.getItemTextByVal();//获取当前li选中的内容
-                //当前没有选中的值 要清空子select的菜单 让选中值再加载子select菜单
-                autoRenewMenuText = true;
                 var setText = core.getOptVal(options, ['set_text', 'setText'], null);
                 //通知更新text
                 if(setText) {
@@ -109,7 +104,7 @@ define(['require'], function (require) {
         }
         //通过当前val取text
         obj.getItemTextByVal = function () {
-            var newValAy = obj[objValObjKey];
+            var newValAy = realVal;
             if(!newValAy || !core.hasData(newValAy)) {
                 return '';
             }
@@ -140,7 +135,7 @@ define(['require'], function (require) {
                 }
             });
             obj.itemTxtArray = textArray_;
-            obj[objValObjKey] = valArray_;
+            realVal = valArray_;
             return textArray_;
         };
         //更新选中的值和文本
@@ -158,11 +153,26 @@ define(['require'], function (require) {
             if($.isArray(valStr)) {
                 valStr = valStr.join(',');
             }
-            //console.log(newValArray);
+            // console.log('setItemVal');
+            // console.log(newValArray);
             if(valStr !== obj.attr('data-value')) {
                 obj.attr('data-value', valStr);
             }
-            obj[objValObjKey] = newValArray;
+            realVal = newValArray;
+            var ulLis = obj['menu']['value'];
+            console.log('ulLis', ulLis.length);
+            $.each(ulLis, function(n, tmpItem) {
+                var liVal = tmpItem.attr('data-value');
+                if(newValArray) {
+                    if(core.strInArray(liVal, newValArray) !=-1) {
+                        tmpItem.addClass('active');
+                    } else {
+                        tmpItem.removeClass('active');
+                    }
+                } else {
+                    tmpItem.removeClass('active');
+                }
+            });
             if(renewBind && setBind) {
                 //触发数据同步  触发赋值 */
                 if($.inArray(obj, exceptObj) == -1) exceptObj.push(obj);
@@ -236,55 +246,59 @@ define(['require'], function (require) {
                     core.delProperty(liOpt, ['text']);
                     // console.log('liOpt ______:');
                     // console.log(JSON.stringify(liOpt));
-                    var diyMouseEven = core.getMouseEven(options_);
-                    //console.log('liOpt');
-                    //console.log(liOpt);
-                    liOpt = $.extend(liOpt, diyMouseEven);
-                    var diyClick = core.getOptVal(liOpt, ['click'], null);
-                    liOpt['click'] = function (clickObj, even_, scope) {//支持点击事件扩展
+                    var systemClick = function (clickObj) {//支持点击事件扩展
                         var liVal = clickObj[liDataKey];
                         // console.log('liVal:', clickObj, liVal);
                         if(obj['multi']) {//多选
                             clickObj.toggleClass('active');
                             obj.reGetValAndText();
                         } else {//单选
-                            clickObj.addClass('active').siblings('.active').removeClass('active');
-                            //获取子菜单的事件
-                            //单纯的改变样式 赋值
-                            obj.setItemVal([liVal]);
+                            obj.setItemVal([liVal], [obj],true);
                             renewMenuTextByVal();
                         }
-                        if(diyClick) diyClick(clickObj, obj, even_, scope);
                     };
+                    var diyClick = core.getOptVal(liOpt, ['click'], null);
+                    if(diyClick) {
+                        liOpt['click'] = function (li_, even_, scope) {
+                            systemClick(li_);//提前更新value给外部获取
+                            diyClick(li_, obj, even_, scope);
+                        }
+                    } else {
+                        liOpt['click'] = function (li_) {
+                            systemClick(li_);
+                        }
+                    }
 
                     liOpt['disabled'] = "{{this.disabled}==true || {this.disabled}=='true' || {this.disabled}==1}";
                     // console.log('liOpt');
                     // console.log(liOpt);
                     //items参数里的data要给makeList,自己不需要
-                    var ulOpt = {};
-                    if(!core.isUndefined(liOpt['data'])) ulOpt['data'] = liOpt['data'];
-                    if(!core.isUndefined(liOpt['data_from'])) ulOpt['data_from'] = liOpt['data_from'];
-                    if(!core.isUndefined(liOpt['dataFrom'])) ulOpt['dataFrom'] = liOpt['dataFrom'];
+                    var listOpt = {};
+                    //items参数里的data要给makeList,自己不需要
+                    if(!core.isUndefined(liOpt['data'])) listOpt['data'] = liOpt['data'];
+                    var hasDataFrom = core.getOptVal(liOpt, ['data_from', 'dataFrom'], null);
+                    if(hasDataFrom) {
+                        listOpt['dataFrom'] = hasDataFrom;
+                        menuListSuccess = false;
+                    }
                     core.delProperty(liOpt, ['dataFrom', 'data_from','data']);
-                    ulOpt['li'] = liOpt;
-                    ulOpt['needParentKey'] = core.getOptNeedParentKey(itemsOpt);
-                    //console.log(JSON.stringify(ulOpt));
-                    //console.log(JSON.stringify(options_));
-                    ulOpt['lazyCall'] = function () {
-                        obj.menuXuanranSuccess = true;
-                        if(!autoRenewMenuText) {
-                            if(sourceVal !== ''  && !core.strHasKuohao(sourceVal)) {
-                                console.log('lazyCall');
-                                renewMenuTextByVal();
-                            }
+                    listOpt['li'] = liOpt;
+                    listOpt['needParentKey'] = core.getOptNeedParentKey(itemsOpt);
+                    listOpt['lazyCall'] = function () {
+                        if(!hasDataFrom) {
+                            menuListSuccess = true;
+                        }
+                        console.log('lazyCall');
+                        if(valueSetted) {
+                            console.log('renewMenuTextByVal', realVal);
+                            renewMenuTextByVal();
                         }
                         setTimeout(function () {
                             //延迟执行父绑定的延迟事件
                             if(lazyCall) lazyCall(obj, itemValueArray, core.livingObj);
                         }, 100);
                     };
-                    // console.log('ulOpt', JSON.stringify(ulOpt));
-                    ulListObj = core.makeList(ulOpt);
+                    ulListObj = core.makeList(listOpt);
                     var sons = ulListObj.value;
                     var disableVals = [];
                     sons.map(function (v, n) {
@@ -298,8 +312,11 @@ define(['require'], function (require) {
                     obj['menu'] = ulListObj;
                     obj.append(ulListObj);
                     obj['createItem'] = true;
+
                 }
-                core.strObj.formatAttr(this, options_, 0, hasSetData);
+
+                core.optionDataFrom(obj, options_);
+                core.strObj.formatAttr(obj, options_, 0, hasSetData);
             },
             updates: function(dataName, exceptObj) {//数据同步
                 console.log('updates items');

@@ -16,14 +16,12 @@ require.config({
     paths: {
         jquery: '/resource/pub/js/jq/jquery-3.2.1',
         lrBox: '/assets/libs/lr/jquery-lr_box',
-        core: 'core',
-        tree: 'tree',
     }
 });
-require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
-    var td = lrEle.makeTrees({
-        //分类数据
-        menu: {
+require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
+    var td = lrEle.makeTree({
+        //配置单元
+        'li': {
             'data': [
                 {
                     'some_id': 1,
@@ -101,17 +99,15 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
             'value_key': 'some_id',
             'title_key': 'some_title',
             'son_key': 'sons',//子数据的字段名
-            'li': {
-                //li 附加显示内容
-                value: [
-                    lrEle.makeBtn({
-                        value: '标题:{some_title}',
-                    })
-                ],
-                'click': function (li_, e_, o_) {
-                    console.log(li_);
-                    // console.log(o_.value);
-                },
+            //li 附加显示内容
+            value: [
+                lrEle.makeBtn({
+                    value: '标题:{some_title}',
+                })
+            ],
+            'click': function (li_, e_, o_) {
+                console.log(li_);
+                // console.log(o_.value);
             },
         },
         value: [21,22]

@@ -3158,11 +3158,11 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     var outFunc = [
         'sizeIsXs', 'sizeIsSm','sizeIsMd','sizeIsBg','sizeIsLg',
         'isObj',   'getOptVal', 'hasData','cloneData','_onFormatVal','strHasKuohao','formatIfHasKuohao',
-        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize',
+        'optionGetSet', 'objBindVal', 'addCloneName', 'optionAddData', 'formatFloat','setSize','copyEvens',
         'isUndefined', 'makeRandomInt','makeRandomStr', 'optionDataFrom','strInArray','toNumber','isNumber',
         'copySourceOpt', 'renewObjData', 'getOptNeedParentKey', 'getKuohaoAbc', 'isStrOrNumber','delProperty',
         'renewObjBindAttr', 'getObjData', 'getCallData', 'classAddSubClass', 'objPushVal','getMouseEven',
-        'updateBindObj', 'objIsNull', '_getFormData', 'postAndDone', 'rePost','createRadomName',
+        'updateBindObj', 'objIsNull', '_getFormData', 'postAndDone', 'rePost','createRadomName','isOurObj',
         'makeDom', 'makeA', 'makeB', 'makeI', 'makeP', 'makeList', 'makeLi',
         'makeH1', 'makeH2', 'makeH3', 'makeH4', 'makeH5','makeH6',
         'makeTable', 'makeForm', 'makeTr', 'makeTh', 'makeTd',
@@ -4430,7 +4430,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         return checkAll(opt);
     }
 
-    //格式化val 公告方法
+    //格式化val 方法
     function _onFormatVal(obj, data_, sourceVal, valKey)  {
         valKey = valKey || 'value';
         var newVal = '';

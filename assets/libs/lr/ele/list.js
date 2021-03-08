@@ -66,8 +66,8 @@ define(['require'], function (require) {
             var nowValLen = newData.length;
             var tmpIndex;
             // console.log('newData:', newData);
-            console.log('lastValLen:'+ lastValLen);
-            console.log('nowValLen:'+ nowValLen);
+            // console.log('lastValLen:'+ lastValLen);
+            // console.log('nowValLen:'+ nowValLen);
             if(lastValLen > nowValLen) { //多出来 裁掉
                 //console.log('remove more');
                 //如果没有data，要copy一个临时的
@@ -101,25 +101,25 @@ define(['require'], function (require) {
                             newLi = obj['default_li'].cloneSelf();
                             sonFirst = newLi;
                         } else {
-                            console.log('sonFirst___is___:');
-                            console.log(sonFirst);
-                            console.log(sonFirst['sor_opt']);
-                            console.log(JSON.stringify(sonFirst['sor_opt']['data']));
+                            // console.log('sonFirst___is___:');
+                            // console.log(sonFirst);
+                            // console.log(sonFirst['sor_opt']);
+                            // console.log(JSON.stringify(sonFirst['sor_opt']['data']));
                             //console.log(sonFirst['options']['value']);
                             //保留之前的li的value 继续复制一个li  opt不能提早带上新data 会导致后续无法克隆新li的原始data
                             var newOpt = core.cloneData(sonFirst['sor_opt']);
                             newOpt['tag'] = 'li';
-                            console.log('newOpt', newOpt, newOpt['data']);
+                            // console.log('newOpt', newOpt, newOpt['data']);
                             newLi = sonFirst.cloneSelf(newOpt);
-                            console.log('sonFirst.clone');
-                            console.log(newLi);
-                            console.log(newLi.data);
+                            // console.log('sonFirst.clone');
+                            // console.log(newLi);
+                            // console.log(newLi.data);
                         }
                         //console.log('cloneSonLi');
                         //console.log(newLi);
                         newLi['parent'] = obj;
                         sons[sons.length] = newLi;
-                        console.log('等克隆完li的属性才能更新data 不然提早渲染的data可能无法再次刷新');
+                        // console.log('等克隆完li的属性才能更新data 不然提早渲染的data可能无法再次刷新');
                         newLi['data'] = newData[tmpIndex];
                         this.append(newLi);
                     }

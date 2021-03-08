@@ -69,7 +69,7 @@ define(['require'], function (require) {
                         cloneTr['extendParentData'] = true;//强制继承父data更新
                         var newTr = core.makeTr(cloneTr);
                         newTr['parent'] = obj;//分配父对象
-                        console.log('call----> set data', newTr, tmpData);
+                        // console.log('call----> set data', newTr, tmpData);
                         newTr['data'] = tmpData;//更新data
                         //找到最后一个循环的tr 没有的话就直接append
                         if(obj['repeatSons'].length) {

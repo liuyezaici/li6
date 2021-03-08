@@ -17,23 +17,30 @@
         }
     });
     require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
+
+    var getInfoUrl = '/index/tool/get_group';
+    var getDataMenuUrl = '/index/tool/get_rows?num=12';
     var items = lrEle.makeItems({
         name:  'demo',
         data:  {'this_val': [2,3]},
         width: '420px',
         'items': {
-            data: [
-                {'id': "1", 'title_': "单元1"},
-                {'id': "2", 'title_': "单元2"},
-                {'id': "3", 'title_': "单元3"},
-                {'id': "4", 'title_': "单元4"},
-            ],
+            data_from: {
+                url: getDataMenuUrl,
+                data_key: 'data',
+                post_data: {},
+                success_key: 'code',
+                success_value: '1',
+                err_func: function (e) {
+                    lrBox.msgTisf(e.msg);
+                }
+            },
             value_key: 'id',
-            title_key: 'title_',
+            title_key: 'title',
             'class': 'btn btn-xs btn-info',
             width: '20%',
             margin_right: '10px',
-            text: '{title_}',
+            text: '{title}',
         },
         value: '{this_val}'
     });

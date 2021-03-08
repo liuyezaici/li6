@@ -1,99 +1,10 @@
-//创建简单的li对象
-define(['core'], function (core) {
+define(['require'], function (require) {
+
     var global = {};
 
     var objValObjKey = 'obj_val_objs';//当前对象包含的obj  每个人对象创建成功后，其val都会保存当前值或dom对象 字符串形式的value除非
     var objValIsNode = 'obj_val_is_node';//obj的val是否允许以字符串的形式重新再写入
     var objBindAttrsName = 'bind_attrs';
-    //创建树菜单对象 只能更新、修改起data的长度 data不能设置对象
-    var __makeTreeInnerObj = function(sourceOptions) {
-        var options = core.cloneData(sourceOptions);
-        var obj = makeDiv(options);
-        //更新循环的tree的date
-        obj.renewOldTree = function(newData) {
-            //console.log('renew.SonData');
-            //console.log(newData);
-            var sons;
-            if(hasData(this['treeFirstSons'])) {//只更新循环部分的tr
-                sons = this['treeFirstSons'];
-                if(!$.isArray(newData)) newData = [newData];
-                var sonData;
-                $.each(sons, function (n, son) {
-                    sonData = newData[n];
-                    if(!sonData) sonData = []; //数据突然为空
-                    renewObjData(son, sonData);
-                })
-            }
-        };
-        //更新tree.data 如果含有带循环的tree 则只更新data的tr；反之更新全部tr
-        obj.renewSonLen = function(opt) {
-            var newData = core.getOptVal(opt, ['data'], {});
-            //console.log(obj);
-            var nowValLen = newData.length;
-            var sons;
-            if(hasData(this['treeFirstSons'])) {
-                //console.log('hasData _____o');
-                sons = this['treeFirstSons'];
-                if(!$.isArray(newData)) newData = [newData];
-                //如果之前产生过多的儿子而新数量变少要剔除
-                var lastValLen = sons.length;
-                //console.log('lastValLen:'+ lastValLen);
-                //console.log('nowValLen:'+ nowValLen);
-                //console.log('nowValLen:'+ nowValLen);
-                if(lastValLen > nowValLen) { //多出来 裁掉
-                    sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
-                        o.remove();
-                    });
-                    obj['treeFirstSons'] = sons; //移除son
-                    //console.log('remove more td,now:');
-                    //console.log(sons);
-                    //更新data
-                    var tmpTreeCheckDataId; //第几行
-                    var tmpData;
-                    for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
-                        tmpData =  newData[tmpTreeCheckDataId];
-                        //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
-                        if(!core.isUndefined(sons[tmpTreeCheckDataId])) {
-                            //console.log('renew_tmpIndex:'+ tmpIndex);
-                            sons[tmpTreeCheckDataId]['data'] = tmpData;
-                        }
-                    }
-                } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
-                    var newChecked;
-                    //console.log('lastValLen < nowValLen');
-                    //console.log('newData');
-                    //console.log(newData);
-                    var tmpTreeCheckDataId; //tr第几组
-                    var tmpData;
-                    for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
-                        tmpData =  newData[tmpTreeCheckDataId];
-                        //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
-                        //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
-                        //console.log('tmpData');
-                        //console.log(tmpData);
-                        if(!core.isUndefined(sons[tmpTreeCheckDataId])) {
-                            //console.log('renew_tmpIndex:'+ tmpIndex);
-                            sons[tmpTreeCheckDataId]['data'] = tmpData;
-                        } else {
-                            newChecked = sons[0].cloneSelf();
-                            //console.log('cloneOpt newChecked');
-                            //console.log(newChecked);
-                            //console.log(tmpData);
-                            newChecked['parent'] = this;
-                            sons[sons.length-1].after(newChecked);
-                            sons[sons.length] = newChecked;
-                            //等克隆完tr的属性才能更新data 不然提早渲染的data可能无法再次刷新
-                            newChecked['data'] = tmpData;
-                        }
-                    }
-                } else {
-                    //刷新循环的tr
-                    obj.renewOldTree(newData);
-                }
-            }
-        };
-        return obj;
-    };
     //创建树形分类 用于快速管理树形分类
     global.makeTree = global.makeTrees = function(sourceOptions, sureSource) {
         var core = require('core');
@@ -103,22 +14,115 @@ define(['core'], function (core) {
         obj.tag = 'tree';
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  core.cloneData(sourceOptions) : core.cloneData(copySourceOpt(sourceOptions));
+            obj.sor_opt = sureSource ?  core.cloneData(sourceOptions) : core.cloneData(core.copySourceOpt(sourceOptions));
         }
         var options = core.cloneData(sourceOptions);
         var setBind = core.getOptVal(options, ['bind'], '');
         var sourceVal = core.getOptVal(options, ['value'], '');
+
+
+
+
+        //创建树菜单对象 只能更新、修改起data的长度 data不能设置对象
+        var _makeTreeInnerObj = function(sourceOptions) {
+            var options = core.cloneData(sourceOptions);
+            var obj = core.makeDiv(options);
+            //更新循环的tree的date
+            obj.renewOldTree = function(newData) {
+                //console.log('renew.SonData');
+                //console.log(newData);
+                var sons;
+                if(core.hasData(this['treeFirstSons'])) {//只更新循环部分的tr
+                    sons = this['treeFirstSons'];
+                    if(!$.isArray(newData)) newData = [newData];
+                    var sonData;
+                    $.each(sons, function (n, son) {
+                        sonData = newData[n];
+                        if(!sonData) sonData = []; //数据突然为空
+                        core.renewObjData(son, sonData);
+                    })
+                }
+            };
+            //更新tree.data 如果含有带循环的tree 则只更新data的tr；反之更新全部tr
+            obj.renewSonLen = function(opt) {
+                var newData = core.getOptVal(opt, ['data'], {});
+                //console.log(obj);
+                var nowValLen = newData.length;
+                var sons;
+                if(core.hasData(this['treeFirstSons'])) {
+                    //console.log('core.hasData _____o');
+                    sons = this['treeFirstSons'];
+                    if(!$.isArray(newData)) newData = [newData];
+                    //如果之前产生过多的儿子而新数量变少要剔除
+                    var lastValLen = sons.length;
+                    //console.log('lastValLen:'+ lastValLen);
+                    //console.log('nowValLen:'+ nowValLen);
+                    //console.log('nowValLen:'+ nowValLen);
+                    if(lastValLen > nowValLen) { //多出来 裁掉
+                        sons.splice(nowValLen, lastValLen-nowValLen).forEach(function (o) {
+                            o.remove();
+                        });
+                        obj['treeFirstSons'] = sons; //移除son
+                        //console.log('remove more td,now:');
+                        //console.log(sons);
+                        //更新data
+                        var tmpTreeCheckDataId; //第几行
+                        var tmpData;
+                        for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
+                            tmpData =  newData[tmpTreeCheckDataId];
+                            //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
+                            if(!core.isUndefined(sons[tmpTreeCheckDataId])) {
+                                //console.log('renew_tmpIndex:'+ tmpIndex);
+                                sons[tmpTreeCheckDataId]['data'] = tmpData;
+                            }
+                        }
+                    } else if(lastValLen < nowValLen) { //数据累加 要克隆第一个tr 并且累加到最后一个循环的对象背后
+                        var newChecked;
+                        //console.log('lastValLen < nowValLen');
+                        //console.log('newData');
+                        //console.log(newData);
+                        var tmpTreeCheckDataId; //tr第几组
+                        var tmpData;
+                        for(tmpTreeCheckDataId = 0; tmpTreeCheckDataId < nowValLen; tmpTreeCheckDataId++) {
+                            tmpData =  newData[tmpTreeCheckDataId];
+                            //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
+                            //console.log('tmpTreeCheckDataId:'+ tmpTreeCheckDataId);
+                            //console.log('tmpData');
+                            //console.log(tmpData);
+                            if(!core.isUndefined(sons[tmpTreeCheckDataId])) {
+                                //console.log('renew_tmpIndex:'+ tmpIndex);
+                                sons[tmpTreeCheckDataId]['data'] = tmpData;
+                            } else {
+                                newChecked = sons[0].cloneSelf();
+                                //console.log('cloneOpt newChecked');
+                                //console.log(newChecked);
+                                //console.log(tmpData);
+                                newChecked['parent'] = this;
+                                sons[sons.length-1].after(newChecked);
+                                sons[sons.length] = newChecked;
+                                //等克隆完tr的属性才能更新data 不然提早渲染的data可能无法再次刷新
+                                newChecked['data'] = tmpData;
+                            }
+                        }
+                    } else {
+                        //刷新循环的tr
+                        obj.renewOldTree(newData);
+                    }
+                }
+            };
+            return obj;
+        };
+        
         //统一头部判断结束
         obj[objValIsNode] = false;
         obj['createTree'] = false;
         obj['multi'] = undefined;
         obj[objValObjKey] = [];//子checked对象的集合
         obj['treeFirstSons'] = [];  //一共有多少个首级分类
-        var treeMenuOpt = core.getOptVal(options, ['menu'], {});
-        var valueKey = core.getOptVal(treeMenuOpt, ['value_key', 'valueKey'], '');
-        var titleKey = core.getOptVal(treeMenuOpt, ['title_key', 'titleKey', 'text_key', 'textKey'], '');
-        var sonDataKey = core.getOptVal(treeMenuOpt, ['son_key', 'sonKey', 'son_data_key', 'sonDataKey'], null);//data子数据
-        var treeLiOpt = core.getOptVal(treeMenuOpt, ['li'], null);//单元格附加显示内容
+        var liOpt = core.getOptVal(options, ['li'], {});
+        var valueKey = core.getOptVal(liOpt, ['value_key', 'valueKey'], '');
+        var titleKey = core.getOptVal(liOpt, ['title_key', 'titleKey', 'text_key', 'textKey'], '');
+        var sonDataKey = core.getOptVal(liOpt, ['son_key', 'sonKey', 'son_data_key', 'sonDataKey'], null);//data子数据
         var valueHasSeted = true;//当前对象的value是否渲染完成
         var xuanranTreemenuSuccess = true;//当前对象的menu是否渲染完成
         var parentCheckedsKey = 'parent_checked';//上级复选框
@@ -197,29 +201,29 @@ define(['core'], function (core) {
         });
 
         //移除所有子checked的选中状态
-        function __sonRemoveChecked(obj_) {
+        function _sonRemoveChecked(obj_) {
             if(obj_[sonCheckedsKey]) {
                 $.each(obj_[sonCheckedsKey], function (index, tmpObj) {
                     if(tmpObj.checked==true) tmpObj.checked = false;
-                    __sonRemoveChecked(tmpObj);
+                    _sonRemoveChecked(tmpObj);
                 });
             }
         }
         //给所有子checked的添加选中状态
-        function __sonAddChecked(obj_) {
+        function _sonAddChecked(obj_) {
             if(obj_[sonCheckedsKey]) {
                 $.each(obj_[sonCheckedsKey], function (index, tmpObj) {
                     if(tmpObj.checked == false) tmpObj.checked = true;
-                    __sonAddChecked(tmpObj);
+                    _sonAddChecked(tmpObj);
                 });
             }
         }
         //给所有父checked的添加选中状态
-        function __parAddChecked(obj_) {
+        function _parAddChecked(obj_) {
             if(obj_[parentCheckedsKey]) {
                 var tmpParObj = obj_[parentCheckedsKey];
                 if(tmpParObj.checked == false) tmpParObj.checked = true;
-                __parAddChecked(tmpParObj);
+                _parAddChecked(tmpParObj);
             }
         }
         //克隆多行的可数据循环的tr
@@ -252,19 +256,19 @@ define(['core'], function (core) {
                         // 如果当前选择选中，父选项要选中
                         //console.log(obj_.checked);
                         if(!obj_.checked) {
-                            __sonRemoveChecked(obj_);
+                            _sonRemoveChecked(obj_);
                         } else {
                             //所有子都要打勾
-                            __sonAddChecked(obj_);
+                            _sonAddChecked(obj_);
                             //所有父都要打勾
-                            __parAddChecked(obj_);
+                            _parAddChecked(obj_);
                         }
                         if(setBind) {
                             core.updateBindObj($.trim(setBind), obj.value, [obj]);
                         }
                     };
 
-                    checkObj = global.makeCheck(checkOpt);
+                    checkObj = core.makeChecked(checkOpt);
                     if(parentObj) {
                         checkObj[parentCheckedsKey] = parentObj;
                         if(parentObj[sonCheckedsKey]) {
@@ -274,19 +278,19 @@ define(['core'], function (core) {
                         }
                     }
                     if(!core.isUndefined(tmpData[sonDataKey])) {
-                        sonMenuPbj = global.makeDiv({
+                        sonMenuPbj = core.makeDiv({
                             'class': 'son_menu'
                         });
                         copyLiOpt['value'] = [
                             checkObj,
                             sonMenuPbj
                         ];
-                        if(treeLiOpt) {
+                        if(liOpt) {
                             var sonVal = [];
-                            if(!$.isArray(treeLiOpt.value)) {
-                                treeLiOpt.value = [treeLiOpt.value];
+                            if(!$.isArray(liOpt.value)) {
+                                liOpt.value = [liOpt.value];
                             }
-                            treeLiOpt.value.forEach(function (tmpObj) {
+                            liOpt.value.forEach(function (tmpObj) {
                                 var  newSon ;
                                 if(core.isOurObj(tmpObj)) {
                                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
@@ -298,16 +302,16 @@ define(['core'], function (core) {
                                 }
                                 sonVal.push(newSon);
                             });
-                            treeLiOpt.value = sonVal;
-                            copyLiOpt['value'].push(core.makeSpan(treeLiOpt));
+                            liOpt.value = sonVal;
+                            copyLiOpt['value'].push(core.makeSpan(liOpt));
                         }
                     } else {
-                        if(treeLiOpt) {
+                        if(liOpt) {
                             var sonVal = [];
-                            if(!$.isArray(treeLiOpt.value)) {
-                                treeLiOpt.value = [treeLiOpt.value];
+                            if(!$.isArray(liOpt.value)) {
+                                liOpt.value = [liOpt.value];
                             }
-                            treeLiOpt.value.forEach(function (tmpObj) {
+                            liOpt.value.forEach(function (tmpObj) {
                                 var  newSon ;
                                 if(core.isOurObj(tmpObj)) {
                                     //保留之前的li的value 继续复制一个li 不能从源opt开始克隆，会丢失之后渲染的li.value
@@ -318,14 +322,14 @@ define(['core'], function (core) {
                                 }
                                 sonVal.push(newSon);
                             });
-                            treeLiOpt.value = sonVal;
-                            copyLiOpt['value'] = [checkObj, global.makeSpan(treeLiOpt)];
+                            liOpt.value = sonVal;
+                            copyLiOpt['value'] = [checkObj, core.makeSpan(liOpt)];
                         } else {
                             copyLiOpt['value'] = checkObj;
                         }
                     }
-                    liObj = global.makeLi(core.cloneData(copyLiOpt));
-                    liObj[parentObjKey] = obj;//分配父对象
+                    liObj = core.makeLi(core.cloneData(copyLiOpt));
+                    liObj['parent'] = obj;//分配父对象
                     obj[objValObjKey].push(checkObj);//累计子对象li
                     liObj['data'] = tmpData; //必须克隆完再更新data
                     //console.log('append li :');
@@ -353,27 +357,23 @@ define(['core'], function (core) {
                 if($.isArray(sValueStr) && sValueStr.length>0 && obj['multi'] == undefined) {
                     obj['multi'] = true;
                 }
-                options_['class'] = classAddSubClass(options_['class'], 'diy_trees', true);
+                options_['class'] = core.classAddSubClass(options_['class'], 'diy_trees', true);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 if(core.isStrOrNumber(selectValueArray) && core.strHasKuohao(selectValueArray)) {
                     valueHasSeted = false; //设为未渲染完成
                 }
-
-                treeMenuOpt['disabled'] = "{{this.disabled}==true || {this.disabled}=='true' || {this.disabled}==1}";
-                if(core.getOptVal(treeMenuOpt, ['data_from', "dataFrom"], null)) {
+                liOpt['disabled'] = "{{this.disabled}==true || {this.disabled}=='true' || {this.disabled}==1}";
+                if(core.getOptVal(liOpt, ['data_from', "dataFrom"], null)) {
                     xuanranTreemenuSuccess = false;
                 }
-                //console.log('ulOpt');
-                //console.log(obj);
-                //console.log(JSON.stringify(ulOpt));
-                //console.log(JSON.stringify(options_));
-                var liOpt = core.cloneData(treeMenuOpt);
                 var checkOpt = {
                     value: "{"+ valueKey +"}",
                     text: "{"+ titleKey +"}"
                 };
-                treeMenuOpt['class_extend'] = 'tree_inner';
-                var objInner = __makeTreeInnerObj(treeMenuOpt);
+                liOpt['class_extend'] = 'tree_inner';
+                var objInner = _makeTreeInnerObj(liOpt);
+                obj['son'] = objInner;
+                objInner['parent'] = obj; //设置其父对象
                 obj.append(objInner);
                 //console.log('tree.options_');
                 //console.log(JSON.stringify(options_));
@@ -381,9 +381,9 @@ define(['core'], function (core) {
                 core.optionDataFrom(objInner, options_);
                 core.delProperty(liOpt, ['data', 'son_key', 'sonKey']);
                 core.copyEvens(liOpt, checkOpt);
-                createRepeatDataTree(treeMenuOpt['data'], liOpt, checkOpt, objInner, null);
-                obj['son'] = objInner;
-                objInner[parentObjKey] = obj; //设置其父对象
+                console.log('liOpt', liOpt);
+                console.log('checkOpt', checkOpt);
+                createRepeatDataTree(liOpt['data'], liOpt, checkOpt, objInner, null);
                 core.strObj.formatAttr(obj, options_, 0, hasSetData);
             },
             updates: function(dataName, exceptObj) {//数据同步
