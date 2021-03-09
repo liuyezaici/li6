@@ -4470,11 +4470,25 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     //传统表单的自定义打包提交方法
     global.formSubmitEven = function(form, opt) {
         var beforeFunc = getOptVal(opt, ['before'], null);
+        var files = form.find("input[type='file']");
+        var fileData = {};
+        files.on('change', function () {
+            let fileObj = $(this);
+            let inputName = $(this).attr('name');
+            let fileNode = fileObj[0].files[0];
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let base64Data = e.target.result;
+                fileData[inputName] = base64Data;
+            };
+            reader.readAsDataURL(fileNode);
+        });
         form.on('submit', function (e) {
             e.preventDefault();
             e.stopPropagation();
             var data_ = form.serializeArray();
             var pData = {};
+            pData = $.extend(pData, fileData);
             data_.map(function (v, n) {
                 if(!isUndefined(pData[v.name])) {
                     if($.isArray(pData[v.name])) {
