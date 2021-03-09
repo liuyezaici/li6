@@ -27,6 +27,11 @@
             ,click: function (o,e) {
                 var val = o.value;
                 lrBox.msgTisf('type:'+ typeof val + ', value:' + val);
+                setTimeout(function () {
+                    o.value =  12;
+                    var val = o.value;
+                    lrBox.msgTisf('type:'+ typeof val + ', value:' + val);
+                }, 1000);
             }
         });
         $('#show_span').append(simpleSpan);

@@ -3795,11 +3795,16 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
         if(isStrOrNumber(optData) && hasSetData) { //optData : {son_v}
             optData = strObj.formatStr(optData, [], 0, obj_, 'data');
         }
-        obj_.intVal = false;//刷新时要更新之前的int类型的val
-        obj_.nodeObj = [];//刷新时要更新之前保存的node
-        obj_.htmObj = [];//刷新时要更新之前保存的nodeHtm
         //更新node
-        var _renewNodeVal = function(newV) {
+        //dimNumber 直接设置新intVal的value ：当新值仍然是数字类型 则可以直接更新node的number值;反之要清空之前的
+        var _renewNodeVal = function(newV, dimNumber) {
+            if(!dimNumber) {
+                obj_.intVal = undefined; //二次修改如果是字符串的值，需要更新之前的int类型的val
+            } else {
+                obj_.intVal = dimNumber; //二次修改如果仍是数字的值，直接赋值
+            }
+            obj_.nodeObj = [];//刷新时要更新之前保存的node
+            obj_.htmObj = [];//刷新时要更新之前保存的nodeHtm
             // console.log('_renew NodeVal ', newV);
             //如果 newV 是三元运算符，并且引号里带<> 直接html会勿将三元语法给打乱，所以应该一开始就将<>转译一遍
             if(isHtml(newV) ) {
@@ -3834,20 +3839,22 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
             obj_.append(thisNewVal);
             formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
             //最终结果如果是数字 且只含有唯一的node 则可判定值为数字类型
-            if(obj_.htmObj.length ==0 && obj_.nodeObj.length == 1) {
-                if(obj_.nodeObj[0]['text'] === newV) {
+            if(obj_.htmObj.length ==0 && obj_.nodeObj.length == 1 ) {
+                if(obj_.nodeObj[0]['text'] == newV && obj_.nodeObj[0].obj.setNumber) {
                     obj_.intVal = obj_.nodeObj[0].obj.setNumber;
                 }
             }
         };
-        _renewNodeVal(optValStr);//更新node
+
+        _renewNodeVal(optValStr, false);//更新node
 
 
         //如果一开始value是html格式，突然换个obj格式，所以要在这里做格式判断
         if(!obj_.hasOwnProperty('value')) {
             Object.defineProperty(obj_, 'value', {
                 get: function () {
-                    if(obj_.intVal !== false) {
+                    // console.log('intVal', obj_.intVal);
+                    if(obj_.intVal !== undefined) {
                         return obj_.intVal;
                     }
                     if(obj_.htmObj) {
@@ -3857,7 +3864,14 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 }
                 ,set: function (newVal) {
                     //value修改，统一全部更新
-                    _renewNodeVal(newVal);//更新node
+                    var dimNumber = false;
+                    if(isNumber(newVal)) {
+                        //如果之前是纯数字的值 且只有一个node节点，继续复用intVal
+                        if(obj_.htmObj.length ==0 && obj_.nodeObj.length == 1 && obj_.intVal !== undefined) {
+                            dimNumber = newVal;
+                        }
+                    }
+                    _renewNodeVal(newVal, dimNumber);//更新node
                 }
             });
         }
