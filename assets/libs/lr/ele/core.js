@@ -1304,7 +1304,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 if(!s_) return s_;
                 if(typeof s_ == 'number') s_ += '';
                 s_ = formatAbc(s_, 'data');
-                console.log('after format Abc:', s_ , typeof s_);
+                // console.log('after format Abc:', s_ , typeof s_);
                 //提取语法：
                 // item {0 % 2==0 ? 'even': 'odd'}
                 // {'a'+'b'}
@@ -1385,7 +1385,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
             // console.log('替换完data的变量，结果:'+ str);
             //替换单个尖括号里的变量
             function replaceMatchAbc(str_, match_, dataPub) { //match_: {abc}
-                console.log('replace MatchAbc str_ :', str_, match_);
+                // console.log('replace MatchAbc str_ :', str_, match_);
                 var matchVal,
                     khKeyLeft = '{',
                     khKeyRight = '}';
@@ -1403,7 +1403,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 if(!str_) return str_;
                 if(isBoolean(str_)) return ;//continue
                 matchVal = formatOneDateKey(matchVal, dataPub);//格式 {abc}
-                console.log('change matchVal new___ :', matchVal, typeof matchVal);
+                // console.log('change matchVal new___ :', matchVal, typeof matchVal);
                 //此结果可能是提取data数组 或 对象 或字符串
                 if(isStrOrNumber(matchVal)) {
                     //console.log('str_ :'+ str_);
@@ -1854,7 +1854,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 matches = uniqueArray(matches);
                 matches.forEach(function (match__) {
                     s_ = replaceMatchAbc(s_, match__, dataPub);
-                    console.log('after replace MatchAbc:', s_, typeof s_);
+                    // console.log('after replace MatchAbc:', s_, typeof s_);
                 });
                 return s_;
             }
@@ -1971,7 +1971,10 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 node_.htmlObj = tmpDom;
                 $(node_).after(tmpDom);
             } else {//纯文本直接设置内容 比如int
-                // console.log('纯文本直接设置内容',node_, val_, typeof val_);
+                // console.log('纯数字 绑定 支持获取node的数字值',node_, val_, typeof val_);
+                if(isNumber(val_)) {
+                    node_.setNumber = val_;
+                }
                 node_.textContent = val_;
             }
         }
@@ -2066,7 +2069,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 //首次初始化 要么是带data 要么是需要pubdata
                 if(hasSetData || strHasKuohao(nodeText, 'public')) {
                     newStr =  strObj.formatStr(nodeText, data, n, thisObj, 'value');
-                    console.log('htmlDecode :'+ newStr, typeof newStr, 'nodeText:'+nodeText);
+                    // console.log('htmlDecode :'+ newStr, typeof newStr, 'nodeText:'+nodeText);
                     if(!isUndefined(opt['onFormat_value'])) {
                         thisFormatEven  = {func: opt['onFormat_value'], val: newStr, data: data};
                     }
@@ -2076,6 +2079,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 }
                 //只有文本被修改才更新node的文本 防止没必要的操作dom 带<>标记的内容要在此格式化
                 if(nodeText !== newStr) {
+                    // console.log('setTextContent :', node,  newStr, typeof newStr);
                     setTextContent(node, newStr);
                 }
             });
@@ -2355,11 +2359,11 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
         // console.log('callRewObj.StringVal');
         // console.log(obj_, obj_[objValIsNode],options['value']);
         if(obj_[objValIsNode]) {
-            //未渲染
+            //未渲染value
             if(strHasKuohao(options['value'])) {//局部的data变了 才格式化
                 formatObjNodesVal(obj_, options['data'], !isUndefined(options['data']));
             } else {
-                //console.log('已渲染 node');
+                //重新生成value
                 domAppendNode(obj_, options);
             }
         } else {
@@ -3785,14 +3789,18 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
 
     //对象字符串node类型的写入和刷新
     function domAppendNode(obj_, opt, hasSetData) {
+        hasSetData = hasSetData || false;
         var optValStr = opt['value'] || opt['son'] || '';
         var optData = opt['data'] || makeNullData();
         if(isStrOrNumber(optData) && hasSetData) { //optData : {son_v}
             optData = strObj.formatStr(optData, [], 0, obj_, 'data');
         }
+        obj_.intVal = false;//刷新时要更新之前的int类型的val
+        obj_.nodeObj = [];//刷新时要更新之前保存的node
+        obj_.htmObj = [];//刷新时要更新之前保存的nodeHtm
         //更新node
         var _renewNodeVal = function(newV) {
-            console.log('_renewNodeVal ', newV);
+            // console.log('_renew NodeVal ', newV);
             //如果 newV 是三元运算符，并且引号里带<> 直接html会勿将三元语法给打乱，所以应该一开始就将<>转译一遍
             if(isHtml(newV) ) {
                 //匹配例子： ..." <a href="#{id}"></a> <i class="glyphicon glyphicon-fire"></i>  <i class="glyphicon glyphicon-fire"></i>" ...
@@ -3821,33 +3829,28 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 }
             }
             obj_.html(newV);//先写入html再提取dom
-            obj_.nodeObj = [];//刷新时要更新之前保存的node
-            obj_.htmObj = [];//刷新时要更新之前保存的nodeHtm
             //提取dom的node
             var thisNewVal = getObjHtmlNode(obj_, obj_[0], optData);
-            console.log('thisNewVal ', thisNewVal);
             obj_.append(thisNewVal);
             formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
+            //最终结果如果是数字 且只含有唯一的node 则可判定值为数字类型
+            if(obj_.htmObj.length ==0 && obj_.nodeObj.length == 1) {
+                if(obj_.nodeObj[0]['text'] === newV) {
+                    obj_.intVal = obj_.nodeObj[0].obj.setNumber;
+                }
+            }
         };
         _renewNodeVal(optValStr);//更新node
-        if(obj_[objBindAttrsName]) { //obj bind attrs(如:class) 中含{{dataName} > 2}
-            $.each(obj_[objBindAttrsName], function (bindName, attrNames) {
-                // 只格式化value
-                $.each(attrNames, function (n, attrKey) {
-                    if(attrKey =='value')  {
-                        formatObjNodesVal(obj_, livingObj, hasSetData);
-                    }
-                });
-            });
-        }
+
 
         //如果一开始value是html格式，突然换个obj格式，所以要在这里做格式判断
         if(!obj_.hasOwnProperty('value')) {
             Object.defineProperty(obj_, 'value', {
                 get: function () {
-                    console.log('get val');
-                    console.log(obj_[objValIsNode]);
-                    if(obj_[objValIsNode]) {
+                    if(obj_.intVal !== false) {
+                        return obj_.intVal;
+                    }
+                    if(obj_.htmObj) {
                         return obj_.html();
                     }
                     return this[objValObjKey];
@@ -4146,7 +4149,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                 var optValStr = opt['value'];
                 if(isStrOrNumber(optValStr) ) {
                     obj[objValIsNode] = true;
-                    console.log('AppendVal value is string +++++++++++++', optValStr, hasSetData);
+                    // console.log('AppendVal value is string +++++++++++++', optValStr, hasSetData);
                     domAppendNode(obj_, opt, hasSetData);
                 } else if($.isArray(optValStr) ) {
                     dimValObj();

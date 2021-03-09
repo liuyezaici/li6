@@ -21,11 +21,12 @@
 // value/class 属性支持js语法. 变量用{}括起
         var simpleSpan = lrEle.makeSpan({
             name: 'test_span',
-            data: {'age': 300},
+            data: {'age': 300.22},
             value: '{age}',
             'class': "well"
             ,click: function (o,e) {
-                lrBox.msgTisf('type:'+ typeof o.value + ', value:' + o.value);
+                var val = o.value;
+                lrBox.msgTisf('type:'+ typeof val + ', value:' + val);
             }
         });
         $('#show_span').append(simpleSpan);
