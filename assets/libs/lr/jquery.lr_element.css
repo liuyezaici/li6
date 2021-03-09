@@ -2339,6 +2339,9 @@ div.form-control,
     list-style-type: none;
     display: inline-block;
 }
+.diy_tree ul li.parentLi {
+    display: block;
+}
 .diy_tree .diy_checked {
     margin-right: 10px;
 }

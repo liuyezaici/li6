@@ -310,6 +310,7 @@ define(['require'], function (require) {
             //     var sonData = menuOpt['data'][sonDataKey];
             //     console.log('has son', menuOpt['data'], sonData)
             // }
+            menuNoEven['li']['class'] = 'parentLi';
             menuNoEven['li']['value'] = liValObj;
             console.log('menuNoEven', menuNoEven)
             return core.makeList(menuNoEven);
