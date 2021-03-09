@@ -25,13 +25,13 @@
     <script>
 
         require.config({
+            baseUrl: '/assets/libs/lr/ele/',
             paths: {
                 jquery: '/resource/pub/js/jq/jquery-3.2.1',
                 lrBox: '/assets/libs/lr/jquery-lr_box',
-                lrEle: '/assets/libs/lr/jquery-lr_element',
             }
         });
-        require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+        require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
             //js造一个简单的表格
             var table = lrEle.makeTable({
                 'class': 'well',
@@ -44,13 +44,23 @@
                 tr_top: [
                     {
                         th: [
-                            { value: lrEle.makeSpan({
-                                    value: '全选',
-                                    name: 'demo',
-                                    click: function (o){
-                                        o.parent.parent.parent.selectAll('demo');
-                                    }
-                                })
+                            {
+                                value: [
+                                    lrEle.makeSpan({
+                                        value: '全选',
+                                        name: 'demo',
+                                        click: function (o){
+                                            o.parent.parent.parent.selectAll('checkedId');
+                                        }
+                                    }),
+                                    lrEle.makeSpan({
+                                        value: '当前选中',
+                                        name: 'demo',
+                                        click: function (o){
+                                            lrBox.msgTisf(o.parent.parent.parent.selected('checkedId'));
+                                        }
+                                    })
+                                ]
                             }
                         ]
                     }
@@ -62,8 +72,7 @@
                                 value: [lrEle.makeChecked({
                                     value: '{id}',
                                     id: '{id}',
-                                    name: 'demo',
-                                    checked: false,//或者填 true 也可以
+                                    name: 'checkedId',
                                     click: function (o, e) {
                                         if(o.checked) {
                                             lrBox.msgTisf('选中我了'+ o.id);

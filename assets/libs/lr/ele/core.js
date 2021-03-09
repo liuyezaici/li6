@@ -7,10 +7,10 @@
  * @createTime  2018-08
  */
 "use strict";
-define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
+define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
         'items', 'select', 'tree', 'img','radio', 'checked', 'switch',  'bar',  'rili',  'page'
     ],
-    function ($, lrBox, table, form, list, input, str, hObj,
+    function ($, lrBox, table, form, list, input, str,
               items, select, tree, img, radio, checked, switched, bar, rili, page) {
     // VERSION 20210222
     // LR 2018.8
@@ -137,14 +137,17 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
     //剪切options所有事件 返回无even的opt和带even的opt
     function cutOptEvens(opt) {
         var evenOpt = {};
-        var removeEvenOpt = {};
+        var noEvenOpt = {};
         $.each(opt, function (k, v) {
             if(attrIsEven(k)) {
-                evenOpt[k] = opt[k];
-                removeEvenOpt[k] = k;
+                evenOpt[k] = v;
+            } else {
+                noEvenOpt[k] = v;
             }
         });
-        return [evenOpt, delProperty(opt, removeEvenOpt)];
+        // console.log('evenOpt', evenOpt);
+        // console.log('noEvenOpt', noEvenOpt);
+        return [evenOpt, noEvenOpt];
     }
 
     //去掉引号里的内容
@@ -1119,7 +1122,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                             resultStr = abc;
                         }
                     }
-                    // console.log('resultStr', resultStr);
+                    // console.log('resultStr', resultStr, typeof resultStr);
                     if(resultStr && isString(resultStr)) {
                         var reg1 = /^\!*this\.([a-zA-Z0-9]+)/;
                         var reg2 = /^\!*this\[\d+\]*(\[('|")?([a-zA-Z_\[\]]+[a-zA-Z_\d.]+)('|")?\])*/;
@@ -1144,13 +1147,11 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                                 } else {
                                     resultStr = val_;
                                 }
-                                // console.log('resultStr2', resultStr);
                             } else if(!isUndefined(obj_[matchKey])) { //允许获取 obj.diyAttr
                                 resultStr = obj_[matchKey];
                             } else {
                                 resultStr = '';
                             }
-                            // console.log('resultStr2', resultStr);
                         } else {
                             //{a.b}
                             if(abc.indexOf('.') !=-1) {
@@ -1169,6 +1170,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                                 } else {
                                     resultStr = '';//找不到data[abc]对象 返回为空
                                 }
+                                // console.log('resultStr', resultStr, typeof resultStr);
                             }
                         }
                     }
@@ -1192,17 +1194,8 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                         resultStr = ''; //返回自定义的绑定对象字符串 <xxx:aaaa>
                     }
                 }
-                var newAbc;
-                if(isBoolean(resultStr)) {
-                    // console.log(' isBoolean  ', resultStr);
-                    newAbc = resultStr; //可能是data:{info}提取对象 所以不能转json
-                } else if(typeof resultStr == 'object' || typeof resultStr == 'array') { // 对象直接替换当前匹配的data,如：data:{son_data}
-                    newAbc = resultStr; //可能是data:{info}提取对象 所以不能转json
-                } else {
-                    newAbc = abc.replace(abc, resultStr);
-                }
                 // console.log(' format one '+ abc +' resultStr:'+ newAbc, typeof  newAbc);
-                return newAbc;
+                return resultStr;
             }
             //提取赋值的等式 {a=3}
             function getSetStr(setSourcsStr) {
@@ -1311,7 +1304,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 if(!s_) return s_;
                 if(typeof s_ == 'number') s_ += '';
                 s_ = formatAbc(s_, 'data');
-                // console.log('after format Abc:', s_);
+                console.log('after format Abc:', s_ , typeof s_);
                 //提取语法：
                 // item {0 % 2==0 ? 'even': 'odd'}
                 // {'a'+'b'}
@@ -1362,8 +1355,6 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                         //console.log(s3+ ' has3_Yufa:'+ has3Yufa);
                         //console.log(s3+ ' has3_Yufa:'+ has3Yufa);
                         s3 = strObj.runYufa(s3);
-                    } else {
-                        //console.log(s3+ ' no has3_Yufa:'+ has3Yufa);
                     }
                     //解析完data的数据再恢复引号
                     s3 = strObj.urlDecodeLR(s3);
@@ -1373,7 +1364,6 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                     }
                     return s3;
                 };
-                //click('[url_hash_code]%E5%95%8A%E5%A5%BD')
                 //有没有{}语法 应该是在解析url之前判断 不能在解析后判断语法，因为url里的符合内容太丰富了 无法做到解析时不受干扰
                 if(strHasKuohao(s_, 'data')) {
                     //console.log('still has func ———————————————:'+ s_);
@@ -1395,15 +1385,16 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             // console.log('替换完data的变量，结果:'+ str);
             //替换单个尖括号里的变量
             function replaceMatchAbc(str_, match_, dataPub) { //match_: {abc}
-                // console.log('replace MatchAbc str_ :', str_);
-                var matchVal;
+                console.log('replace MatchAbc str_ :', str_, match_);
+                var matchVal,
+                    khKeyLeft = '{',
+                    khKeyRight = '}';
                 if(dataPub=='public') {
-                    matchVal = trim(match_, '{{');
-                    matchVal = trim(matchVal, '}}');
-                } else {
-                    matchVal = trim(match_, '{');
-                    matchVal = trim(matchVal, '}');
-                }
+                    khKeyLeft = '{{';
+                    khKeyRight = '}}';
+                } 
+                matchVal = trim(match_, khKeyLeft);
+                matchVal = trim(matchVal, khKeyRight);
                 matchVal = $.trim(matchVal);
                 if(!matchVal) {
                     str_ = str_.replace(matchVal, '');
@@ -1412,7 +1403,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 if(!str_) return str_;
                 if(isBoolean(str_)) return ;//continue
                 matchVal = formatOneDateKey(matchVal, dataPub);//格式 {abc}
-                // console.log('change matchVal new___ :', matchVal, typeof matchVal);
+                console.log('change matchVal new___ :', matchVal, typeof matchVal);
                 //此结果可能是提取data数组 或 对象 或字符串
                 if(isStrOrNumber(matchVal)) {
                     //console.log('str_ :'+ str_);
@@ -1453,7 +1444,12 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                         str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), 0);
                     } else {
                         //console.log('isNumber :'+ matchVal);
-                        str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), matchVal);
+                        //如果需要替换的字符串就是匹配的值{abc} 直接可以赋值，不用replace，导致丢失结果的int类型
+                        if(str_ === match_) {
+                            str_ = matchVal;
+                        } else {
+                            str_ = str_.replace(RegExp(regCodeAddGang(match_), 'g'), matchVal);
+                        }
                     }
                     //console.log('change str_ new :'+str_);
                 } else { //abc => obj 那么abc直接等于obj
@@ -1858,7 +1854,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 matches = uniqueArray(matches);
                 matches.forEach(function (match__) {
                     s_ = replaceMatchAbc(s_, match__, dataPub);
-                    // console.log('after replace MatchAbc:', s_, typeof s_);
+                    console.log('after replace MatchAbc:', s_, typeof s_);
                 });
                 return s_;
             }
@@ -1956,13 +1952,14 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         }
     }
     //设置文本节点
-    function setTextContent (node, text) {
+    function setTextContent (node, textOrNumber) {
         //console.log('node_:::::');
         //console.log(node);
         //插入内容 当内容包含htm的dom节点时 比如<i></i> 需要启动html置换
-        function insertHtmlToNode(node_, html_) {
-            if(!html_) html_ = '';
-            var htmlString = html_.toString();
+        function insertHtmlToNode(node_, val_) {
+            if(!val_) val_ = '';
+            if(!isStrOrNumber(val_)) val_ = val_.toString();
+            var htmlString = val_;
             node_.textContent = '';
             if(node_.htmlObj) {
                 $(node_.htmlObj).remove();
@@ -1970,12 +1967,12 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             if(isHtml(htmlString)) {
                 //console.log('htmlString');
                 var tmpDom = $('<span></span>');
-                tmpDom.append(html_);
+                tmpDom.append(val_);
                 node_.htmlObj = tmpDom;
                 $(node_).after(tmpDom);
-            } else {//纯文本直接设置内容
-                //console.log('纯文本直接设置内容',node_, html_);
-                node_.textContent = html_;
+            } else {//纯文本直接设置内容 比如int
+                // console.log('纯文本直接设置内容',node_, val_, typeof val_);
+                node_.textContent = val_;
             }
         }
 
@@ -1983,14 +1980,14 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             //console.log('array');
             //console.log(node);
             node.forEach(function (v) {
-                insertHtmlToNode(v.obj, text);
+                insertHtmlToNode(v.obj, textOrNumber);
             });
         } else {
-            if(text == null) {
-                text == '';
+            if(textOrNumber == null) {
+                textOrNumber == '';
             }
             //console.log('insertHtmlToNode', node, text);
-            insertHtmlToNode(node, text);
+            insertHtmlToNode(node, textOrNumber);
         }
     }
     //同步节点数据
@@ -2069,12 +2066,14 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 //首次初始化 要么是带data 要么是需要pubdata
                 if(hasSetData || strHasKuohao(nodeText, 'public')) {
                     newStr =  strObj.formatStr(nodeText, data, n, thisObj, 'value');
+                    console.log('htmlDecode :'+ newStr, typeof newStr, 'nodeText:'+nodeText);
                     if(!isUndefined(opt['onFormat_value'])) {
                         thisFormatEven  = {func: opt['onFormat_value'], val: newStr, data: data};
                     }
                 }
-                newStr = htmlDecode(newStr);
-                //console.log('htmlDecode :'+ newStr , 'nodeText:'+nodeText);
+                if(isString(newStr)) {
+                    newStr = htmlDecode(newStr);
+                }
                 //只有文本被修改才更新node的文本 防止没必要的操作dom 带<>标记的内容要在此格式化
                 if(nodeText !== newStr) {
                     setTextContent(node, newStr);
@@ -2674,7 +2673,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                         if(dataBeforeDecode) {
                             response = dataBeforeDecode(response);
                         }
-                        // console.log('response', response);
+                        // console.log('__formatDataFunc response', response);
                         __formatDataFunc(response, callFunc);
 
                     }, errFunc: function (response) {
@@ -3793,6 +3792,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         }
         //更新node
         var _renewNodeVal = function(newV) {
+            console.log('_renewNodeVal ', newV);
             //如果 newV 是三元运算符，并且引号里带<> 直接html会勿将三元语法给打乱，所以应该一开始就将<>转译一遍
             if(isHtml(newV) ) {
                 //匹配例子： ..." <a href="#{id}"></a> <i class="glyphicon glyphicon-fire"></i>  <i class="glyphicon glyphicon-fire"></i>" ...
@@ -3825,6 +3825,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             obj_.htmObj = [];//刷新时要更新之前保存的nodeHtm
             //提取dom的node
             var thisNewVal = getObjHtmlNode(obj_, obj_[0], optData);
+            console.log('thisNewVal ', thisNewVal);
             obj_.append(thisNewVal);
             formatObjNodesVal(obj_, optData, hasSetData); //value的改变 也要重新格式化
         };
@@ -3844,8 +3845,8 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         if(!obj_.hasOwnProperty('value')) {
             Object.defineProperty(obj_, 'value', {
                 get: function () {
-                    //console.log('get val');
-                    //console.log(obj_[objValIsNode]);
+                    console.log('get val');
+                    console.log(obj_[objValIsNode]);
                     if(obj_[objValIsNode]) {
                         return obj_.html();
                     }
@@ -3902,7 +3903,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             { //有数据传入 哪怕是[] 都要判断之前的对象是否有data 有则对比更新
                 var extPar = valObj['extendParentData'];
                 if(!isUndefined(extPar) && extPar == true) {
-                    console.log('domAppendObj renew ObjData', );
+                    // console.log('domAppendObj renew ObjData', );
                     renewObjData(valObj, optData);
                 }
             }
@@ -3993,7 +3994,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         //when value is changed by outside
         obj.renewVal = function(newV, opt_) {
             if(isUndefined(opt_)) opt_ = obj['sor_opt'];
-            // console.log('renew Val', newV);
+            console.log('renew Val', newV);
             opt_['value'] = newV;
             if(isStrOrNumber(newV)) {
                 obj[objValIsNode] = true; //修改obj的内容类型
@@ -4021,6 +4022,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 }
             })
         };
+
         //append方法扩展
         obj.appendObj = function(newObj) {
             obj.renewVal(newObj, obj['sor_opt']);
@@ -4037,7 +4039,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             var data_ = getOptVal(opt, ['data'], {});
             // console.log('domAppendVal_______', tag, obj,  opt['value'], data_);
             //这里生成的dom都是提前获取好sor_opt的
-            var createDom = function (newOpt, sonData) {
+            var createDom = function (newOpt) {
                 newOpt = newOpt || {};
                 // console.log('create Dom************_', newOpt);
                 var renew_data = false;
@@ -4098,9 +4100,9 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                 });
                 dimValObj();
             } else if(tag == 'list') {
-                console.log('list__AppendVal---------,opt', opt['data']);
+                // console.log('list__AppendVal---------,opt', opt['data']);
                 var newVal = makeList(opt);
-                console.log('list__AppendVal++++++++++,newVal', newVal);
+                // console.log('list__AppendVal++++++++++,newVal', newVal);
                 // objPushVal(obj_, newVal);
                 objPushVal(obj_, newVal);
                 if(hasData(data_)) {
@@ -4119,7 +4121,6 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
                     $.each(valObj, function (n, val_){
                         if(!val_) return;
                         if(val_ instanceof $) { //jq对象 也是ourObj
-                            // console.log('array.jq对象 ', val_);
                             objPushVal(obj_, val_);
                             //li和td 的data由list创建后更新data
                         } else {
@@ -4143,9 +4144,9 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
             } else {
                 if(isUndefined(opt['value'])) opt['value'] = ' ';//必须输入空文本只能执行node替换
                 var optValStr = opt['value'];
-                // console.log('AppendVal value is obj+++++++++++++', optValStr);
                 if(isStrOrNumber(optValStr) ) {
                     obj[objValIsNode] = true;
+                    console.log('AppendVal value is string +++++++++++++', optValStr, hasSetData);
                     domAppendNode(obj_, opt, hasSetData);
                 } else if($.isArray(optValStr) ) {
                     dimValObj();
@@ -4291,22 +4292,22 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str','h',
         return makeDom({tag: 'tr', 'options':options});
     }
     function makeH1(options) {
-        return hObj.makeH1(options);
+        return makeDom({tag: 'h1', 'options':options});
     }
     function makeH2(options) {
-        return hObj.makeH2(options);
+        return makeDom({tag: 'h2', 'options':options});
     }
     function makeH3(options) {
-        return hObj.makeH3(options);
+        return makeDom({tag: 'h3', 'options':options});
     }
     function makeH4(options) {
-        return hObj.makeH4(options);
+        return makeDom({tag: 'h4', 'options':options});
     }
     function makeH5(options) {
-        return hObj.makeH5(options);
+        return makeDom({tag: 'h5', 'options':options});
     }
     function makeH6(options) {
-        return hObj.makeH6(options);
+        return makeDom({tag: 'h6', 'options':options});
     }
     function makeTree(options) {
         return tree.makeTree(options);

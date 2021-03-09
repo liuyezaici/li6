@@ -292,6 +292,37 @@ define(['require'], function (require) {
             }
             return selectIds;
         };
+        //去掉所选
+        obj.unselect = function(inputName) {
+            inputName = inputName || '';
+            if(!inputName) {
+                console.log('no set inputName');
+                return;
+            }
+            var inputs = [];
+            if(inputName.indexOf('.') !=-1) {
+                inputs = obj.find("."+ inputName +"");
+            } else {
+                inputs = obj.find("input[name='"+ inputName +"']");
+
+            }
+            var selectIds = [];
+            if(inputs.length) {
+                $.each(inputs, function (k, tmpTrInput_) {
+                    if(tmpTrInput_.prop('checked')) {
+                        findInputByName.prop('checked', false);
+                    }
+                });
+            } else {
+                $.each(obj['value'], function (k, tr) {
+                    if(tr.findName(inputName) && tr.findName(inputName).checked) {
+                        tr.findName(inputName).checked = false;
+                    }
+                });
+            }
+            return selectIds;
+        };
+
         obj.appendTrs(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
         core.optionGetSet(obj, options);

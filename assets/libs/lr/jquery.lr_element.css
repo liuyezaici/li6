@@ -1691,13 +1691,7 @@ div.form-control,
     transform: rotate(45deg) scaleY(1);
 }
 
-.diy_checked.checked_default.checkStyle2 ._icon,
-.diy_checked.checked_info.checkStyle2 ._icon,
-.diy_checked.checked_danger.checkStyle2 ._icon,
-.diy_checked.checked_warning.checkStyle2 ._icon,
-.diy_checked.checked_primary.checkStyle2 ._icon,
-.diy_checked.checked_success.checkStyle2 ._icon,
-.diy_checked.checked_black.checkStyle2 ._icon {
+.diy_checked.checkStyle2 ._icon {
     border-radius: 50px;
     box-shadow: none;
 }

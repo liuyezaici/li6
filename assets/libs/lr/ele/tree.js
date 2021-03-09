@@ -29,7 +29,7 @@ define(['require'], function (require) {
         var parentChecked = 'parent_checked';//上级复选框
         var sonCheckeds = 'son_checkeds';//下级复选框
         var menuOpt = core.getOptVal(options, ['menu'], null);
-        var liOpt = core.getOptVal(options, ['li'], null);
+        var liOpt = core.getOptVal(menuOpt, ['li'], null);
         var liCheckedBox = core.getOptVal(liOpt, ['checkedBox'], null);
         var liVal = core.getOptVal(liOpt, ['value'], null);
         if(!menuOpt) {
@@ -234,9 +234,14 @@ define(['require'], function (require) {
             }
         };
         //创建根菜单 只有根菜单可以带even 其他子节点不能带
+        var _createMenu = function(opt) {
+            return core.makeList(opt);
+        };
+        //创建子菜单 不能带even
         var createRootMenu = function() {
             var optArray = core.cutOptEvens(menuOpt);
-            var menuNoEven = optArray[0];
+            var menuNoEven = optArray[1];
+            // console.log('menuNoEven', menuNoEven);
 
             var liValObj = [];
             if(liCheckedBox) {
@@ -250,27 +255,58 @@ define(['require'], function (require) {
                         diyClick(obj_, e_, scope);
                     }
                 } else {
-                    liCheckedBox['click'] = function (obj_, e, scope) {
+                    liCheckedBox['click'] = function (obj_, e_, scope) {
                         systemClickChecked(obj_, e_, scope);
                     }
                 }
+                var liNeedPushValText = false;
+                var liNeedPushValObj = false;
+                if(core.isStrOrNumber(liVal)) {
+                    if(core.isUndefined(liCheckedBox['text'])) {
+                        liCheckedBox['text'] = liVal;
+                    } else {
+                        //如果自定义了checkedBox的text 再设置li的value 则只能新加li的value
+                        liNeedPushValText = true;
+                    }
+                } else {
+                    liNeedPushValObj = true;
+                }
                 liValObj.push(core.makeChecked(liCheckedBox));
-            }
-            if(core.isStrOrNumber(liVal)) {
-                liValObj.push(core.makeSpan({value: liVal}));
             } else {
-                liValObj.push(liVal);
+                if(core.isStrOrNumber(liVal)) {
+                    liNeedPushValText = true;
+                } else  {
+                    liNeedPushValObj = true;
+                }
             }
-            if(sonDataKey) {
-                liValObj.push(core.makeList(menuNoEven));
+            if(liNeedPushValText) {
+                liValObj.push(core.makeSpan({value: liVal}));
             }
+            if(liNeedPushValObj) {
+                if(!Array.isArray(liVal)) {
+                    liVal = [liVal];
+                }
+                var opt_, newObj;
+                liVal.map(function (o_) {
+                    if(core.isOurObj(o_)) {
+                        opt_ = o_.sor_opt;
+                        newObj = core.makeDom({tag: opt_.tag, 'options':opt_});
+                    } else {
+                        newObj = o_.clone(); //必须克隆不一样的obj 才能后续循环
+                    }
+                    liValObj.push(newObj);
+                });
+            }
+            core.delProperty(liOpt, ['checkedBox']);
+            core.delProperty(menuNoEven, ['son_key']);
+            menuNoEven['li'] = liOpt;
+            // if(sonDataKey && core.hasData(menuOpt['data']) && core.isUndefined(menuOpt['data'][sonDataKey])) {
+            //     var sonData = menuOpt['data'][sonDataKey];
+            //     console.log('has son', menuOpt['data'], sonData)
+            // }
             menuNoEven['li']['value'] = liValObj;
+            console.log('menuNoEven', menuNoEven)
             return core.makeList(menuNoEven);
-        };
-        //创建子菜单 不能带even
-        var createRootMenu = function() {
-            var menu_Opt = menuOpt;
-            return _createMenu(menu_Opt);
         };
         obj.extend({
             //主动更新数据
@@ -281,9 +317,6 @@ define(['require'], function (require) {
                 if(core.isUndefined(options_['text'])) options_['text'] = ''; //强制加text 否则外部无法取
                 var sValueStr = !core.isUndefined(options_['value']) ? options_['value'] : [] ;
                 isMultity = core.getOptVal(options_, ['mul', 'multi', 'multity'], undefined); //是否支持多选
-                var lazyCall = core.getOptVal(options_, ['lazy_call', 'lazyCall'], null);
-                var itemsOpt = core.getOptVal(options_, ['items'], {});
-                var liOpt = core.cloneData(itemsOpt);
                 // console.log('items:');
                 // console.log(JSON.stringify(itemsOpt));
                 //如果值是数组 并且多个值 并且未定义是否多选，则默认多选

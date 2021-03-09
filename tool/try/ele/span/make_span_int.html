@@ -14,18 +14,18 @@
             lrBox: '/assets/libs/lr/jquery-lr_box',
         }
     });
-    require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+    require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
 //一个简单的数据循环
 //注意：
 // 如果数据是数组: index 作为每个循环的序号 ;
 // value/class 属性支持js语法. 变量用{}括起
         var simpleSpan = lrEle.makeSpan({
             name: 'test_span',
-            data: {'ps': '没什么特别的技能'},
-            value: '我只是一串文本: {ps}',
+            data: {'age': 300},
+            value: '{age}',
             'class': "well"
             ,click: function (o,e) {
-                console.log(o, o.value);
+                lrBox.msgTisf('type:'+ typeof o.value + ', value:' + o.value);
             }
         });
         $('#show_span').append(simpleSpan);

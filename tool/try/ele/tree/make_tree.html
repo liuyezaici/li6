@@ -102,16 +102,20 @@ require(['jquery', 'core', 'lrBox'], function ($, lrEle, lrBox) {
             //li 附加显示内容
             li: {
                 checkedBox: {
-                    type: 1,
-                    checked: function () {
-
-                    }
+                    type: 2,
+                    text: '{some_title}',
+                    // click: function (o_, e) {
+                    //     e.stopPropagation();
+                    //     console.log('checked', o_);
+                    // }
                 },
-                value: '标题:{some_title}',
-                'click': function (li_, e_, o_) {
-                    console.log(li_);
-                    // console.log(o_.value);
-                },
+                value: lrEle.makeBtn({
+                    value: '{some_title}',
+                }),
+                // 'click': function (li_, e_, o_) {
+                //     console.log('li', li_);
+                //     // console.log(o_.value);
+                // },
             }
         },
         value: [21,22]
