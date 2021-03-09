@@ -4423,7 +4423,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                     }
                     // td: [{},{}]
                 } else if(isOurObj(val_)) {
-                    console.log('isOurObj', val_, val_.sor_opt);
+                    // console.log('isOurObj', val_, val_.sor_opt);
                     backData[k] = val_.sor_opt;
                 }  else if(isObj(val_)) {
                     if(val_ instanceof $) {

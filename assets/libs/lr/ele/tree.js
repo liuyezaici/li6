@@ -286,20 +286,26 @@ define(['require'], function (require) {
                 if(!Array.isArray(liVal)) {
                     liVal = [liVal];
                 }
-                var opt_, newObj;
+                var opt_, newObj = null;
                 liVal.map(function (o_) {
                     if(core.isOurObj(o_)) {
                         opt_ = o_.sor_opt;
                         newObj = core.makeDom({tag: opt_.tag, 'options':opt_});
                     } else {
-                        newObj = o_.clone(); //必须克隆不一样的obj 才能后续循环
+                        if(o_) {
+                            //必须克隆不一样的obj 才能后续循环
+                            newObj = o_.clone();
+                        }
                     }
-                    liValObj.push(newObj);
+                   if(newObj) {
+                       liValObj.push(newObj);
+                   }
                 });
             }
             core.delProperty(liOpt, ['checkedBox']);
             core.delProperty(menuNoEven, ['son_key']);
             menuNoEven['li'] = liOpt;
+            menuNoEven['class'] = 'rootMenu';
             // if(sonDataKey && core.hasData(menuOpt['data']) && core.isUndefined(menuOpt['data'][sonDataKey])) {
             //     var sonData = menuOpt['data'][sonDataKey];
             //     console.log('has son', menuOpt['data'], sonData)
@@ -329,7 +335,7 @@ define(['require'], function (require) {
                 }
                 // console.log('valIsNumber', valIsNumber);
                 // console.log('isMultity', isMultity);
-                options_['class'] = core.classAddSubClass(options_['class'], 'diy_items', true);
+                options_['class'] = core.classAddSubClass(options_['class'], 'diy_tree', true);
                 //参数读写绑定 参数可能被外部重置 所以要同步更新参数
                 obj.rootMenu = createRootMenu();
                 obj.append(obj.rootMenu);

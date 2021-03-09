@@ -1618,7 +1618,7 @@ div.form-control,
     display: inline-block;
     width: 14px;
     height: 14px;
-    margin-right: 5px;
+    margin-right: 3px;
     vertical-align: text-bottom;
     position: relative;
     z-index: 1;
@@ -2327,98 +2327,27 @@ div.form-control,
 
 
 /* 多层级树形菜单 */
-.diy_trees {
+.diy_tree {
 }
-.diy_trees .son_menu {
+.diy_tree .rootMenu {
     background-color: #fff;
-    padding: 0 0 2px 25px;
-    margin-bottom: 4px;
-}
-.diy_trees .tree_inner li {
-    display: block;
-    padding-right: 10px;
-}
-.diy_trees .son_menu li {
-    margin: 0;
-    list-style-type: none;
-}
-.diy_trees tr.top_tr td {
-    background-color: #f1f1f7;
-    border-top: 1px solid #fff;
-    padding: 5px 0;
-    font-size: 14px;
-    text-indent: 11px;
-    font-weight: bold;
-    color: #666;
-}
-.diy_trees .diy_checked ._inner ._title {
-    display: inline-block;
-    vertical-align: middle;
-}
-/* 权限排版 */
-.diy_power .trees_box div.son_box {
-    display: inline-block;
-}
-.diy_power .trees_box .top_title {
-    cursor: pointer;
-}
-.diy_power .trees_box .power_id {
-    margin-right: 6px;
-    vertical-align: middle;
-    line-height: 0;
-}
-.diy_power .trees_box .power_id input {
-    margin-top: 0;
-    width: 12px; /* 谷歌浏览器底下莫名其妙缩小了 */
+    padding: 0;
 }
 
-/* 小黑三角 */
-.diy_sanjiao {
+.diy_tree ul li {
+    margin: 0;
+    list-style-type: none;
+    display: inline-block;
+}
+.diy_tree .diy_checked {
+    margin-right: 10px;
+}
+.diy_tree .diy_checked ._inner ._title {
     display: inline-block;
     vertical-align: middle;
-    line-height: 1.42857;
-    position: relative;
-    cursor: pointer;
-    padding: 6px;
 }
-.diy_sanjiao > * {
-    display: inline-block;
-    vertical-align: middle;
-    line-height: 1.42857;
-    position: absolute;
-    border-width: 5px;
-    border-color: #888;
-    border-style: solid;
-    border-right-width: 0;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
-    transition: transform  0.25s , border-color 0.25s;
-    -webkit-transition: transform  0.25s  , border-color 0.25s; /* Safari */
-    bottom: 3px;
-    left: 4px;
-}
-.diy_sanjiao >.s {
-    transform: rotate(-90deg);
-    -webkit-transform: rotate(-90deg); /* Safari */
-}
-.diy_sanjiao >.y {
-    transform: rotate(0deg) ;
-    -webkit-transform: rotate(0deg); /* Safari */
-}
-.diy_sanjiao >.x {
-    transform: rotate(90deg);
-    -webkit-transform: rotate(90deg); /* Safari */
-}
-.diy_sanjiao >.z {
-    transform: rotate(180deg);
-    -webkit-transform: rotate(180deg); /* Safari */
-}
-.diy_sanjiao:hover > * {
-    border-color: #666;
-    border-right-width: 0;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
-}
+
+/* 拖动条 */
 .diy_bar {
     height: 25px;
     width: 125px;
