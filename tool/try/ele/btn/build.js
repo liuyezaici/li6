@@ -9,5 +9,5 @@
     // 打包输出到的路径
     out: "C:\\web\\li6\\assets\\libs\\lr\\lrEle.mini.js",
     allowSourceOverwrites: true,
-    optimize: 'uglify',
+    optimize: 'uglify'
 });
