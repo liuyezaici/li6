@@ -2,28 +2,6 @@
     <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
     <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
     <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-    <script src="/assets/js/require.min.js"></script>
+    <script src="/assets/js/require.min.js"  data-main="/tool/try/ele/btn/btn" defer async="true"></script>
     <div id="show_btn"></div>
-    <script>
-        //一个简单的数据循环
-        require.config({
-            baseUrl: '/assets/libs/lr/ele/',
-            paths: {
-                jquery: '/resource/pub/js/jq/jquery-3.2.1',
-                lrBox: '/assets/libs/lr/jquery-lr_box',
-            }
-        });
-        require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
-            //创建一个按钮
-            var diyBtn = core.makeBtn({
-                'class': 'btnLr btnLrSm btnLrSuccess',
-                value: '按钮',
-                click: function (obj_) {
-                    lrBox.msgTis('哈喽');
-                },
-            });
 
-            $('#show_btn').append(diyBtn);
-        });
-
-    </script>
