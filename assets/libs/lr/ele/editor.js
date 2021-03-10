@@ -3,43 +3,44 @@ define(['require'], function (require) {
     var objBindAttrsName = 'bind_attrs';
     var objAttrHasKh = 'obj_opt_has_kuohao';//obj的属性包含有{} 则可能绑定全局变量
     var objValIsNode = 'obj_val_is_node';//obj的val是否允许以字符串的形式重新再写入
-
     //创建编辑器[属性：name,width,height,content urlencode , type:'uEditor|xheditor', editorObj: 回调的编辑器对象'
     global.makeEditor = function(sourceOptions, sureSource) {
         var core = require('core');
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
-        var editorId =  getOptVal(options, 'id', 'editormd');
         var obj = $('<textarea id="'+ editorId +'"></textarea>');
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
-            obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
+            obj.sor_opt = sureSource ?  core.cloneData(sourceOptions || {}) : core.cloneData(core.copySourceOpt(sourceOptions));
         }
-        var options = cloneData(sourceOptions);
-        var setBind = getOptVal(options, ['bind'], '');
-        var sourceVal = getOptVal(options, ['value'], '');
+        var options = core.cloneData(sourceOptions);
+        var setBind = core.getOptVal(options, ['bind'], '');
+        var sourceVal = core.getOptVal(options, ['value'], '');
+        var editorId =  core.getOptVal(options, 'id', 'editormd');
+        var editorType = !core.isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd
+        var editorOpt = core.getOptVal(options, ['editorOpt', 'editorOption'], {});
+        var editorOut = !core.isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
 
         obj['tag'] = 'editor';
         obj[objValIsNode] = false;
-        var valueStrFormatdSuccess = true;//当前value是否渲染完成
-
+        var valueSetted = true;//当前value是否渲染完成
         //单独的格式化value的括号
         obj.formatVal = function (opt) {
             opt = opt || [];
-            var newData = getOptVal(opt, ['data'], {});
-            var newVal = _onFormatVal(obj, newData,  sourceVal);
-            var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
+            var newData = core.getOptVal(opt, ['data'], {});
+            var newVal = core._onFormatVal(obj, newData,  sourceVal);
+            var editorOut = !core.isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
             opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             obj.renewVal(newVal);
             if (sourceVal != newVal) {
                 //console.log('value change');
-                valueStrFormatdSuccess = true;
+                valueSetted = true;
             }
             var renewBind = obj[objAttrHasKh]==true;
             if(setBind && renewBind) {//触发数据同步  触发赋值 */
-                updateBindObj($.trim(setBind), newVal, [obj]);
+                core.updateBindObj($.trim(setBind), newVal, [obj]);
             }
-            if(valueStrFormatdSuccess) {
+            if(valueSetted) {
                 if(obj.lazyCall) {
                     obj.lazyCall(obj, newData, livingObj);
                 }
@@ -54,17 +55,41 @@ define(['require'], function (require) {
         };
         //渲染插件
         obj.formatPlugs = function(options) {
-            var editorType = !isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd
-            var editorOpt = getOptVal(options, ['editorOpt', 'editorOption'], null);
-            var editorOut = !isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
-            var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';//editormd
             //编辑器扩展 支持插入代码
             var newEditorObj;
-            //上面设置了读写属性 下面才能设置
+            //kindEditor响应速度很快
+            if(core.strInArray(editorType, ['kind', 'kindEditor']) !=-1) {
+                setTimeout(function () {
+                    //这里可以统一设置编辑器样式
+                    var defaultOpt =  {
+                        resizeType : 1,
+                        allowPreviewEmoticons : false,
+                        allowImageUpload : false,
+                        items : [ 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                            'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                            'insertunorderedlist']
+                    };
+                    defaultOpt = $.extend({}, defaultOpt, editorOpt);
+                    newEditorObj = KindEditor.create(obj, defaultOpt);
+                    //支持外部取值
+                    if(!obj.hasOwnProperty('value')) {
+                        Object.defineProperty(obj, 'value', {
+                            get: function () {
+                                return newEditorObj.text();
+                            },set :function (newVal) {
+                                return newEditorObj.text(newVal);
+                            }
+                        });
+                    }
+                    obj[editorOut] = newEditorObj;
+                }, 10);
+                return ;
+            }
+
             //先设定options参数 下面才可以修改options
             //id需要在页面种才能渲染编辑器
             setTimeout(function () {
-                if(strInArray(editorType, ['xheditor', 'xhEditor']) !=-1) {
+                if(core.strInArray(editorType, ['xheditor', 'xhEditor', 'xh']) !=-1) {
                     //这里可以统一设置编辑器样式
                     newEditorObj = obj.xheditor({
                         'plugins':  {
@@ -112,7 +137,7 @@ define(['require'], function (require) {
                     }
                     obj[editorOut] = newEditorObj;
                 }
-                else if(strInArray(editorType, ['uEditor', 'ueditor']) !=-1) {
+                else if(core.strInArray(editorType, ['uEditor', 'ueditor']) !=-1) {
                     UE.delEditor(editorId);//防止已经实例化过此编辑器
                     var defToolbars = [[
                         'fullscreen', 'source', '|', 'undo', 'redo', '|',
@@ -122,7 +147,7 @@ define(['require'], function (require) {
                         'inserttable', 'deletetable', 'insertparagraphbeforetable', 'insertrow', 'deleterow', 'insertcol', 'deletecol', 'mergecells', 'mergeright', 'mergedown', 'splittocells', 'splittorows', 'splittocols', 'charts', '|',
                         'print', 'preview', 'searchreplace', 'drafts', 'help'
                     ]];
-                    var toolbars = getOptVal(options, ['toolbars'], defToolbars);
+                    var toolbars = core.getOptVal(options, ['toolbars'], defToolbars);
                     newEditorObj = UE.getEditor(editorId, {toolbars: toolbars});
                     //支持外部取值
                     if(!obj.hasOwnProperty('value')) {
@@ -136,14 +161,14 @@ define(['require'], function (require) {
                     obj[editorOut].pasteHTML = function (newContent) {
                         newEditorObj.setContent(newContent, true);
                     }
-                } else if(strInArray(editorType, ['umEditor', 'umeditor']) !=-1) {
+                } else if(core.strInArray(editorType, ['umEditor', 'umeditor']) !=-1) {
                     UM.delEditor(editorId);//防止已经实例化过此编辑器
                     var defToolbars = [
                         'fullscreen', 'source', 'undo', 'redo','bold', 'italic', 'underline', 'fontborder', 'strikethrough', 'superscript', 'subscript',
                         'removeformat', 'formatmatch', 'autotypeset', 'blockquote', 'pasteplain', '|', 'forecolor',
                         'backcolor', 'insertorderedlist', 'insertunorderedlist'
                     ];
-                    var toolbars = getOptVal(options, ['toolbars', 'toolbar'], defToolbars);
+                    var toolbars = core.getOptVal(options, ['toolbars', 'toolbar'], defToolbars);
                     newEditorObj = UM.getEditor(editorId, {
                         toolbar: toolbars}
                     );
@@ -159,7 +184,7 @@ define(['require'], function (require) {
                     obj[editorOut].pasteHTML = function (newContent) {
                         newEditorObj.setContent(newContent, true);
                     }
-                } else if(strInArray(editorType, ['editormd', 'editorMd']) !=-1) {
+                } else if(core.strInArray(editorType, ['editormd', 'editorMd']) !=-1) {
                     var opt_ = {
                         width: "100%",
                         height: 540,
@@ -176,7 +201,7 @@ define(['require'], function (require) {
                     if (editorOpt) {
                         opt_ = $.extend({}, opt_, editorOpt);
                     }
-                    editorId = !isUndefined(editorOpt['id']) ? editorOpt['id'] : 'editormd';//实例化以父div的id为准
+                    editorId = !core.isUndefined(editorOpt['id']) ? editorOpt['id'] : 'editormd';//实例化以父div的id为准
                     newEditorObj = editormd(editorId, opt_);
                     //支持外部取值editormd
                     if (!obj.hasOwnProperty('value')) {
@@ -197,7 +222,7 @@ define(['require'], function (require) {
                         newEditorObj.setValue(newContent);
                     }
                 }
-            }, 500);
+            }, 1);
 
         };
         //外部设置val
@@ -205,24 +230,22 @@ define(['require'], function (require) {
             //主动更新数据
             renew: function(options) {
                 options = options || {};
-                var hasSetData = !isUndefined(options['data']);
+                var hasSetData = !core.isUndefined(options['data']);
                 //console.log('renew exitor');
                 //console.log(this);
                 //console.log(options);
-                options['placeholder'] = getOptVal(options, ['place', 'placeholder'], '');
-                var editorOut = !isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
-                var editorType = !isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd
-                if(isUndefined(options['value'])) options['value'] = '';//支持外部取值，textarea需要用到
+                options['placeholder'] = core.getOptVal(options, ['place', 'placeholder'], '');
+                if(core.isUndefined(options['value'])) options['value'] = '';//支持外部取值，textarea需要用到
                 var lastContent = options['value'] || '';
-                if(strHasKuohao(lastContent)) {
+                if(core.strHasKuohao(lastContent)) {
                     //console.log('set false:');
-                    valueStrFormatdSuccess = false;
+                    valueSetted = false;
                 }
                 obj.val(lastContent);
-                optionDataFrom(obj, options);
+                core.optionDataFrom(obj, options);
                 //console.log(lastContent);
                 if(editorType=='text') {
-                    options['class'] = isUndefined(options['class']) ? 'form-control' : options['class'] + ' form-control';
+                    options['class'] = core.isUndefined(options['class']) ? 'form-control' : options['class'] + ' form-control';
                     //支持外部取值
                     if(!obj.hasOwnProperty('value')) {
                         // console.log('set_text val');
@@ -245,28 +268,29 @@ define(['require'], function (require) {
 
                 //console.log('options');
                 //console.log(options);
-                strObj.formatAttr(obj, options, 0, hasSetData); //里面找出事件来绑定
+                core.strObj.formatAttr(obj, options, 0, hasSetData); //里面找出事件来绑定
             },
             updates: function(dataName, exceptObj) {//数据同步
                 exceptObj = exceptObj || [];
                 if(setBind && $.inArray(this, exceptObj) == -1) {
                     exceptObj.push(this);
-                    this.renewVal(getObjData($.trim(setBind)));
+                    this.renewVal(core.getObjData($.trim(setBind)));
                 }
                 if(obj[objBindAttrsName] && obj[objBindAttrsName][dataName]) { //attrs(如:class) 中含{公式 {dataName} > 2}
-                    renewObjBindAttr(this, dataName);
+                    core.renewObjBindAttr(this, dataName);
                 }
             },
             //克隆当前对象
             cloneSelf: function() {
-                var opt = cloneData(obj.sor_opt);
+                var opt = core.cloneData(obj.sor_opt);
                 return global.makeEditor(opt, true);
             }
         });
         obj.renew(options);//首次赋值 赋值完才能作数据绑定 同步绑定的数据
-        optionGetSet(obj, options);
-        objBindVal(obj, options);//数据绑定
-        addCloneName(obj);//支持克隆
+        core.optionGetSet(obj, options);
+        core.objBindVal(obj, options);//数据绑定
+        core.addCloneName(obj);//支持克隆
+        core.addTimer(obj);//添加定时器绑定
         //console.log(obj);
         return obj; //makeEditor
     };

@@ -8,10 +8,11 @@
  */
 "use strict";
 define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
-        'items', 'select', 'tree', 'img','radio', 'checked', 'switch',  'bar',  'rili',  'page'
+        'items', 'select', 'tree', 'img','radio', 'checked', 'switch', 'bar', 'rili', 'page', 'editor'
     ],
     function ($, lrBox, table, form, list, input, str,
-              items, select, tree, img, radio, checked, switched, bar, rili, page) {
+              items, select, tree, img, radio, checked,
+              switched, bar, rili, page, editor) {
     // VERSION 20210222
     // LR 2018.8
     //$.url.decode('http:%%%'); 实际以下插件中并没有使用 urldecode 此处嵌入只是方便以后的调取
@@ -4341,6 +4342,9 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
     function makePage(options) {
         return page.makePage(options);
     }
+    function makeEditor(options) {
+        return editor.makeEditor(options);
+    }
 
     //格式化 {td: []} 为 {value: makeTd}
     function tdToObj(trData, TdOpts, setExtData, tdKey) {
@@ -4552,7 +4556,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
         'makeH1', 'makeH2', 'makeH3', 'makeH4', 'makeH5','makeH6',
         'makeTable', 'makeForm', 'makeTr', 'makeTh', 'makeTd',
         'makeDiv', 'makeSpan', 'makeBtn', 'makeImg', 'makeInput', 'makeItems', 'makeSelect',
-        'makeTree','makeSwitch', 'makeChecked', 'makeRadio', 'makeBar','makeRili','makePage',
+        'makeTree','makeSwitch', 'makeChecked', 'makeRadio', 'makeBar','makeRili','makePage','makeEditor',
     ];
 
     outFunc.map(function (v, n) {

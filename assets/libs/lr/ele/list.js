@@ -226,6 +226,7 @@ define(['require'], function (require) {
         core.optionGetSet(obj, options);
         core.objBindVal(obj, options);//数据绑定
         core.addCloneName(obj, options);//支持克隆
+        core.addTimer(obj);//添加定时器绑定
         //对象直接设置了data 可以触发 延迟执行
         var dataFrom = core.getOptVal(options, ['data_from', 'dataFrom'], null);
         if(obj.lazyCall) {
