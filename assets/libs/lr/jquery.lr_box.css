@@ -8,11 +8,10 @@
     text-align: center;
     z-index: 20000000;
 }
-/* 全站的提示框样式 */
+/*  提示框样式 */
 .msg_box {
     width: 440px;
     max-width: 100%;
-    display: none;
     position: absolute;
     z-index: 1022;
     background-color: #f2f2f2;

@@ -2,10 +2,7 @@
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_box.css" rel="stylesheet" media="all" />
 <link href="/assets/libs/lr/jquery.lr_element.css" rel="stylesheet" media="all" />
-<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_box.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_base.js"></script>
-<script type="text/javascript" src="/assets/libs/lr/jquery-lr_element.js"></script>
+    <script src="/assets/js/require.min.js"></script>
 
 <style>
     #show_list .even {
@@ -38,32 +35,36 @@
 <div id="show_reload_btn"></div>
 
 <script>
-    //一个简单的数据循环
-    //注意：
-    // 如果数据是数组: index 作为每个循环的序号 ;
-    // value/class 属性支持js语法. 变量用{}括起
 
-    var liList = makeList({
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-3.2.1',
+            lrBox: '/assets/libs/lr/jquery-lr_box',
+        }
+    });
+    require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
+    var liList = core.makeList({
         data: [
             {'id': 1, 'url': '/resource/system/images/face/1.jpg' },
             {'id': 2, 'url': '/resource/system/images/face/2.jpg' },
         ],
-        name: 'test_li',
         title: '共有{this.length}行',
-        // show: '{{this.length} >0}',
         li: {
-            'class': "item {{index} % 2==0 ? 'even': 'odd'}",
+            'class': "item {{id} % 2==0 ? 'even': 'odd'}",
             value: [
-                makeDiv({
+                core.makeDiv({
                     value: "头像: {id}"
                 }),
-                makeImg({
-                    'class': 'thumbnail'
-                    ,'height': '50px'
-                    ,src: '{url}'
-                    , click: function (o) {
-                        console.log(o);
-                    }
+                core.makeDiv({
+                    'class': 'thumbnail',
+                    value: core.makeImg({
+                        'height': '80px'
+                        ,src: '{url}'
+                        , click: function (o) {
+                            lrBox.msgTisf(o.src);
+                        }
+                    })
                 })
             ]
         }
@@ -71,14 +72,14 @@
 
     $('#show_list').append(liList);
 
-    $('#show_reload_btn').append(makeA({
-        value: '点此更新数据',
+    $('#show_reload_btn').append(core.makeA({
+        value: '更新数据',
         'class': 'btnLr btnLrSuccess',
         click: function (e) {
             var newData = [];
             var i = 0,tmpI;
             while( i<5) {
-                tmpI =  makeRandomStr(2);
+                tmpI =  core.makeRandomInt(2);
                 newData.push({
                     'id': tmpI, 'url': '/resource/system/images/face/'+ tmpI +'.jpg'
                 });
@@ -86,7 +87,7 @@
             }
             liList['data'] = newData;
         }
-    })
-    );
+    }));
+});
 
 </script>

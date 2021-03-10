@@ -27,6 +27,10 @@
     border-radius: 4px;
     text-decoration: none;
 }
+.btnLrBlock {
+    display: block;
+    width: 100%;
+}
 .btnLr:focus,
 .btnLr:active:focus,
 .btn.active:focus,

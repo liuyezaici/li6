@@ -608,16 +608,15 @@ define(['jquery'], function ($) {
         if(!isUndefined(options['can_drag'])) options['canDrag'] = options['can_drag'];
         if(!isUndefined(options['close_btn'])) options['closeBtn'] = options['close_btn'];
         if(!isUndefined(options['position_type'])) options['positionType'] = options['position_type'];
-        if(!isUndefined(options['msg_hide'])) options['msgHide'] = options['msg_hide'];
         if(!isUndefined(options['text_decode'])) options['textDecode'] = options['text_decode'];
-        if(!isUndefined(options['msg_hide_then'])) options['msgHideThen'] = options['msg_hide_then'];
         if(!isUndefined(options['bg_opacity'])) options['bgOpacity'] = options['bg_opacity'];
-        var msgMoveDirection = getOptVal(options, ['fx','fangxiang','fangXiang','direction', '方向', '移动方向'], null);//移动方向
-        var msgHideTime = getOptVal(options,['hide_time','hideTime','消失时长','hideKeep'], 1200);//消失动画持续时间
+        var stayTime = getOptVal(options, ['stayTime', 'stay_time', '停留时间', '停留时长'], 0);
+        var autoHide = getOptVal(options, ['autoHide', 'auto_hide','msgHide','msg_hide', '自动隐藏'], false);
+        var autoHideThen = getOptVal(options, ['hideThen', 'hide_then', 'autoHideThen','auto_hide_then', 'hide_func','hideFunc','自动隐藏后', '隐藏后', '消失后执行方法'], false);//消失后执行方法
+        var msgMoveDirection = getOptVal(options, ['fx','fangxiang','fangXiang','direction', '方向', '移动方向'], null);
+        var fadeOutTime = getOptVal(options,['fadeOutTime', 'fade_out_time', '消失时长'], 1200);//消失动画持续时间
         var stopDistance = getOptVal(options,['distance','juli','jl','距离', '移动距离'], 200);//移动距离
         var boxMoveSpeed = getOptVal(options,['speed','速度','移动速度','移动时长'], 280);//移动速度
-        var hideThenFunc = getOptVal(options,['hide_func','hideFunc','消失后执行','消失回调'], false);//消失后执行方法
-        var msgHideWait = getOptVal(options,['msgHideWait','msg_hide_wait','wait','keep','停留时长'], false);//停留时长
         var fadeIn = getOptVal(options,['fadeIn','fadein'], null);//缓慢出现
         var zIndex = getOptVal(options,['zIndex','z-index'], null);//zIndex
         var shown = getOptVal(options,['show'], true);//是否显示
@@ -918,8 +917,6 @@ define(['jquery'], function ($) {
             boxObj.append(resizeBtn);
         }
         boxObjArray.push(boxObj);
-        //如果弹窗要渐渐显示，开始必须要先隐藏
-        if(fadeIn) boxObj.hide();
         $('body').append(boxObj);
         if (options.canDrag) {
             if(!options.positionType) options.positionType = '';
@@ -989,32 +986,24 @@ define(['jquery'], function ($) {
             });
         }
         var _callFadeout = function () {
-            if(msgHideWait) {
+            if(stayTime) {
                 var tmpTimeId = setTimeout(function () {
-                    boxObj.fadeOut(msgHideTime, function () {
+                    console.log('开始隐藏')
+                    boxObj.fadeOut(fadeOutTime, function () {
                         global.removeBoxObj(boxObj);
-                        if(hideThenFunc) {
-                            if(typeof hideThenFunc == 'string') {
-                                eval(hideThenFunc);
-                            } else {
-                                hideThenFunc();
-                            }
+                        if(autoHideThen) {
+                            autoHideThen();
                         }
-                    })
-                }, msgHideWait);
+                    });
+                }, stayTime);
                 faddingObj.set(boxObj, tmpTimeId);
             }
         };
         if(fadeIn) {
-            var reCss = {'display': 'none', width: boxWidth};
+            var reCss = {opacity: 0, width: boxWidth};
             reCss['left'] = x_;
             reCss['top'] = y_;
-            boxObj.css(reCss);
-            setTimeout(function () {
-                boxObj.fadeIn(fadeInTime, function () {
-                    _callFadeout();
-                });
-            }, 20);
+            boxObj.css(reCss).animate({opacity: 1},fadeInTime);
         } else if(fangda) {
             var reCss = {width: boxWidth, "position": options.positionType, "display": 'block'};
             if(x_) reCss['left'] = x_;
@@ -1074,7 +1063,6 @@ define(['jquery'], function ($) {
             //浮起来 ,停顿, 消失
         } else {
             boxObj.css(reCss);
-            if(!fadeIn) _callFadeout();
         }
 
         if(bgIsFadingOut) {
@@ -1082,6 +1070,10 @@ define(['jquery'], function ($) {
         }
         if(!contentIsUrl) {
             if(onLoadFunc) onLoadFunc(boxObj);
+        }
+        // console.log('autoHide', autoHide, stayTime);
+        if(autoHide) {
+            _callFadeout();
         }
         return boxObj;
     };
@@ -1529,8 +1521,10 @@ define(['jquery'], function ($) {
         options = options || {};
         if(isObj(tisText)) tisText = JSON.stringify(tisText);
         options = $.extend({
-            'wait': 1200,
-            'hideTime': 300,
+            'stayTime': 1200,
+            'autoHide': true,
+            'hideTime': 600,
+            'fadeOutTime': 2000,
         }, options);
         return __makeTisfBox(tisText, options, true)
     };
@@ -1583,11 +1577,9 @@ define(['jquery'], function ($) {
     function __makeTisfBox(tisText, options, fangda) {
         faddingObj.removeLastFaddingBox();
         options = options || {};
-        var bg = options['bg'] || options['背景'] || options['遮罩']|| false;//是否需要背景遮挡
         var boxClass = 'diy_tis_box';
-        if(typeof tisText == 'object')  tisText = tisText.toString();
         var defCfg = {
-            bg: bg,//背景遮挡
+            bg: false,
             width: 'auto',
             text: tisText,
             fangda: fangda, //向上移动 也可以带放大的效果
@@ -1596,11 +1588,8 @@ define(['jquery'], function ($) {
             'top': '40%', //出现顶部距离
             positionType: 'fixed'
         };
-        var msgHideWait = getOptVal(options,['msgHideWait','msg_hide_wait','wait','keep','stop','停留时长'], false);//停留时长
-        if(msgHideWait === false) defCfg['wait'] = 1500;
         options = $.extend(defCfg, options);
-        var box = global.makeBox(options);
-        return box;
+        return global.makeBox(options);
     };
 
     //效果：页面中间显示一个loading图标 用于等候数据提交的等待.

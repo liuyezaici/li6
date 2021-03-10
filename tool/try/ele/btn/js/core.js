@@ -4495,12 +4495,12 @@ define(['jquery', 'table', 'form', 'list', 'input', 'str',
         var files = form.find("input[type='file']");
         var fileData = {};
         files.on('change', function () {
-            let fileObj = $(this);
-            let inputName = $(this).attr('name');
-            let fileNode = fileObj[0].files[0];
-            let reader = new FileReader();
+            var o_ = $(this);
+            var inputName = o_.attr('name');
+            var fileNode = o_[0].files[0];
+            var reader = new FileReader();
             reader.onload = function (e) {
-                let base64Data = e.target.result;
+                var base64Data = e.target.result;
                 fileData[inputName] = base64Data;
             };
             reader.readAsDataURL(fileNode);

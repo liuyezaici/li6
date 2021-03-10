@@ -1,5 +1,5 @@
 (function () {
-    'use strict';//一个简单的数据循环
+    'use strict';
     require.config({
         baseUrl: 'js/',
         paths: {
@@ -7,9 +7,9 @@
             lrBox: '/assets/libs/lr/jquery-lr_box',
         }
     });
+    //创建一个按钮
     require(['jquery', 'core', 'lrBox'], function ($, core, lrBox) {
         var global = {};
-        //创建一个按钮
         var diyBtn = core.makeBtn({
             'class': 'btnLr btnLrSm btnLrSuccess',
             value: '按钮',
