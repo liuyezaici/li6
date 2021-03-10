@@ -7,10 +7,10 @@
  * @createTime  2018-08
  */
 "use strict";
-define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
+define(['jquery', 'table', 'form', 'list', 'input', 'str',
         'items', 'select', 'tree', 'img','radio', 'checked', 'switch', 'bar', 'rili', 'page', 'editor'
     ],
-    function ($, lrBox, table, form, list, input, str,
+    function ($, table, form, list, input, str,
               items, select, tree, img, radio, checked,
               switched, bar, rili, page, editor) {
     // VERSION 20210222
@@ -2851,7 +2851,7 @@ define(['jquery', 'lrBox', 'table', 'form', 'list', 'input', 'str',
                     var parentObj = thisObj['parent'];
                     var parentSons = parentObj['value'];
                     if(parentSons.length == 1) {
-                        lrBox.msgTisf('atLeaseOne');
+                        alert('atLeaseOne');
                         return;
                     }
                     $.each(parentSons, function (n, obj_) {
