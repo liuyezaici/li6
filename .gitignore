@@ -3,7 +3,6 @@
 /runtime/temp
 /runtime/log
 /runtime/cache
-/uploads
 /application/database.php
 /runtime/schema
 /install/install.lock

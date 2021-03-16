@@ -1,8 +1,10 @@
 周1 
-    
+	打包客户管理平台的代码 更新page插件
+	
    
 周2
-	 
+    格式化oss权限编辑体验
+	
 周3  
 周4 
 	官网信息修改
@@ -24,5 +26,5 @@
  redis-cli -h pomcube.pehexp.0001.usw2.cache.amazonaws.com
  
  //导出数据
- mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -p  -- systemservice usage_statistics_for_day > day_dump.txt
+ mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -p  -- customer fa_customer > day_dump.txt
  
