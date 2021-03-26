@@ -10,8 +10,8 @@
 	
 	
 周4 
-	官网信息修改
-	客户管理 加批量修改功能
+	新版官网新版UI重排
+	 
 	
     
 周5   
@@ -19,8 +19,12 @@
    
    
    
+   //官网本地数据库
+   mysql -u pomcube -pAUQq3qCw
+   
    
    //连接数据库
+   
    
    mysql -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678
 
