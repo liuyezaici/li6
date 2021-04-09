@@ -21,6 +21,13 @@
    
    //官网本地数据库
    mysql -u pomcube -pAUQq3qCw
+   show databases;
+   //导出数据库
+mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  pomcube_www_sp > copyMysqlData2.txt
+
+//导出表
+ mysqldump  -u pomcube -p  -- pomcube_www pomcube_www_sp > copyMysqlData.txt
+   
    
    
    //连接数据库
