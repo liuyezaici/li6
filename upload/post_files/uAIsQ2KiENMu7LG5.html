@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+    <style>
+
+        @keyframes mymove {
+            from {
+                opacity: 1
+            }
+            to {
+                width: 0;
+                height: 0;
+                opacity: 0
+            }
+        }
+
+        @-moz-keyframes mymove /* Firefox */
+        {
+            from {
+                opacity: 1
+            }
+            to {
+                width: 0;
+                height: 0;
+                opacity: 0
+            }
+        }
+
+        @-webkit-keyframes mymove /* Safari and Chrome */
+        {
+            from {
+                opacity: 1
+            }
+            to {
+                width: 0;
+                height: 0;
+                opacity: 0
+            }
+        }
+
+        @-o-keyframes mymove /* Opera */
+        {
+            from {
+                opacity: 1
+            }
+            to {
+                width: 0;
+                height: 0;
+                opacity: 0
+            }
+        }
+        .demo {
+            position: relative;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #00c1de;
+            border-radius: 50%;
+        }
+        .demo .inner1 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            opacity: 0;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #00c1de;
+            animation:mymove 0.8s forwards infinite; /* Firefox */
+            -moz-animation:mymove 0.8s forwards infinite; /* Firefox */
+            -webkit-animation:mymove 0.8s forwards infinite; /* Safari and Chrome */
+            -o-animation:mymove 0.8s forwards infinite; /* Opera */
+        }
+        .demo .inner2 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            opacity: 0;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            border: 1px solid #00c1de;
+            animation:mymove 1.6s forwards infinite; /* Firefox */
+            -moz-animation:mymove 1.6s forwards infinite; /* Firefox */
+            -webkit-animation:mymove 1.6s forwards infinite; /* Safari and Chrome */
+            -o-animation:mymove 1.6s forwards infinite; /* Opera */
+        }
+    </style>
+</head>
+<body>
+
+<p><b>注释：</b>本例在 Internet Explorer 中无效。</p>
+
+<div class="demo">
+    <div class="inner1"></div>
+    <div class="inner2"></div>
+</div>
+
+</body>
+</html>
