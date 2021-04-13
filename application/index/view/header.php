@@ -4,7 +4,6 @@
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <link href="/min/?f=/resource/pub/bootstrap-3.3.7/css/bootstrap.css,/resource/pub/css/pub.css" rel="stylesheet" media="all" />
 <link rel="stylesheet" href="/assets/libs/lr/jquery.lr_box.css" />
-<link rel="stylesheet" href="/assets/libs/lr/jquery.lr_element.css" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/resource/pub/bootstrap-3.3.7/js/bootstrap.js"></script>
 <script src="/assets/js/require.min.js"></script>

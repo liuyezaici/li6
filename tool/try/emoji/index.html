@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+<link href="http://js.li6.cc/assets/libs/lr/lrBox.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/js/require.min.js"></script>
+<style>
+    .show_a {display: inline-block}
+</style>
+
+
+    <div id="show_box" class="container">
+        <h2>
+            //emoji转unicode
+        </h2>
+       <div class="well">
+           <div class="row">
+               <div class="col-sm-5">
+                   <input name="emoji_str1" class="form-control sourceInput" placeholder="emoji表情" value="👧" />
+               </div>
+               <div class="col-sm-5">
+                    <input name="emoji_str2" class="form-control resultInput" placeholder="结果" />
+               </div>
+               <div class="col-sm-2">
+                   <button class="btn btn-success changeBtn">转换</button>
+               </div>
+           </div>
+       </div>
+    </div>
+
+<script>
+
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-1.8.3.min',
+            lrBox: 'http://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+        }
+    });
+    require(['jquery', 'lrBox'], function ($, lrBox) {
+        function _convertStringToUnicodeCodePoints(str) {
+            var surrogate1st = 0,
+                unicodeCodes = [],
+                i = 0,
+                l = str.length;
+
+            for (; i < l; i++) {
+                var utf16Code = str.charCodeAt(i);
+                if (surrogate1st != 0) {
+                    if (utf16Code >= 0xDC00 && utf16Code <= 0xDFFF) {
+                        var surrogate2nd = utf16Code,
+                            unicodeCode = (surrogate1st - 0xD800) * (1 << 10) + (1 << 16) + (surrogate2nd - 0xDC00);
+                        unicodeCodes.push(unicodeCode);
+                    }
+                    surrogate1st = 0;
+                } else if (utf16Code >= 0xD800 && utf16Code <= 0xDBFF) {
+                    surrogate1st = utf16Code;
+                } else {
+                    unicodeCodes.push(utf16Code);
+                }
+            }
+            return unicodeCodes;
+        }
+        function _escapeToUtf32(str) {
+            var escaped = [],
+                unicodeCodes = _convertStringToUnicodeCodePoints(str),
+                i = 0,
+                l = unicodeCodes.length,
+                hex;
+
+            for (; i < l; i++) {
+                hex = unicodeCodes[i].toString(16);
+                escaped.push('0000'.substr(hex.length) + hex);
+            }
+            return escaped.join('-');
+        }
+        var input1 = $('.sourceInput');
+        var input2 = $('.resultInput');
+        var changeBtn = $('.changeBtn');
+        changeBtn.click(function () {
+            var str = input1.val();
+            if(!str) {
+                lrBox.msgTisf('请粘贴emoji表情进来');
+                return;
+            }
+            input2.val(_escapeToUtf32(str));
+        });
+    });
+
+</script>
