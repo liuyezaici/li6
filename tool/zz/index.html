@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="renderer" content="webkit|ie-comp|ie-stand"><!-- 强制360用急速模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+<link href="http://js.li6.cc/assets/libs/lr/lrBox.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/js/require.min.js"></script>
+
+    <div id="show_box" class="container">
+        <h2>
+            //在线正则表达式测试 <a href="/" class="btn btn-sm" target="_self">回首页</a>
+        </h2>
+       <div class="row">
+                   <div class="col-md-9">
+                       <div style="padding-bottom: 15px;">
+                           <textarea class="form-control" style="height: 200px;" id="textSour" placeholder="在此输入待匹配文本"></textarea>
+                       </div>
+                       <div class="operateTB">
+                           <form class="well ">
+                               <div class="input-group">
+                                   <span class="input-group-addon">正则表达式</span>
+                                   <input type="text" id="textPattern" placeholder="在此输入正则表达式" class="form-control" />
+                                   <div class="input-group-btn">
+                                       <a class="btn btn-primary testBtn">测试匹配</a>
+                                   </div>
+                               </div>
+                               <div class="row" >
+                                   <div class="col-md-4">
+
+                                   </div>
+                                   <div class="col-md-4">
+                                       <div class="checkbox">
+                                            <label class="checkbox"><input type="checkbox" value="global" checked="checked" id="optionGlobal" />全局搜索</label>
+                                       </div>
+                                   </div>
+                                   <div class="col-md-4">
+                                       <div class="checkbox">
+                                            <label class="checkbox"><input type="checkbox" value="ignoreCase" id="optionIgnoreCase"/>忽略大小写</label>
+                                       </div>
+                                   </div>
+                               </div>
+                           </form>
+                       </div>
+                       <div class="bottomBar">
+                           <h4>匹配结果：</h4>
+                           <textarea readonly="readonly" style="height: 200px;" class="form-control" id="textMatchResult"></textarea>
+                       </div>
+                       <div class="operateTB">
+                           <form class="well">
+                               <div class="input-group">
+                                   <input type="text" id="textNewReplace" class="form-control" placeholder="在此输入替换文本" />
+                                   <div class="input-group-btn">
+                                       <a  class="btn btn-info testReplaceBtn"><i class="icon-chevron-down icon-white"></i>替换</a>
+                                   </div>
+                               </div>
+                           </form>
+                       </div>
+                       <div style="padding-bottom: 100px;">
+                           <h4>替换结果：</h4>
+                           <textarea readonly="readonly" style="height: 400px;"  class="form-control" id="textReplaceResult"></textarea><br/>
+                       </div>
+                   </div>
+                   <div class="col-md-3" id="right_area">
+                       <ul class="nav nav-list well">
+                           <li class="nav-header"><i class="fa fa-list-ul"></i>常用正则表达式</li>
+                           <li><a href="#" title="[\u4e00-\u9fa5]">匹配中文字符</a></li>
+                           <li><a href="#" title="[^\x00-\xff]">匹配双字节字符(包括汉字在内)</a></li>
+                           <li><a href="#" title="\n\s*\r">匹配空白行</a></li>
+                           <li><a href="#" title="[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?">匹配Email地址</a></li>
+                           <li><a href="#" title="[a-zA-z]+://[^\s]*">匹配网址URL</a></li>
+                           <li><a href="#" title="\d{3}-\d{8}|\d{4}-\{7,8}">匹配国内电话号码</a></li>
+                           <li><a href="#" title="[1-9][0-9]{4,}">匹配腾讯QQ号</a></li>
+                           <li><a href="#" title="[1-9]\d{5}(?!\d)">匹配中国邮政编码</a></li>
+                           <li><a href="#" title="^(\d{6})(\d{4})(\d{2})(\d{2})(\d{3})([0-9]|X)$">匹配18位身份证号</a></li>
+                           <li><a href="#" title="([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8])))">匹配(年-月-日)格式日期</a></li>
+                           <li><a href="#" title="^[1-9]\d*$">匹配正整数</a></li>
+                           <li><a href="#" title="^-[1-9]\d*$">匹配负整数</a></li>
+                           <li><a href="#" title="^-?[1-9]\d*$">匹配整数</a></li>
+                           <li><a href="#" title="^[1-9]\d*|0$">匹配非负整数（正整数 + 0）</a></li>
+                           <li><a href="#" title="^-[1-9]\d*|0$">匹配非正整数（负整数 + 0）</a></li>
+                           <li><a href="#" title="^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$">匹配正浮点数</a></li>
+                           <li><a href="#" title="^-[1-9]\d*\.\d*|-0\.\d*[1-9]\d*$">匹配负浮点数</a></li>
+                       </ul>
+                   </div>
+           </div>
+        <h6>
+            代码来源：https://tool.oschina.net/regex/
+        </h6>
+    </div>
+    <div class="hidden">
+            &copy;2007
+            <script type="text/javascript">document.write(unescape("%3Cspan id='cnzz_stat_icon_1279380024'%3E%3C/span%3E%3Cscript src='https://s9.cnzz.com/stat.php%3Fid%3D1279380024%26show%3Dpic' type='text/javascript'%3E%3C/script%3E"));</script>
+    </div>
+<script>
+
+    require.config({
+        baseUrl: '/assets/libs/lr/ele/',
+        paths: {
+            jquery: '/resource/pub/js/jq/jquery-1.8.3.min',
+            lrBox: 'http://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+        }
+    });
+    require(['jquery', 'lrBox'], function ($, lrBox) {
+        var show_box = $('#show_box');
+        var textPattern = show_box.find('#textPattern');
+        var textSour = show_box.find('#textSour');
+        var textMatchResult = show_box.find('#textMatchResult');
+        var textNewReplace = show_box.find('#textNewReplace');
+        var textReplaceResult = show_box.find('#textReplaceResult');
+        var optionGlobal = show_box.find('#optionGlobal');
+        var optionIgnoreCase = show_box.find('#optionIgnoreCase');
+        var testBtn = show_box.find('.testBtn');
+        var testReplaceBtn = show_box.find('.testReplaceBtn');
+        function onMatch() {
+            if (!isValidFields()) {
+                return false;
+            }
+            textMatchResult.val();
+            var regex = buildRegex();
+            var result = textSour.val().match(regex);
+            if (null==result || 0==result.length) {
+                textMatchResult.val("（没有匹配）");
+                return false;
+            }
+            if (optionGlobal.prop('checked')) {
+                var strResult = "共找到 " + result.length + " 处匹配：\r\n";
+                for (var i=0;i < result.length;++i)strResult = strResult + result[i] + "\r\n";
+                textMatchResult.val(strResult);
+            }
+            else {
+                textMatchResult.val("匹配位置：" + regex.lastIndex + "\r\n匹配结果：" + result[0]);
+            }
+            return true;
+        }
+        show_box.find("#right_area li a").click(function (){
+            textPattern.val($(this).attr("title"));
+            onMatch();
+        });
+        testBtn.click(function () {
+            onMatch();
+        });
+        testReplaceBtn.click(function () {
+            var str = textSour.val();
+            var regex = buildRegex();
+            textReplaceResult.val(str.replace(regex, textNewReplace.val()));
+        });
+
+        function isValidFields() {
+            if (null==textSour.val() || textSour.val().length<1) {
+                textSour.focus();
+                lrBox.msgTsf("请输入待匹配文本");
+                return false;
+            }
+            if (null==textPattern.val() || textPattern.val().length<1) {
+                textPattern.focus();
+                lrBox.msgTsf("请输入正则表达式");
+                return false;
+            }
+            return true;
+        }
+        function buildRegex() {
+            var op = "";
+            if (optionGlobal.prop('checked')) {
+                op = "g";
+            }
+            if (optionIgnoreCase.prop('checked')) {
+                op = op + "i";
+            }
+            return new RegExp(textPattern.val(), op);
+        }
+        function reset()
+        {
+            textSour.val("");
+            textPattern.val("");
+            textMatchResult.val("");
+            textNewReplace.val("");
+            textReplaceResult.val("");
+        }
+    });
+
+</script>

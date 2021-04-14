@@ -2,11 +2,11 @@ require.config({
     paths: {
         jquery: '/resource/pub/js/jq/jquery-3.2.1',
         lrBase: '/assets/libs/lr/jquery-lr_base',
-        lrBox: '/assets/libs/lr/jquery-lr_box',
+        lrBox: 'http://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
         lrEle: '/assets/libs/lr/jquery-lr_element',
     }
 });
-require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
+require(['jquery', 'lrEle', 'lrBox', 'lrBase'], function ($, lrEle, lrBox, lrBase) {
 
     //form里的快速注册
     window.fastReg= function() {
@@ -166,7 +166,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
     window.checkLogin = function() {
         var topMenu = $('#navigation');
         var stateBox = topMenu.find('.status_box');
-        rePost('/index/system/checkLogin',{}, function(res){
+        lrBase.rePost('/index/system/checkLogin',{}, function(res){
             var my_menu = '';
             if( res.data.account !== '' && res.data.nickname !== '' ){
                 if(stateBox.length > 0 ) {
@@ -183,7 +183,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
 
 //全局退出登录
     window.logOut=function() {
-        rePost('/?s=system/ajax_out', {}, function (data) {
+        lrBase.rePost('/index/system/logout', {}, function (data) {
             if (data.id != '0233') {
                 if (data.info) data.msg += data.info;
                 lrBox.msgTisf(data.msg);
@@ -224,7 +224,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
                             value: lrEle.makeInput({
                                 place: '帐号',
                                 name: 'u_nick',
-                                'class': 'no_border no_radius input-group-lg btn-block',
+                                'class': 'input-group-lg btn-block',
                                 null_func: function (data) {
                                     lrBox.msgTisf('帐号呢');
                                 }
@@ -235,7 +235,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
                             padding_top: '20px',
                             value: lrEle.makeInput({
                                 place: '密码',
-                                'class': 'no_border no_radius input-group-lg btn-block',
+                                'class': 'input-group-lg btn-block',
                                 type: 'password',
                                 name: 'u_pwd',
                                 null_func: function (data) {
@@ -244,7 +244,6 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
                             })
                         }
                     },{
-                        'class': 'submit_tr',
                         td: {
                             colspan: '2',
                             padding_top: '20px',
@@ -252,7 +251,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
                             value: lrEle.makeBtn({
                                 value: '登 录',
                                 type: 'submit',
-                                'class': 'btn btn-lg btn-success btn-block no_radius'
+                                'class': 'btn btn-success btn-block'
                             })
                         }
                     }]
@@ -277,7 +276,7 @@ require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
         });
         lrBox.msgWin('登录', diyForm, 400, 100,{
             bg: true,//背景遮挡
-            'class': 'new_loginbox',
+            'addClass': 'new_loginbox',
             canDrag: false
         });
     };

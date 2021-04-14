@@ -43,7 +43,7 @@ class Article extends Frontend
         include_once(ROOT_PATH . 'assets/libs/markdown/Markdown.php');
         include_once(ROOT_PATH . 'assets/libs/markdown/MarkdownExtra.php');
         $info['content'] = \MarkdownExtra::defaultTransform( $info['content']);
-        $info['content'] = preg_replace("/<img(.+)src=\"([^\"]+)\"(.+)>/", '<img class="lazy"$1data-original=\'$2\' src=\'/assets/img/loading2.gif\'$3>',$info['content']);
+//        $info['content'] = preg_replace("/<img(.+)src=\"([^\"]+)\"(.+)>/", '<img class="lazy"$1data-original=\'$2\' src=\'/assets/img/loading2.gif\'$3>',$info['content']);
         //上一篇 下一篇
         $prevArticle = ArticleModel::getPrevNextArticle($info['typeid'], $id, '<');
         $nextArticle = ArticleModel::getPrevNextArticle($info['typeid'], $id, '>');
