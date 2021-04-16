@@ -2,7 +2,7 @@ require.config({
     paths: {
         jquery: '/resource/pub/js/jq/jquery-3.2.1',
         lrBase: '/assets/libs/lr/jquery-lr_base',
-        lrBox: 'http://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+        lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
         lrEle: '/assets/libs/lr/jquery-lr_element',
     }
 });

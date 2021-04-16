@@ -41,13 +41,16 @@ mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  customer > c
  redis-cli -h pomcube.pehexp.0001.usw2.cache.amazonaws.com
  
  //导出数据-表
- mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- systemservice device > device.sql
+ mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- systemservice fa_device_bind_user > fa_device_bind_user.sql
  
  //导出数据-库
  mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- pomcube_www > copyMysqlWWW.txt;
  mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- systemservice > copyMysqlser.txt;
  mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- customer > copyMysqlcus.txt;
  
+ 查看定时任务
+ crontab -l
  
- 
+ 重命名表：
+ ALTER TABLE fa_device_status_template RENAME TO fa_device_cfg_template
  

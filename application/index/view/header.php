@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
 <link href="/min/?f=/resource/pub/bootstrap-3.3.7/css/bootstrap.css,/resource/pub/css/pub.css" rel="stylesheet" media="all" />
-<link rel="stylesheet" href="http://js.li6.cc/assets/libs/lr/lrBox.css" />
+<link rel="stylesheet" href="https://js.li6.cc/assets/libs/lr/lrBox.css" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/resource/pub/bootstrap-3.3.7/js/bootstrap.js"></script>
 <script src="/assets/js/require.min.js"></script>
