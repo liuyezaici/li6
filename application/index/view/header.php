@@ -6,8 +6,7 @@
 <link rel="stylesheet" href="https://js.li6.cc/assets/libs/lr/lrBox.css" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/resource/pub/bootstrap-3.3.7/js/bootstrap.js"></script>
-<script src="/assets/js/require.min.js"></script>
-<script type="text/javascript" src="/resource/front/js/front.js"></script><!-- 前端js-->
+<script src="/assets/js/require.min.js" data-main="/resource/front/js/front" ></script>
 <link href="/resource/front/css/front.css" rel="stylesheet" media="all" /> <!-- 模版样式 -->
 <meta property="og:image" content="/resource/front/images/logo.png"/>
 <meta property="og:title" content="李瑞个人主页"/>

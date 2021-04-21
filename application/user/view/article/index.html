@@ -1,188 +1,208 @@
 <script src="/resource/pub/js/jquery-upload.js">
 </script>
+<link href="/assets/libs/editor/tui-editor/codemirror.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/editor/tui-editor/tui-editor-contents.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/editor/tui-editor/tui-editor.css" rel="stylesheet" media="all" />
+<link href="/assets/libs/editor/tui-editor/github.min.css" rel="stylesheet" media="all" />
 <script>
-    var pageOpt = {
-        page: parseInt("<?=$pageInfo['pagenow']?>"),
-        total: parseInt("<?=$pageInfo['total']?>"),
-        pagesize: parseInt("<?=$pageInfo['pagesize']?>"),
-        click: function (obj, newPage) {
-            searchForm.findName("page").value=(newPage);
-            reFreshArticle();
-        }
-    };
-    var searchForm = makeForm({
-        'class': 'diy_search_top',
-        submit: function(obj) {
-            var uri = obj.serialize();
-            ajaxOpen('/user/article/?'+ uri);
-        },
-        value: [
-            makeInput({name: 'page', type: 'hidden', value: '<?=$page?>'}),
-            makeSpan({
-                padding: '0 22px 0 10px',
-                value: '文章管理'
-            }),
-            makeInput({name: 'keyword', place: '文章标题', 'class': 'no_radius_right', width: '200px', value: '<?=$keyword?>'}),
-            makeBtn({
-                'value': '搜索', 'type': 'submit','class': 'btn btn-info no_radius_left'
-            }),
-            makeBtn({
-                'value': '写文章', margin_left: '122px','type': 'button', 'class': 'btn btn-success', click: function () {
-                    msgWin('添加文章','[url]/user/article/add', 800, 50);
-                }
-            }),
-            makeBtn({
-                'value': '文章分类', margin_left: '12px','type': 'button', 'class': 'btn btn-info', click: function () {
-                    viewAllTypes();
-                }
-            })
-        ]
-    });
-    var dataHtmlObj = makeTable({
-        'class': 'table table-bordered',
-        data:  JSON.parse('<?=$articleList?>'),
-        tr_1:
-            {
-                td: [
-                    {
-                        width: '120px',
-                        'style': 'padding-left: 20px;',
-                        value: [
-                            makeSpan({
-                                value: '编号'
-                            })
-                        ]
-                    },
-                    {
-                        value: [
-                            makeSpan({
-                                value: '标题'
-                            })
-                        ]
-                    },
-                    {
-                        value: [
-                            makeSpan({
-                                value: '分类'
-                            })
-                        ]
-                    },
-                    {
-                        value: [
-                            makeSpan({
-                                value: '人气'
-                            })
-                        ]
-                    },
-                    {
-                        value: [
-                            makeSpan({
-                                value: '操作'
-                            })
-                        ]
-                    }
-                ]
-            },
-        tr:
-            {
-                td: [
-                    {
-                        show: '{id}',
-                        value: [
-                            makeSpan({
-                                'style': 'padding-left: 20px;',
-                                value: '{id}'
-                            })
-                        ]
-                    },
-                    {
-                        show: '{id}',
-                        value: [
-                            makeSpan({
-                                value: '{typeName}'
-                            })
-                        ]
-                    },
-                    {
-                        show: '{id}',
-                        value: [
-                            makeA({
-                                href: '/index/article/details/id/{id}',
-                                value: '{title}'
-                            })
-                        ]
-                    },
-                    {
-                        show: '{id}',
-                        value: [
-                            makeSpan({
-                                value: '{rq}'
-                            })
-                        ]
-                    },
-                    {
-                        show: '{id}',
-                        value: [
-                            makeA({
-                                value: '编辑',
-                                target: '_self',
-                                'class': 'btn btn-xs btn-info no_radius_right',
-                                click: "editArticle({id});"
-                            }),
-                            makeA({
-                                value: '删除',
-                                target: '_self',
-                                'class': 'btn btn-xs btn-warning no_radius_left',
-                                click: "delArticle({id});"
-                            })
-                        ]
-                    }
-                ]
-            },
-        tr_default: [
-            {
-                show: '{{this.length}==0}',
-                td: [
-                    {
-                        colspan: '10',
-                        value: '没有搜索结果'
-                    }
-                ]
+
+    require(['jquery', 'lrEle', 'lrBox', 'lrBase', 'webuploader'], function ($, lrEle, lrBox, lrBase, webuploader) {
+        var pageOpt = {
+            page: parseInt("<?=$pageInfo['pagenow']?>"),
+            total: parseInt("<?=$pageInfo['total']?>"),
+            pagesize: parseInt("<?=$pageInfo['pagesize']?>"),
+            click: function (obj, newPage) {
+                searchForm.findName("page").value = (newPage);
+                reFreshArticle();
             }
-        ],
-    });
-    var pageObj = makePage(pageOpt);
-
-    //删除文章
-    function delArticle(articleid) {
-        msgConfirm('你确定要删除此文章吗？', '确定', '取消', function () {
-           hideNewBox();
-            postAndDone({
-                post_url: '/user/article/del/id/'+ articleid,
-                post_data: {},
-                success_key: 'id',
-                success_value: '0039',
-                success_func: 'hideNewBox();reFreshArticle();msgTis("删除成功");'
-            });
+        };
+        var searchForm = lrEle.makeForm({
+            'class': 'diy_search_top',
+            submit: function (obj) {
+                var uri = obj.serialize();
+                ajaxOpen('/user/article/?' + uri);
+            },
+            value: [
+                lrEle.makeInput({name: 'page', type: 'hidden', value: '<?=$page?>'}),
+                lrEle.makeSpan({
+                    padding: '0 22px 0 10px',
+                    value: '文章管理'
+                }),
+                lrEle.makeInput({
+                    name: 'keyword',
+                    place: '文章标题',
+                    'class': 'no_radius_right',
+                    width: '200px',
+                    value: '<?=$keyword?>'
+                }),
+                lrEle.makeBtn({
+                    'value': '搜索', 'type': 'submit', 'class': 'btn btn-info no_radius_left'
+                }),
+                lrEle.makeBtn({
+                    'value': '写文章',
+                    margin_left: '122px',
+                    'type': 'button',
+                    'class': 'btn btn-success',
+                    click: function () {
+                       lrBox.msgWin('添加文章', '[url]/user/article/add', 1200, 50);
+                    }
+                }),
+                lrEle.makeBtn({
+                    'value': '文章分类',
+                    margin_left: '12px',
+                    'type': 'button',
+                    'class': 'btn btn-info',
+                    click: function () {
+                        lrBox.msgWin('文章分类管理', '[url]/user/article/manageAllTypes', 580, 1);
+                    }
+                })
+            ]
         });
-    }
-    //编辑文章图片
-    function editArticlePics(articleid) {
-        hideNewBox();
-        msgWin('编辑文章图片','[url]/user/article/article_pic_list?id='+ articleid, 1200, 1);
-    }
-    //编辑文章信息
-    function editArticle(articleid) {
-        msgWin('编辑文章','[url]/user/article/edit/id/'+ articleid, 1200, 1);
-    }
-    //刷新列表
-    function reFreshArticle() {
-        $(searchForm[0]).submit();
-    }
+        var dataHtmlObj = lrEle.makeTable({
+            'class': 'table table-bordered',
+            data: JSON.parse('<?=$articleList?>'),
+            tr_1:
+                {
+                    td: [
+                        {
+                            width: '120px',
+                            'style': 'padding-left: 20px;',
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '编号'
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '标题'
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '分类'
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '人气'
+                                })
+                            ]
+                        },
+                        {
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '操作'
+                                })
+                            ]
+                        }
+                    ]
+                },
+            tr:
+                {
+                    td: [
+                        {
+                            show: '{id}',
+                            value: [
+                                lrEle.makeSpan({
+                                    'style': 'padding-left: 20px;',
+                                    value: '{id}'
+                                })
+                            ]
+                        },
+                        {
+                            show: '{id}',
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '{typeName}'
+                                })
+                            ]
+                        },
+                        {
+                            show: '{id}',
+                            value: [
+                                lrEle.makeA({
+                                    href: '/index/article/details/id/{id}',
+                                    value: '{title}'
+                                })
+                            ]
+                        },
+                        {
+                            show: '{id}',
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '{rq}'
+                                })
+                            ]
+                        },
+                        {
+                            show: '{id}',
+                            value: [
+                                lrEle.makeA({
+                                    value: '编辑',
+                                    target: '_self',
+                                    'class': 'btn btn-xs btn-info no_radius_right',
+                                    click: "editArticle({id});"
+                                }),
+                                lrEle.makeA({
+                                    value: '删除',
+                                    target: '_self',
+                                    'class': 'btn btn-xs btn-warning no_radius_left',
+                                    click: "delArticle({id});"
+                                })
+                            ]
+                        }
+                    ]
+                },
+            tr_default: [
+                {
+                    show: '{{this.length}==0}',
+                    td: [
+                        {
+                            colspan: '10',
+                            value: '没有搜索结果'
+                        }
+                    ]
+                }
+            ],
+        });
+        var pageObj = lrEle.makePage(pageOpt);
 
-    //文章分类
-    function viewAllTypes() {
-        msgWin('文章分类管理','[url]/user/article/manageAllTypes', 580, 1);
-    }
-    $('#root_right .right_content').append(searchForm).append(dataHtmlObj).append(pageObj);
+        //删除文章
+        function delArticle(articleid) {
+            lrBox.msgConfirm('你确定要删除此文章吗？', '确定', '取消', function () {
+                lrBox.hideNewBox();
+                lrEle.postAndDone({
+                    post_url: '/user/article/del/id/' + articleid,
+                    post_data: {},
+                    success_key: 'id',
+                    success_value: '0039',
+                    success_func: 'hideNewBox();reFreshArticle();msgTis("删除成功");'
+                });
+            });
+        }
+
+        //编辑文章图片
+        function editArticlePics(articleid) {
+            lrBox.hideNewBox();
+            lrBox.msgWin('编辑文章图片', '[url]/user/article/article_pic_list?id=' + articleid, 1200, 1);
+        }
+
+        //编辑文章信息
+        window.editArticle = function(articleid) {
+            lrBox.msgWin('编辑文章', '[url]/user/article/edit/id/' + articleid, 1200, 10);
+        };
+
+        //刷新列表
+        window.reFreshArticle = function() {
+            $(searchForm[0]).submit();
+        };
+
+        $('#root_right .right_content').append(searchForm).append(dataHtmlObj).append(pageObj);
+    });
 </script>

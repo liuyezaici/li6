@@ -140,6 +140,7 @@ class Article extends Backend
     //获取详情
     public function get($id=NULL) {
         $info = ArticleModel::getbyid($id);
+        $info['content'] = html_entity_decode($info['content']);
         $this->success('获取成功', '', $info);
     }
 
@@ -159,6 +160,7 @@ class Article extends Backend
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
             if(!$content) $this->error('请输入内容');
+            $info['content'] = html_entity_decode($info['content']);
             ArticleModel::where('id', $id)->update($rows);
             $this->success('编辑成功');
         }

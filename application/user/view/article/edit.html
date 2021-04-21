@@ -59,264 +59,300 @@
 </style>
 <div id="modify_article_form"></div>
 <script>
-    var articleSid = parseInt('<?=$id?>');
-    var typeSelect = makeSelect({
-        name: 'rows[typeid]',
-        'text': '选择分类',
-        value: '{typeid}',
-        value_key: 'id',
-        title_key: 'title',
-        menu: {
-            width: '400px',
-            data_from: {
-                url: '/user/article/getAllTypes',
-                success_key: 'code',
-                success_value: '1',
-                data_key: 'data.list'
-            }
-        },
-        li: {
-            value: '{title}'
-        }
-    });
-    var editorObj = makeEditor({
-        name:'rows[content]',
-        'class': 'editor',
-        width: '500px',
-        height: '450px',
-        type: 'editormd',
-        editorObj: 'editArticleEditor',
-        editorOpt: {
-            id:'article_editor_parent',
-            width   : "100%",
-            height  : 440,
-            syncScrolling : "single",
-            toolbarIcons : function() {
-                // Or return editormd.toolbarModes[name]; // full, simple, mini
-                // Using "||" set icons align right.
-                return ["bold", "quote", "h3", "del", "link", "list-ul", "list-ol",
-                    "code",  "preformatted-text", "code-block", "table", "datetime","hr", "|", "image", "||", "watch", "preview"]
-            },
-            path: '/assets/libs/editormd/lib/',// 如果加载不了其他扩展，则需要手动定义lib所在路径
-        },
-        value: '{content}'
-    });
-    $('#modify_article_form').append(makeForm({
-        'url': '/user/article/edit/id/'+ articleSid,
-        data_from: {
-            url: '/user/article/get/id/'+ articleSid,
-            success_key: 'code',
-            success_value: ['1'],
-            data_key: 'data',
-        },
-        name: 'modifyForm',
-        success_key: 'code',
-        success_value: '1',
-        success_func: function (e) {
-            msgTis(e.msg);
-        },
-        err_func: function (e) {
-            msgTis(e.msg);
-        },
-        value: [
-            makeTable({
-                tr_1: [
-                    {
-                        td: [
-                            {
-                                width: '100px',
-                                value: makeSpan({value: '文章标题'})
-                            },{
-                                value: makeInput({name:'rows[title]', width: '455px', value: '{title}'})
-                            }
-                        ]
-                    },
-                    {
-                        td: [
-                            {
-                                padding_top: '15px',
-                                value: makeSpan({value: '文章分类'})
-                            },{
-                                padding_top: '15px',
-                                value:  [
-                                    typeSelect,
-                                    makeBtn({value: '管理分类', 'class': 'btn btn-default', margin_left: '5px', click: function () {
-                                            msgWin('文章分类管理','[url]/user/article/manageAllTypes', 580, 1);
-                                        }})
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        td: [
-                            {
-                                padding_top: '15px',
-                                valign: 'top',
-                                value: makeSpan({value: '正文'})
-                            },{
-                                padding_top: '15px',
-                                value: makeDiv({
-                                    id:'article_editor_parent',
-                                    value: editorObj
-                                })
-                            }
-                        ]
-                    },
-                    {
-                        td: [
-                            {
-                                padding_top: '10px',
-                                value: makeSpan({value: '附件'})
-                            },{
-                                padding_top: '10px',
-                                value: makeDiv({id: 'manage_article_fujian', 'class': 'manage_files', value: ''})
-                            }
-                        ]
-                    },
-                    {
-                        td: [{}, {
-                            padding_top: '10px',
-                            value: makeBtn({type:'submit', value:'保存', 'class': 'btn btn-info'})
-                        }]
+
+    require(['jquery', 'lrEle', 'lrBox', 'lrBase', 'webuploader' , '/assets/libs/editor/tui-editor/toastui-jquery-editor.min.js'],
+        function ($, lrEle, lrBox, lrBase, webuploader, tuiEditor) {
+            var articleSid = parseInt('<?=$id?>');
+            var typeSelect = lrEle.makeSelect({
+                name: 'rows[typeid]',
+                'text': '选择分类',
+                value: '{typeid}',
+                value_key: 'id',
+                title_key: 'title',
+                menu: {
+                    width: '400px',
+                    data_from: {
+                        url: '/user/article/getAllTypes',
+                        success_key: 'code',
+                        success_value: '1',
+                        data_key: 'data.list'
                     }
-                ]
-            })
-        ]
-    })
-    );
-    //重新加载分类
-    function refreshArticlesTypes() {
-        typeSelect.menu.renewData();
-    }
-
-    var currentFilePage = 1;
-    //附件翻页
-    function articleFujianGotoPage(page) {
-        reLoadThisArticleFujian(page);
-    }
-    //加载当前问题的附件
-    function reLoadThisArticleFujian(page) {
-        page = page || 1;
-        currentFilePage = page;
-        var form = $('#modify_article_form');
-        rePost("/user/articlefujian/load_article_fujians?page="+ page, {sid: articleSid},function(res) {
-            if(res.code !=1) {
-                msg(res.msg);
-            } else {
-                var responses = res.data;
-                var filesData = responses.fileDatas;
-                console.log('filesData', filesData);
-                var filesPageMenu = makePage(responses.pageInfo);
-                var fileHtml= '', tmpFileFid, tmpFileName, tmpFileSize, tmpFileGeshi;
-                fileHtml += "<ul>";
-                var fileIcon = '';
-                if(filesData.length>0) {
-                    $.each(filesData, function (n, v) {
-                        tmpFileFid = v['id'];
-                        tmpFileName = v['filename'];
-                        tmpFileGeshi = v['geshi'];
-                        tmpFileSize = v['filesize'];
-                        if($.inArray(tmpFileGeshi.toLowerCase(), ['gif','png','jpg', 'jpeg']) !=-1) {
-                            fileIcon ="<img src=\""+ v['fileurl'] +"\" width='100%' onclick=\"enterThisImage('"+ v['fileurl'] +"');\" title='插入使用' />";
-                        } else {
-                            fileIcon ="<span onclick=\"enterThisFile('"+ v['fileurl'] +"');\">插入使用</span>";
-                        }
-                        fileHtml += "<li>" +
-                            "<span class='cover' title='格式:"+ tmpFileGeshi +",大小:"+ tmpFileSize +"'> " +
-                             fileIcon +
-                            "</span>" +
-                            "<span class='operat'> " +
-                            "   <span class='item'><a href='javascript: void(0);' onclick=\"moveThisFile('"+ tmpFileFid +"', 'l');\" target='_self' title='向左移动'><i class='glyphicon glyphicon-arrow-left'></i></a></span>" +
-                            "   <span class='item'><a href='javascript: void(0);' onclick=\"delThisFile('"+ tmpFileFid +"');\" target='_self' title='删除图片'><i class='glyphicon glyphicon-remove'></i></a></span>" +
-                            "   <span class='item'><a href='javascript: void(0);' onclick=\"moveThisFile('"+ tmpFileFid +"', 'r');\" target='_self' title='向左移动'><i class='glyphicon glyphicon-arrow-right'></i></a></span>" +
-                            "</span>" +
-                            "</li>";
-                    });
-                } else {
-                    fileHtml += "<li> </li>";
+                },
+                li: {
+                    value: '{title}'
                 }
+            });
+            var editorObj = lrEle.makeEditor({
+                name: 'rows[content]',
+                'class': 'editor',
+                width: '100%',
+                height: '450px',
+                value: '{content}',
+                type: 'tuiEditor',
+                editorObj: 'editArticleEditor',
+                editorOpt: {
+                    obj: tuiEditor,
+                    height: '500px',
+                    language: 'en-US',
+                    previewStyle: 'vertical', //tab vertical,
+                    toolbarItems: [
+                        'heading',
+                        'bold',
+                        'italic',
+                        'strike',
+                        'divider',
+                        'hr',
+                        'quote',
+                        'divider',
+                        'ul',
+                        'ol',
+                        'task',
+                        'indent',
+                        'outdent',
+                        'divider',
+                        'table',
+                        'image',
+                        'link',
+                        'divider',
+                        'code',
+                        'codeblock'
+                    ]
+                }
+            });
+            $('#modify_article_form').append(lrEle.makeForm({
+                    'url': '/user/article/edit/id/' + articleSid,
+                    data_from: {
+                        url: '/user/article/get/id/' + articleSid,
+                        success_key: 'code',
+                        success_value: ['1'],
+                        data_key: 'data',
+                    },
+                    name: 'modifyForm',
+                    success_key: 'code',
+                    success_value: '1',
+                    success_func: function (e) {
+                        lrBox.msgTis(e.msg);
+                    },
+                    err_func: function (e) {
+                        lrBox.msgTis(e.msg);
+                    },
+                    value: [
+                        lrEle.makeTable({
+                            tr_1: [
+                                {
+                                    td: [
+                                        {
+                                            width: '100px',
+                                            value: lrEle.makeSpan({value: '文章标题'})
+                                        }, {
+                                            value: lrEle.makeInput({name: 'rows[title]', width: '455px', value: '{title}'})
+                                        }
+                                    ]
+                                },
+                                {
+                                    td: [
+                                        {
+                                            padding_top: '15px',
+                                            value: lrEle.makeSpan({value: '文章分类'})
+                                        }, {
+                                            padding_top: '15px',
+                                            value: [
+                                                typeSelect,
+                                                lrEle.makeBtn({
+                                                    value: '管理分类',
+                                                    'class': 'btn btn-default',
+                                                    margin_left: '5px',
+                                                    click: function () {
+                                                        lrBox.msgWin('文章分类管理', '[url]/user/article/manageAllTypes', 580, 1);
+                                                    }
+                                                })
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    td: [
+                                        {
+                                            padding_top: '15px',
+                                            valign: 'top',
+                                            value: lrEle.makeSpan({value: '正文'})
+                                        }, {
+                                            padding_top: '15px',
+                                            value: lrEle.makeDiv({
+                                                id: 'article_editor_parent',
+                                                value: editorObj
+                                            })
+                                        }
+                                    ]
+                                },
+                                {
+                                    td: [
+                                        {
+                                            padding_top: '10px',
+                                            value: lrEle.makeSpan({value: '附件'})
+                                        }, {
+                                            padding_top: '10px',
+                                            value: lrEle.makeDiv({
+                                                id: 'manage_article_fujian',
+                                                'class': 'manage_files',
+                                                value: ''
+                                            })
+                                        }
+                                    ]
+                                },
+                                {
+                                    td: [{}, {
+                                        padding_top: '10px',
+                                        value: lrEle.makeBtn({type: 'submit', value: '保存', 'class': 'btn btn-info'})
+                                    }]
+                                }
+                            ]
+                        })
+                    ]
+                })
+            );
 
-                fileHtml += "</ul>";
-                var uploadBtn = makeBtn({
-                    'class': 'btn alert-info',
-                    value: '<em class="glyphicon glyphicon-picture"></em> 上传文件',
-                    click: function () {
-                        var uploadForm = batchUploadForm({
-                            'url' : '/user/articlefujian/upload_files',
-                            'post': {
-                                'aid': articleSid,
-                                'save_path': '<?=$savePath?>',
-                                'path_safe_hash': '<?=$upload_safe_code?>',
-                            },
-                            'one_finish': function () {
+            //重新加载分类
+            function refreshArticlesTypes() {
+                typeSelect.menu.renewData();
+            }
 
-                            } ,
-                            'all_finish': function () {
-                                hideNewBox();
-                                msgTis('上传完成');
-                                reLoadThisArticleFujian();
-                            },
-                            'accept': {
-                                title: 'file',
-                                extensions: 'gif,jpg,jpeg,bmp,png,txt,html',
-                                mimeTypes: 'image/jpg,image/jpeg,image/png,txt/plain'
+            var currentFilePage = 1;
+
+            //附件翻页
+            function articleFujianGotoPage(page) {
+                reLoadThisArticleFujian(page);
+            }
+
+            //加载当前问题的附件
+            function reLoadThisArticleFujian(page) {
+                page = page || 1;
+                currentFilePage = page;
+                var form = $('#modify_article_form');
+                lrEle.rePost("/user/articlefujian/load_article_fujians?page=" + page, {sid: articleSid}, function (res) {
+                    if (res.code != 1) {
+                        lrBox.msg(res.msg);
+                    } else {
+                        var responses = res.data;
+                        var filesData = responses.fileDatas;
+                        console.log('filesData', filesData);
+                        var filesPageMenu = lrEle.makePage(responses.pageInfo);
+                        var fileHtml = '', tmpFileFid, tmpFileName, tmpFileSize, tmpFileGeshi;
+                        fileHtml += "<ul>";
+                        var fileIcon = '';
+                        if (filesData.length > 0) {
+                            $.each(filesData, function (n, v) {
+                                tmpFileFid = v['id'];
+                                tmpFileName = v['filename'];
+                                tmpFileGeshi = v['geshi'];
+                                tmpFileSize = v['filesize'];
+                                if ($.inArray(tmpFileGeshi.toLowerCase(), ['gif', 'png', 'jpg', 'jpeg']) != -1) {
+                                    fileIcon = "<img src=\"" + v['fileurl'] + "\" width='100%' onclick=\"enterThisImage('" + v['fileurl'] + "');\" title='插入使用' />";
+                                } else {
+                                    fileIcon = "<span onclick=\"enterThisFile('" + v['fileurl'] + "');\">插入使用</span>";
+                                }
+                                fileHtml += "<li>" +
+                                    "<span class='cover' title='格式:" + tmpFileGeshi + ",大小:" + tmpFileSize + "'> " +
+                                    fileIcon +
+                                    "</span>" +
+                                    "<span class='operat'> " +
+                                    "   <span class='item'><a href='javascript: void(0);' onclick=\"moveThisFile('" + tmpFileFid + "', 'l');\" target='_self' title='向左移动'><i class='glyphicon glyphicon-arrow-left'></i></a></span>" +
+                                    "   <span class='item'><a href='javascript: void(0);' onclick=\"delThisFile('" + tmpFileFid + "');\" target='_self' title='删除图片'><i class='glyphicon glyphicon-remove'></i></a></span>" +
+                                    "   <span class='item'><a href='javascript: void(0);' onclick=\"moveThisFile('" + tmpFileFid + "', 'r');\" target='_self' title='向左移动'><i class='glyphicon glyphicon-arrow-right'></i></a></span>" +
+                                    "</span>" +
+                                    "</li>";
+                            });
+                        } else {
+                            fileHtml += "<li> </li>";
+                        }
+
+                        fileHtml += "</ul>";
+                        var uploadBtn = lrEle.makeBtn({
+                            'class': 'btn alert-info',
+                            value: '<em class="glyphicon glyphicon-picture"></em> 上传文件',
+                            click: function () {
+                                var uploadForm = batchUploadForm({
+                                    'url': '/user/articlefujian/upload_files',
+                                    'post': {
+                                        'aid': articleSid,
+                                        'save_path': '<?=$savePath?>',
+                                        'path_safe_hash': '<?=$upload_safe_code?>',
+                                    },
+                                    'one_finish': function () {
+
+                                    },
+                                    'all_finish': function () {
+                                        hideNewBox();
+                                        lrBox.msgTis('上传完成');
+                                        reLoadThisArticleFujian();
+                                    },
+                                    'accept': {
+                                        title: 'file',
+                                        extensions: 'gif,jpg,jpeg,bmp,png,txt,html',
+                                        mimeTypes: 'image/jpg,image/jpeg,image/png,txt/plain'
+                                    }
+                                });
+                                lrBox.msgView('上传文件', uploadForm, 820, 10, false);
                             }
                         });
-                        msgView('上传文件', uploadForm, 820, 10, false);
+                        form.find('#manage_article_fujian').html(fileHtml).append([
+                            filesPageMenu,
+                            lrEle.makeDiv({'class': 'upload_btn_box', value: uploadBtn})
+                        ]);
                     }
                 });
-                form.find('#manage_article_fujian').html(fileHtml).append([
-                    filesPageMenu,
-                    makeDiv({'class': 'upload_btn_box', value: uploadBtn})
-                ]);
             }
-        });
-    }
-    //移动附件
-    function moveThisFile(f_id, direction) {
-        loadingSvg();
-        postAndDone({
-            success_value: '1',
-            success_key: 'code',
-            post_url: '/user/articlefujian/move_post_fujian',
-            post_data: {id: f_id, direction: direction},
-            success_func: function () {
-                noLoading();
-                reLoadThisArticleFujian();
-            },
-            error_func: function (res) {
-                noLoading();
-                msgTisf(res.msg);
-            },
-        });
-    }
-    //将附件插入到内容
-    function enterThisFile(url) {
-        var pushHtml = "["+ url +"]("+ url +")";
-        editorObj.editArticleEditor.insertValue(pushHtml);
-    }
-    //将图片插入到内容
-    function enterThisImage(url) {
-        var pushHtml = "![]("+ url +")";
-        editorObj.editArticleEditor.insertValue(pushHtml);
-    }
-    //删除附件
-    function delThisFile(code) {
-        loadingSvg();
-        postAndDone({
-            success_value: '1',
-            success_key: 'code',
-            post_url: '/user/articlefujian/remove_article_fujians',
-            post_data: {fid: code},
-            success_func: function () {
-                noLoading();
-                reLoadThisArticleFujian();
-            },
-            error_func: function (res) {
-                noLoading();
-                msgTisf(res.msg);
-            },
-        });
-    }
-    reLoadThisArticleFujian();//加载附件
+
+            //移动附件
+            function moveThisFile(f_id, direction) {
+                lrBox.loadingSvg();
+                lrEle.postAndDone({
+                    success_value: '1',
+                    success_key: 'code',
+                    post_url: '/user/articlefujian/move_post_fujian',
+                    post_data: {id: f_id, direction: direction},
+                    success_func: function () {
+                        lrBox.noLoading();
+                        reLoadThisArticleFujian();
+                    },
+                    error_func: function (res) {
+                        lrBox.noLoading();
+                        lrBox.msgTisf(res.msg);
+                    },
+                });
+            }
+
+            //将附件插入到内容
+            function enterThisFile(url) {
+                var pushHtml = "[" + url + "](" + url + ")";
+                editorObj.editArticleEditor.insertValue(pushHtml);
+            }
+
+            //将图片插入到内容
+            function enterThisImage(url) {
+                var pushHtml = "![](" + url + ")";
+                editorObj.editArticleEditor.insertValue(pushHtml);
+            }
+
+            //删除附件
+            function delThisFile(code) {
+                lrBox.loadingSvg();
+                lrEle.postAndDone({
+                    success_value: '1',
+                    success_key: 'code',
+                    post_url: '/user/articlefujian/remove_article_fujians',
+                    post_data: {fid: code},
+                    success_func: function () {
+                        lrBox.noLoading();
+                        reLoadThisArticleFujian();
+                    },
+                    error_func: function (res) {
+                        lrBox.noLoading();
+                        lrBox.msgTisf(res.msg);
+                    },
+                });
+            }
+
+            reLoadThisArticleFujian();//加载附件
+    });
 </script>

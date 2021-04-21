@@ -3924,13 +3924,6 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             TdOpts = [TdOpts];
         }
         TdOpts.forEach(function (opt_) {
-            //opt_ 的value可能是提前渲染好的span数组
-            var optVal = opt_['value'] || [];
-            //强制转数组
-            if(!$.isArray(optVal)) {
-                //  opt_['value'] = [optVal];
-            }
-            // console.log('forEach___val', opt_['value']);
             if(setExtData) opt_['extendParentData'] = true;//tr是克隆来的话，会继承data  td必须也要继续
             newTd = makeTD_(opt_);
             if(hasData(trData)) newTd['data'] = trData;
@@ -7595,16 +7588,25 @@ item: [{
     global.makeEditor = function(sourceOptions, sureSource) {
         sourceOptions = sourceOptions || {};
         sureSource = sureSource || false;
+        var options = cloneData(sourceOptions);
         var editorId =  getOptVal(options, 'id', 'editormd');
-        var obj = $('<textarea id="'+ editorId +'"></textarea>');
+        var editorType =  getOptVal(options, 'type', 'uEditor'); //text|uEditor|umEditor|xheditor|editormd
+        var isTuiEditor = strInArray(editorType, ['tuiEditor', 'tuieditor', 'tui-editor']) !=-1;
+        var editorNeedTextarea = false;
+        var obj = null;
+        if(isTuiEditor) {
+            obj = $('<div></div>');
+        } else {
+            obj = $('<textarea id="'+ editorId +'"></textarea>');
+            editorNeedTextarea = true;
+        }
         if(!obj.sor_opt) {
             //必须克隆 否则后面更新会污染sor_opt
             obj.sor_opt = sureSource ?  cloneData(sourceOptions || {}) : cloneData(copySourceOpt(sourceOptions));
         }
-        var options = cloneData(sourceOptions);
         var setBind = getOptVal(options, ['bind'], '');
         var sourceVal = getOptVal(options, ['value'], '');
-
+        var onReadyEven = getOptVal(options, ['onload', 'onLoad', 'ready', 'onReady'], null);
         obj['tag'] = 'editor';
         obj[objValIsNode] = false;
         var valueStrFormatdSuccess = true;//当前value是否渲染完成
@@ -7614,10 +7616,9 @@ item: [{
             opt = opt || [];
             var newData = getOptVal(opt, ['data'], {});
             var newVal = _onFormatVal(obj, newData,  sourceVal);
-            var editorOut = !isUndefined(opt['editorObj']) ? opt['editorObj'] : 'editor';
             opt['value'] = newVal; //参数要改变 防止外部取出来的仍是括号
             obj.renewVal(newVal);
-            if (sourceVal != newVal) {
+            if (hasData(newData) && sourceVal != newVal) {
                 //console.log('value change');
                 valueStrFormatdSuccess = true;
             }
@@ -7629,21 +7630,26 @@ item: [{
                 if(obj.lazyCall) {
                     obj.lazyCall(obj, newData, livingObj);
                 }
+                obj.formatPlugs(opt, newVal);
             }
-            if(obj[editorOut] && obj[editorOut].setContent) {
-                obj[editorOut].setContent(newVal);
-            }
-            obj.formatPlugs(opt);
         };
+
         obj.renewVal = function(newVal) {
-            obj.val(newVal);
+            if(editorNeedTextarea) {
+                obj.val(newVal);
+            } else {
+                obj.html(newVal);
+            }
         };
         //渲染插件
-        obj.formatPlugs = function(options) {
-            var editorType = !isUndefined(options['type']) ? options['type'] : 'uEditor';//text|uEditor|umEditor|xheditor|editormd
+        obj.formatPlugs = function(options, content) {
+            content = content || '';
             var editorOpt = getOptVal(options, ['editorOpt', 'editorOption'], null);
             var editorOut = !isUndefined(options['editorObj']) ? options['editorObj'] : 'editor';
             var editorId = !isUndefined(options['id']) ? options['id'] : 'editormd';//editormd
+            var toolItemKeys = ['tools', 'toolBars', 'toolbar', 'items', 'toolbarIcons', 'toolbarItems'];
+            var editorToolBars = getOptVal(editorOpt, toolItemKeys, {});
+            var editorJsObj = getOptVal(editorOpt, ['obj'], null);
             //编辑器扩展 支持插入代码
             var newEditorObj;
             //上面设置了读写属性 下面才能设置
@@ -7697,6 +7703,65 @@ item: [{
                         });
                     }
                     obj[editorOut] = newEditorObj;
+                }
+                else if(isTuiEditor) {
+                    var defaultOpt = {
+                        el: obj[0],
+                        initialEditType: 'markdown',
+                        initialValue: content,
+                        height: '500px',
+                        language: 'en-US',
+                        previewStyle: 'tab', //tab vertical
+                        useCommandShortcut: true,
+                        useDefaultHTMLSanitizer: true,
+                        usageStatistics: false,
+                        hideModeSwitch: true,
+                        toolbarItems: [
+                            'heading',
+                            'bold',
+                            'italic',
+                            'strike',
+                            'divider',
+                            'hr',
+                            'quote',
+                            'divider',
+                            'ul',
+                            'ol',
+                            'task',
+                            'indent',
+                            'outdent',
+                            'divider',
+                            'table',
+                            'image',
+                            'link',
+                            'divider',
+                            'code',
+                            'codeblock'
+                        ]
+                    };
+                    if(hasData(editorToolBars)) {
+                        defaultOpt['toolbarItems'] = editorToolBars;
+                        delProperty(editorOpt, toolItemKeys);
+                    }
+                    defaultOpt = $.extend({}, defaultOpt, editorOpt);
+                    newEditorObj =  new editorJsObj(defaultOpt);
+                    //支持外部取值editormd
+                    if(!obj.hasOwnProperty('value')) {
+                        Object.defineProperty(obj, 'value', {
+                            get: function () {
+                                return newEditorObj.getMarkdown();
+                            },
+                            set: function (newVal) {
+                                newEditorObj.setHtml(newVal);
+                            }
+                        });
+                    }
+                    obj.focus = function () {
+                        newEditorObj.focus();
+                    };
+                    obj.insertHtml = obj.appendHtml = function (newContent) {
+                        newEditorObj.insertText(newContent);
+                    };
                 }
                 else if(strInArray(editorType, ['uEditor', 'ueditor']) !=-1) {
                     UE.delEditor(editorId);//防止已经实例化过此编辑器
@@ -7854,6 +7919,10 @@ item: [{
         objBindVal(obj, options);//数据绑定
         addCloneName(obj, options);//支持克隆
         //console.log(obj);
+
+        if(onReadyEven) {
+            onReadyEven(obj);
+        }
         return obj; //makeEditor
     };
 
