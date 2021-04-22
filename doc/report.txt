@@ -54,3 +54,8 @@ mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  customer > c
  重命名表：
  ALTER TABLE fa_device_status_template RENAME TO fa_device_cfg_template
  
+ 
+ 测试机
+ AA-70-2010-01-0038-385
+ ?01239956BB1CCA4DEE
+ 
