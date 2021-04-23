@@ -6383,8 +6383,8 @@ item: [{
         }
         obj.append($('<div class="inner"> \
         <div class="title_wrap '+ objExtendClass +' ">\
-            <button class="select_text btnLr btnLrDefault" tabindex="1">'+ selectDefaultText +'</button>\
-            <span class="btnLr btnLrDefault" type="button"><span class="caret"></span></> \
+            <span class="select_text btnLr btnLrDefault">'+ selectDefaultText +'</span>\
+            <span class="btnLr btnLrDefault"><span class="caret"></span></> \
         </div> \
      </div>'));
         obj.textObj = obj.find('.select_text');
