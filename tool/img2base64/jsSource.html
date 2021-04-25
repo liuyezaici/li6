@@ -1,0 +1,163 @@
+<script>
+    //原js 未加密
+    $(document).ready(function () {
+        var form = $('#changeForm');
+        var fileinput = form.find('.input');
+        var pasteInput = form.find('.pasteInput');
+        var dropInput = form.find('.dropInput');
+        var resultBase64 = form.find('#result');
+        var resultView = form.find('#img_area');
+
+        //十六进制颜色随机
+        function color16() {
+            var r = Math.floor(Math.random() * 256);
+            var g = Math.floor(Math.random() * 256);
+            var b = Math.floor(Math.random() * 256);
+            return '#' + r.toString(16) + g.toString(16) + b.toString(16);
+        }
+        //重新生成input
+        var reCreateInput = function (fileObj) {
+            //重新生成input防止同一个文件不能连续发送
+            let newInput = $(fileObj.prop("outerHTML"));
+            inputBindFileEven(newInput);
+            fileObj.after(newInput).remove();
+        };
+        //input绑定文件事件
+        var inputBindFileEven = function (inputObj) {
+            inputObj.on('change', function (e) {
+                e.stopPropagation();
+                let fileObj = $(this);
+                let fileNode = fileObj[0].files[0];
+                reCreateInput(fileObj);
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let base64Data = e.target.result;
+                    resultBase64.val('loading');
+                    setTimeout(function () {
+                        resultBase64.val(base64Data);
+                    }, 200);
+                    resultView.html('<img class="thumbnail" src="'+ base64Data +'" style="max-width: 500px;" />');
+                };
+                reader.readAsDataURL(fileNode);
+            });
+        };
+        //input绑定粘贴事件
+        var inputBindPasteEven = function (inputObj, func) {
+            inputObj[0].addEventListener('paste', function (e) {
+                // console.log('pastingeeeeeeeeee');
+                var cbd = e.clipboardData;
+                var ua = window.navigator.userAgent;
+                // 如果是 Safari 直接 return
+                if (!(e.clipboardData && e.clipboardData.items)) {
+                    // console.log('!(e.clipboardData && e.clipboardData.items)');
+                    return;
+                }
+                // Mac平台下Chrome49版本以下 复制Finder中的文件的Bug Hack掉
+                if (cbd.items && cbd.items.length === 2 && cbd.items[0].kind === "string" && cbd.items[1].kind === "file" &&
+                    cbd.types && cbd.types.length === 2 && cbd.types[0] === "text/plain" && cbd.types[1] === "Files" &&
+                    ua.match(/Macintosh/i) && Number(ua.match(/Chrome\/(\d{2})/i)[1]) < 49) {
+                    // console.log('Mac平台下Chrome49版本以下 复制Finder中的文件的Bug Hack掉');
+                    return;
+                }
+                var blob;
+                for (var i = 0; i < cbd.items.length; i++) {
+                    var item = cbd.items[i];
+                    if (item.kind == "file") {
+                        e.preventDefault(); //火狐62.0.3下 自带插入图片功能 要return掉
+                        blob = item.getAsFile();
+                        if (blob.size === 0) {
+                            return '';
+                        }
+                        // blob 就是从剪切板获得的文件 可以进行上传或其他操作
+                        var reader = new FileReader();
+                        var imgs = new Image();
+                        imgs.file = blob;
+                        reader.onload = (function (aImg) {
+                            return function (e) {
+                                aImg.src = e.target.result;
+                            };
+                        })(imgs);
+                        reader.readAsDataURL(blob);
+                    }
+                }
+                // console.log('pasting!!!!!!!!!!!!2');
+                // console.log(imgs);
+                if (func) func(imgs);
+            }, false);
+        };
+
+        inputBindFileEven(fileinput);
+
+        inputBindPasteEven(pasteInput, function (imgDom) {
+            if (imgDom.toString().length > 0) {
+                //火狐62.0.3下 会获取到 [object HTMLImageElement] 自带插入图片功能，不需要走手动插入
+                var dom2 = $(imgDom);
+                dom2.addClass('thumbnail').attr('style', 'max-width: 500px;');
+                resultView.html('').append(imgDom);
+                //图片加载完成 才能获取它的src
+                dom2.on('load', function () {
+                    resultBase64.val('loading');
+                    setTimeout(function () {
+                        resultBase64.val(resultView.find('.thumbnail').attr('src'));
+                    }, 200);
+                });
+            } else {
+                alert('粘贴后获取不到图片');
+            }
+        });
+
+
+        //拖拽文件发送事件
+        var addDragAndDropFileEven =function(drogTo, addClassObj) {
+            addClassObj = addClassObj || null;
+            drogTo.addEventListener("dragenter", function(e){
+                e.stopPropagation();
+                e.preventDefault();
+            }, false);
+            drogTo.addEventListener("dragover", function(e){
+                e.stopPropagation();
+                e.preventDefault();
+                if(addClassObj) addClassObj.addClass('dragover');
+            }, false);
+            //松开鼠标
+            drogTo.addEventListener("drop", function(e){
+                e.stopPropagation();
+                e.preventDefault();
+                if(addClassObj) addClassObj.removeClass('dragover');
+                var dt = e.dataTransfer;
+                var files = dt.files;
+                let fileNode = files[0];
+                if(!fileNode) {
+                    //在输入框中拖拽文字 图片时 没有file
+                    return;
+                }
+                let fileType = fileNode.type;
+                if(fileType.indexOf('image/') !=-1) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        let base64Data = e.target.result;
+                        resultBase64.val('loading');
+                        setTimeout(function () {
+                            resultBase64.val(base64Data);
+                        }, 200);
+                        resultView.html('<img class="thumbnail" src="'+ base64Data +'" style="max-width: 500px;" />');
+                    };
+                    reader.readAsDataURL(fileNode);
+                }
+            }, false);
+            document.addEventListener("dragover", function(e){
+                e.preventDefault();
+                if(addClassObj) addClassObj.removeClass('dragover');
+                return false;
+            }, false);
+            document.addEventListener("drop", function(e){
+                e.preventDefault();
+                return false;
+            }, false);
+        };
+        /**
+         * 拖拽实现
+         */
+        addDragAndDropFileEven(dropInput[0], dropInput);
+    });
+</script>
