@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+<title>图片(截图)在线转base64工具</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="renderer" content="webkit|ie-comp|ie-stand"><!-- 强制360用急速模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<link href="/resource/pub/bootstrap-3.3.7/css/bootstrap.css" rel="stylesheet" media="all" />
+<link href="https://js.li6.cc/assets/libs/lr/lrBox.css" rel="stylesheet" media="all" />
+<script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/assets/js/require.min.js"></script>
+
+    <div id="show_box" class="container">
+        <h2>
+            //图片在线转base64工具（支持本地图片/截图） <a href="/" class="btn btn-sm" target="_self">回首页</a>
+        </h2>
+        <div class="well" id="changeForm" >
+            <div  class="input-group">
+                <div class="input-group-addon"> <b>浏览本地图片</b> :</div>
+                <input class="form-control input" type="file" />
+                <div class="input-group-addon">或 <b>粘贴图片</b>:</div>
+                <input class="form-control pasteInput" type="text" />
+            </div>
+
+            <div class="well" style="margin-top:20px;">
+                <h4 class="title">BASE64（img标签）:</h4>
+                <textarea id="result" class="form-control" style="width: 100%; height: 400px;outline: none;padding: 0;"></textarea>
+                <div id="img_area" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+        <h6>
+            来源：https://tool.oschina.net/encrypt?type=4
+        </h6>
+    </div>
+    <script>
+        $(document).ready(function () {
+            var form = $('#changeForm');
+            var fileinput = form.find('.input');
+            var pasteInput = form.find('.pasteInput');
+            var resultBase64 = form.find('#result');
+            var resultView = form.find('#img_area');
+
+            //十六进制颜色随机
+            function color16() {
+                var r = Math.floor(Math.random() * 256);
+                var g = Math.floor(Math.random() * 256);
+                var b = Math.floor(Math.random() * 256);
+                return '#' + r.toString(16) + g.toString(16) + b.toString(16);
+            }
+            //重新生成input
+            var reCreateInput = function (fileObj) {
+                //重新生成input防止同一个文件不能连续发送
+                let newInput = $(fileObj.prop("outerHTML"));
+                inputBindFileEven(newInput);
+                fileObj.after(newInput).remove();
+            };
+            //input绑定文件事件
+            var inputBindFileEven = function (inputObj) {
+                inputObj.on('change', function (e) {
+                    e.stopPropagation();
+                    let fileObj = $(this);
+                    let fileNode = fileObj[0].files[0];
+                    reCreateInput(fileObj);
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        let base64Data = e.target.result;
+                        resultBase64.val('loading');
+                        setTimeout(function () {
+                            resultBase64.val(base64Data);
+                        }, 200);
+                        resultView.html('<img class="thumbnail" src="'+ base64Data +'" style="max-width: 500px;" />');
+                    };
+                    reader.readAsDataURL(fileNode);
+                });
+            };
+            //input绑定粘贴事件
+            var inputBindPasteEven = function (inputObj, func) {
+                inputObj[0].addEventListener('paste', function (e) {
+                    // console.log('pastingeeeeeeeeee');
+                    var cbd = e.clipboardData;
+                    var ua = window.navigator.userAgent;
+                    // 如果是 Safari 直接 return
+                    if (!(e.clipboardData && e.clipboardData.items)) {
+                        // console.log('!(e.clipboardData && e.clipboardData.items)');
+                        return;
+                    }
+                    // Mac平台下Chrome49版本以下 复制Finder中的文件的Bug Hack掉
+                    if (cbd.items && cbd.items.length === 2 && cbd.items[0].kind === "string" && cbd.items[1].kind === "file" &&
+                        cbd.types && cbd.types.length === 2 && cbd.types[0] === "text/plain" && cbd.types[1] === "Files" &&
+                        ua.match(/Macintosh/i) && Number(ua.match(/Chrome\/(\d{2})/i)[1]) < 49) {
+                        // console.log('Mac平台下Chrome49版本以下 复制Finder中的文件的Bug Hack掉');
+                        return;
+                    }
+                    var blob;
+                    for (var i = 0; i < cbd.items.length; i++) {
+                        var item = cbd.items[i];
+                        if (item.kind == "file") {
+                            e.preventDefault(); //火狐62.0.3下 自带插入图片功能 要return掉
+                            blob = item.getAsFile();
+                            if (blob.size === 0) {
+                                return '';
+                            }
+                            // blob 就是从剪切板获得的文件 可以进行上传或其他操作
+                            var reader = new FileReader();
+                            var imgs = new Image();
+                            imgs.file = blob;
+                            reader.onload = (function (aImg) {
+                                return function (e) {
+                                    aImg.src = e.target.result;
+                                };
+                            })(imgs);
+                            reader.readAsDataURL(blob);
+                        }
+                    }
+                    // console.log('pasting!!!!!!!!!!!!2');
+                    // console.log(imgs);
+                    if (func) func(imgs);
+                }, false);
+            };
+
+            inputBindFileEven(fileinput);
+
+            inputBindPasteEven(pasteInput, function (imgDom) {
+                if (imgDom.toString().length > 0) {
+                    //火狐62.0.3下 会获取到 [object HTMLImageElement] 自带插入图片功能，不需要走手动插入
+                    var dom2 = $(imgDom);
+                    dom2.addClass('thumbnail').attr('style', 'max-width: 500px;');
+                    resultView.html('').append(imgDom);
+                    //图片加载完成 才能获取它的src
+                    dom2.on('load', function () {
+                        resultBase64.val('loading');
+                        setTimeout(function () {
+                            resultBase64.val(resultView.find('.thumbnail').attr('src'));
+                        }, 200);
+                    });
+                } else {
+                    alert('粘贴后获取不到图片');
+                }
+            });
+        });
+    </script>
+    <div class="hidden">
+            &copy;2007
+            <script type="text/javascript">document.write(unescape("%3Cspan id='cnzz_stat_icon_1279380024'%3E%3C/span%3E%3Cscript src='https://s9.cnzz.com/stat.php%3Fid%3D1279380024%26show%3Dpic' type='text/javascript'%3E%3C/script%3E"));</script>
+    </div>
