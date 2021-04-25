@@ -11,10 +11,15 @@
 <link href="https://js.li6.cc/assets/libs/lr/lrBox.css" rel="stylesheet" media="all" />
 <script src="/resource/pub/js/jq/jquery-3.2.1.js"></script>
 <script type="text/javascript" src="/assets/js/require.min.js"></script>
-
+<style>
+    .dragover {
+        border: 1px dashed #ff4400;
+        background-color: #fafafa;
+    }
+</style>
     <div id="show_box" class="container">
         <h2>
-            //图片在线转base64工具（支持本地图片/截图） <a href="/" class="btn btn-sm" target="_self">回首页</a>
+            //图片在线转base64工具（支持本地图片/截图/拖入图片） <a href="/" class="btn btn-sm" target="_self">回首页</a>
         </h2>
         <div class="well" id="changeForm" >
             <div  class="input-group">
@@ -22,6 +27,10 @@
                 <input class="form-control input" type="file" />
                 <div class="input-group-addon">或 <b>粘贴图片</b>:</div>
                 <input class="form-control pasteInput" type="text" />
+            </div>
+            <div  class="input-group">
+                <div class="input-group-addon">或 <b>拽入图片</b>:</div>
+                <textarea class="form-control dropInput" style="height: 100px;" placeholder="可将电脑的图片拽入此处"></textarea>
             </div>
 
             <div class="well" style="margin-top:20px;">
@@ -39,6 +48,7 @@
             var form = $('#changeForm');
             var fileinput = form.find('.input');
             var pasteInput = form.find('.pasteInput');
+            var dropInput = form.find('.dropInput');
             var resultBase64 = form.find('#result');
             var resultView = form.find('#img_area');
 
@@ -139,6 +149,60 @@
                     alert('粘贴后获取不到图片');
                 }
             });
+
+
+            //拖拽文件发送事件
+            var addDragAndDropFileEven =function(drogTo, addClassObj) {
+                addClassObj = addClassObj || null;
+                drogTo.addEventListener("dragenter", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+                }, false);
+                drogTo.addEventListener("dragover", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if(addClassObj) addClassObj.addClass('dragover');
+                }, false);
+                //松开鼠标
+                drogTo.addEventListener("drop", function(e){
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if(addClassObj) addClassObj.removeClass('dragover');
+                    var dt = e.dataTransfer;
+                    var files = dt.files;
+                    let fileNode = files[0];
+                    if(!fileNode) {
+                        //在输入框中拖拽文字 图片时 没有file
+                        return;
+                    }
+                    let fileType = fileNode.type;
+                    if(fileType.indexOf('image/') !=-1) {
+                        let reader = new FileReader();
+                        reader.onload = function (e) {
+                            let base64Data = e.target.result;
+                            resultBase64.val('loading');
+                            setTimeout(function () {
+                                resultBase64.val(base64Data);
+                            }, 200);
+                            resultView.html('<img class="thumbnail" src="'+ base64Data +'" style="max-width: 500px;" />');
+                        };
+                        reader.readAsDataURL(fileNode);
+                    }
+                }, false);
+                document.addEventListener("dragover", function(e){
+                    e.preventDefault();
+                    if(addClassObj) addClassObj.removeClass('dragover');
+                    return false;
+                }, false);
+                document.addEventListener("drop", function(e){
+                    e.preventDefault();
+                    return false;
+                }, false);
+            };
+            /**
+             * 拖拽实现
+             */
+            addDragAndDropFileEven(dropInput[0], dropInput);
         });
     </script>
     <div class="hidden">
