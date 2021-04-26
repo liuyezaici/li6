@@ -4,6 +4,7 @@
         var form = $('#changeForm');
         var fileinput = form.find('.input');
         var pasteInput = form.find('.pasteInput');
+        var pasteUrlInput = form.find('.pasteUrlInput');
         var dropInput = form.find('.dropInput');
         var resultBase64 = form.find('#result');
         var resultView = form.find('#img_area');
@@ -159,5 +160,32 @@
          * 拖拽实现
          */
         addDragAndDropFileEven(dropInput[0], dropInput);
+
+        //url转换
+        pasteUrlInput.on('blur', function (e) {
+            var url = pasteUrlInput.val();
+            if(!url) {
+                window.location.hash=('未填写url');
+                return;
+            }
+            if(!url.match(/^(http|https)\:\/\//)) {
+                window.location.hash=('url必须http://开头哦');
+                return;
+            }
+            $.post('/tool/img/downBase64',
+                {
+                    url: url
+                },
+                function (res) {
+                    var base64 = res.data.url;
+                    resultBase64.val('loading');
+                    setTimeout(function () {
+                        resultBase64.val(base64);
+                    }, 200);
+                    resultView.html('<img class="thumbnail" src="'+ base64 +'" style="max-width: 500px;" />');
+                },
+                'json');
+
+        })
     });
 </script>
