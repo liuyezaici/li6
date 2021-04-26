@@ -42,3 +42,6 @@ mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  customer > c
  AA-70-2010-01-0038-385
  ?01239956BB1CCA4DEE
  
+ 
+ AA-70-2010-01-0031-106  ศýยฅฒโสิป๚
+ 
