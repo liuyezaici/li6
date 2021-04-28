@@ -1,4 +1,5 @@
 <script>
+
     require.config({
         baseUrl: '/assets/libs/lr/ele/',
         paths: {
@@ -7,108 +8,7 @@
         }
     });
     require(['jquery', 'lrBox'], function ($, lrBox) {
-        var allTimeZone = [
-            {
-                v: -12,
-                t: '埃尼威托克岛 (GMT-12)',
-            },
-            {
-                v: -11,
-                t: '萨摩亚群岛 (GMT-11)',
-            },
-            {
-                v: -10,
-                t: '夏威夷 (GMT-10)',
-            },
-            {
-                v: -9,
-                t: '阿拉斯加 (GMT-9)',
-            },
-            {
-                v: -8,
-                t: '太平洋时间 (GMT-8)',
-            },
-            {
-                v: -7,
-                t: '山脉时间 (GMT-7)',
-            },
-            {
-                v: -6,
-                t: '中央标准时间 (GMT-6)',
-            },
-            {
-                v: -5,
-                t: '东部时间 (GMT-5)',
-            },
-            {
-                v: -4,
-                t: '大西洋时间 (GMT-4)',
-            },
-            {
-                v: -3,
-                t: 'Brazilia (GMT-3)',
-            },
-            {
-                v: -2,
-                t: '大西洋中部时间(GMT-2)',
-            },
-            {
-                v: -1,
-                t: '亚述尔群岛 (GMT-1)',
-            },
-            {
-                v: 0,
-                t: '格林威治标准（GMT）',
-            },
-            {
-                v: 1,
-                t: '罗马 (GMT +1)',
-            },
-            {
-                v: 2,
-                t: '以色列 (GMT +2)',
-            },
-            {
-                v: 3,
-                t: '莫斯科 (GMT +3)',
-            },
-            {
-                v: 4,
-                t: '巴库 (GMT +4)',
-            },
-            {
-                v: 5,
-                t: 'New Delhi (GMT +5)',
-            },
-            {
-                v: 6,
-                t: 'Dhakar (GMT +6)',
-            },
-            {
-                v: 7,
-                t: '曼谷 (GMT +7)',
-            },
-            {
-                v: 8,
-                t: '北京 (GMT +8)',
-            },
-            {
-                v: 9,
-                t: '东京 (GMT +9)',
-            },
-            {
-                v: 10,
-                t: '悉尼 (GMT +10)',
-            },
-            {
-                v: 11,
-                t: 'Magadan (GMT +11)',
-            },
-            {
-                v: 12,
-                t: '惠灵顿 (GMT +12)',
-            }
-        ];
+        var allTimeZone = [ { v: -12, t: '埃尼威托克岛 (GMT-12)', }, { v: -11, t: '萨摩亚群岛 (GMT-11)', }, { v: -10, t: '夏威夷 (GMT-10)', }, { v: -9, t: '阿拉斯加 (GMT-9)', }, { v: -8, t: '太平洋时间 (GMT-8)', }, { v: -7, t: '山脉时间 (GMT-7)', }, { v: -6, t: '中央标准时间 (GMT-6)', }, { v: -5, t: '东部时间 (GMT-5)', }, { v: -4, t: '大西洋时间 (GMT-4)', }, { v: -3, t: 'Brazilia (GMT-3)', }, { v: -2, t: '大西洋中部时间(GMT-2)', }, { v: -1, t: '亚述尔群岛 (GMT-1)', }, { v: 0, t: '格林威治标准（GMT）', }, { v: 1, t: '罗马 (GMT +1)', }, { v: 2, t: '以色列 (GMT +2)', }, { v: 3, t: '莫斯科 (GMT +3)', }, { v: 4, t: '巴库 (GMT +4)', }, { v: 5, t: 'New Delhi (GMT +5)', }, { v: 6, t: 'Dhakar (GMT +6)', }, { v: 7, t: '曼谷 (GMT +7)', }, { v: 8, t: '北京 (GMT +8)', }, { v: 9, t: '东京 (GMT +9)', }, { v: 10, t: '悉尼 (GMT +10)', }, { v: 11, t: 'Magadan (GMT +11)', }, { v: 12, t: '惠灵顿 (GMT +12)', } ];
         Date.prototype.format = function(e) {
             let t = function(e, t) {
                 let i = ""
@@ -220,6 +120,7 @@
                 t = "yyyy-MM-dd HH:mm:ss" + ("s" === jingdu ? "" : ":SSS");
             return new Date(parseInt(timeInt, 10) * e + 6e4 * ((new Date).getTimezoneOffset() + 60 * curGMT)).format(t)
         }
+        var toInt = true;
         var changeTimeForm = box.find('.changeTimeForm');
         var showAllTimeZone = changeTimeForm.find('.showAllTimeZone');
         var changeTimeInput = changeTimeForm.find('.timeInt');
@@ -246,17 +147,38 @@
         var changeTimeJingdu = changeTimeForm.find('.x-sel-sec');
         //转换指令
         var changeValToStr = function() {
-            var val_ = changeTimeInput.val();
-            var valInt = val_.replace(/[^0-9]/g, '');
-            if(valInt !== val_) {
-                changeTimeInput.val(valInt);
-            }
-            if(valInt) {
-                if (!parseInt(valInt, 10)) {
-                    return lrBox.msgTsf("请输入合法的Unix时间戳");
+            var valInt = changeTimeInput.val();
+            var valStr = timeResult.val();
+            var gmt = showAllTimeZone.find("input:checked").val();
+            if(toInt) {
+                var valIntNew = valInt.replace(/[^0-9]/g, '');
+                if(valIntNew !== valInt) {
+                    changeTimeInput.val(valIntNew);
                 }
-                var timeStr = stampToLocale(valInt, showAllTimeZone.find("input:checked").val(), changeTimeJingdu.val());
-                timeResult.val(timeStr);
+                if(valIntNew) {
+                    if (!parseInt(valIntNew, 10)) {
+                        return lrBox.msgTsf("请输入合法的Unix时间戳");
+                    }
+                    var timeStr = stampToLocale(valIntNew, gmt, changeTimeJingdu.val());
+                    timeResult.val(timeStr);
+                }
+            } else if(valStr) {
+                if(valStr) {
+                    if(valStr.includes('/')) {
+                        valStr = valStr.replace(/\//g, '-');
+                        timeResult.val(valStr);
+                    }
+                    if(!/\s\d+:\d+:\d+/.test(valStr) ) {
+                        valStr = $.trim(valStr) + " 00:00:00";
+                        timeResult.val(valStr);
+                    }
+                }
+                let e = new Date(Date.parse(valStr) - 6e4 * ((new Date).getTimezoneOffset() + 60 * gmt)).getTime();
+                if(isNaN(e)) {
+                    lrBox.msgTsf("请输入合法的时间格式，如：2014-04-01 10:01:01，或：2014-01-01");
+                }
+                let t = "s" === changeTimeJingdu.val() ? 1e3 : 1;
+                changeTimeInput.val(Math.round(e / t));
             }
         };
         showAllTimeZone.find("input").on('click', function () {
@@ -266,11 +188,18 @@
         });
 
         changeTimeInput.on('input propertychange', function () {
+            toInt = true;
             changeValToStr();
         });
+        timeResult.on('input propertychange', function () {
+            toInt = false;
+            changeValToStr();
+        });
+
         changeTimeJingdu.on('change', function () {
             changeValToStr();
         });
+
         showCurrentAreaTimes(showAllTimeZone.find("input:checked").val());
         changeTimeInput.focus();
 
