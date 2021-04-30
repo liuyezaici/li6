@@ -274,14 +274,15 @@ lirui lirui
 linux ≥ı ºªØ’æµ„ 
 git init
 
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/lrtxt.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/ossmq.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/gif.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/picsucai.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/lrele.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/zhengshi_oss.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/fastadmin-oss.git
-git remote add origin https://li6:ygmlxomlg@gitee.com/li6//treeholes.git
-git remote add origin https://li6:ygmlxomlg@gitee.com/li6//treeholes.api.git
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/treeholes.git
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/treeholes.api.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/pomcube.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/pomcube-old.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/customer.git
@@ -291,17 +292,19 @@ git remote add origin https://li6:ygmlxomlg@gitee.com/li6/fastadmin-oss.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/beyond1314.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/dwsj.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/ethli6js.git
-git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/upload.chat.git
+
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/li6.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/queue.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/dwsj.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/supermq.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/ecshop.git
-git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/chat.treeholes.git
-git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/api.chat.treeholes.git
-git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/common.chat.treeholes.git
-git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/socket.chat.treeholes.git
-git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/upload.chat.git
+
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/havenchat.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/upload.havenchat.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/api.havenchat.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/common.havenchat.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/socket.havenchat.git
+
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/poc_oss.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/poc_portal.git
 git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/wz123.git
