@@ -274,6 +274,7 @@ lirui lirui
 linux ≥ı ºªØ’æµ„ 
 git init
 
+git remote add origin https://li6:ygmlxomlg@gitee.com/li6/ossmq.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/gif.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/picsucai.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6/lrele.git
