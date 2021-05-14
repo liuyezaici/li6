@@ -3,11 +3,13 @@
     .manage_files {
         background-color: #fff;
     }
+
     .manage_files ul li {
         padding: 5px 0;
         display: inline-block;
         width: 25%;
     }
+
     .manage_files ul li .cover {
         margin: 0 5px;
         overflow: hidden;
@@ -16,10 +18,12 @@
         display: block;
         height: 56px;
     }
+
     .manage_files ul li .cover img {
         width: 100%;
         height: 100%;
     }
+
     .manage_files ul li .title {
         margin: 0 5px;
         padding: 2px;
@@ -28,197 +32,130 @@
         text-overflow: ellipsis;
         display: block;
     }
+
     .manage_files ul li .title input {
         width: 100%;
         border: 1px solid #fff;
         text-indent: 2px;
     }
+
     .manage_files ul li .title input:hover {
         border: 1px solid #ccc;
     }
+
     .manage_files ul li .operat {
         display: block;
         padding-top: 5px;
     }
+
     .manage_files ul li .operat .item {
         width: 33.33%;
         display: inline-block;
         text-align: center;
         float: left;
     }
+
     .manage_files ul li .operat .glyphicon {
         color: #bbb;
     }
+
     .manage_files ul li .operat .glyphicon:hover {
         color: #999;
     }
+
     #modify_article_form .lr_editor {
         width: 555px;
         height: 120px;
     }
 </style>
-<div id="modify_article_form"></div>
+<form id="modify_article_form" type="post">
+    <table width="100%" border="0">
+        <tbody>
+        <tr>
+            <td style="width:100px"><span>标题</span></td>
+            <td>
+                <input name="rows[title]" type="text" class="form-control" autocomplete="off" value="<?=$info['title']?>" >
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-top:15px"><span>分类</span></td>
+            <td style="padding-top:15px">
+                <button class="btn btn-default" style="margin-left:5px">刷新</button>
+            </td>
+        </tr>
+        <tr>
+            <td valign="top" style="padding-top:15px"><span>正文</span></td>
+            <td style="padding-top:15px">
+                <textarea name="rows[content]" class="editEditor" style="display: none; box-sizing: border-box;"><?=$info['content']?></textarea>
+                <div id="showEditor">
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-top:10px"><span>附件</span></td>
+            <td style="padding-top:10px">
+                <div id="manage_article_fujian" class="manage_files">
+                    <ul>
+                        <li></li>
+                    </ul>
+                    <div class="upload_btn_box">
+                        <button class="btn alert-info"><em class="glyphicon glyphicon-picture"></em> 上传文件</button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td style="padding-top:10px">
+                <button type="submit" class="btn btn-info">保存</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
 <script>
-
-    require(['jquery', 'lrEle', 'lrBox', 'lrBase', 'webuploader' , '/assets/libs/editor/tui-editor/toastui-jquery-editor.min.js'],
-        function ($, lrEle, lrBox, lrBase, webuploader, tuiEditor) {
+    require(['jquery', 'lrEle', 'lrBox', 'front', 'webuploader'],
+        function ($, lrEle, lrBox, front, webuploader) {
             var articleSid = parseInt('<?=$id?>');
-            var typeSelect = lrEle.makeSelect({
-                name: 'rows[typeid]',
-                'text': '选择分类',
-                value: '{typeid}',
-                value_key: 'id',
-                title_key: 'title',
-                menu: {
-                    width: '400px',
-                    data_from: {
-                        url: '/user/article/getAllTypes',
-                        success_key: 'code',
-                        success_value: '1',
-                        data_key: 'data.list'
-                    }
-                },
-                li: {
-                    value: '{title}'
-                }
-            });
-            var editorObj = lrEle.makeEditor({
-                name: 'rows[content]',
-                'class': 'editor',
-                width: '100%',
-                height: '450px',
-                value: '{content}',
-                type: 'tuiEditor',
-                editorObj: 'editArticleEditor',
-                editorOpt: {
-                    obj: tuiEditor,
-                    height: '500px',
-                    language: 'en-US',
-                    previewStyle: 'vertical', //tab vertical,
-                    toolbarItems: [
-                        'heading',
-                        'bold',
-                        'italic',
-                        'strike',
-                        'divider',
-                        'hr',
-                        'quote',
-                        'divider',
-                        'ul',
-                        'ol',
-                        'task',
-                        'indent',
-                        'outdent',
-                        'divider',
-                        'table',
-                        'image',
-                        'link',
-                        'divider',
-                        'code',
-                        'codeblock'
-                    ]
-                }
-            });
-            $('#modify_article_form').append(lrEle.makeForm({
-                    'url': '/user/article/edit/id/' + articleSid,
-                    data_from: {
-                        url: '/user/article/get/id/' + articleSid,
-                        success_key: 'code',
-                        success_value: ['1'],
-                        data_key: 'data',
-                    },
-                    name: 'modifyForm',
-                    success_key: 'code',
-                    success_value: '1',
-                    success_func: function (e) {
-                        lrBox.msgTis(e.msg);
-                    },
-                    err_func: function (e) {
-                        lrBox.msgTis(e.msg);
-                    },
-                    value: [
-                        lrEle.makeTable({
-                            tr_1: [
-                                {
-                                    td: [
-                                        {
-                                            width: '100px',
-                                            value: lrEle.makeSpan({value: '文章标题'})
-                                        }, {
-                                            value: lrEle.makeInput({name: 'rows[title]', width: '455px', value: '{title}'})
-                                        }
-                                    ]
-                                },
-                                {
-                                    td: [
-                                        {
-                                            padding_top: '15px',
-                                            value: lrEle.makeSpan({value: '文章分类'})
-                                        }, {
-                                            padding_top: '15px',
-                                            value: [
-                                                typeSelect,
-                                                lrEle.makeBtn({
-                                                    value: '管理分类',
-                                                    'class': 'btn btn-default',
-                                                    margin_left: '5px',
-                                                    click: function () {
-                                                        lrBox.msgWin('文章分类管理', '[url]/user/article/manageAllTypes', 580, 1);
-                                                    }
-                                                })
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    td: [
-                                        {
-                                            padding_top: '15px',
-                                            valign: 'top',
-                                            value: lrEle.makeSpan({value: '正文'})
-                                        }, {
-                                            padding_top: '15px',
-                                            value: lrEle.makeDiv({
-                                                id: 'article_editor_parent',
-                                                value: editorObj
-                                            })
-                                        }
-                                    ]
-                                },
-                                {
-                                    td: [
-                                        {
-                                            padding_top: '10px',
-                                            value: lrEle.makeSpan({value: '附件'})
-                                        }, {
-                                            padding_top: '10px',
-                                            value: lrEle.makeDiv({
-                                                id: 'manage_article_fujian',
-                                                'class': 'manage_files',
-                                                value: ''
-                                            })
-                                        }
-                                    ]
-                                },
-                                {
-                                    td: [{}, {
-                                        padding_top: '10px',
-                                        value: lrEle.makeBtn({type: 'submit', value: '保存', 'class': 'btn btn-info'})
-                                    }]
-                                }
-                            ]
-                        })
-                    ]
-                })
-            );
+            var writeForm = $('#modify_article_form');
+            var editEditor = writeForm.find('.editEditor');
+            var showEditor = writeForm.find('#showEditor');
+            var editUrl = '/user/article/edit/id/' + articleSid;
+            window.currentPushingContent = editEditor.val();
+            var innerEditor = $('<iframe style="width: 100%; height: 700px;border: 0;overflow:hidden;" src="/tool/markdown.html"></iframe>');
+            showEditor.append(innerEditor);
+            var iframe = innerEditor[0];
+
+            //当前编辑器value的get/set方法
+            var currentGetEditorValFunc = function () {
+
+            };
+            var currentEditorValFunc = function () {
+
+            };
+
+            var readyEven = function () {
+                currentGetEditorValFunc = function () {
+                    return window.mdEditorGetContent();
+                };
+                currentEditorValFunc = function (newVal) {
+                    window.mdEditorSetContent(newVal);
+                };
+            };
+            if (iframe.attachEvent) {
+                iframe.attachEvent("onload", function() {
+                    readyEven(); //iframe加载完成后你需要进行的操作
+                });
+            } else {
+                iframe.onload = function() {
+                    readyEven(); //iframe加载完成后你需要进行的操作
+                };
+            }
 
             //重新加载分类
             function refreshArticlesTypes() {
-                typeSelect.menu.renewData();
+
             }
-
-            var currentFilePage = 1;
-
             //附件翻页
             function articleFujianGotoPage(page) {
                 reLoadThisArticleFujian(page);
@@ -353,6 +290,44 @@
                 });
             }
 
+
+            writeForm.on('submit', function (e) {
+                e.preventDefault();
+                var data_ = writeForm.serializeArray();
+                var pData = {};
+                data_.map(function (v, n) {
+                    if (!front.isUndef(pData[v.name])) {
+                        if ($.isArray(pData[v.name])) {
+                            pData[v.name].push(v.value);
+                        } else {
+                            pData[v.name] = [pData[v.name], v.value];
+                        }
+                    } else {
+                        pData[v.name] = v.value;
+                    }
+                });
+                var content = currentGetEditorValFunc();
+                if(content===undefined) {
+                    console.log('内容获取失败！');
+                    return;
+                }
+                lrBox.loading(true);
+                front.postAndDone({
+                    url: editUrl,
+                    data: pData,
+                    successKey: 'code',
+                    successVal: 1,
+                    successFunc: function (res) {
+                        lrBox.noLoading();
+                        lrBox.msgTisf(res.msg);
+                    },
+                    errorFunc: function (res) {
+                        lrBox.noLoading();
+                        lrBox.msgTisf(res.msg);
+                    }
+                });
+            });
+
             reLoadThisArticleFujian();//加载附件
-    });
+        });
 </script>

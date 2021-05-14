@@ -6,7 +6,7 @@
 <link href="/assets/libs/editor/tui-editor/github.min.css" rel="stylesheet" media="all" />
 <script>
 
-    require(['jquery', 'lrEle', 'lrBox', 'lrBase', 'webuploader'], function ($, lrEle, lrBox, lrBase, webuploader) {
+    require(['jquery', 'lrEle', 'lrBox','webuploader'], function ($, lrEle, lrBox, webuploader) {
         var pageOpt = {
             page: parseInt("<?=$pageInfo['pagenow']?>"),
             total: parseInt("<?=$pageInfo['total']?>"),
@@ -196,7 +196,9 @@
 
         //编辑文章信息
         window.editArticle = function(articleid) {
-            lrBox.msgWin('编辑文章', '[url]/user/article/edit/id/' + articleid, 1200, 10);
+            lrBox.msgWin('编辑文章', '[url]/user/article/edit/id/' + articleid, 1200, 10, {
+                position: 'absolute'
+            });
         };
 
         //刷新列表

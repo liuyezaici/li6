@@ -1,13 +1,13 @@
 require.config({
     paths: {
         jquery: '/resource/pub/js/jq/jquery-3.2.1',
-        lrBase: '/assets/libs/lr/jquery-lr_base',
         lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
         lrEle: '/assets/libs/lr/jquery-lr_element',
         webuploader: '/assets/libs/webuploader/webuploader',
+        front: '/assets/js/front',
     }
 });
-require(['jquery', 'lrEle', 'lrBox', 'lrBase', 'webuploader'], function ($, lrEle, lrBox, lrBase, webuploader) {
+require(['jquery', 'lrEle', 'lrBox', 'front', 'webuploader', 'webuploader'], function ($, lrEle, lrBox, front, webuploader) {
 
     //ajax绑定hash事件
     function ajaxBindWindowHash() {

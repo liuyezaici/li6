@@ -166,6 +166,7 @@ class Article extends Backend
         }
         $mainHtml = $this->view->fetch('', [
             'id' =>  $id,
+            'info' =>  $info,
             'savePath' =>  'upload/post_files/',
             'upload_safe_code' =>  \fast\Str::makeSafeUploadCode('upload/post_files/', $myUid), //生成安全码 防止上传路径被手动篡改
         ]);

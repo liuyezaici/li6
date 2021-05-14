@@ -1,12 +1,12 @@
 require.config({
     paths: {
         jquery: '/resource/pub/js/jq/jquery-3.2.1',
-        lrBase: '/assets/libs/lr/jquery-lr_base',
+        front: '/assets/js/front',
         lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
         lrEle: '/assets/libs/lr/jquery-lr_element',
     }
 });
-require(['jquery', 'lrEle', 'lrBox', 'lrBase'], function ($, lrEle, lrBox, lrBase) {
+require(['jquery', 'lrEle', 'lrBox'], function ($, lrEle, lrBox) {
 
     //form里的快速注册
     window.fastReg= function() {
@@ -166,7 +166,7 @@ require(['jquery', 'lrEle', 'lrBox', 'lrBase'], function ($, lrEle, lrBox, lrBas
     window.checkLogin = function() {
         var topMenu = $('#navigation');
         var stateBox = topMenu.find('.status_box');
-        lrBase.rePost('/index/system/checkLogin',{}, function(res){
+        front.rePost('/index/system/checkLogin',{}, function(res){
             var my_menu = '';
             if( res.data.account !== '' && res.data.nickname !== '' ){
                 if(stateBox.length > 0 ) {
@@ -183,7 +183,7 @@ require(['jquery', 'lrEle', 'lrBox', 'lrBase'], function ($, lrEle, lrBox, lrBas
 
 //全局退出登录
     window.logOut=function() {
-        lrBase.rePost('/index/system/logout', {}, function (data) {
+        front.rePost('/index/system/logout', {}, function (data) {
             if (data.id != '0233') {
                 if (data.info) data.msg += data.info;
                 lrBox.msgTisf(data.msg);
