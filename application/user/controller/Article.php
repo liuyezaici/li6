@@ -65,78 +65,9 @@ class Article extends Backend
         ArticleModel::where('id', $id)->delete();
         $this->success('删除成功');
     }
-    //添加分类
-    final function add_type() {
-        $myUid = $this->auth->id;
-        if($this->request->isPost()) {
-            $title = input('title', '', 'trim');
-            if(!$title) $this->error('no title');
-            if(ArticleTypesModel::where(['title' => $title])->find()) $this->error('分类已经存在');
-            $newData = [
-                'title' => $title,
-                'cuid' => $myUid,
-                'addtime' => time(),
-            ];
-            ArticleTypesModel::insert($newData);
-            $this->success('添加成功');
-        }
-        $arr = array(
-            'id' => 0,
-            'title' => '',
-            'modify' => 'add'
-        );
-        $mainHtml = $this->view->fetch('', $arr);
-        print_r($mainHtml);
-    }
 
-    //编辑文章分类
-    final function edit_type() {
-        $id = input('id', 0, 'int');
-        //id参数是否为空
-        if( !$id ){
-            $this->error('no id');
-        }
-        $classInfo = ArticleTypesModel::where('id', $id)->find();
-        if(!$classInfo) $this->error('分类不存在');
-        if($this->request->isPost()) {
-            $title = input('title', '', 'trim');
-            if(!$title) $this->error('no title');
-            if(ArticleTypesModel::where(['title' => $title, 'id'=>['<>', $id]])->find()) $this->error('分类已经存在');
-            $editData = [
-                'title' => $title,
-            ];
-            ArticleTypesModel::where('id', $id)->update($editData);
-            $this->success('添加成功');
-        }
-        $mainHtml = $this->view->fetch('', json_decode(json_encode($classInfo), true));
-        print_r($mainHtml);
-    }
 
-    //编辑文章分类
-    final function del_type() {
-        $id = input('id', 0, 'int');
-        //id参数是否为空
-        if( !$id ){
-            $this->error('no id');
-        }
-        ArticleTypesModel::where('id', $id)->delete();
-        $this->error('删除成功');
-    }
 
-    //管理所有分类
-    public function manageAllTypes(){
-        $list = ArticleTypesModel::field('id,title')->order('id', 'desc')->select();
-        //获取分类树形菜单
-        $mainHtml = $this->view->fetch('', [
-          'class_list' => json_encode($list)
-        ]);
-        print_r($mainHtml);
-    }
-    //获取所有分类
-    public function getAllTypes($id=NULL){
-        $list = ArticleTypesModel::field('id,title')->select();
-        $this->success('获取成功', '', ['list' => $list]);
-    }
     //获取详情
     public function get($id=NULL) {
         $info = ArticleModel::getbyid($id);

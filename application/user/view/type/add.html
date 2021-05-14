@@ -1,0 +1,57 @@
+<style>
+    #addTypeBox .editorType {
+        display: inline-block;
+        margin-right: 12px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: normal;
+        padding-top: 7px;
+    }
+    #addTypeBox .col-sm-2 {
+        max-width: 100px;
+        white-space: nowrap;
+    }
+    #addTypeBox .editorType  input {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        vertical-align: sub;
+    }
+</style>
+
+<form id="addTypeBox" class="form-horizontal">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="分类名" name="title" autocomplete="off" />
+        <div class="input-group-btn">
+            <button type="submit" class="btn btn-info">保存</button>
+        </div>
+    </div>
+</form>
+<script>
+    (function () {
+        'use strict';
+        require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
+            var addForm = $("#addTypeBox");
+            front.formSubmitEven(addForm, {
+                url: '/user/type/addApi',
+                successKey: 'code',
+                successVal: 1,
+                successFunc: function (res) {
+                    lrBox.noLoading();
+                    lrBox.hideNewBox();
+                    lrBox.msgTsf(res.msg);
+                    if(window.renewEditArticleType) {
+                        window.renewEditArticleType();
+                    }
+                },
+                errorFunc: function (res) {
+                    lrBox.noLoading();
+                    lrBox.msgTisf(res.msg);
+                }
+            });
+            return {};
+        });
+    })();
+
+</script>

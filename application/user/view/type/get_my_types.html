@@ -1,0 +1,15 @@
+
+<div class="input-group">
+    <select  class="form-control" id="myTypeSelect" name="rows[typeid]" >
+        <option value="0">无</option>
+        <?php
+            foreach($allTypes as  $n=>$v ) {
+        ?>
+        <option value="<?=$v['id'];?>" <?=$v['selected'];?>><?=$v['title'];?></option>
+        <?php
+        }?>
+    </select>
+    <div class="input-group-btn">
+        <button type="button" class="btn btn-default addTypeBtn">添加</button>
+    </div>
+</div>
