@@ -164,9 +164,11 @@ class Article extends Backend
             ArticleModel::where('id', $id)->update($rows);
             $this->success('编辑成功');
         }
+        $allTypeList = ArticleTypesModel::field('id,title')->select();
         $mainHtml = $this->view->fetch('', [
             'id' =>  $id,
             'info' =>  $info,
+            'allTypeList' =>  $allTypeList,
             'savePath' =>  'upload/post_files/',
             'upload_safe_code' =>  \fast\Str::makeSafeUploadCode('upload/post_files/', $myUid), //生成安全码 防止上传路径被手动篡改
         ]);
