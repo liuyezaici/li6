@@ -19,8 +19,9 @@
         var searchForm = lrEle.makeForm({
             'class': 'diy_search_top',
             submit: function (obj) {
-                var uri = obj.serialize();
-                ajaxOpen('/user/article/?' + uri);
+                var uri = obj.findName('keyword').value;
+                var page = obj.findName('page').value;
+                ajaxOpen('/user/article/?keyword=' + uri +'&page='+ page);
             },
             value: [
                 lrEle.makeInput({name: 'page', type: 'hidden', value: '<?=$page?>'}),
