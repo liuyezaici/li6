@@ -1,0 +1,366 @@
+<table class="list_table" cellspacing="0" cellpadding="0" width="100%" border="0">
+QQ����:tencent://message/?uin=2211212
+$uid = $this->userClass->getUserAttrib('userId');
+$page = Func::has($this->options['page']) ? intval($this->options['page']) : 1;
+$aid = Func::has($this->options['aid']) ? intval($this->options['aid']) : 0;
+$aid = Func::has($this->options['aid']) ? trim($this->options['aid']) : '';
+�滻ͼƬdata
+$aa = preg_replace('/<img([^>]*.?)src="data:image([^>]*.?)/','',$aa);
+ǿ����������
+ onkeyup='this.value=this.value.replace(/[^0-9]/gi,"")'
+ onkeyup='this.value=this.value.replace(/[^0-9.]/gi,"")'
+��ѯʱ��
+$today = Timer::today();
+$uInfo = cachemysqltable::get($v2['ch_from']);
+                        $u_nick_from = $uInfo['u_nick'];
+
+                        //���������ʱ�䣬��ѯָ�����ڵ�ͳ��
+                        if($fromtime) {
+                            if(!Timer::isdate($fromtime)) $fromtime = '';
+                        }
+                        if($endtime) {
+                            if(!Timer::isdate($endtime)) $endtime = '';
+                        }
+
+                        if($endtime) {
+                            $endtime_sql = Timer::GetDateTimeMk(Timer::addDay(strtotime($endtime),1));
+                            $endtime_sql = explode(' ',$endtime_sql);
+                            $endtime_sql = $endtime_sql[0];
+                        }
+                        if($fromtime && $endtime && $fromtime <= $endtime) {
+                            $where_ = "a_createtime >= '".$fromtime."' AND a_createtime < '".$endtime_sql."'";
+                        } else {
+                            $where_ = "a_createtime >= '".$today."'";
+                        }
+
+//�����˻�
+if($employid && !is_numeric($employid)) {
+                    if(!DbBase::ifExist('c_user',"u_nick = '".$employid."'")) {
+                        print_r(message::getMessage('0282'));//�˻�������
+                        exit;
+                    }
+                    $user = new Users();
+                    $userInfo = $user->getUserByNick($employid, 'u_id');
+                    $employid = $userInfo['u_id'];
+                }
+
+�������ᵼ�����⣺360�������kindeditor�Ŀɼ��༭ģʽ���޷���ʾͼƬ��
+
+�ڲ���ת��ַ /?s=user&goto=m%3Duser%26show%3Dscore%26sign
+
+΢�ŵ�¼
+http://mp.weixin.qq.com/wiki/index.php?title=%E7%BD%91%E9%A1%B5%E6%8E%88%E6%9D%83%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF
+
+//id�����Ƿ�Ϊ��
+if( !$aid ){
+    return message::getMsgJson('0023');//ȱ�ٱ������Ϣ��������
+} 
+echo strip_tags($text, '<p><a>');
+���Ա��� p a
+
+���ֻ�����
+$points = $client->PostGroup(
+    array(
+        'account'=>'dgwz@dgwz',
+        'password'=>'123456',
+        'subid'=>'',
+        'mssages'=>array(
+            'MessageData'=>array(
+                'Phone'=>'13539012325',
+                'Content'=>'��ã����������Զ��ţ����㻨������ֵ��ӵ�У�',
+                'customMsgID'=>'',
+                'vipFlag'=>'false'
+            )
+        )
+    )
+);
+print_r($points);
+
+//��ҳ����
+    function application_page(page) {
+        $('#search_form').find('#page').val(page);
+        $('#search_form').submit();
+    }
+
+�滻�ո�
+url = url.replace(/\s/g,'');
+
+
+//��ȡ��Ŀ¼
+ $_SERVER["DOCUMENT_ROOT"]
+$nowtime = Func::mytime();//��ȡ��������
+$todayArray = explode(' ',$nowtime);
+$today = $todayArray[0];
+
+php�Ƚϼ۸��С:
+if bccomp($a,$b,2) = 0 һ��
+if bccomp($a,$b,2) < 0 ) {$a<$b}
+if bccomp($a,$b,2) > 0 ) {$a>$b} 
+
+�Ӽ��ʽ� 
+//�� $newdata[$toZjName] = bcadd($uinfo[$toZjName] , $money,2); //�µ�Ŀ���ʽ�
+//�� $arr['back_price'] = bcsub($acInfo[0]['a_newprice'] , $acInfo[0]['a_price'], 2);
+
+����
+ $('body,html').animate({scrollTop:0},1000);
+
+css����
+word-wrap: break-word; 
+//word-break����ǿ�л���;normal �������Ժͷ��������Ե��ı��������������ڻ���
+word-break: normal; 
+//ǿ��Ӣ�ĵ��ʶ���
+word-break:break-all;
+
+//������
+white-space:nowrap; 
+
+//������
+$mytime = Func::ntime();
+$newtime = Func::lastDay(strtotime($mytime),7); //��7��
+$aWeekAgo = Timer::GetDateTimeMk($newtime); //ת�ı���ʽ
+
+//������
+$today = Func::ntime();
+$nextweek = Timer::addDay(strtotime($today),7); //��7��
+$nextweek = Timer::GetDateTimeMk($nextweek); //����ʱ��Ϊ7���
+
+//�жϻ�Ա�Ƿ��¼
+                $user = new Users();
+                $userId = $user->getUserAttrib('userId');
+                if($userId) {
+                    echo(strlen($userId));
+                    die;
+                }
+//js �Զ�ˢ��
+
+                    setTimeout(function(){
+                        var url = window.location;
+                        window.location = url;
+                    },1000);
+
+Func::filePush('log/ww_invite.txt','��ͻ�Ƽ���,������:'.$a_ww.' �����ʺ�:'.$u_nick.'������Ʒ:'.$taobaoid.',�Ƽ���д:'.$inviter.' ');
+
+�������ӣ�http://www.taobao.com/webww/ww.php?ver=3&touid="+nick+"&siteid=cntaobao&status=1&charset=utf-8
+
+//������ѯ����
+$sql = "select a_id,a_name,a_img  FROM a_action WHERE a_atype='".$item[0]['a_atype'] ."' AND a_state = 6 order by a_id desc limit 10";
+                $db->Query($sql); //ִ��sql���
+                $action_like =  $db->getAllRecodesEx(\PDO::FETCH_ASSOC);
+
+��ѯ���ݰ�ָ��id�Ⱥ����� order by field (a_id,".$actionIds.")
+
+�ж����ݹ���
+// �ж��Ƿ��Ѿ�ͨ����� 1-3 δ��Ͳ�ͨ�� �ſ��Ա༭
+                if (!$this->userClass->checkOwn('v_action','a_id', $aid,'','a_people = \''.$uid.'\' and a_state in(1,3)')){
+                    return json_encode(message::getMsgStruct('1068'));//�û�Ѿ����������Ա���.�������ٴ����
+                }
+
+msgWin('�༭���Ϣ','/?s=eaction/form&form=edit&aid='+a_id,800,200,"<a target='_self' class='btn' href=\"javascript:editAction('"+ a_id +"');\" >ˢ��</a> ");
+
+�жϲ����Ƿ�Ϊ��
+
+
+//У��Ȩ��
+                    if (!$this->userClass->checkPower(56)){
+                        return message::Show(message::getmsg('0027'), '-1',0,3000);
+                    }
+
+
+�ύ��ť
+<a class="button" href="javascript: void(0);" onclick="$(this).next().click();" target="_self">��¼</a>
+<input type="submit" value="��¼" class="hide_btn" />
+js
+�жϵ绰�����ʽ
+
+        var re1 = /^[0][1-9]{2,3}-[0-9]{5,10}$/;
+        var re2 = /^1[3|4|5|8][0-9]\d{4,8}$/;
+        if(!re1.test(tel) && !re2.test(tel)) {
+            msg("�绰��ʽ����",4);
+            return;
+        }
+
+
+jquery ��ȡcheckbox $("td input[type='checkbox'][id!='allcheck']:checked")
+jquery ��ȡradio  var shiyong = form.find(".pingfen").find("input[name='shiyong']:checked").val();
+jquery ��ȡ�������� mainBox.offset().l eft .top
+��ʼ��
+ $(document).ready(function(e) {});
+
+�ж��Ƿ����
+ $db = mysql::getInstance();
+                $num = DbBase::ifExist('v_action',"a_taoid = '".$taobaoid."' and a_ctime > '".$today_old."' and a_atype <> '11' ");
+                 if ($num > 0){}
+kindEditorɾ�� 
+window.KindEditor.remove('all');
+ if("#taobaoinfo") KindEditor.remove('#taobaoinfo'); //ɾ����༭��
+    var p_content = $.trim(window.editor.html());
+
+
+ window.editor = KindEditor.create('.reason',{
+                //�������д�����ǹؼ�������,��ʧȥ����ʱִ�� this.sync();
+                afterBlur:function(){this.sync();}
+            });
+
+//�жϻ�Ա���ڷ�
+num = DbBase::ifExist('c_user',"u_nick = '".$u_nick."");
+ajax post
+
+
+var postData = {
+            r_id: r_id
+        };
+        post('/?s=report&do=zan&json=true',postData,function(data) {
+            if(data.id != '0108') {
+                if(data.info) data.msg += data.info;
+                if(data.id == '0004') {
+                    loginIn();
+		    return;
+                }
+                msg(data.msg,4);
+            } else {
+                msg(data.msg,1);
+                if(data.id == '0108') removeRecord(a_id);
+            }
+        });
+
+
+ֱ�ӷ�����Ϣ
+
+ print message::getmsg('0103');//���ڷǷ�����    δ��������
+����jsonϵͳ��Ϣ
+
+  return json_encode(message::getMsgStruct('0106'));//�޸ĳɹ�
+
+,"<a target='_self' class='btn' href=\"javascript:editAction('"+ a_id +"');\" >ˢ��</a> "
+
+ 
+//ajaxɾ����Ϣ
+function confirmDeleteAction(a_id) {
+    var postData = {
+        gid: a_id
+    };
+    $.post('?m=eaction&do=del&json=true',postData,function(data) {
+        if(data.id != '0108') {
+            if(data.info) data.msg += data.info;
+            msg(data.msg,4);
+            if(data.id == '0000') {
+                msg(data.msg,1);
+                window.location.assign("?model=elogin")
+                return;
+            }
+        } else {
+            msg(data.msg,1);
+            if(data.id == '0108') removeRecord(a_id);
+            return;
+        }
+    },'json');
+}
+function removeRecord(aid) {
+    $('#td_'+aid).remove();
+}
+
+$.get('?model=login&do=userstateinfo&t='+Math.random(), function(data){
+        if( data.nick && data.nick!= '' ){
+            var usermodel = data.usertype == 3 ? 'employee' : 'user';
+            var my_menu = "<a href='index.php?model="+ usermodel +"' class='headbtn1'>��������</a> <a href='index.php?model=exit&do=login' class='headbtn2'>ע��</a> ";
+            var top_menu = $('.top_class');
+            if(top_menu.length > 0 ) {
+                top_menu.find('.my_menu').html( my_menu );
+                top_menu.find('.usermenu img').attr({'src':data.logimg,'title': data.nick + ', ����: '+data.score });
+            }
+            var header_state = $('#header').find('#login_state');
+            if(header_state.length > 0 ) {
+                var my_menu = "��ӭ��: <a href='index.php?model="+ usermodel +"'>"+ data.nick +"</a> | &nbsp; <a href='index.php?model=exit&do=login'>ע��</a> ";
+                header_state.html( my_menu ).attr({'title': data.nick + ', ����: '+data.score });
+            }
+            var scroll_nemu =  $('#topmenu');
+            if(scroll_nemu.length > 0 ){
+                scroll_nemu.find('.userinfo').html($('.top_class').find('.usermenu').html() );
+            }
+        }
+    },'json');
+
+
+if (confirm('��Ҫ ��ȷ����')){
+        }
+
+//crc�ж�
+
+if (!$ac->checkCRC($toUserid)){
+	return json_encode(message::getMsgStruct('0018')); //�˻�CRCУ�����
+}
+//��Աͷ��
+<img src="{userlogo}" width="80" height="80" class="userface" title="����޸�ͷ��" onerror="this.src='/upload/face/default.jpg';"/>
+            $arr['_replace']['userlogo'] = $GLOBALS['cfg_photos']."/".$this->userClass->getUserAttrib('userId').".jpg";
+
+
+
+---------------------------------------------------------------------------
+//�������
+                $db->BeginTRAN(); 
+                try {
+			if($ac !=1) {
+                        throw new Exception('��������ʧ��',-1);
+                    }
+			$db->CommitTRAN();
+                }catch (Exception $e){
+                    $db->RollBackTRAN();
+                    return message::getMsgJson('1010');// ����:����ʧ��
+                }
+
+ FIND_IN_SET �滻�� ����������� 
+
+        $ids = Func::addYh($ids);
+                return message::getMsgJson('1133');// ����:����ɹ�,�ȴ��������
+
+
+---------------
+����ע�����
+--------------------------------
+$db = mysql::getInstance();
+$user= new Users();
+$ac = new account();
+$mytime = Func::mytime();
+for ( $a=10000; $a<10100;$a++ ) {
+   $nick = "yz".$a;
+    $arr = array(
+        'u_nick' => $nick,
+        'u_pwd' => Func::getMD5( "yizhong" ),
+        'u_type' => 3,
+        'u_email' => substr(md5($nick),0,15).'@qq.com',
+        'u_logtime' => $mytime,
+        'u_ctime' => $mytime,
+        'u_chtime' => $mytime,
+        'u_fcode' => 1
+    );
+    //�����û�
+    if ( $user->createUser( $arr , $db ) != 1 ){
+        echo "createUser err ";
+        exit;
+    }
+    $uid = $db-> getLastID();
+    //�����˻�
+    $ac->createAccount( $uid , $usertype );
+}
+echo "finish";
+
+--------------- php��ά��������
+function multi_array_sort($multi_array,$sort_key,$sort=SORT_DESC){
+                    if(is_array($multi_array)){
+                        foreach ($multi_array as $row_array){
+                            if(is_array($row_array)){
+                                $key_array[] = $row_array[$sort_key];
+                            }else{
+                                return false;
+                            }
+                        }
+                    }else{
+                        return false;
+                    }
+                    array_multisort($key_array,$sort,$multi_array);
+                    return $multi_array;
+                }
+                //ÿ���ͳ�ƴӴ�С����
+                foreach($allFidData as $n=>$v) {
+                    $allFidData[$n] =  multi_array_sort($v,'total');
+                }

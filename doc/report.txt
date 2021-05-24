@@ -1,0 +1,47 @@
+ 
+   
+   
+   
+   //官网本地数据库
+   mysql -u pomcube -pAUQq3qCw
+   show databases;
+   //导出数据库
+mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  pomcube_www > copyMysqlWWW.txt;
+mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  systemservice > copyMysqlser.txt;
+mysqldump -upomcube -pAUQq3qCw -P3306 --default-character-set utf8  customer > copyMysqlcus.txt;
+
+//导出表
+ mysqldump  -u pomcube -p  -- pomcube_www pomcube_www_sp > copyMysqlData.txt
+   
+   
+   
+   //连接数据库
+   
+   mysql -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678
+
+	
+ //连接redis
+ redis-cli -h pomcube.pehexp.0001.usw2.cache.amazonaws.com
+ 
+ //导出数据-表
+ mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- systemservice fa_device_bind_user > fa_device_bind_user.sql
+ 
+ //导出数据-库
+ mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- pomcube_www > copyMysqlWWW.txt;
+ mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- systemservice > copyMysqlser.txt;
+ mysqldump -h apollo.croj2cye9x3c.us-west-2.rds.amazonaws.com -u root -ppom345678  -- customer > copyMysqlcus.txt;
+ 
+ 查看定时任务
+ crontab -l
+ 
+ 重命名表：
+ ALTER TABLE fa_device_status_template RENAME TO fa_device_cfg_template
+ 
+ 
+ 测试机
+ AA-70-2010-01-0038-385
+ ?01239956BB1CCA4DEE
+ 
+ 
+ AA-70-2010-01-0031-106  三楼测试机
+ 
