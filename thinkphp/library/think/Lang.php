@@ -21,7 +21,7 @@ class Lang
     /**
      * @var string 语言作用域
      */
-    private static $range = 'zh-cn';
+    private static $range = 'en';
 
     /**
      * @var string 语言自动侦测的变量
@@ -46,7 +46,7 @@ class Lang
     /**
      * @var array Accept-Language 转义为对应语言包名称 系统默认配置
      */
-    protected static $acceptLanguage = ['zh-hans-cn' => 'zh-cn'];
+    protected static $acceptLanguage = ['zh-hans-cn' => 'en'];
 
     /**
      * 设定当前的语言
@@ -196,8 +196,14 @@ class Lang
             // url 中设置了语言变量
             $langSet = strtolower($_GET[self::$langDetectVar]);
         } elseif (isset($_COOKIE[self::$langCookieVar])) {
+//            print_r('cookies');exit;
             // Cookie 中设置了语言变量
             $langSet = strtolower($_COOKIE[self::$langCookieVar]);
+        } elseif (Config::get('default_lang')) {
+            $langSet     = Config::get('default_lang');
+//            print_r('cfg.$langSet:');
+//            print_r($langSet);
+//            exit;
         } elseif (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
             // 自动侦测浏览器语言
             preg_match('/^([a-z\d\-]+)/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);

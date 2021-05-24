@@ -1,0 +1,249 @@
+<!-- 手动载入编辑器第三方插件内容 -->
+<script src="/assets/libs/editor/kindeditor/kindeditor-all-min.js" ></script>
+<script src="/assets/libs/editor/kindeditor/lang/zh-CN.js" ></script>
+<link href="/assets/libs/editor/kindeditor/themes/default/default.css" rel="stylesheet" type="text/css">
+
+<style>
+    #writeBox .editorType {
+        display: inline-block;
+        margin-right: 12px;
+        font-size: 16px;
+        cursor: pointer;
+        font-weight: normal;
+        padding-top: 7px;
+    }
+    #writeBox .col-sm-2 {
+        max-width: 100px;
+        white-space: nowrap;
+    }
+    #writeBox .editorType  input {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        vertical-align: sub;
+    }
+</style>
+<div class="panel panel-info" id="writeBox">
+    <div class="panel-heading">
+        <h3 class="panel-title"><?=$topTitle?></h3>
+    </div>
+    <div class="panel-body">
+        <form id="writeForm" class="form-horizontal">
+            <div class="form-group">
+                <label for="set_typeid" class="col-sm-2 control-label">分类</label>
+                <div class="col-sm-10 form-inline">
+                    <div id="set_typeid" class="input-group"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="set_title" class="col-sm-2 control-label">标题</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="set_title" name="title" value="<?=$row['title'];?>" placeholder="" autocomplete="off" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">编辑器</label>
+                <div class="col-sm-10">
+                    <label class="editorType">
+                        <input type="radio" name="editorType" value="txt" <?=($row['editorType']=='txt' ? 'checked':'');?> /> txt
+                    </label>
+                    <label class="editorType">
+                        <input type="radio" name="editorType" value="html" <?=($row['editorType']=='html' ? 'checked':'');?> /> html
+                    </label>
+                    <label class="editorType">
+                        <input type="radio" name="editorType" value="markdown" <?=($row['editorType']=='markdown' ? 'checked':'');?> /> markdown
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">正文</label>
+                <div class="col-sm-10">
+                    <textarea class="form-control hidden" id="defaultContent" name="content" style="max-width: 1000px;height: 600px;"><?=$row['content'];?></textarea>
+                    <div id="showEditor"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"> </label>
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 35px;">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    (function () {
+        'use strict';
+        require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
+            var editorTypeCache = 'editorType';
+            var submitUrl = '<?=$submitUrl;?>';
+            var writeBox = $("#writeBox");
+            var writeForm = writeBox.find("#writeForm");
+            var selectBox = writeBox.find("#set_typeid");
+            var editorTypes = writeBox.find(".editorType");
+            var showEditor = writeBox.find("#showEditor");
+            var defaultContent = writeBox.find("#defaultContent");
+            function getTypes() {
+                selectBox.html('').load('/my/type/getMyTypes', function () {
+                    var addTypeBtn = selectBox.find(".addTypeBtn");
+                    addTypeBtn.click(function () {
+                        lrBox.msgt('添加分类', '[url]/my/type/add', '400px', {fadein: 1, fd: 1,move: {fx:'d', sd: 100,jl: '20%'}});
+                        //更新分类的方法
+                        window.renewEditArticleType= function () {
+                            getTypes();
+                        };
+                    });
+                });
+            }
+            getTypes();
+            //切换编辑器类型
+            //当前编辑器value的get/set方法
+            var currentGetEditorValFunc = function () {
+
+            };
+            var currentEditorValFunc = function () {
+
+            };
+            //定义value的公共对象
+            var editorObj = {};
+            Object.defineProperty(editorObj, 'value', {
+                get: function () {
+                    return currentGetEditorValFunc();
+                },set :function (newVal) {
+                    currentEditorValFunc(newVal);
+                }
+            });
+            var pushNewEditor = function (lastVal) {
+                var newContentObj = defaultContent.clone();
+                newContentObj.removeClass('hidden');
+                showEditor.html('').append(newContentObj);
+                newContentObj.val(lastVal);
+                return newContentObj;
+            };
+            function createTextEditor(lastVal) {
+                var newContentObj = pushNewEditor(lastVal);
+                currentGetEditorValFunc = function () {
+                    return  newContentObj.val();
+                };
+                currentEditorValFunc = function (newVal) {
+                    newContentObj.val(newVal);
+                };
+            }
+
+            function createHtmlEditor(lastVal) {
+                var newContentObj = pushNewEditor(lastVal);
+                //这里可以统一设置编辑器样式
+                var defaultOpt =  {
+                    width: '100%',
+                    height: '600px',
+                    resizeType : 1,
+                    allowPreviewEmoticons : false,
+                    allowImageUpload : false,
+                    items : [
+                        'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
+                        'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
+                        'insertunorderedlist', '|', 'image', 'link']
+                };
+                var thisEditorObj = KindEditor.create(newContentObj, defaultOpt);
+
+                currentGetEditorValFunc = function () {
+                    return  thisEditorObj.text();
+                };
+                currentEditorValFunc = function (newVal) {
+                    thisEditorObj.text(newVal);
+                };
+            }
+
+            //http://editor.md.ipandao.com/examples/use-requirejs.html
+            function createMdEditor(lastVal) {
+                //var newContentObj = pushNewEditor(lastVal);
+                window.currentPushingContent = lastVal;
+                var innerEditor = $('<iframe style="width: 100%; height: 600px;border: 0;overflow:hidden;" src="/article/markdown.html"></iframe>');
+                showEditor.html('').append(innerEditor);
+                innerEditor.on('load', function () {
+                    currentGetEditorValFunc = function () {
+                        return window.mdEditorGetContent();
+                    };
+                    currentEditorValFunc = function (newVal) {
+                        window.mdEditorSetContent(newVal);
+                    };
+                });
+            }
+
+            editorTypes.click(function (e) {
+                var type_ = $(this).find('input').val();
+                var lastVal = '';
+                if(editorObj) {
+                    lastVal = editorObj.value;
+                }
+                front.cacheObj.setCache(editorTypeCache, type_);
+                switch (type_) {
+                    case 'txt':
+                        createTextEditor(lastVal);
+                        break;
+                    case 'html':
+                        createHtmlEditor(lastVal);
+                        break;
+                    case 'markdown':
+                        createMdEditor(lastVal);
+                        break;
+                    default:
+                        lrBox.msgTsf('不支持的编辑器类型');
+                }
+            });
+            //初始化 txt 编辑器
+
+            var lastType = front.cacheObj.getCache(editorTypeCache);
+            if(!lastType) {
+                createTextEditor('');
+            } else {
+                writeBox.find(".editorType input[value='"+ lastType +"']").trigger('click');
+            }
+
+
+            writeForm.on('submit', function (e) {
+                e.preventDefault();
+                var data_ = writeForm.serializeArray();
+                var pData = {};
+                data_.map(function (v, n) {
+                    if (!front.isUndef(pData[v.name])) {
+                        if ($.isArray(pData[v.name])) {
+                            pData[v.name].push(v.value);
+                        } else {
+                            pData[v.name] = [pData[v.name], v.value];
+                        }
+                    } else {
+                        pData[v.name] = v.value;
+                    }
+                });
+                var content = editorObj.value;
+                //将content单独分割保存于服务器再提交发布
+                if(content) {
+                    content = front.aesEncode(content);
+                }
+                console.log('content', content);
+                delete pData['content'];
+                lrBox.loading(true);
+                //提交发布
+                front.postAndDone({
+                    url: submitUrl,
+                    data: pData,
+                    successKey: 'code',
+                    successVal: 1,
+                    successFunc: function (res) {
+                        lrBox.noLoading();
+                        lrBox.msgTisf(res.msg);
+                    },
+                    errorFunc: function (res) {
+                        lrBox.noLoading();
+                        lrBox.msgTisf(res.msg);
+                    }
+                });
+
+            });
+            return {};
+        });
+    })();
+
+</script>

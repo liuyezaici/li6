@@ -17,7 +17,7 @@ class AuthRule extends Model
     protected static function init()
     {
         self::afterWrite(function ($row) {
-//            Cache::rm(self::$menuCacheName);
+            Cache::rm('__menu__');
         });
     }
 

@@ -3,11 +3,15 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
+use app\common\exception\UploadException;
+use app\common\library\Upload;
 use fast\Random;
+use think\addons\Service;
 use think\Cache;
 use think\Config;
 use think\Db;
 use think\Lang;
+use think\Validate;
 
 /**
  * Ajax异步请求接口
@@ -25,7 +29,7 @@ class Ajax extends Backend
         parent::_initialize();
 
         //设置过滤方法
-        $this->request->filter(['strip_tags', 'htmlspecialchars']);
+        $this->request->filter(['trim', 'strip_tags', 'htmlspecialchars']);
     }
 
     /**
@@ -34,6 +38,12 @@ class Ajax extends Backend
     public function lang()
     {
         header('Content-Type: application/javascript');
+        header("Cache-Control: public");
+        header("Pragma: cache");
+
+        $offset = 30 * 60 * 60 * 24; // 缓存一个月
+        header("Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT");
+
         $controllername = input("controllername");
         //默认只加载了控制器对应的语言名，你还根据控制器名来加载额外的语言包
         $this->loadlang($controllername);
@@ -46,87 +56,63 @@ class Ajax extends Backend
     public function upload()
     {
         Config::set('default_return_type', 'json');
-        $file = $this->request->file('file');
-        if (empty($file))
-        {
-            $this->error(__('No file upload or server upload limit exceeded'));
-        }
-
-        //判断是否已经存在附件
-        $sha1 = $file->hash();
-
-        $upload = Config::get('upload');
-
-        preg_match('/(\d+)(\w+)/', $upload['maxsize'], $matches);
-        $type = strtolower($matches[2]);
-        $typeDict = ['b' => 0, 'k' => 1, 'kb' => 1, 'm' => 2, 'mb' => 2, 'gb' => 3, 'g' => 3];
-        $size = (int) $upload['maxsize'] * pow(1024, isset($typeDict[$type]) ? $typeDict[$type] : 0);
-        $fileInfo = $file->getInfo();
-        $suffix = strtolower(pathinfo($fileInfo['name'], PATHINFO_EXTENSION));
-        $suffix = $suffix ? $suffix : 'file';
-
-        $mimetypeArr = explode(',', $upload['mimetype']);
-        $typeArr = explode('/', $fileInfo['type']);
-        //验证文件后缀
-        if ($upload['mimetype'] !== '*' && !in_array($suffix, $mimetypeArr) && !in_array($fileInfo['type'], $mimetypeArr) && !in_array($typeArr[0] . '/*', $mimetypeArr))
-        {
-            $this->error(__('Uploaded file format is limited'));
-        }
-        $replaceArr = [
-            '{year}'     => date("Y"),
-            '{mon}'      => date("m"),
-            '{day}'      => date("d"),
-            '{hour}'     => date("H"),
-            '{min}'      => date("i"),
-            '{sec}'      => date("s"),
-            '{random}'   => Random::alnum(16),
-            '{random32}' => Random::alnum(32),
-            '{filename}' => $suffix ? substr($fileInfo['name'], 0, strripos($fileInfo['name'], '.')) : $fileInfo['name'],
-            '{suffix}'   => $suffix,
-            '{.suffix}'  => $suffix ? '.' . $suffix : '',
-            '{filemd5}'  => md5_file($fileInfo['tmp_name']),
-        ];
-        $savekey = $upload['savekey'];
-        $savekey = str_replace(array_keys($replaceArr), array_values($replaceArr), $savekey);
-
-        $uploadDir = substr($savekey, 0, strripos($savekey, '/') + 1);
-        $fileName = substr($savekey, strripos($savekey, '/') + 1);
-        //
-        $splInfo = $file->validate(['size' => $size])->move(ROOT_PATH . $uploadDir, $fileName);
-        if ($splInfo)
-        {
-            $imagewidth = $imageheight = 0;
-            if (in_array($suffix, ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'swf']))
-            {
-                $imgInfo = getimagesize($splInfo->getPathname());
-                $imagewidth = isset($imgInfo[0]) ? $imgInfo[0] : $imagewidth;
-                $imageheight = isset($imgInfo[1]) ? $imgInfo[1] : $imageheight;
+        //必须设定cdnurl为空,否则cdnurl函数计算错误
+        Config::set('upload.cdnurl', '');
+        $chunkid = $this->request->post("chunkid");
+        if ($chunkid) {
+            if (!Config::get('upload.chunking')) {
+                $this->error(__('Chunk file disabled'));
             }
-            $params = array(
-                'filesize'    => $fileInfo['size'],
-                'imagewidth'  => $imagewidth,
-                'imageheight' => $imageheight,
-                'imagetype'   => $suffix,
-                'imageframes' => 0,
-                'mimetype'    => $fileInfo['type'],
-                'url'         => $uploadDir . $splInfo->getSaveName(),
-                'uploadtime'  => time(),
-                'storage'     => 'local',
-                'sha1'        => $sha1,
-            );
-            $attachment = model("attachment");
-            $attachment->data(array_filter($params));
-            $attachment->save();
-            \think\Hook::listen("upload_after", $attachment);
-            $this->success(__('Upload successful'), null, [
-                'url' => $uploadDir . $splInfo->getSaveName()
-            ]);
+            $action = $this->request->post("action");
+            $chunkindex = $this->request->post("chunkindex/d");
+            $chunkcount = $this->request->post("chunkcount/d");
+            $filename = $this->request->post("filename");
+            $method = $this->request->method(true);
+            if ($action == 'merge') {
+                $attachment = null;
+                //合并分片文件
+                try {
+                    $upload = new Upload();
+                    $attachment = $upload->merge($chunkid, $chunkcount, $filename);
+                } catch (UploadException $e) {
+                    $this->error($e->getMessage());
+                }
+                $this->success(__('Uploaded successful'), '', ['url' => $attachment->url, 'fullurl' => cdnurl($attachment->url, true)]);
+            } elseif ($method == 'clean') {
+                //删除冗余的分片文件
+                try {
+                    $upload = new Upload();
+                    $upload->clean($chunkid);
+                } catch (UploadException $e) {
+                    $this->error($e->getMessage());
+                }
+                $this->success();
+            } else {
+                //上传分片文件
+                //默认普通上传文件
+                $file = $this->request->file('file');
+                try {
+                    $upload = new Upload($file);
+                    $upload->chunk($chunkid, $chunkindex, $chunkcount);
+                } catch (UploadException $e) {
+                    $this->error($e->getMessage());
+                }
+                $this->success();
+            }
+        } else {
+            $attachment = null;
+            //默认普通上传文件
+            $file = $this->request->file('file');
+            try {
+                $upload = new Upload($file);
+                $attachment = $upload->upload();
+            } catch (UploadException $e) {
+                $this->error($e->getMessage());
+            }
+
+            $this->success(__('Uploaded successful'), '', ['url' => $attachment->url, 'fullurl' => cdnurl($attachment->url, true)]);
         }
-        else
-        {
-            // 上传失败获取错误信息
-            $this->error($file->getError());
-        }
+
     }
 
     /**
@@ -142,78 +128,58 @@ class Ajax extends Backend
         $field = $this->request->post("field");
         //操作的数据表
         $table = $this->request->post("table");
+        if (!Validate::is($table, "alphaDash")) {
+            $this->error();
+        }
+        //主键
+        $pk = $this->request->post("pk");
         //排序的方式
-        $orderway = $this->request->post("orderway", 'strtolower');
+        $orderway = strtolower($this->request->post("orderway", ""));
         $orderway = $orderway == 'asc' ? 'ASC' : 'DESC';
         $sour = $weighdata = [];
         $ids = explode(',', $ids);
-        $prikey = 'id';
-        $pid = $this->request->post("pid");
+        $prikey = $pk && preg_match("/^[a-z0-9\-_]+$/i", $pk) ? $pk : (Db::name($table)->getPk() ?: 'id');
+        $pid = $this->request->post("pid", "");
         //限制更新的字段
         $field = in_array($field, ['weigh']) ? $field : 'weigh';
 
         // 如果设定了pid的值,此时只匹配满足条件的ID,其它忽略
-        if ($pid !== '')
-        {
+        if ($pid !== '') {
             $hasids = [];
-            $list = Db::name($table)->where($prikey, 'in', $ids)->where('pid', 'in', $pid)->field('id,pid')->select();
-            foreach ($list as $k => $v)
-            {
-                $hasids[] = $v['id'];
+            $list = Db::name($table)->where($prikey, 'in', $ids)->where('pid', 'in', $pid)->field("{$prikey},pid")->select();
+            foreach ($list as $k => $v) {
+                $hasids[] = $v[$prikey];
             }
             $ids = array_values(array_intersect($ids, $hasids));
         }
 
-        //直接修复排序
-        $one = Db::name($table)->field("{$field},COUNT(*) AS nums")->group($field)->having('nums > 1')->find();
-        if ($one)
-        {
-            $list = Db::name($table)->field("$prikey,$field")->order($field, $orderway)->select();
-            foreach ($list as $k => $v)
-            {
-                Db::name($table)->where($prikey, $v[$prikey])->update([$field => $k + 1]);
-            }
-            $this->success();
+        $list = Db::name($table)->field("$prikey,$field")->where($prikey, 'in', $ids)->order($field, $orderway)->select();
+        foreach ($list as $k => $v) {
+            $sour[] = $v[$prikey];
+            $weighdata[$v[$prikey]] = $v[$field];
         }
-        else
-        {
-            $list = Db::name($table)->field("$prikey,$field")->where($prikey, 'in', $ids)->order($field, $orderway)->select();
-            foreach ($list as $k => $v)
-            {
-                $sour[] = $v[$prikey];
-                $weighdata[$v[$prikey]] = $v[$field];
-            }
-            $position = array_search($changeid, $ids);
-            $desc_id = $sour[$position];    //移动到目标的ID值,取出所处改变前位置的值
-            $sour_id = $changeid;
-            $desc_value = $weighdata[$desc_id];
-            $sour_value = $weighdata[$sour_id];
-            //echo "移动的ID:{$sour_id}\n";
-            //echo "替换的ID:{$desc_id}\n";
-            $weighids = array();
-            $temp = array_values(array_diff_assoc($ids, $sour));
-            foreach ($temp as $m => $n)
-            {
-                if ($n == $sour_id)
-                {
-                    $offset = $desc_id;
+        $position = array_search($changeid, $ids);
+        $desc_id = $sour[$position];    //移动到目标的ID值,取出所处改变前位置的值
+        $sour_id = $changeid;
+        $weighids = array();
+        $temp = array_values(array_diff_assoc($ids, $sour));
+        foreach ($temp as $m => $n) {
+            if ($n == $sour_id) {
+                $offset = $desc_id;
+            } else {
+                if ($sour_id == $temp[0]) {
+                    $offset = isset($temp[$m + 1]) ? $temp[$m + 1] : $sour_id;
+                } else {
+                    $offset = isset($temp[$m - 1]) ? $temp[$m - 1] : $sour_id;
                 }
-                else
-                {
-                    if ($sour_id == $temp[0])
-                    {
-                        $offset = isset($temp[$m + 1]) ? $temp[$m + 1] : $sour_id;
-                    }
-                    else
-                    {
-                        $offset = isset($temp[$m - 1]) ? $temp[$m - 1] : $sour_id;
-                    }
-                }
-                $weighids[$n] = $weighdata[$offset];
-                Db::name($table)->where($prikey, $n)->update([$field => $weighdata[$offset]]);
             }
-            $this->success();
+            if (!isset($weighdata[$offset])) {
+                continue;
+            }
+            $weighids[$n] = $weighdata[$offset];
+            Db::name($table)->where($prikey, $n)->update([$field => $weighdata[$offset]]);
         }
+        $this->success();
     }
 
     /**
@@ -221,15 +187,27 @@ class Ajax extends Backend
      */
     public function wipecache()
     {
-        $wipe_cache_type = ['TEMP_PATH', 'LOG_PATH', 'CACHE_PATH'];
-        foreach ($wipe_cache_type as $item)
-        {
-            $dir = constant($item);
-            if (!is_dir($dir))
-                continue;
-            rmdirs($dir);
+        $type = $this->request->request("type");
+        switch ($type) {
+            case 'all':
+            case 'content':
+                rmdirs(CACHE_PATH, false);
+                Cache::clear();
+                if ($type == 'content') {
+                    break;
+                }
+            case 'template':
+                rmdirs(TEMP_PATH, false);
+                if ($type == 'template') {
+                    break;
+                }
+            case 'addons':
+                Service::refresh();
+                if ($type == 'addons') {
+                    break;
+                }
         }
-        Cache::clear();
+
         \think\Hook::listen("wipecache_after");
         $this->success();
     }
@@ -239,24 +217,20 @@ class Ajax extends Backend
      */
     public function category()
     {
-        $type = $this->request->get('type');
-        $pid = $this->request->get('pid');
+        $type = $this->request->get('type', '');
+        $pid = $this->request->get('pid', '');
         $where = ['status' => 'normal'];
         $categorylist = null;
-        if ($pid !== '')
-        {
-            if ($type)
-            {
-                $where['type'] = $type;
-            }
-            if ($pid)
-            {
-                $where['pid'] = $pid;
-            }
-
-            $categorylist = Db::name('category')->where($where)->field('id as value,name')->order('weigh desc,id desc')->select();
+        if ($pid || $pid === '0') {
+            $where['pid'] = $pid;
         }
-        $this->success('', null, $categorylist);
+        if ($type) {
+            $where['type'] = $type;
+        }
+
+        $categorylist = Db::name('category')->where($where)->field('id as value,name')->order('weigh desc,id desc')->select();
+
+        $this->success('', '', $categorylist);
     }
 
     /**
@@ -264,28 +238,38 @@ class Ajax extends Backend
      */
     public function area()
     {
-        $province = $this->request->get('province');
-        $city = $this->request->get('city');
+        $params = $this->request->get("row/a");
+        if (!empty($params)) {
+            $province = isset($params['province']) ? $params['province'] : '';
+            $city = isset($params['city']) ? $params['city'] : '';
+        } else {
+            $province = $this->request->get('province', '');
+            $city = $this->request->get('city', '');
+        }
         $where = ['pid' => 0, 'level' => 1];
         $provincelist = null;
-        if ($province !== '')
-        {
-            if ($province)
-            {
-                $where['pid'] = $province;
-                $where['level'] = 2;
-            }
-            if ($city !== '')
-            {
-                if ($city)
-                {
-                    $where['pid'] = $city;
-                    $where['level'] = 3;
-                }
-                $provincelist = Db::name('area')->where($where)->field('id as value,name')->select();
+        if ($province !== '') {
+            $where['pid'] = $province;
+            $where['level'] = 2;
+            if ($city !== '') {
+                $where['pid'] = $city;
+                $where['level'] = 3;
             }
         }
-        $this->success('', null, $provincelist);
+        $provincelist = Db::name('area')->where($where)->field('id as value,name')->select();
+        $this->success('', '', $provincelist);
+    }
+
+    /**
+     * 生成后缀图标
+     */
+    public function icon()
+    {
+        $suffix = $this->request->request("suffix");
+        header('Content-type: image/svg+xml');
+        $suffix = $suffix ? $suffix : "FILE";
+        echo build_suffix_image($suffix);
+        exit;
     }
 
 }

@@ -1,23 +1,22 @@
 <meta charset="utf-8">
-<title>{$webInfo.set_web_admin_title|default=''}</title>
+<title>{$title|default=''}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="renderer" content="webkit">
+<meta name="referrer" content="never">
 
 <link rel="shortcut icon" href="__CDN__/assets/img/favicon.ico" />
 <!-- Loading Bootstrap -->
 <link href="__CDN__/assets/css/backend{$Think.config.app_debug?'':'.min'}.css?v={$Think.config.site.version}" rel="stylesheet">
-<script src="/assets/libs/jquery/dist/jquery.js"></script>
-<script src="/assets/libs/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="/assets/js/lr/jquery-lr_box.js"></script>
-<script src="/assets/js/lr/jquery-lr_base.js"></script>
-<script src="/assets/js/lr/jquery-lr_element.js"></script>
-<script src="/assets/js/editor/xheditor/xheditor.js"></script>
+
+{if $Think.config.fastadmin.adminskin}
+<link href="__CDN__/assets/css/skins/{$Think.config.fastadmin.adminskin}.css?v={$Think.config.site.version}" rel="stylesheet">
+{/if}
+
 <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
 <!--[if lt IE 9]>
   <script src="__CDN__/assets/js/html5shiv.js"></script>
   <script src="__CDN__/assets/js/respond.min.js"></script>
 <![endif]-->
-
 <script type="text/javascript">
     var require = {
         config:  {$config|json_encode}

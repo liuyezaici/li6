@@ -1,0 +1,266 @@
+<script>
+
+    require.config({
+        paths: {
+            jquery: '/assets/libs/jquery/dist/jquery-2.2.1.min',
+            lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+        }
+    });
+    require(['jquery', 'lrBox'], function ($, lrBox) {
+        var allTimeZone = [ { v: -12, t: '埃尼威托克岛 (GMT-12)', }, { v: -11, t: '萨摩亚群岛 (GMT-11)', }, { v: -10, t: '夏威夷 (GMT-10)', }, { v: -9, t: '阿拉斯加 (GMT-9)', }, { v: -8, t: '太平洋时间 (GMT-8)', }, { v: -7, t: '山脉时间 (GMT-7)', }, { v: -6, t: '中央标准时间 (GMT-6)', }, { v: -5, t: '东部时间 (GMT-5)', }, { v: -4, t: '大西洋时间 (GMT-4)', }, { v: -3, t: 'Brazilia (GMT-3)', }, { v: -2, t: '大西洋中部时间(GMT-2)', }, { v: -1, t: '亚述尔群岛 (GMT-1)', }, { v: 0, t: '格林威治标准（GMT）', }, { v: 1, t: '罗马 (GMT +1)', }, { v: 2, t: '以色列 (GMT +2)', }, { v: 3, t: '莫斯科 (GMT +3)', }, { v: 4, t: '巴库 (GMT +4)', }, { v: 5, t: 'New Delhi (GMT +5)', }, { v: 6, t: 'Dhakar (GMT +6)', }, { v: 7, t: '曼谷 (GMT +7)', }, { v: 8, t: '北京 (GMT +8)', }, { v: 9, t: '东京 (GMT +9)', }, { v: 10, t: '悉尼 (GMT +10)', }, { v: 11, t: 'Magadan (GMT +11)', }, { v: 12, t: '惠灵顿 (GMT +12)', } ];
+        Date.prototype.format = function(e) {
+            let t = function(e, t) {
+                let i = ""
+                    , o = e < 0
+                    , n = String(Math.abs(e));
+                return n.length < t && (i = new Array(t - n.length + 1).join("0")), (o ? "-" : "") + i + n
+            };
+            if ("string" != typeof e)
+                return this.toString();
+            let i = function(t, i) {
+                e = e.replace(t, i)
+            }
+                , o = this.getFullYear()
+                , n = this.getMonth() + 1
+                , s = this.getDate()
+                , r = this.getHours()
+                , l = this.getMinutes()
+                , a = this.getSeconds()
+                , d = this.getMilliseconds();
+            return i(/yyyy/g, t(o, 4)),
+                i(/yy/g, t(parseInt(o.toString().slice(2), 10), 2)),
+                i(/MM/g, t(n, 2)),
+                i(/M/g, n),
+                i(/dd/g, t(s, 2)),
+                i(/d/g, s),
+                i(/HH/g, t(r, 2)),
+                i(/H/g, r),
+                i(/hh/g, t(r % 12, 2)),
+                i(/h/g, r % 12),
+                i(/mm/g, t(l, 2)),
+                i(/m/g, l),
+                i(/ss/g, t(a, 2)),
+                i(/s/g, a),
+                i(/SSS/g, t(d, 3)),
+                i(/S/g, d),
+                e
+        };
+
+        var data_ = {
+            txtNowS: Math.round((new Date).getTime() / 1000),
+            txtNowMs: (new Date).getTime(),
+            txtNowDate: (new Date).toLocaleString(),
+            txtLocale: "",
+            txtDesStamp: "",
+            secTo: "s",
+            worldTime: {},
+            curGMT: (new Date).getTimezoneOffset() / 60 * -1
+        };
+
+//             for (let t = -12; t <= 12; t++) {
+//                 data_.worldTime[t > 0 ? "+" + t : t] = new Date(i.getTime() + 60 * t * 60000).format(e);
+//             }
+
+        var getTimeMap = function (curGMT) {
+            let e = "yyyy-MM-dd HH:mm:ss";
+            let t = new Date
+                , i = new Date(t.getTime() + 60000 * t.getTimezoneOffset())
+                , o = new Date(i.getTime() + 60 * curGMT * 60000);
+            return[o.format(e), Math.round(o.getTime() / 1000)];
+            // data_.txtNowMs = o.getTime(),
+            // data_.worldTime.gmt = i.format(e);
+        };
+
+        var startTimestamp = function(callFunc, curGMT) {
+            return window.setInterval(()=>{
+                    let times = getTimeMap(curGMT);
+                    callFunc(times[0], times[1]);
+                }
+                , 1000);
+        };
+
+        var box = $('#show_box');
+        //当地时间
+        var currentTimeBar = box.find('.currentTimeBar');
+        var currentTimeStr = currentTimeBar.find('.currentTimeStr');
+        var currentTimeInt = currentTimeBar.find('.currentTimeInt');
+        var currentTimeCountBtn = currentTimeBar.find('.countTimeBtn');
+        var currentTimeBegin = false;
+        var currentTimeIntervalId = null; //北京时间计时器
+        currentTimeCountBtn.click(function () {
+            if(!currentTimeBegin) {
+                currentTimeIntervalId = startTimestamp(function (timeStr, timeInt) {
+                    currentTimeStr.find('.val').html(timeStr);
+                    currentTimeInt.find('.val').html(timeInt);
+                }, data_.curGMT);
+            } else {
+                clearInterval(currentTimeIntervalId);
+            }
+            currentTimeBegin = !currentTimeBegin;
+            if(currentTimeBegin) {
+                currentTimeCountBtn.html(currentTimeCountBtn.attr('data-stop')).removeClass('btn-info').addClass('btn-warning');
+                currentTimeStr.addClass('counting');
+                currentTimeInt.addClass('counting');
+            } else {
+                currentTimeCountBtn.html(currentTimeCountBtn.attr('data-begin')).removeClass('btn-warning').addClass('btn-info');
+                currentTimeStr.removeClass('counting');
+                currentTimeInt.removeClass('counting');
+            }
+        });
+        //初始化当前北京时间
+        let times = getTimeMap(data_.curGMT);
+        currentTimeStr.find('.val').html(times[0]);
+        currentTimeInt.find('.val').html(times[1]);
+
+
+        //转换时间
+        function stampToLocale(timeInt, curGMT, jingdu) {
+            let e = ("s" === jingdu) ? 1e3 : 1,
+                t = "yyyy-MM-dd HH:mm:ss" + ("s" === jingdu ? "" : ":SSS");
+            return new Date(parseInt(timeInt, 10) * e + 6e4 * ((new Date).getTimezoneOffset() + 60 * curGMT)).format(t)
+        }
+        var toInt = true;
+        var changeTimeForm = box.find('.changeTimeForm');
+        var showAllTimeZone = changeTimeForm.find('.showAllTimeZone');
+        var changeTimeInput = changeTimeForm.find('.timeInt');
+        var timeResult = changeTimeForm.find('.timeResult');
+        var showHisTime = changeTimeForm.find('.showHisTime');
+        var timeZoneRadioTemp = $('<label><input type="radio" name="changeZone"><span class="text"></span></label>');
+        var newTimeZoneRadios = [];
+        $.each(allTimeZone, function (i, array_) {
+            var tmpRadio = timeZoneRadioTemp.clone();
+            var timeZ_ = array_['v'];
+            tmpRadio.find('input').val(timeZ_);
+            tmpRadio.find('.text').html(array_['t']);
+            if(timeZ_==8) {
+                tmpRadio.find('input').prop('checked', true);
+            }
+            newTimeZoneRadios.push(tmpRadio);
+        });
+        showAllTimeZone.append(newTimeZoneRadios);
+
+        var showCurrentAreaTimes = function (thisTimeZone_) {
+            let times = getTimeMap(thisTimeZone_);
+            showHisTime.val(times[0] + '('+ times[1] +')');
+        };
+        var changeTimeJingdu = changeTimeForm.find('.x-sel-sec');
+        //转换指令
+        var changeValToStr = function() {
+            var valInt = changeTimeInput.val();
+            var valStr = timeResult.val();
+            var gmt = showAllTimeZone.find("input:checked").val();
+            if(toInt) {
+                var valIntNew = valInt.replace(/[^0-9]/g, '');
+                if(valIntNew !== valInt) {
+                    changeTimeInput.val(valIntNew);
+                }
+                if(valIntNew) {
+                    if (!parseInt(valIntNew, 10)) {
+                        return lrBox.msgTsf("请输入合法的Unix时间戳");
+                    }
+                    var timeStr = stampToLocale(valIntNew, gmt, changeTimeJingdu.val());
+                    timeResult.val(timeStr);
+                }
+            } else if(valStr) {
+                if(valStr) {
+                    if(valStr.includes('/')) {
+                        valStr = valStr.replace(/\//g, '-');
+                        timeResult.val(valStr);
+                    }
+                    if(!/\s\d+:\d+:\d+/.test(valStr) ) {
+                        valStr = $.trim(valStr) + " 00:00:00";
+                        timeResult.val(valStr);
+                    }
+                }
+                let e = new Date(Date.parse(valStr) - 6e4 * ((new Date).getTimezoneOffset() + 60 * gmt)).getTime();
+                if(isNaN(e)) {
+                    lrBox.msgTsf("请输入合法的时间格式，如：2014-04-01 10:01:01，或：2014-01-01");
+                }
+                let t = "s" === changeTimeJingdu.val() ? 1e3 : 1;
+                changeTimeInput.val(Math.round(e / t));
+            }
+        };
+        showAllTimeZone.find("input").on('click', function () {
+            var thisTimeZone_ = $(this).val();
+            showCurrentAreaTimes(thisTimeZone_);
+            changeValToStr();
+        });
+
+        changeTimeInput.on('input propertychange', function () {
+            toInt = true;
+            changeValToStr();
+        });
+        timeResult.on('input propertychange', function () {
+            toInt = false;
+            changeValToStr();
+        });
+
+        changeTimeJingdu.on('change', function () {
+            changeValToStr();
+        });
+
+        showCurrentAreaTimes(showAllTimeZone.find("input:checked").val());
+        changeTimeInput.focus();
+
+
+        //世界时钟
+        var worldForm = box.find('.worldForm');
+        var worldAppend = worldForm.find('.appendWhere');
+        var temp = worldAppend.html();
+        worldAppend.html('');
+        var tempObj = $(temp);
+        var allTemp = [];
+        var tmpObj , timeZone_, title_;
+        var worldDoms = {}; //定时更新世界时钟的所有dom
+        $.each(allTimeZone, function (i, array_) {
+            // console.log(array_);
+            timeZone_ = array_['v'];
+            title_ = array_['t'];
+            tmpObj = tempObj.clone();
+            tmpObj.find('.panel-title').html(title_);
+
+            let times = getTimeMap(timeZone_);
+            let timeStrDom = $('<div></div>');
+            let timeIntDom = $('<div></div>');
+            worldDoms['dom:'+ timeZone_] = [
+                timeStrDom, timeIntDom
+            ];
+            timeStrDom.html(times[0]);
+            timeIntDom.html(times[1]);
+            tmpObj.find('.panel-body').html('').append([timeStrDom, timeIntDom]);
+            if(timeZone_== 8) {
+                tmpObj.find('.panel').removeClass('panel-default').addClass('panel-success');
+            } else if(timeZone_== 0) {
+                tmpObj.find('.panel').removeClass('panel-default').addClass('panel-info');
+            }
+            allTemp.push(tmpObj)
+        });
+        worldAppend.append(allTemp);
+
+        var worldCountBtn = worldForm.find('.countTimeBtn');
+        var worldBegin = false;
+        var worldIntervalId = null; //世界时钟的计时器
+        worldCountBtn.click(function () {
+            if(!worldBegin) {
+                worldIntervalId = window.setInterval(()=>{
+                    let renewDom ,times = 0;
+                    $.each(allTimeZone, function (i, array_) {
+                        timeZone_ = array_['v'];
+                        times = getTimeMap(timeZone_);
+                        renewDom = worldDoms['dom:'+ timeZone_];
+                        renewDom[0].html(times[0]);
+                        renewDom[1].html(times[1]);
+                    });
+                }, 1000);
+            } else {
+                clearInterval(worldIntervalId);
+            }
+            worldBegin = !worldBegin;
+            if(worldBegin) {
+                worldCountBtn.html(worldCountBtn.attr('data-stop')).removeClass('btn-info').addClass('btn-warning');
+            } else {
+                worldCountBtn.html(worldCountBtn.attr('data-begin')).removeClass('btn-warning').addClass('btn-info');
+            }
+        });
+    });
+</script>

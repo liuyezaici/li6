@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="{$config.language}">
+<head>
+    {include file="common/meta" /}
+
+    <style type="text/css">
+        body {
+            color: #999;
+            background: #d2d6de;
+            background-size: cover;
+            min-height: 100%;
+        }
+
+        a {
+            color: #444;
+        }
+
+        .login-logo {
+            color: #333;
+        }
+
+        .login-screen {
+            width: 360px;
+            margin: 7% auto;
+        }
+
+        .login-screen .well {
+            border-radius: 3px;
+            -webkit-box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 1);
+            border: none;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        @media (max-width: 767px) {
+            .login-screen {
+                padding: 0 20px;
+            }
+        }
+
+        .profile-img-card {
+            width: 100px;
+            height: 100px;
+            display: block;
+            -moz-border-radius: 50%;
+            -webkit-border-radius: 50%;
+            border-radius: 50%;
+            margin: -93px auto 30px;
+            border: 5px solid #fff;
+        }
+
+        .profile-name-card {
+            text-align: center;
+        }
+
+
+        .reg-box-body {
+            background: #fff;
+            padding: 20px;
+            border-top: 0;
+            color: #666;
+        }
+
+        #reg-box-body .input-group {
+            margin-bottom: 15px;
+        }
+
+        #reg-box-body .form-control {
+            font-size: 13px;
+        }
+        /* jq.validator */
+        #reg-box-body .msg-box.n-right {
+            left: 0;
+            z-index: 10;
+            bottom: 0;
+        }
+    .social-auth-links a {
+        color: #3c8dbc;
+    }
+    </style>
+    <!--@formatter:off-->
+    {if $background}
+        <style type="text/css">
+            body{
+                background-image: url('{$background}');
+            }
+        </style>
+    {/if}
+    <!--@formatter:on-->
+</head>
+<body>
+<div class="container">
+    <div class="login-wrapper">
+        <div class="login-screen">
+            <div class="login-logo">
+                <b>POM</b>Cube OSS
+            </div>
+            <div class="reg-box-body">
+                <p id="profile-name" class="profile-name-card"></p>
+                <p class="login-box-msg">Create an account to start</p>
+                <form action="" method="post" id="reg-box-body">
+                    <div id="errtips" class="hide"></div>
+                    {:token()}
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="pd-form-username" placeholder="{:__('Username')}" name="username" autocomplete="off" value="" data-rule="{:__('Username')}:required;username"/>
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="pd-form-email" placeholder="{:__('Email')}" name="email" autocomplete="off" value="" data-rule="{:__('Username')}:required;email|email"/>
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span></div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="pd-form-password" placeholder="{:__('Password')}" name="password" autocomplete="off" value="" data-rule="{:__('Password')}:required;password"/>
+                        <div class="input-group-addon"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="pd-form-confirmpassword" placeholder="{:__('Confirm Password')}" name="confirmpassword" autocomplete="off" value="" data-rule="{:__('Password')}:required;password"/>
+                        <div class="input-group-addon"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></div>
+                    </div>
+                    {if $Think.config.fastadmin.login_captcha}
+                    <div class="input-group">
+                        <div class="input-group-addon"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></div>
+                        <input type="text" name="captcha" class="form-control" placeholder="{:__('Captcha')}" data-rule="{:__('Captcha')}:required;length(4)"/>
+                        <span class="input-group-addon" style="padding:0;border:none;cursor:pointer;">
+                                    <img src="{:rtrim('__PUBLIC__', '/')}/index.php?s=/captcha" width="100" height="30" onclick="this.src = '{:rtrim('__PUBLIC__', '/')}/index.php?s=/captcha&r=' + Math.random();"/>
+                                </span>
+                    </div>
+                    {/if}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block btn-flat" style="background:#3c8dbc;font-size: 14px;">{:__('Sign up')}</button>
+                    </div>
+                </form>
+                <div class="social-auth-links ">
+                    <p class="text-center">--- OR ---</p>
+                    <div class="text-right">
+                        Already have an account? <a href="/index/?user/login">Sign in</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{include file="common/script" /}
+</body>
+</html>

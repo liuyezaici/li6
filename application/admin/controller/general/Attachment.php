@@ -7,18 +7,22 @@ use app\common\controller\Backend;
 /**
  * 附件管理
  *
- * @icon fa fa-circle-o
+ * @icon   fa fa-circle-o
  * @remark 主要用于管理上传到又拍云的数据或上传至本服务的上传数据
  */
 class Attachment extends Backend
 {
 
+    /**
+     * @var \app\common\model\Attachment
+     */
     protected $model = null;
 
     public function _initialize()
     {
         parent::_initialize();
         $this->model = model('Attachment');
+        $this->view->assign("mimetypeList", \app\common\model\Attachment::getMimetypeList());
     }
 
     /**
@@ -27,29 +31,44 @@ class Attachment extends Backend
     public function index()
     {
         //设置过滤方法
-        $this->request->filter(['strip_tags']);
-        if ($this->request->isPost())
-        {
-            list($whereMore, $sort, $order) = $this->buildparams();
-            $total = $this->model
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->count();
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isPost()) {
+            $mimetypeQuery = [];
+            $filter = $this->request->request('filter');
+            $filterArr = (array)json_decode($filter, true);
+            if (isset($filterArr['mimetype']) && preg_match("/[]\,|\*]/", $filterArr['mimetype'])) {
+                $this->request->get(['filter' => json_encode(array_diff_key($filterArr, ['mimetype' => '']))]);
+                $mimetypeQuery = function ($query) use ($filterArr) {
+                    $mimetypeArr = explode(',', $filterArr['mimetype']);
+                    foreach ($mimetypeArr as $index => $item) {
+                        if (stripos($item, "/*") !== false) {
+                            $query->whereOr('mimetype', 'like', str_replace("/*", "/", $item) . '%');
+                        } else {
+                            $query->whereOr('mimetype', 'like', '%' . $item . '%');
+                        }
+                    }
+                };
+            }
+
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
-                    ->where($where)
-                    ->order($sort, $order)
-                    ->limit($offset, $limit)
-                    ->select();
+                ->where($mimetypeQuery)
+                ->where($where)
+                ->order($sort, $order)
+                ->paginate($limit);
+
             $cdnurl = preg_replace("/\/(\w+)\.php$/i", '', $this->request->root());
-            foreach ($list as $k => &$v)
-            {
+            foreach ($list as $k => &$v) {
                 $v['fullurl'] = ($v['storage'] == 'local' ? $cdnurl : $this->view->config['upload']['cdnurl']) . $v['url'];
             }
             unset($v);
-            return json_output($total, $list);
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
+            return json($result);
         }
-       print_r($this->view->fetch());
+        $this->view->engine->layout(false);
+        print_r($this->view->fetch());
     }
 
     /**
@@ -57,24 +76,22 @@ class Attachment extends Backend
      */
     public function select()
     {
-        if ($this->request->isPost())
-        {
+        if ($this->request->isAjax()) {
             return $this->index();
         }
-       print_r($this->view->fetch());
+        return $this->view->fetch();
     }
 
     /**
      * 添加
      */
-//    public function add()
-//    {
-//        if ($this->request->isPost())
-//        {
-//            $this->error();
-//        }
-//       print_r($this->view->fetch());
-//    }
+    public function add()
+    {
+        if ($this->request->isAjax()) {
+            $this->error();
+        }
+        return $this->view->fetch();
+    }
 
     /**
      * 删除附件
@@ -82,18 +99,21 @@ class Attachment extends Backend
      */
     public function del($ids = "")
     {
-        if ($ids)
-        {
-            \think\Hook::add('upload_delete', function($params) {
-                $attachmentFile = ROOT_PATH . '/public' . $params['url'];
-                if (is_file($attachmentFile))
-                {
-                    @unlink($attachmentFile);
+        if (!$this->request->isPost()) {
+            $this->error(__("Invalid parameters"));
+        }
+        $ids = $ids ? $ids : $this->request->post("ids");
+        if ($ids) {
+            \think\Hook::add('upload_delete', function ($params) {
+                if ($params['storage'] == 'local') {
+                    $attachmentFile = ROOT_PATH . '/public' . $params['url'];
+                    if (is_file($attachmentFile)) {
+                        @unlink($attachmentFile);
+                    }
                 }
             });
             $attachmentlist = $this->model->where('id', 'in', $ids)->select();
-            foreach ($attachmentlist as $attachment)
-            {
+            foreach ($attachmentlist as $attachment) {
                 \think\Hook::listen("upload_delete", $attachment);
                 $attachment->delete();
             }

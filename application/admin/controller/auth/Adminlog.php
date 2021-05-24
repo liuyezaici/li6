@@ -8,13 +8,17 @@ use app\common\controller\Backend;
 /**
  * 管理员日志
  *
- * @icon fa fa-users
+ * @icon   fa fa-users
  * @remark 管理员可以查看自己所拥有的权限的管理员日志
  */
 class Adminlog extends Backend
 {
 
+    /**
+     * @var \app\admin\model\AdminLog
+     */
     protected $model = null;
+    protected $childrenGroupIds = [];
     protected $childrenAdminIds = [];
 
     public function _initialize()
@@ -23,9 +27,36 @@ class Adminlog extends Backend
         $this->model = model('AdminLog');
 
         $this->childrenAdminIds = $this->auth->getChildrenAdminIds(true);
+        $this->childrenGroupIds = $this->auth->getChildrenGroupIds($this->auth->isSuperAdmin() ? true : false);
 
+        $groupName = AuthGroup::where('id', 'in', $this->childrenGroupIds)
+            ->column('id,name');
+
+        $this->view->assign('groupdata', $groupName);
     }
 
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isPost()) {
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+            $list = $this->model
+                ->where($where)
+                ->where('admin_id', 'in', $this->childrenAdminIds)
+                ->order($sort, $order)
+                ->paginate($limit);
+
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
+            return json($result);
+        }
+        $this->view->engine->layout(false);
+        print_r($this->view->fetch());
+    }
 
     /**
      * 详情
@@ -33,10 +64,29 @@ class Adminlog extends Backend
     public function detail($ids)
     {
         $row = $this->model->get(['id' => $ids]);
-        if (!$row)
+        if (!$row) {
             $this->error(__('No Results were found'));
+        }
         $this->view->assign("row", $row->toArray());
-       print_r($this->view->fetch());
+        return $this->view->fetch();
+    }
+
+    /**
+     * 添加
+     * @internal
+     */
+    public function add()
+    {
+        $this->error();
+    }
+
+    /**
+     * 编辑
+     * @internal
+     */
+    public function edit($ids = null)
+    {
+        $this->error();
     }
 
     /**
@@ -44,19 +94,21 @@ class Adminlog extends Backend
      */
     public function del($ids = "")
     {
-        if ($ids)
-        {
+        if (!$this->request->isPost()) {
+            $this->error(__("Invalid parameters"));
+        }
+        $ids = $ids ? $ids : $this->request->post("ids");
+        if ($ids) {
             $childrenGroupIds = $this->childrenGroupIds;
-            $adminList = $this->model->where('id', 'in', $ids)->where('admin_id', 'in', $childrenGroupIds)->select();
-            if ($adminList)
-            {
+            $adminList = $this->model->where('id', 'in', $ids)->where('admin_id', 'in', function ($query) use ($childrenGroupIds) {
+                $query->name('auth_group_access')->field('uid');
+            })->select();
+            if ($adminList) {
                 $deleteIds = [];
-                foreach ($adminList as $k => $v)
-                {
+                foreach ($adminList as $k => $v) {
                     $deleteIds[] = $v->id;
                 }
-                if ($deleteIds)
-                {
+                if ($deleteIds) {
                     $this->model->destroy($deleteIds);
                     $this->success();
                 }
@@ -66,35 +118,17 @@ class Adminlog extends Backend
     }
 
     /**
-     * 查看
+     * 批量更新
+     * @internal
      */
-    public function index()
+    public function multi($ids = "")
     {
-        if ($this->request->isPost())
-        {
-            list($whereMore, $sort, $order) = $this->buildparams();
-            $where  = [];
-            $page = input('page', 1, 'int');
-            $pageSize = input('page_size', 10, 'int');
-            if($id = input('id/d'))  $where['id'] = $id;
-            if($username = input('username/s'))  $where['username'] = $username;
-//            print_r(json_encode($whereMore));exit;
-            if($whereMore) $where = array_merge($where, $whereMore);
-            $total = $this->model
-                ->where($where)
-                ->where('admin_id', 'in', $this->childrenAdminIds)
-                ->order($sort, $order)
-                ->count();
+        // 管理员禁止批量操作
+        $this->error();
+    }
 
-            $list = $this->model
-                ->where($where)
-                ->where('admin_id', 'in', $this->childrenAdminIds)
-                ->order($sort, $order)
-                ->page($page, $pageSize)
-                ->select();
-            $result = array("total" => $total, "page_size" => $pageSize, "page" => $page, "rows" => $list);
-            return json($result);
-        }
-       print_r($this->view->fetch());
+    public function selectpage()
+    {
+        return parent::selectpage();
     }
 }

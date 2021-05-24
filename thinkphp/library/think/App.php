@@ -118,6 +118,7 @@ class App
 
             // 记录当前调度信息
             $request->dispatch($dispatch);
+
             // 记录路由和请求信息
             if (self::$debug) {
                 Log::record('[ ROUTE ] ' . var_export($dispatch, true), 'info');
@@ -134,7 +135,6 @@ class App
                 $config['request_cache_expire'],
                 $config['request_cache_except']
             );
-
             $data = self::exec($dispatch, $config);
         } catch (HttpResponseException $exception) {
             $data = $exception->getResponse();
@@ -449,6 +449,8 @@ class App
                     ->code($dispatch['status']);
                 break;
             case 'module': // 模块/控制器/操作
+
+
                 $data = self::module(
                     $dispatch['module'],
                     $config,
@@ -531,7 +533,7 @@ class App
                     $config['request_cache_except']
                 );
             } else {
-                throw new HttpException(404, 'module not exists:' . $module);
+                throw new HttpException(404, '__module not exists:' . $module);
             }
         } else {
             // 单一模块部署
@@ -550,10 +552,13 @@ class App
 
         // 获取控制器名
         $controller = strip_tags($result[1] ?: $config['default_controller']);
-        $controller = $convert ? strtolower($controller) : $controller;
+
         if (!preg_match('/^[A-Za-z](\w|\.)*$/', $controller)) {
             throw new HttpException(404, 'controller not exists:' . $controller);
         }
+
+        $controller = $convert ? strtolower($controller) : $controller;
+
         // 获取操作名
         $actionName = strip_tags($result[2] ?: $config['default_action']);
         if (!empty($config['action_convert'])) {

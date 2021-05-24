@@ -2,230 +2,84 @@
 
 namespace app\admin\library;
 
-use app\common\model\Users;
-use app\admin\model\AuthRule;
+use app\admin\model\Admin;
+use app\common\library\Token;
+use app\common\model\User;
 use fast\Random;
+use fast\RDS;
 use fast\Tree;
-use fast\Addon;
 use think\Config;
 use think\Cookie;
+use think\Db;
+use think\Exception;
+use think\Hook;
 use think\Request;
 use think\Session;
-use think\Db;
 
-class Auth extends \fast\Power
+class Auth extends \fast\Auth
 {
-
     protected $_error = '';
     protected $requestUri = '';
     protected $breadcrumb = [];
     protected $logined = false; //登录状态
-    protected static $adminIdentId = 0;//管理员的身份id 外部查询需要用到
-    protected static $agentIdentId = 1;//代理商的身份id
-    protected static $sellerIdentId = 2;//商家的身份id
-    protected static $bhyIdentId = 3;//补货员的身份id
-    protected static $buyerIdentId = 4;//买家的身份id
-    protected $pwdMaxWrongTimes = 6;//密码最多可以错几次
-    protected $_user = NULL; //内部当前user查询对象
+    protected static $normalGroupId = 2; //普通管理员所在组id
 
     public function __construct()
     {
         parent::__construct();
     }
 
-    /**
-     * 获取当前Token
-     * @return string
-     */
-    public function getToken()
+    public function __get($name)
     {
-        return Session::get('user_token');
-    }
-    /**
-     * 获取当前 user查询对象
-     * @return string
-     */
-    public function getUser()
-    {
-        return $this->_user;
-    }
-
-    /**
-     * 判断帐号是不是补货员
-     */
-    public function accountIsBhy($account)
-    {
-        $info = Users::get(['username' => $account]);
-        if(!$info) {
-            return '帐号不存在';
-        }
-        if(!$this->isBhy($info['utype'])) {
-            return '您不是补货员(accountIsBhy)';
-        }
-        return true;
-    }
-    /**
-     * 判断手机是不是补货员
-     */
-    public function phoneIsBhy($mobile)
-    {
-        $info = Users::field('utype')->where(['mobile' => $mobile])->find();
-        if(!$info) {
-            return '手机未注册不存在';
-        }
-        if(!$this->isBhy($info['utype'])) {
-            return '您不是补货员:'. $info['utype'];
-        }
-        return true;
-    }
-
-    public function __get($authPath)
-    {
-        //user_token.id 会自动获取user_token里的id
-        return Session::get('user_token.' . $authPath);
-    }
-
-    //生成token
-    protected function createTokenKey($id, $keeptime, $expiretime, $token) {
-        return md5(md5($id) . md5($keeptime) . md5($expiretime) . $token);
-    }
-    //获取 用户 所有类型
-    public static function getAdminAllTypes() {
-        return [
-            self::$adminIdentId => '管理员',
-            self::$agentIdentId => '代理商',
-            self::$sellerIdentId => '商家',
-            self::$buyerIdentId => '买家',
-        ];
-    }
-    //获取 用户 所有类型 给前端radio用
-    public static function getAdminAllTypesForRadio() {
-        $allStatus = self::getAdminAllTypes();
-        $newData = [];
-        foreach ($allStatus as $k =>$v) {
-            $newData[] = [
-                'value' => $k,
-                'text' => $v,
-            ];
-        }
-        return $newData;
-    }
-    //获取 admin 状态名字
-    public static function getAdminTypeName($typeid=0) {
-        $allStatus = self::getAdminAllTypes();
-        return isset($allStatus[$typeid]) ? $allStatus[$typeid] : $typeid;
-    }
-
-
-
-    /**
-     * 根据Token初始化
-     *
-     * @param string       $token    Token
-     * @return boolean
-     */
-    public function init($token='')
-    {
-        if ($this->_logined)
-        {
-            return TRUE;
-        }
-        if (!$token) {
-            return FALSE;
-        }
-        if ($this->_error) {
-            return FALSE;
-        }
-        $admin = Users::get(['token' => $token]);
-        if (!$admin)
-        {
-            return FALSE;
-        }
-        $user_id = intval($admin['id']);
-        if ($user_id > 0)
-        {
-            unset($admin['password']);//禁止输出密码 安全一点
-            $admin->loginfailure = 0;
-            $admin->logintime = time();
-            $this->_user = $admin;
-            $admin->token = $token;
-            $admin->save();
-            Session::set("user_token", ['identity' => $admin->utype] + $admin->toArray());
-            $this->keeplogin();
-            return true;
-        }
-        else
-        {
-            return FALSE;
-        }
+        $uInfo = Session::get('admin');
+        return isset($uInfo[$name]) ? $uInfo[$name] : '';
     }
 
     /**
      * 管理员登录
      *
-     * @param   string  $username   用户名
-     * @param   string  $password   密码
-     * @param   int     $keeptime   有效时长
+     * @param string $username 用户名
+     * @param string $password 密码
+     * @param int    $keeptime 有效时长
      * @return  boolean
      */
-    public function login($username, $password, $keeptime = 0, $checkPwd=true)
+    public function login($username, $password, $keeptime = 0)
     {
-        $admin = Users::get(['account' => $username]);
-        if (!$admin)
-        {
-            $this->setError('帐号不存在:'. $username);
+        $admin = Admin::get(['username' => $username]);
+        if (!$admin) {
+            $this->setError('Username is incorrect');
             return false;
         }
-        if ($admin->loginfailure >= $this->pwdMaxWrongTimes && time() - $admin->updatetime < 86400)
+        $isAdmin = Db('authGroupAccess')->where([
+            'uid'=> $admin['id'],
+        ])->value('group_id')==1;
+        $passwordSha = base64_encode(hash("sha256", $password,true));
+        if ($admin->password && $admin->password != $admin->getEncryptPassword($password, $admin->salt))
         {
-           // $this->setError('请一天后再试');
-            //return false;
+            $this->setError('Wrong password');
+            return false;
         }
-        //如果之前的密码已经被手动清空 （允许管理员手动调试） 则允许直接登录
-        if($admin->password == '') {
-            Users::resetPassword($admin->id, $password);
-        }
-        if($checkPwd) {
-            if ($admin->password && $admin->password != Users::encryptPassword($password, $admin->salt))
-            {
-                $admin->loginfailure++;
-                $admin->save();
-                $this->setError('密码不正确');
-                return false;
-            }
-        }
-		if($admin->status !=  Users::getAdminNormalStatus()){
-            $this->setError('状态已经被锁定');
-			return false;
-		}
-        // 此时的Model中只包含部分数据
-        $admin->loginfailure = 0;
-        $admin->logintime = time();
         $admin->token = Random::uuid();
-        $this->_user = $admin;
         $admin->save();
-        Session::set("user_token", ['identity' => $admin->utype] + $admin->toArray());
+        $admin->isAdmin = $isAdmin;
+        $_SESSION['sessionId'] = Random::alnum(20);
+        Session::set("admin", $admin->toArray());
         $this->keeplogin($keeptime);
         return true;
     }
 
     /**
-     * 注销登录
+     * 退出登录
      */
     public function logout()
     {
-        $admin = Users::get(intval($this->id));
-        if (!$admin)
-        {
-            Session::delete("user_token");
-            Cookie::delete("keeplogin");
-            return true;
+        $admin = Admin::get(intval($this->id));
+        if ($admin) {
+            $admin->token = '';
+            $admin->save();
         }
-        $admin->token = '';
-        $this->_user = null;
-        $admin->save();
-        //删除Token
-        Session::delete("user_token");
+        $this->logined = false; //重置登录状态
+//        Session::delete("admin");
         Cookie::delete("keeplogin");
         return true;
     }
@@ -237,30 +91,31 @@ class Auth extends \fast\Power
     public function autologin()
     {
         $keeplogin = Cookie::get('keeplogin');
-        if (!$keeplogin)
-        {
+        if (!$keeplogin) {
             return false;
         }
         list($id, $keeptime, $expiretime, $key) = explode('|', $keeplogin);
-        if ($id && $keeptime && $expiretime && $key && $expiretime > time())
-        {
-            $admin = Users::get($id);
-            if (!$admin || !$admin->token)
-            {
+        if ($id && $keeptime && $expiretime && $key && $expiretime > time()) {
+            $admin = Admin::get($id);
+            if (!$admin || !$admin->token) {
                 return false;
             }
             //token有变更
-            if ($key != $this->createTokenKey($id, $keeptime, $expiretime, $admin->token))
-            {
+            if ($key != md5(md5($id) . md5($keeptime) . md5($expiretime) . $admin->token)) {
                 return false;
             }
-            Session::set("user_token", ['identity' => $admin->utype] + $admin->toArray());
+            $ip = request()->ip();
+            //IP有变动
+            if ($admin->loginip != $ip) {
+                return false;
+            }
+            Session::set("admin", $admin->toArray());
+            $_SESSION['sessionId'] = Random::alnum(20);
+
             //刷新自动登录的时效
             $this->keeplogin($keeptime);
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }
@@ -268,152 +123,49 @@ class Auth extends \fast\Power
     /**
      * 刷新保持登录的Cookie
      *
-     * @param   int     $keeptime
+     * @param int $keeptime
      * @return  boolean
      */
     protected function keeplogin($keeptime = 0)
     {
-        if (!$keeptime)
-        {
-            $keeptime = 86400 * 60;
+        if ($keeptime) {
+            $expiretime = time() + $keeptime;
+            $key = md5(md5($this->id) . md5($keeptime) . md5($expiretime) . $this->token);
+            $data = [$this->id, $keeptime, $expiretime, $key];
+            Cookie::set('keeplogin', implode('|', $data), 86400 * 30);
+            return true;
         }
-        $expiretime = time() + $keeptime;
-        $key = $this->createTokenKey($this->id, $keeptime, $expiretime, $this->token);
-        $data = [$this->id, $keeptime, $expiretime, $key];
-        Cookie::set('keeplogin', implode('|', $data), $expiretime);
-        return true;
+        return false;
     }
 
-    //判断管理员身份类型
-    //判断用户身份 是否代理商
-    public static function identIsAgent($identity=null) {
-        return $identity==self::$agentIdentId;
-    }
-    //判断用户身份 是否商家
-    public static function identIsSeller($identity=null) {
-        return $identity==self::$sellerIdentId;
-    }
-    //判断用户身份 是否买家
-    public static function identIsBuyer($identity = '')
+    public function check($name, $uid = '', $relation = 'or', $mode = 'url')
     {
-        return $identity == self::$buyerIdentId;
-    }
-    //是否普通管理员
-    //是否普通管理员
-    public static function identIsNormalAdmin($identity=null) {
-        return $identity==self::$adminIdentId;
-    }
-    //获取代理身份类型
-    public static function getIdentAgent() {
-        return self::$agentIdentId;
-    }
-    //获取商家身份类型
-    public static function getIdentSeller() {
-        return self::$sellerIdentId;
-    }
-    //获取商家身份类型
-    public static function getIdentBuyer() {
-        return self::$buyerIdentId;
-    }
-    //获取补货员身份类型
-    public static function getIdentBuhuoyuan() {
-        return self::$bhyIdentId;
-    }
-    //获取普通管理员类型
-    public static function getIdentNormalAdmin() {
-        return self::$adminIdentId;
-	}
-    //判断我是否补货员
-    public function isBhy($utype='') {
-        return self::$bhyIdentId === $utype;
-	}
-
-    public function checkAuth($authPath, $uid = '', $relation = 'or', $mode = 'url')
-    {
-        return parent::checkPower($authPath, $this->id, $relation, $mode);
+        $uid = $uid ? $uid : $this->id;
+        return parent::check($name, $uid, $relation, $mode);
     }
 
     /**
      * 检测当前控制器和方法是否匹配传递的数组
      *
      * @param array $arr 需要验证权限的数组
+     * @return bool
      */
     public function match($arr = [])
     {
         $request = Request::instance();
         $arr = is_array($arr) ? $arr : explode(',', $arr);
-        if (!$arr)
-        {
-            return FALSE;
+        if (!$arr) {
+            return false;
         }
 
+        $arr = array_map('strtolower', $arr);
         // 是否存在
-        if (in_array(strtolower($request->action()), $arr) || in_array('*', $arr))
-        {
-            return TRUE;
+        if (in_array(strtolower($request->action()), $arr) || in_array('*', $arr)) {
+            return true;
         }
 
         // 没找到匹配
-        return FALSE;
-    }
-
-    /**
-     * 注册微信用户
-     */
-    public function registerWeixinUser($nickName, $avatar, $inviteData = [])
-    {
-        $ip = request()->ip();
-        $time = time();
-        $this->buyerCfg = Addon::getAddonConfig('buyer');
-        $this->buyerGroup = Addon::getAddonConfigAttr('buyer', 'groupid');
-        if(!$this->buyerGroup) {
-            return ('未配置买家所在组');
-        }
-        $username = Random::alnum(20);
-        $password = Random::alnum(6);
-        $userToken = Random::uuid();
-        $params =[
-            'username' => $username,
-            'nickname'  => $nickName,
-            'avatar'  => $avatar,
-            'salt'      => Random::alnum(),
-            'loginip'   => $ip,
-            'createip'   => $ip,
-            'createtime'  => $time,
-            'token'  => $userToken,
-            'logintime' => $time,
-            'status'    => Users::getUserNormalStatus()
-        ];
-        $params['pid'] = Users::$adminGroupId; //创建人
-        $params['groupid'] = $this->buyerGroup; //所属分组
-        $params['utype'] = $this->getIdentBuyer(); //买家类型
-        $params['salt'] = Random::alnum();
-        $params['password'] = Users::encryptPassword($password, $params['salt']);
-        //账号注册时需要开启事务,避免出现垃圾数据
-        Db::startTrans();
-        try
-        {
-            $user = Users::create($params);
-            //邀请注册时 需要执行打包事件
-            if(isset($inviteData['invite_code']) && $inviteData['invite_code']) {
-                $inviteAddon = \fast\Addon::getModel('userinvite');
-                if($inviteAddon && method_exists($inviteAddon, 'runInviteKeyFunc')) {
-                    $inviteAddon->runInviteKeyFunc($inviteData['invite_code'], $user->id, 'reg');
-                }
-            }
-            Db::commit();
-            // 此时的Model中只包含部分数据
-            $this->_user = Users::get($user->id);
-            $this->_token = $userToken;
-            $this->_logined = TRUE;
-            return TRUE;
-        }
-        catch (Exception $e)
-        {
-            $this->setError($e->getMessage());
-            Db::rollback();
-            return $e->getMessage();
-        }
+        return false;
     }
 
     /**
@@ -423,11 +175,27 @@ class Auth extends \fast\Power
      */
     public function isLogin()
     {
-        $token = Session::get('user_token');
-        if (!$token)
-        {
+        if ($this->logined) {
+            return true;
+        }
+        $admin = Session::get("admin");
+//        print_r('Session');
+//        print_r($admin);
+//        exit;
+        if (!$admin) {
             return false;
         }
+        //判断是否同一时间同一账号只能在一个地方登录
+        if (Config::get('fastadmin.login_unique')) {
+            $my = Admin::get($admin['id']);
+            if (!$my || $my['token'] != $admin['token']) {
+                $this->logined = false; //重置登录状态
+                Session::delete("admin");
+                Cookie::delete("keeplogin");
+                return false;
+            }
+        }
+
         $this->logined = true;
         return true;
     }
@@ -450,25 +218,23 @@ class Auth extends \fast\Power
         $this->requestUri = $uri;
     }
 
-    public function getMyGroupId($uid = null)
+    public function getGroups($uid = null)
     {
         $uid = is_null($uid) ? $this->id : $uid;
-        return parent::getMyGroupId($uid);
+        return parent::getGroups($uid);
     }
 
     public function getRuleList($uid = null)
     {
         $uid = is_null($uid) ? $this->id : $uid;
-//        print_r('getRuleList');
-//        print_r($uid);
-//        exit;
         return parent::getRuleList($uid);
     }
 
     public function getUserInfo($uid = null)
     {
         $uid = is_null($uid) ? $this->id : $uid;
-        return $uid != $this->id ? Users::get(intval($uid)) : Session::get('user_token');
+
+        return $uid != $this->id ? Admin::get(intval($uid)) : Session::get('admin');
     }
 
     public function getRuleIds($uid = null)
@@ -476,39 +242,10 @@ class Auth extends \fast\Power
         $uid = is_null($uid) ? $this->id : $uid;
         return parent::getRuleIds($uid);
     }
-    public function getMyRules($uid = null)
-    {
-        $uid = is_null($uid) ? $this->id : $uid;
-        return parent::getMyRules($uid);
-    }
 
-    //判断用户是不是代理 支持多个uid
-    public function userIsAgent($uids = '')
-    {
-        if(!$uids) return false;
-        $uidArray = explode(',', $uids);
-        foreach ($uidArray as $agentId_) {
-            if(!Users::get(['id' => $agentId_, 'utype'=>self::$agentIdentId])) {
-                return false;
-            }
-        }
-        return true;
-    }
-    //判断用户是不是商家 支持多个uid
-    public function userIsSeller($uids = '')
-    {
-        if(!$uids) return false;
-        $uidArray = explode(',', $uids);
-        foreach ($uidArray as $sellerId_) {
-            if(!Users::get(['id' => $sellerId_, 'utype'=>self::$sellerIdentId])) {
-                return false;
-            }
-        }
-        return true;
-    }
     public function isSuperAdmin()
     {
-        return $this->getRuleIds() == '*' ? TRUE : FALSE;
+        return in_array('*', $this->getRuleIds()) ? true : false;
     }
 
     /**
@@ -518,222 +255,88 @@ class Auth extends \fast\Power
      */
     public function getGroupIds($uid = null)
     {
-        $groups = $this->getMyGroupId($uid);
+        $groups = $this->getGroups($uid);
         $groupIds = [];
-        foreach ($groups as $K => $v)
-        {
-            $groupIds[] = (int) $v['id'];
+        foreach ($groups as $K => $v) {
+            $groupIds[] = (int)$v['group_id'];
         }
         return $groupIds;
     }
 
-
-
     /**
-     * 取出当前管理员所拥有权限的管理员
-     * @param boolean $withself 是否包含自身
-     * @param array $gids groupids 当前查询要限制于某些分组下
-     * @param string $getType /agent/seller 获取子角色类型
-     *
-     * @return array
-     */
-    public function getChildrenAdminIds($withself = false, $getType = 'admin')
-    {
-        //打包自己id
-        $addMyUid = function ($newUids) {
-            if(is_string($newUids)) $newUids = explode(',', $newUids); //转数组
-            array_push($newUids, $this->id);
-            $newUids = array_unique($newUids);
-            return trim(join(',', $newUids), ',');
-        };
-        //定义角色类型
-        $normalAdmin = $this->getIdentNormalAdmin();
-        $agentAdmin = $this->getIdentAgent();
-        $sellerAdmin = $this->getIdentSeller();
-        //方法：获取所有下级 (普通 管理员/代理/商家)
-        $getSonAdmin = function ($parentIds=0, $utype='') use(&$getSonAdmin, $addMyUid) {
-            $parentIds = trim($parentIds, ',');
-            $map = [];
-            $map['utype'] = $utype;
-            $whereOr = [
-                'pid' => ['in', $parentIds]
-            ];
-            $whereOr2 = [];
-            //找上级：pid 或 agent_id
-            if($this->identIsAgent($utype) || $this->identIsSeller($utype)) {
-                $whereOr2 = [
-                    'agent_id' => ['in', $parentIds]
-                ];
-            }
-            $sonAdminIds = (array)Users::where($map)
-                ->where(function($query) use($whereOr, $whereOr2){
-                    $query->where($whereOr)->whereOr($whereOr2);
-                })->column('id');
-
-            if(!$sonAdminIds) return '';
-            if(!$sonAdminIds) return '';
-            $sonAdminIds = join(',', $sonAdminIds);
-            $sonsonAdminIds = $getSonAdmin($sonAdminIds, $utype);
-            if($sonsonAdminIds) {
-                $sonAdminIds = $sonAdminIds .','.$sonsonAdminIds;
-            }
-            $sonAdminIds = trim($sonAdminIds, ',');
-            if($sonAdminIds==0) return '';
-            return $sonAdminIds;
-        };
-        //当前是管理员，要拿到所有子级admin
-        $sonAdminIds = '';
-        if($this->identIsNormalAdmin($this->identity)) {
-            $sonAdminIds = $getSonAdmin($this->id, $normalAdmin);
-        }
-        if($getType == 'admin') {
-            if($withself) $sonAdminIds = $addMyUid($sonAdminIds);
-            return $sonAdminIds;
-        }
-        //我的下级管理员 不能加自己
-        //获取下级的所有代理
-        $allAgentIds = 0;
-//        print_r($getType);exit;
-        if($getType == 'agent') {
-            if($sonAdminIds) {
-                $getFromIds = $sonAdminIds.','.$this->id;
-            } else {
-                $getFromIds = $this->id;
-            }
-            $allAgentIds = $getSonAdmin($getFromIds, $agentAdmin);
-            if($withself) $allAgentIds = $addMyUid($allAgentIds);
-            return $allAgentIds;
-        }
-        //获取下级的所有商家
-        if($getType == 'seller') {
-            $allSellerIds = '';
-            //查找子管理的商家 自然要包含我创建的
-            if($allAgentIds) {
-                $getFromIds = $allAgentIds.','.$this->id;
-            } else {
-                $getFromIds = $this->id;
-            }
-            //代理或管理 才可以获取所有下级管理
-            if($this->identIsNormalAdmin($this->identity) || $this->identIsAgent($this->identity)) {
-            $allAgentIds = $getSonAdmin($getFromIds, $agentAdmin);
-            }
-            //如果我是代理则获取包含我自己下面的商家
-            if($this->identIsAgent($this->identity)) {
-                $allAgentIds = $addMyUid($allAgentIds);//算上我自己
-            }
-            if($allAgentIds) $allSellerIds = $getSonAdmin($allAgentIds, $sellerAdmin);
-            if($this->identIsAgent($this->identity) && !$allSellerIds) { //代理没有子商家 则让外部查询自己的数据
-                $allSellerIds = $this->id;
-            }
-            if($this->identIsSeller($this->identity)) {
-                $allSellerIds = $addMyUid($allSellerIds);//算上我自己
-            }
-            return $allSellerIds;
-        }
-    }
-
-    /**
-     * 取出当前管理员的下级分组
+     * 取出当前管理员所拥有权限的分组
      * @param boolean $withself 是否包含当前所在的分组
      * @return array
      */
     public function getChildrenGroupIds($withself = false)
     {
         //取出当前管理员所有的分组
-        $groupId = $this->getMyGroupId();
-        $ruleIds = $this->getRuleIds();
-        $groupModel = new \app\admin\model\AuthGroup;
-        $strClass = new \fast\Str;
-
-        // 取出所有分组
-        $groupList = $groupModel->where(['status' => $groupModel->getAdminGroupNormalStatus()])->select();
-        $objList = [];
-//        print_r('$ruleIds:');
-//        print_r(json_encode($ruleIds));
-//        exit;
-        if ($ruleIds === '*') {
-            $objList = $groupList;
-//            $objList = json_encode($groupList);
-//            print_r($objList);
-//            exit;
-        } else {
-//            print_r('$groupList:');
-//            print_r(json_encode($groupList));
-//            exit;
-            $groupList = collection($groupList)->toArray();
-            $objList = $strClass::diguiArray($groupList, $groupId, 'sons', 'pid', 'id');
-            $mergeList = [];
-            foreach ($objList as $k => &$tmpV)
-            {
-                if(!empty($tmpV['sons'])) $mergeList = array_merge($mergeList, $tmpV['sons']);
-                unset($tmpV['sons']);
-                unset($tmpV);
+        $groups = $this->getGroups();
+        $groupIds = [];
+        foreach ($groups as $k => $v) {
+            $groupIds[] = $v['id'];
+        }
+        $originGroupIds = $groupIds;
+        foreach ($groups as $k => $v) {
+            if (in_array($v['pid'], $originGroupIds)) {
+                $groupIds = array_diff($groupIds, [$v['id']]);
+                unset($groups[$k]);
             }
-            if($mergeList) $objList = array_merge($objList, $mergeList);
-//            print_r('$groupId:'.$groupId);
-//            print_r('$objList:');
-//            print_r(json_encode($objList));
-//            exit;
+        }
+        // 取出所有分组
+        $groupList = \app\admin\model\AuthGroup::where(['status' => 'normal'])->select();
+        $objList = [];
+        foreach ($groups as $k => $v) {
+            if ($v['rules'] === '*') {
+                $objList = $groupList;
+                break;
+            }
+            // 取出包含自己的所有子节点
+            $childrenList = Tree::instance()->init($groupList)->getChildren($v['id'], true);
+            $obj = Tree::instance()->init($childrenList)->getTreeArray($v['pid']);
+            $objList = array_merge($objList, Tree::instance()->getTreeList($obj));
         }
         $childrenGroupIds = [];
-        foreach ($objList as $k => $v)
-        {
+        foreach ($objList as $k => $v) {
             $childrenGroupIds[] = $v['id'];
         }
-//        print_r($childrenGroupIds);exit;
-        if ($withself)
-        {
-            array_push($childrenGroupIds, $groupId);
-//            print_r($childrenGroupIds);
-            $childrenGroupIds = array_unique($childrenGroupIds);
+        if (!$withself) {
+            $childrenGroupIds = array_diff($childrenGroupIds, $groupIds);
         }
-
-//        print_r($childrenGroupIds);
-//        exit;
         return $childrenGroupIds;
     }
 
-    //获取代理的所有商家
-    public function getAgentSellerIds($agentId=0) {
-        //方法：获取所有下级 (/代理/商家)
-        $getSonAdmin = function ($parentIds=0, $utype='') use(&$getSonAdmin) {
-            $parentIds = trim($parentIds, ',');
-            $map = [];
-            if($utype) {
-                $map['utype'] = $utype;
+    /**
+     * 取出当前管理员所拥有权限的管理员
+     * @param boolean $withself 是否包含自身
+     * @return array
+     */
+    public function getChildrenAdminIds($withself = false)
+    {
+        $childrenAdminIds = [];
+        if (!$this->isSuperAdmin()) {
+            $groupIds = $this->getChildrenGroupIds(false);
+            $authGroupList = \app\admin\model\AuthGroupAccess::
+            field('uid,group_id')
+                ->where('group_id', 'in', $groupIds)
+                ->select();
+            foreach ($authGroupList as $k => $v) {
+                $childrenAdminIds[] = $v['uid'];
             }
-            $whereOr = [
-                'pid' => ['in', $parentIds]
-            ];
-            $whereOr2 = [];
-            //找上级：pid 或 agent_id
-            if($this->identIsAgent($utype) || $this->identIsSeller($utype)) {
-                $whereOr2 = [
-                    'agent_id' => ['in', $parentIds]
-                ];
+        } else {
+            //超级管理员拥有所有人的权限
+            $childrenAdminIds = Admin::column('id');
+        }
+        if ($withself) {
+            if (!in_array($this->id, $childrenAdminIds)) {
+                $childrenAdminIds[] = $this->id;
             }
-            $sonAdminIds = (array)Users::where($map)
-                ->where(function($query) use($whereOr, $whereOr2){
-                    $query->where($whereOr)->whereOr($whereOr2);
-                })->column('id');
-            if(!$sonAdminIds) return '';
-            $sonAdminIds = join(',', $sonAdminIds);
-            $sonsonAdminIds = $getSonAdmin($sonAdminIds, $utype);
-            if($sonsonAdminIds) {
-                $sonAdminIds = $sonAdminIds .','.$sonsonAdminIds;
-            }
-            $sonAdminIds = trim($sonAdminIds, ',');
-            if($sonAdminIds==0) return '';
-            return $sonAdminIds;
-        };
-        $sonAgentIds = $getSonAdmin($agentId, self::$agentIdentId);
-        $sonAgentIdArray = explode(',', $sonAgentIds);
-        $sonAgentIdArray[] = $agentId;
-        $sonAgentIdArray = array_unique($sonAgentIdArray);
-        $sonAgentIds = join($sonAgentIdArray, ',');
-        $sonSellerIds = $getSonAdmin($sonAgentIds, self::$sellerIdentId);
-        return $sonSellerIds;
+        } else {
+            $childrenAdminIds = array_diff($childrenAdminIds, [$this->id]);
+        }
+        return $childrenAdminIds;
     }
+
     /**
      * 获得面包屑导航
      * @param string $path
@@ -741,101 +344,182 @@ class Auth extends \fast\Power
      */
     public function getBreadCrumb($path = '')
     {
-        if ($this->breadcrumb || !$path)
+        if ($this->breadcrumb || !$path) {
             return $this->breadcrumb;
-        $path_rule_id = 0;
-        foreach ($this->rules as $rule)
-        {
-            $path_rule_id = $rule['auth_path'] == $path ? $rule['id'] : $path_rule_id;
         }
-        if ($path_rule_id)
-        {
-            $this->breadcrumb = Tree::instance()->init($this->rules)->getParents($path_rule_id, true);
-            foreach ($this->breadcrumb as $k => &$v)
-            {
-                $v['url'] = url($v['auth_path']);
-                $v['title'] = __($v['title']);
+        $titleArr = [];
+        $menuArr = [];
+        $urlArr = explode('/', $path);
+        foreach ($urlArr as $index => $item) {
+            $pathArr[implode('/', array_slice($urlArr, 0, $index + 1))] = $index;
+        }
+        if (!$this->rules && $this->id) {
+            $this->getRuleList();
+        }
+        foreach ($this->rules as $rule) {
+            if (isset($pathArr[$rule['name']])) {
+                $rule['title'] = __($rule['title']);
+                $rule['url'] = url($rule['name']);
+                $titleArr[$pathArr[$rule['name']]] = $rule['title'];
+                $menuArr[$pathArr[$rule['name']]] = $rule;
             }
+
         }
+        ksort($menuArr);
+        $this->breadcrumb = $menuArr;
         return $this->breadcrumb;
     }
 
     /**
-     * 获取左侧菜单栏
+     * 获取左侧和顶部菜单栏
      *
-     * @param array $params URL对应的badge数据
-     * @return string
+     * @param array  $params    URL对应的badge数据
+     * @param string $fixedPage 默认页
+     * @return array
      */
-    public function getSidebar($params = [], $fixedPage = 'dashboard')
+    public function getSidebar($params = [], $fixedPage = '')
     {
+        // 边栏开始
+        Hook::listen("admin_sidebar_begin", $params);
         $colorArr = ['red', 'green', 'yellow', 'blue', 'teal', 'orange', 'purple'];
         $colorNums = count($colorArr);
         $badgeList = [];
         $module = request()->module();
         // 生成菜单的badge
-        foreach ($params as $k => $v)
-        {
-
+        foreach ($params as $k => $v) {
             $url = $k;
-
-            if (is_array($v))
-            {
+            if (is_array($v)) {
                 $nums = isset($v[0]) ? $v[0] : 0;
                 $color = isset($v[1]) ? $v[1] : $colorArr[(is_numeric($nums) ? $nums : strlen($nums)) % $colorNums];
                 $class = isset($v[2]) ? $v[2] : 'label';
-            }
-            else
-            {
+            } else {
                 $nums = $v;
                 $color = $colorArr[(is_numeric($nums) ? $nums : strlen($nums)) % $colorNums];
                 $class = 'label';
             }
             //必须nums大于0才显示
-            if ($nums)
-            {
+            if ($nums) {
                 $badgeList[$url] = '<small class="' . $class . ' pull-right bg-' . $color . '">' . $nums . '</small>';
             }
         }
 
         // 读取管理员当前拥有的权限节点
         $userRule = $this->getRuleList();
-//        print_r('$userRule');
-//        print_r($userRule);
-//        exit;
-        $select_id = 0;
+//        print_r('$userRule:::');
+//        print_r($userRule);exit;
+        $selected = $referer = [];
+        $refererUrl = Session::get('referer');
+        $pinyin = new \Overtrue\Pinyin\Pinyin('Overtrue\Pinyin\MemoryFileDictLoader');
         // 必须将结果集转换为数组
-        $ruleList = collection(AuthRule::where(
-            ['ismenu'=> 1])
-            ->order('order', 'desc')->select())->toArray();
-//        print_r('$ruleList');
-//        print_r($ruleList);
-//        exit;
-        foreach ($ruleList as $k => &$v)
-        {
-            if (!in_array($v['auth_path'], $userRule))
-            {
+        $ruleList = collection(\app\admin\model\AuthRule::where('status', 'normal')
+            ->where('ismenu', 1)
+            ->order('weigh', 'desc')
+            ->cache("__menu__")
+            ->select())->toArray();
+        $indexRuleList = \app\admin\model\AuthRule::where('status', 'normal')
+            ->where('ismenu', 0)
+            ->where('name', 'like', '%/index')
+            ->column('name,pid');
+        $pidArr = array_filter(array_unique(array_map(function ($item) {
+            return $item['pid'];
+        }, $ruleList)));
+        foreach ($ruleList as $k => &$v) {
+            if (!in_array($v['name'], $userRule)) {
                 unset($ruleList[$k]);
                 continue;
             }
-            $select_id = $v['auth_path'] == $fixedPage ? $v['id'] : $select_id;
-            $v['url'] = '/' . $module . '/' . $v['auth_path'];
-            $v['badge'] = isset($badgeList[$v['auth_path']]) ? $badgeList[$v['auth_path']] : '';
+            $indexRuleName = $v['name'] . '/index';
+            if (isset($indexRuleList[$indexRuleName]) && !in_array($indexRuleName, $userRule)) {
+                unset($ruleList[$k]);
+                continue;
+            }
+            $v['icon'] = $v['icon'] . ' fa-fw';
+            $v['url'] = '/' . $module . '/' . $v['name'];
+            $v['badge'] = isset($badgeList[$v['name']]) ? $badgeList[$v['name']] : '';
+            $v['py'] = $pinyin->abbr($v['title'], '');
+            $v['pinyin'] = $pinyin->permalink($v['title'], '');
             $v['title'] = __($v['title']);
+            $selected = $v['name'] == $fixedPage ? $v : $selected;
+            $referer = url($v['url']) == $refererUrl ? $v : $referer;
         }
-        // 构造菜单数据
-        Tree::instance()->init($ruleList);
-        $menu = Tree::instance()->getTreeMenu(
-            0,
-            '<li class="@class"><a href="@url@addtabs" addtabs="@id" url="@url"><i class="@icon"></i> <span>@title</span> <span class="pull-right-container">@caret @badge</span></a> @childlist</li>',
-            $select_id, '',
-            'ul', 'class="treeview-menu"');
-        return $menu;
+        $lastArr = array_diff($pidArr, array_filter(array_unique(array_map(function ($item) {
+            return $item['pid'];
+        }, $ruleList))));
+        foreach ($ruleList as $index => $item) {
+            if (in_array($item['id'], $lastArr)) {
+                unset($ruleList[$index]);
+            }
+        }
+        if ($selected == $referer) {
+            $referer = [];
+        }
+        $selected && $selected['url'] = url($selected['url']);
+        $referer && $referer['url'] = url($referer['url']);
+
+        $select_id = $selected ? $selected['id'] : 0;
+        $menu = $nav = '';
+        if (Config::get('fastadmin.multiplenav')) {
+            $topList = [];
+            foreach ($ruleList as $index => $item) {
+                if (!$item['pid']) {
+                    $topList[] = $item;
+                }
+            }
+            $selectParentIds = [];
+            $tree = Tree::instance();
+            $tree->init($ruleList);
+            if ($select_id) {
+                $selectParentIds = $tree->getParentsIds($select_id, true);
+            }
+            foreach ($topList as $index => $item) {
+                $childList = Tree::instance()->getTreeMenu(
+                    $item['id'],
+                    '<li class="@class" pid="@pid"><a href="@url@addtabs" addtabs="@id" url="@url" py="@py" pinyin="@pinyin"><i class="@icon"></i> <span>@title</span> <span class="pull-right-container">@caret @badge</span></a> @childlist</li>',
+                    $select_id,
+                    '',
+                    'ul',
+                    'class="treeview-menu"'
+                );
+                $current = in_array($item['id'], $selectParentIds);
+                $url = $childList ? 'javascript:;' : url($item['url']);
+                $addtabs = $childList || !$url ? "" : (stripos($url, "?") !== false ? "&" : "?") . "ref=addtabs";
+                $childList = str_replace(
+                    '" pid="' . $item['id'] . '"',
+                    ' ' . ($current ? '' : 'hidden') . '" pid="' . $item['id'] . '"',
+                    $childList
+                );
+//                $nav .= '<li class="' . ($current ? 'active' : '') . '"><a href="' . $url . $addtabs . '" addtabs="' . $item['id'] . '" url="' . $url . '"><i class="' . $item['icon'] . '"></i> <span>' . $item['title'] . '</span> <span class="pull-right-container"> </span></a> </li>';
+                $menu .= $childList;
+            }
+        } else {
+            // 构造菜单数据
+            Tree::instance()->init($ruleList);
+            $menu = Tree::instance()->getTreeMenu(
+                0,
+                '<li class="@class"><a href="@url@addtabs" addtabs="@id" url="@url" py="@py" pinyin="@pinyin"><i class="@icon"></i> <span>@title</span> <span class="pull-right-container">@caret @badge</span></a> @childlist</li>',
+                $select_id,
+                '',
+                'ul',
+                'class="treeview-menu"'
+            );
+//            if ($selected) {
+//                $nav .= '<li role="presentation44" id="tab_' . $selected['id'] . '" class="' . ($referer ? '' : 'active') . '"><a href="#con_' . $selected['id'] . '" node-id="' . $selected['id'] . '" aria-controls="' . $selected['id'] . '" role="tab" data-toggle="tab"><i class="' . $selected['icon'] . ' fa-fw"></i> <span>' . $selected['title'] . '</span> </a></li>';
+//            }
+//            if ($referer) {
+//                $nav .= '<li role="presentation5544" id="tab_' . $referer['id'] . '" class="active"><a href="#con_' . $referer['id'] . '" node-id="' . $referer['id'] . '" aria-controls="' . $referer['id'] . '" role="tab" data-toggle="tab"><i class="' . $referer['icon'] . ' fa-fw"></i> <span>' . $referer['title'] . '</span> </a> <i class="close-tab fa fa-remove"></i></li>';
+//            }
+//            print_r('$menu___________');
+//            exit;
+        }
+
+        return [$menu, $nav, $selected, $referer];
     }
 
     /**
      * 设置错误信息
      *
-     * @param $error 错误信息
+     * @param string $error 错误信息
+     * @return Auth
      */
     public function setError($error)
     {
@@ -851,68 +535,4 @@ class Auth extends \fast\Power
     {
         return $this->_error ? __($this->_error) : '';
     }
-
-    /**
-     * 修改密码
-     * @param string    $newpassword        新密码
-     * @param string    $oldpassword        旧密码
-     * @param bool      $ignoreoldpassword  忽略旧密码
-     * @return boolean
-     */
-    public function changepwd($newpassword, $oldpassword = '', $ignoreoldpassword = false)
-    {
-        $admin = Users::get(intval($this->id));
-        if (!$admin)
-        {
-            $this->setError('用户名不正确');
-            return false;
-        }
-        //判断旧密码是否正确
-        if ($admin->password == Users::encryptPassword($oldpassword, $admin->salt)){
-            $admin->salt = Random::alnum();//重置密码盐
-            $admin->password =  Users::encryptPassword($newpassword, $admin->salt);
-            $admin->save();
-            return true;
-        }
-        else
-        {
-            $this->setError('密码不正确');
-            return false;
-        }
-    }
-
-    /**
-     * 通过uid 和 第三方登录的记录ID 直接登录账号
-     * @param int $user_id
-     * @return usertoken
-     */
-    public function loginByUidAndThirdid($user_id, $third = 0)
-    {
-        $user = Users::get($user_id);
-        if ($user)
-        {
-            $ip = request()->ip();
-            $time = time();
-            $userToken = Random::uuid();
-            //记录本次登录的IP和时间
-            $user->loginfailure = 0;
-            $user->loginip = $ip;
-            $user->logintime = $time;
-            $user->token = $userToken;
-            $user->save();
-            $this->_user = $user;
-            $this->_token = $userToken;
-            $this->_third = $third;
-            $this->_logined = TRUE;
-            $this->keeplogin();
-            Session::set("user_token", ['identity' => $user->utype] + $user->toArray());
-            return $userToken;
-
-        }
-        else
-        {
-            return '';
-        }
-    }
-
 }

@@ -1,0 +1,56 @@
+<div class="user-section login-section">
+    <div class="login-main">
+        <form name="form" id="loginForm" class="form-vertical" method="POST" action="">
+            <div class="form-group">
+                <label class="control-label" for="account">{:__('Account')}</label>
+                <div class="controls">
+                    <input class="form-control input-lg" id="account" type="text" name="account" value="" data-rule="required" placeholder="{:__('Mobile/Username')}" autocomplete="off">
+                    <div class="help-block"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="password">{:__('Password')}</label>
+                <div class="controls">
+                    <input class="form-control input-lg" id="password" type="password" name="password" data-rule="required;password" placeholder="{:__('Password')}" autocomplete="off">
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-lg btn-block">{:__('Sign in')}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+        require.config({
+            baseUrl: '/assets/libs/lr/ele/',
+            paths: {
+                jquery: '/assets/libs/jquery/dist/jquery',
+                'front': '/assets/index/front',
+                lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+            }
+        });
+        require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
+            var thisForm = $("#loginForm");
+            front.formSubmitEven(thisForm, {
+                url: '/index/user/login',
+                successKey: 'code',
+                successVal: 1,
+                successFunc: function (res) {
+                    lrBox.closeAllBox();
+                    lrBox.msgTisf(res.msg);
+                    setTimeout(function () {
+                        window.location = '/index/main';
+                    }, 1000);
+                },
+                errorFunc: function (res) {
+                    lrBox.noLoading();
+                    lrBox.msgTisf(res.msg);
+                }
+            });
+            return {};
+        });
+    })();
+</script>

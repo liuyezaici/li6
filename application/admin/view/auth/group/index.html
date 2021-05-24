@@ -1,377 +1,197 @@
-<style>
-    .diy_trees .son_menu li {
-        display: inline-block;
-        width: 150px;
-    }
-</style>
 <div class="panel panel-default panel-intro">
     {:build_heading()}
 
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">
-            <div class="widget-body no-padding">
-                <div id="show_search_form"></div>
-                <div id="toolbar" class="toolbar">
-                    <?=build_toolbar([
-                        [
-                        'power'=>'index/index',
-                    'title'=>'刷新',
-                    'icon'=>'fa fa-refresh',
-                    'class'=>'btn btn-primary btn-refresh',
-                    'click'=>'refreshAdminGroup()'
-                    ],
-                    [
-                    'power'=>'index/add',
-                    'title'=>'添加',
-                    'icon'=>'fa fa-plus',
-                    'class'=>'btn btn-success btn-add',
-                    'click'=>'editAdminGroup()'
-                    ]
-                    ]);?>
+            <div class="tab-pane fade active in" id="one">
+                <div class="widget-body no-padding">
+                    <div id="toolbar" class="toolbar">
+                        {:build_toolbar('refresh,add,delete')}
+                    </div>
+                    <table id="table" class="table table-striped table-bordered table-hover" 
+                           data-operate-edit="{:$auth->check('auth/group/edit')}" 
+                           data-operate-del="{:$auth->check('auth/group/del')}" 
+                           width="100%">
+                    </table>
                 </div>
-                <div id="list_result"></div>
             </div>
+
         </div>
     </div>
 </div>
-
 <script>
-    var indexUrl = '/admin/auth/group/';
-    var delUrl = '/admin/auth/group/del/id/';
-    var getUrl = '/admin/auth/group/get/id/';
-    var addUrl = '/admin/auth/group/add/';
-    var editUrl = '/admin/auth/group/edit/id/';
-
-    var allPower = {$allPower};
-    var allTypes = {$allTypes};
-    //分页框
-    var pageObj = makePage({
-        click: function (obj, newPage) {
-            topSearchForm.findName("page").val(newPage);
-            searchFormGo(topSearchForm, parentListTable, pageObj, false);
-        }
-    });
-    //搜索框
-    var topSearchForm = makeForm({
-        url: indexUrl,
-        submit: function(form_, e) {
-            console.log(e);
-            e.preventDefault();
-            topSearchForm.findName("page").val(1);
-            searchFormGo(topSearchForm, parentListTable, pageObj);
-            return false;
-        },
-        value: makeDiv({
-            'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
-            value: [
-                makeInput({
-                    value: 1,
-                    type: 'hidden',
-                    name: 'page'
-                }),
-                makeSpan({
-                    'class': 'form-group col-md-3',
-                    value: [
-                        makeSpan({
-                            'class': 'control-label col-xs-4',
-                            value: 'ID:'
-                        }),
-                        makeInput({
-                            'class': 'col-xs-8',
-                            'name': 'id',
-                            value: '',
-                        }),
-                    ]
-                }),
-                makeSpan({
-                    'class': 'form-group col-md-3',
-                    value: [
-                        makeSpan({
-                            'class': 'control-label col-xs-4',
-                            value: '组名:'
-                        }),
-                        makeSpan({
-                            'class': 'col-xs-8',
-                            value:  makeInput({
-                                'name': 'title',
-                                value: '',
-                                clear: true
-                            })
-                        })
-                    ]
-                }),
-                makeSpan({
-                    'class': 'form-group col-md-3',
-                    value: makeBtn({
-                        'class': 'btn btn-success',
-                        value: '搜索',
-                        type: 'submit'
-                    })
-                }),
-            ]
-        })
-    });
-    $('#show_search_form').append(topSearchForm);
-    var parentListTable = makeTable({
-        'class': 'table table-striped table-bordered table-hover',
-        tr_top: [
-            {
-                th: [
-                    {
-                        value: 'ID'
-                    },
-                    {
-                        value: '父组'
-                    },
-                    {
-                        value: '组名'
-                    },
-                    {
-                        value: '创建时间'
-                    },
-                    {
-                        value: '系统角色关联'
-                    },
-                    {
-                        value: '状态'
-                    },
-                    {
-                        value: '操作'
-                    }
-                ]
-            }
-        ],
-        tr_default: [
-            {
-                show: '{{this.length}==0}',
-                td: [
-                    {
-                        colspan: '6',
-                        value: '没有搜索结果'
-                    }
-                ]
-            }
-        ],
-        tr: [
-            {
-                show: '{"{id}" !=""}',
-                td: [
-                    {
-                        value: '{id}'
-                    },
-                    {
-                        value: '{title_parent}'
-                    },
-                    {
-                        value: '{title}'
-                    },
-                    {
-                        value: '{noSecond[run]({createtime})}'
-                    },
-                    {
-                        value: '{type_name}'
-                    },
-                    {
-                        value: '{status_name}'
-                    },
-                    {
-                        value: [
-                            makeBtn({
-                                'class': 'btn btn-xs btn-success',
-                                value: '编辑',
-                                click: "editAdminGroup('{id}')"
-                            }),
-                            makeBtn({
-                                'class': 'btn btn-xs btn-danger',
-                                value: '删除',
-                                margin_left: '5px',
-                                click: "delAdminGroup('{id}')"
-                            })
-                        ]
-                    }
-                ]
-            }
-        ],
-        data_from: {
-            func: function (tableObj) {
-                searchFormGo(topSearchForm, tableObj, pageObj);
-            }
-        }
-    });
-    $('#list_result').append(parentListTable).append(pageObj);
-
-    //刷新列表
-    function refreshAdminGroup() {
-        searchFormGo(topSearchForm, parentListTable, pageObj);
-    }
-    //删除分组
-    function delAdminGroup(id) {
-        msgConfirm('您是否确认要删除此分组？', '确定', '取消', function () {
-            hideNewBox();
-            postAndDone({
-                url: delUrl + id,
-                success_key: 'code',
-                success_value: '1',
-                success_func: function () {
-                    refreshAdminGroup();
-                    msgTis('删除成功');
-                },
-                err_func: function (data) {
-                    msgTis(data.msg);
+    $(document).ready(function () {
+        require(['jquery', 'bootstrap', 'backend', 'table', 'form', 'jstree', 'lrBox'], function ($, undefined, Backend, Table, Form, jstree, lrBox) {
+            //读取选中的条目
+            $.jstree.core.prototype.get_all_checked = function (full) {
+                var obj = this.get_selected(), i, j;
+                for (i = 0, j = obj.length; i < j; i++) {
+                    obj = obj.concat(this.get_node(obj[i]).parents);
                 }
-            })
-        });
-    }
-
-    //添加编辑分组
-    function editAdminGroup(id) {
-        id = id || 0;
-        var dataFromObj = null;
-        if(id) {
-            dataFromObj = {
-                url: getUrl + id,
-                data_key: 'data'
+                obj = $.grep(obj, function (v, i, a) {
+                    return v != '#';
+                });
+                obj = obj.filter(function (itm, i, a) {
+                    return i == a.indexOf(itm);
+                });
+                return full ? $.map(obj, $.proxy(function (i) {
+                    return this.get_node(i);
+                }, this)) : obj;
             };
-        }
-        var box = makeForm({
-            'type': 'post',
-            url: id > 0 ? editUrl + id : addUrl,
-            submit: function (obj, ev) {
-                console.log(obj.getFormDatas());
+            var Controller = {
+                index: function () {
+                    // 初始化表格参数配置
+                    Table.api.init({
+                        extend: {
+                            "index_url": "auth/group/index",
+                            "add_url": "auth/group/add",
+                            "edit_url": "auth/group/edit",
+                            "del_url": "auth/group/del",
+                            "multi_url": "auth/group/multi",
+                        }
+                    });
 
-            },
-            success_key: 'code',
-            success_value: ['1'],
-            success_func: function (data) {
-                hideNewBox();
-                if(id > 0) {
-                    msgTis('修改成功');
-                } else {
-                    msgTis('添加成功');
-                }
-                refreshAdminGroup();
-            },
-            err_func: function (data) {
-                msg(data.msg);
-            },
-            value: makeTable({
-                'class': 'edit_table',
-                data_from: dataFromObj,
-                tr_1: [
-                    {
-                        td: [
-                            {
-                                'class': 'td_em',
-                                value: '上级分组'
-                            }, {
-                                'class': 'td_main',
-                                value: makeSelect({
-                                    name: 'row[pid]',
-                                    value: '{pid}',
-                                    'clear': true,
-                                    value_key: 'id',
-                                    title_key: 'title',
-                                    menu: {
-                                        data_from: {
-                                            url: '/admin/auth/group/index/?selectpage',
-                                            data_key: 'rows'
-                                        },
-                                    },
-                                    li: {
-                                        value: '{title}'
+                    var table = $("#table");
+
+                    // 初始化表格
+                    table.bootstrapTable({
+                        url: $.fn.bootstrapTable.defaults.extend.index_url,
+                        method: 'post',
+                        columns: [
+                            [
+                                {field: 'state', checkbox: true,},
+                                {field: 'id', title: 'ID'},
+                                {field: 'oldPrivilege', title: __('oldPrivilege')},
+                                {field: 'pid', title: __('Parent')},
+                                {field: 'name', title: __('Name'), align: 'left', formatter:function (value, row, index) {
+                                        return value.toString().replace(/(&|&amp;)nbsp;/g, '&nbsp;');
                                     }
-                                })
-                            }]
-                    },
-                    {
-                        td: [
-                            {
-                                'class': 'td_em',
-                                value: '系统角色关联'
-                            }, {
-                                'class': 'td_main',
-                                value: makeRadio({
-                                    name: 'row[utype]',
-                                    value: '{"{utype}" ? "{utype}":"0"}',
-                                    text_key: 'text',
-                                    items: {
-                                        data: allTypes
+                                },
+                                {field: 'status', title: __('Status'), formatter: Table.api.formatter.status},
+                                {
+                                    field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate,
+                                    buttons: [{
+                                        refresh:true,
+                                        text: ('Clone'),
+                                        icon: 'fa fa-files-o',
+                                        classname: 'btn btn-info btn-xs btn-ajax',
+                                        url: 'auth/group/clone'
                                     },
-                                })
-                            }]
-                    },
-                    {
-                        td: [
-                            {
-                                'class': 'td_em',
-                                value: '组名'
-                            }, {
-                                'class': 'td_main',
-                                value: makeInput({
-                                    width: '100%',
-                                    name: 'row[title]',
-                                    value: '{title}',
-                                    null_func: function () {
-                                        msgTis('组名不能为空');
+                                        {
+                                        text: '',
+                                        icon: 'fa fa-user',
+                                        classname: 'btn btn-primary btn-xs btn-click',
+                                        url: '',
+                                        click: function (a, data_) {
+                                            var title = data_['name'];
+                                            var id = data_.id;
+                                            lrBox.msgView('Members['+ title +']',
+                                                '[url]auth/group/members/ids/'+ id, 700, 0,
+                                                {isRound: false, bg: true});
+                                        }
+                                    }],
+                                    formatter: function (value, row, index) {
+                                        return Table.api.formatter.operate.call(this, value, row, index);
                                     }
-                                })
-                            }]
+                                }
+                            ]
+                        ],
+                        pagination: false,
+                        search: false,
+                        commonSearch: false,
+                    });
+
+                    // 为表格绑定事件
+                    Table.api.bindevent(table);//当内容渲染完成后
+
+                },
+                add: function () {
+                    Controller.api.bindevent();
+                },
+                edit: function () {
+                    Controller.api.bindevent();
+                },
+                api: {
+                    bindevent: function () {
+                        Form.api.bindevent($("form[role=form]"), null, null, function () {
+                            if ($("#treeview").size() > 0) {
+                                var r = $("#treeview").jstree("get_all_checked");
+                                $("input[name='row[rules]']").val(r.join(','));
+                            }
+                            return true;
+                        });
+                        //渲染权限节点树
+                        //变更级别后需要重建节点树
+                        $(document).on("change", "select[name='row[pid]']", function () {
+                            var pid = $(this).data("pid");
+                            var id = $(this).data("id");
+                            // if ($(this).val() == id) {
+                            //     $("option[value='" + pid + "']", this).prop("selected", true).change();
+                            //     Backend.api.toastr.error(__('Can not change the parent to self'));
+                            //     return false;
+                            // }
+                            $.ajax({
+                                url: "auth/group/roletree",
+                                type: 'post',
+                                dataType: 'json',
+                                data: {id: id, pid: $(this).val()},
+                                success: function (ret) {
+                                    if (ret.hasOwnProperty("code")) {
+                                        var data = ret.hasOwnProperty("data") && ret.data != "" ? ret.data : "";
+                                        if (ret.code === 1) {
+                                            //销毁已有的节点树
+                                            $("#treeview").jstree("destroy");
+                                            Controller.api.rendertree(data);
+                                        } else {
+                                            Backend.api.toastr.error(ret.msg);
+                                        }
+                                    }
+                                }, error: function (e) {
+                                    Backend.api.toastr.error(e.message);
+                                }
+                            });
+                        });
+                        //全选和展开
+                        $(document).on("click", "#checkall", function () {
+                            $("#treeview").jstree($(this).prop("checked") ? "check_all" : "uncheck_all");
+                        });
+                        $(document).on("click", "#expandall", function () {
+                            $("#treeview").jstree($(this).prop("checked") ? "open_all" : "close_all");
+                        });
+                        $("select[name='row[pid]']").trigger("change");
                     },
-                    {
-                        td: [
-                            {
-                                'class': 'td_em',
-                                value: '状态'
-                            }, {
-                                'class': 'td_main',
-                                value: makeRadio({
-                                    name: 'row[status]',
-                                    value: '{"{status}" ? "{status}":"1"}',
-                                    text_key: 'text',
-                                    items: {
-                                        data: {$allStatus}
+                    rendertree: function (content) {
+                        $("#treeview")
+                            .on('redraw.jstree', function (e) {
+                                $(".layer-footer").attr("domrefresh", Math.random());
+                            })
+                            .jstree({
+                                "themes": {"stripes": true},
+                                "checkbox": {
+                                    "keep_selected_style": false,
+                                },
+                                "types": {
+                                    "root": {
+                                        "icon": "fa fa-folder-open",
                                     },
-                                })
-                            }]
-                    },
-                    {
-                        td: [
-                            {
-                                'class': 'td_em',
-                                'valign': 'top',
-                                value: '权限'
-                            }, {
-                                'class': 'td_main',
-                                value: makeTrees({
-                                    //分类数据
-                                    items: {
-                                        'data':  allPower,
-                                        'value_key': 'id',
-                                        'title_key': 'title',//标题的字段名
-                                        'son_key': 'child',//子数据的字段名
+                                    "menu": {
+                                        "icon": "fa fa-folder-open",
                                     },
-                                    name: "row[rules]",
-                                    value: "{rules}"
-                                })
-                            }]
-                    },
-                    {
-                        td: [
-                            {
-                                'class': 'td_em',
-                                value: ''
-                            }, {
-                                'class': 'td_main',
-                                value: makeBtn({
-                                    'class': 'btn btn-success',
-                                    'value': id>0 ? '编辑' : '添加',
-                                    'type': 'submit'
-                                })
-                            }]
+                                    "file": {
+                                        "icon": "fa fa-file-o",
+                                    }
+                                },
+                                "plugins": ["checkbox", "types"],
+                                "core": {
+                                    'check_callback': true,
+                                    "data": content
+                                }
+                            });
                     }
-                ]
-            })
+                }
+            };
+            return Controller.index();
         });
-        msgWin(id >0 ? '编辑':'添加', box, 800, 1);
-    }
+
+    });
 </script>

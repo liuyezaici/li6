@@ -1,0 +1,69 @@
+<div class="user-section login-section">
+    <div class="login-main">
+        <form name="form1" id="regForm" class="form-vertical" method="POST" action="">
+            <div class="form-group">
+                <label class="control-label">{:__('Mobile')}</label>
+                <div class="controls">
+                    <input type="text" name="mobile" data-rule="required;mobile" class="form-control input-lg" placeholder="{:__('Mobile')}">
+                    <p class="help-block"></p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">{:__('Account')}</label>
+                <div class="controls">
+                    <input type="text" name="username" data-rule="required;username" class="form-control input-lg" placeholder="{:__('Username must be 3 to 30 characters')}">
+                    <p class="help-block"></p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">{:__('Password')}</label>
+                <div class="controls">
+                    <input type="password" name="password" data-rule="required;password" class="form-control input-lg" placeholder="{:__('Password must be 6 to 30 characters')}">
+                    <p class="help-block"></p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">{:__('Password')}2</label>
+                <div class="controls">
+                    <input type="password" name="password2" data-rule="required;password" class="form-control input-lg" placeholder="{:__('Password must be 6 to 30 characters')}">
+                    <p class="help-block"></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-lg btn-block">{:__('Sign up')}</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    (function () {
+        'use strict';
+        require.config({
+            baseUrl: '/assets/libs/lr/ele/',
+            paths: {
+                jquery: '/assets/libs/jquery/dist/jquery',
+                'front': '/assets/index/front',
+                lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+            }
+        });
+        require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
+            var thisForm = $("#regForm");
+            front.formSubmitEven(thisForm, {
+                url: '/index/user/register',
+                successKey: 'code',
+                successVal: 1,
+                successFunc: function (res) {
+                    lrBox.closeAllBox();
+                    lrBox.msgTisf(res.msg);
+                },
+                errorFunc: function (res) {
+                    lrBox.noLoading();
+                    lrBox.msgTisf(res.msg);
+                }
+            });
+            return {};
+        });
+    })();
+
+</script>

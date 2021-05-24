@@ -12,7 +12,6 @@ use think\Exception;
 
 class Api extends Command
 {
-
     protected function configure()
     {
         $site = Config::get('site');
@@ -27,7 +26,8 @@ class Api extends Command
             ->addOption('author', 'a', Option::VALUE_OPTIONAL, 'document author', $site['name'])
             ->addOption('class', 'c', Option::VALUE_OPTIONAL | Option::VALUE_IS_ARRAY, 'extend class', null)
             ->addOption('language', 'l', Option::VALUE_OPTIONAL, 'language', 'zh-cn')
-            ->setDescription('Compress js and css file');
+            ->addOption('controller', 'r', Option::VALUE_REQUIRED | Option::VALUE_IS_ARRAY, 'controller name', null)
+            ->setDescription('Build Api document from controller');
     }
 
     protected function execute(Input $input, Output $output)
@@ -70,31 +70,43 @@ class Api extends Command
         }
 
         if (version_compare(PHP_VERSION, '7.0.0', '<')) {
-            if (extension_loaded('opcache')) {
+            if (extension_loaded('Zend OPcache')) {
                 $configuration = opcache_get_configuration();
                 $directives = $configuration['directives'];
                 $configName = request()->isCli() ? 'opcache.enable_cli' : 'opcache.enable';
                 if (!$directives[$configName]) {
-                    throw new Exception("Please make sure {$configName} is turned on, Get help:http://forum.fastadmin.net/d/1321");
+                    throw new Exception("Please make sure {$configName} is turned on, Get help:https://forum.fastadmin.net/d/1321");
                 }
             } else {
-                throw new Exception("Please make sure opcache already enabled, Get help:http://forum.fastadmin.net/d/1321");
+                throw new Exception("Please make sure opcache already enabled, Get help:https://forum.fastadmin.net/d/1321");
             }
         }
+        //控制器名
+        $controller = $input->getOption('controller') ?: '';
+        if(!$controller) {
+            $controllerDir = $moduleDir . Config::get('url_controller_layer') . DS;
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($controllerDir),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
 
-        $controllerDir = $moduleDir . Config::get('url_controller_layer') . DS;
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($controllerDir), \RecursiveIteratorIterator::LEAVES_ONLY
-        );
-
-        foreach ($files as $name => $file) {
-            if (!$file->isDir()) {
-                $filePath = $file->getRealPath();
+            foreach ($files as $name => $file) {
+                if (!$file->isDir() && $file->getExtension() == 'php') {
+                    $filePath = $file->getRealPath();
+                    $classes[] = $this->get_class_from_file($filePath);
+                }
+            }
+        }
+        else{
+            foreach ($controller as $index => $item) {
+                $filePath=$moduleDir . Config::get('url_controller_layer') . DS .$item.'.php';
                 $classes[] = $this->get_class_from_file($filePath);
             }
         }
+        $classes = array_unique(array_filter($classes));
 
         $config = [
+            'sitename'    => config('site.name'),
             'title'       => $title,
             'author'      => $author,
             'description' => '',
@@ -114,8 +126,8 @@ class Api extends Command
      * get full qualified class name
      *
      * @param string $path_to_file
-     * @author JBYRNE http://jarretbyrne.com/2015/06/197/
      * @return string
+     * @author JBYRNE http://jarretbyrne.com/2015/06/197/
      */
     protected function get_class_from_file($path_to_file)
     {
@@ -149,7 +161,7 @@ class Api extends Command
 
                     //Append the token's value to the name of the namespace
                     $namespace .= $token[1];
-                } else if ($token === ';') {
+                } elseif ($token === ';') {
 
                     //If the token is the semicolon, then we're done with the namespace declaration
                     $getting_namespace = false;
@@ -174,5 +186,4 @@ class Api extends Command
         //Build the fully-qualified class name and return it
         return $namespace ? $namespace . '\\' . $class : $class;
     }
-
 }

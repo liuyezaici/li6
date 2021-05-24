@@ -1,6 +1,7 @@
-<!-- sidebar: style can be found in sidebar.less -->
+<!-- 左侧菜单栏 -->
 <section class="sidebar">
-    <!-- search form -->
+
+    <!-- 菜单搜索 -->
     <form action="" method="get" class="sidebar-form" onsubmit="return false;">
         <div class="input-group">
             <input type="text" name="q" class="form-control" placeholder="{:__('Search menu')}">
@@ -12,12 +13,17 @@
             </div>
         </div>
     </form>
-    <!-- /.search form -->
 
-    <!-- sidebar menu: : style can be found in sidebar.less -->
-    <!--如果想始终显示子菜单,则给ul加上show-submenu类即可-->
-    <ul class="sidebar-menu" id="sidebar_menu">
+    <!-- 移动端一级菜单 -->
+    <div class="mobilenav visible-xs">
+
+    </div>
+
+    <!--如果想始终显示子菜单,则给ul加上show-submenu类即可,当multiplenav开启的情况下默认为展开-->
+    <ul class="sidebar-menu {if $Think.config.fastadmin.multiplenav}show-submenu{/if}">
+
+        <!-- 菜单可以在 后台管理->权限管理->菜单规则 中进行增删改排序 -->
         {$menulist}
+
     </ul>
 </section>
-<!-- /.sidebar -->

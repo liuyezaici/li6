@@ -3,8 +3,7 @@
 namespace app\admin\controller;
 
 use app\common\controller\Backend;
-use \fast\Addon;
-use app\common\model\Users;
+use think\Config;
 
 /**
  * 控制台
@@ -14,70 +13,45 @@ use app\common\model\Users;
  */
 class Dashboard extends Backend
 {
-    protected $noNeedRight = '*';
 
     /**
      * 查看
      */
     public function index()
     {
-        $todayInt = \fast\Date::todayInt();
-        //获取我的身份【管理/代理/商家】
-        $isAdmin = $this->auth->identIsNormalAdmin($this->auth->identity);
-        $isAgent = $this->auth->identIsAgent($this->auth->identity);
-        $isSeller = $this->auth->identIsSeller($this->auth->identity);
-		$orderModel = Addon::getModel('order');
-        $mySellerIds = 0;
-        if($isAgent || $isSeller) {
-            $mySellerIds = $this->auth->getChildrenAdminIds(true, 'seller');
+        $seventtime = \fast\Date::unixtime('day', -7);
+        $paylist = $createlist = [];
+        for ($i = 0; $i < 7; $i++)
+        {
+            $day = date("Y-m-d", $seventtime + ($i * 86400));
+            $createlist[$day] = mt_rand(20, 200);
+            $paylist[$day] = mt_rand(1, mt_rand(1, $createlist[$day]));
         }
-        //统计用户数
-        $userNumCacheName = 'user_num_'.$this->auth->id;//不同的身份看到的数据是不一样的
-        $userNums = \think\cache::get($userNumCacheName);
-        if(!$userNums) {
-            $userNums = 0;
-            if($isAdmin) {
-            $userNums = Users::countAllUser();
-            } else {
-//                echo $mySellerIds;exit;
-                if($orderModel) {
-                    //TP去重统计查询
-                    $mapCountUser = [
-                        'sellerid' => ['in', $mySellerIds]
-                    ];
-                    $userNums = $orderModel->where($mapCountUser)->count('distinct(cuid)');
-                }
-            }
-            \think\cache::set($userNumCacheName, $userNums, 300);
-        }
-        //今日注册
-        $todayReg = 0;
-        if($orderModel) {
-            if($isAdmin) {
-                $todayReg = db('users')->where([
-                    'createtime' => ['>', $todayInt]
-                ])->count();
-            }  else {
-                if($isAgent) {//我是代理
-                    $todayReg = db('users')->where([
-                        'createtime' => ['>', $todayInt],
-                        'pid' => ['in', $mySellerIds]
-                    ])->count();
-                } elseif($isSeller) {//我是商家
-                    $todayReg = db('users')->where([
-                        'createtime' => ['>', $todayInt],
-                        'pid' => $this->auth->id
-                    ])->count();
-                }
-            }
-        }
-
+        $hooks = config('addons.hooks');
+        $uploadmode = isset($hooks['upload_config_init']) && $hooks['upload_config_init'] ? implode(',', $hooks['upload_config_init']) : 'local';
+        $addonComposerCfg = ROOT_PATH . '/vendor/karsonzhang/fastadmin-addons/composer.json';
+        Config::parse($addonComposerCfg, "json", "composer");
+        $config = Config::get("composer");
+        $addonVersion = isset($config['version']) ? $config['version'] : __('Unknown');
         $this->view->assign([
-            'totaluser'        => $userNums,
-            'todayReg'       => $todayReg,
+            'totaluser'        => 35200,
+            'totalviews'       => 219390,
+            'totalorder'       => 32143,
+            'totalorderamount' => 174800,
+            'todayuserlogin'   => 321,
+            'todayusersignup'  => 430,
+            'todayorder'       => 2324,
+            'unsettleorder'    => 132,
+            'sevendnu'         => '80%',
+            'sevendau'         => '32%',
+            'paylist'          => $paylist,
+            'createlist'       => $createlist,
+            'addonversion'       => $addonVersion,
+            'uploadmode'       => $uploadmode
         ]);
 
-       print_r($this->view->fetch());
+        $this->view->engine->layout(false);
+        print_r($this->view->fetch());
     }
 
 }

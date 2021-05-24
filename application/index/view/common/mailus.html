@@ -1,0 +1,54 @@
+<form class="mailUsForm" id="sendUsAnEmail">
+    <div class="container ">
+        <div class="inner">
+            <h2 class="allBigTitle">SEND US AN EMAIL</h2>
+            <p class="title2">You'll usually receive a reply within 3 working days</p>
+            <div class="row">
+                <div class="col-md-6 col-xs-12">
+                    <label>Name <em>*</em> </label>
+                    <input type="text" class="input" name="row[name]" placeholder="Name*"/>
+                </div>
+                <div class="col-md-6 col-xs-12">
+                    <label>Phone <em>*</em></label>
+                    <input type="text" class="input" name="row[phone]" placeholder="phone*"/>
+                 </div>
+                <div class="col-md-6 col-xs-12">
+                    <label>Email <em>*</em></label>
+                    <input type="text" class="input" name="row[email]" placeholder="Email *"/>
+                 </div>
+                <div class="col-md-6 col-xs-12">
+                    <label>Zip / Postal Code</label>
+                    <input type="text" class="input" name="row[zip]" placeholder="Zip / Postal Code"/>
+                 </div>
+                <div class="col-xs-12">
+                    <label>Subject <em>*</em></label>
+                    <input type="text" class="input" name="row[subject]" placeholder="Subject*"/>
+                 </div>
+                <div class="col-xs-12">
+                    <label>Message <em>*</em></label>
+                    <textarea placeholder="Message*" class="textarea" name="row[message]"></textarea>
+                 </div>
+                <div class="col-xs-12">
+                    <div class="radio-box">
+                        <input type="checkbox" class="checked" name="row[agree]" value="1"/>
+                        <span>I agree to be contacted by e-mail, telephone in order to receive information about new products and services from POMCube Inc.  <em>*</em></span>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="row" style="padding-top: 10px;">
+                <div class="sub-btn">
+                    <div class="col-xs-6" style="text-align: left;padding-top: 10px;">
+                        <span style="padding:0;border:none;cursor:pointer;max-width: 50%;vertical-align:middle;">
+                                <img src="/index/tool/captcha" width="100" height="38" onclick="this.src = '/index/tool/captcha?r=' + Math.random();"/>
+                            </span>
+                        <input type="text" name="row[captcha]" class="input" style="display: inline-block;width: auto;height: 40px;vertical-align:middle;max-width: 50%;" maxlength="4" placeholder="{:__('Captcha')}"/>
+                    </div>
+                    <div class="col-xs-6" style="text-align: right;">
+                        <button type="submit" name="btn">Submit</button>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </div>
+</form>

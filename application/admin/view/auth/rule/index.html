@@ -1,198 +1,184 @@
 <div class="panel panel-default panel-intro">
     {:build_heading()}
-
-    <div class="panel-body">
-        <div id="myTabContent" class="tab-content">
-            <div class="widget-body no-padding">
-                <div id="show_search_form"></div>
-                <div id="toolbar" class="toolbar">
-                    <?=build_toolbar([
-                        [
-                        'power'=>'index/index',
-                    'title'=>'刷新',
-                    'icon'=>'fa fa-refresh',
-                    'class'=>'btn btn-primary btn-refresh',
-                    'click'=>'refreshRule()'
-                    ],
-                    [
-                    'power'=>'index/add',
-                    'title'=>'添加',
-                    'icon'=>'fa fa-plus',
-                    'class'=>'btn btn-success btn-add',
-                    'click'=>'editRule()'
-                    ]
-                    ]);?>
+    <style>
+        .tab-content .input-group {
+            margin-bottom: 5px;
+        }
+        .actionBtn a {
+            color: #c1c9f1;
+            cursor: pointer;
+        }
+        .actionBtn a + a {
+            margin-left: 2px;
+        }
+    </style>
+    <div class="panel-body" id="rulesBox">
+        <div class="tab-content">
+            <form class="form-inline" id="search_rule_form">
+                <input name="page" class="page" type="hidden" value="1" />
+                <div class="input-group">
+                    <input type="text" class="form-control"  name="title" placeholder="Title" value="">
                 </div>
-                <div id="list_result"></div>
+                <div class="input-group">
+                    <input type="text" class="form-control pid"  name="pid" placeholder="Pid" value="">
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control"  name="url" placeholder="Url" value="">
+                </div>
+                <button type="submit" style="vertical-align: top;" class="btn btn-success">
+                    Search
+                </button>
+                <button type="button" style="vertical-align: top;" class="btn btn-info addRuleBtn">
+                    Add
+                </button>
+            </form>
+        </div>
+        <div class="row" style="margin: 10px 0;">
+            <div class="box box-info">
+                <div class="box-header ui-sortable-handle">
+                    <h3 class="box-title">
+                       Total: <span class="ruleTotalNum">0</span>
+                    </h3>
+                </div>
+                <div class="box-body" id="resultList">
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-
 <script>
-        var indexUrl = '/admin/auth/rule/';
-        var delUrl = '/admin/auth/rule/del/id/';
-        var getUrl = '/admin/auth/rule/get/id/';
-        var addUrl = '/admin/auth/rule/add/';
-        var editUrl = '/admin/auth/rule/edit/id/';
-
-        //分页框
-        var pageObj = makePage({
-            click: function (obj, newPage) {
-                topSearchForm.findName("page").val(newPage);
-                searchFormGo(topSearchForm, parentListTable, pageObj, false);
-            }
-        });
-        //搜索框
-        var topSearchForm = makeForm({
-            url: indexUrl,
-            submit: function(form_, e) {
-                e.preventDefault();
-                topSearchForm.findName("page").val(1);
-                searchFormGo(topSearchForm, parentListTable, pageObj);
-                return false;
-            },
-            value: makeDiv({
-                'class': 'col-xs-12 col-sm-12 col-md-12 col-lg-12',
-                value: [
-                    makeInput({
-                        value: 1,
-                        type: 'hidden',
-                        name: 'page'
-                    }),
-                    makeSpan({
-                        'class': 'form-group col-md-3',
-                        value: [
-                            makeSpan({
-                                'class': 'control-label col-xs-4',
-                                value: 'ID:'
-                            }),
-                            makeInput({
-                                'class': 'col-xs-8',
-                                'name': 'id',
-                                value: '',
-                            }),
-                        ]
-                    }),
-                    makeSpan({
-                        'class': 'form-group col-md-3',
-                        value: [
-                            makeSpan({
-                                'class': 'control-label col-xs-4',
-                                value: '权限名:'
-                            }),
-                            makeSpan({
-                                'class': 'col-xs-8',
-                                value:  makeInput({
-                                    'name': 'title',
-                                    value: '',
-                                    clear: true
-                                })
-                            })
-                        ]
-                    }),
-                    makeSpan({
-                        'class': 'form-group col-md-3',
-                        value: makeBtn({
-                            'class': 'btn btn-success',
-                            value: '搜索',
-                            type: 'submit'
-                        })
-                    }),
-                ]
-            })
-        });
-        $('#show_search_form').append(topSearchForm);
-        var parentListTable = makeTable({
+    require(['jquery','lrBox', 'lrEle'], function ($, lrBox, lrEle) {
+        var indexUrl = '/auth/rule/newIndex';
+        var addUrl = '/auth/rule/addNew';
+        var editUrl = '/auth/rule/editNew/id/';
+        var deleteUrl = '/auth/rule/del/ids/';
+        var rulesBox = $('#rulesBox');
+        var searchForm = rulesBox.find('#search_rule_form');
+        var addRuleBtn = searchForm.find('.addRuleBtn');
+        var parentListTable = lrEle.makeTable({
             'class': 'table table-striped table-bordered table-hover',
             tr_top: [
                 {
                     th: [
-                        {
-                            value: 'ID'
-                        },
-                        {
-                            value: '权限名'
-                        },
-                        {
-                            value: '权限路径'
-                        },
-                        {
-                            value: '图标'
-                        },
-                        {
-                            value: '排序'
-                        },
-                        {
-                            value: '操作'
-                        }
+                        { value: 'Id'},
+                        { value: 'Title'},
+                        { value: 'Include'},
+                        { value: 'Url(Name)'},
+                        { value: 'Weigh' },
+                        { value: 'Status'},
+                        { value: 'IsMenu'},
+                        { value: 'Operate'},
                     ]
                 }
             ],
             tr_default: [
                 {
-                    show: '{{this.length}==0}',
+                    show: '{!this.data}',
                     td: [
                         {
-                            colspan: '6',
-                            value: '没有搜索结果{id}'
+                            colspan: '8',
+                            value: 'No Data'
                         }
                     ]
                 }
             ],
             tr: [
                 {
-                    show: '{"{id}" !=""}',
+                    '_id': '{id}',
+                    dblclick: function (o) {
+                        lrBox.msgView('Edit Rule', '[url]'+ editUrl + o._id, 560, 0)
+                    },
+                    show: '{this.data}',
                     td: [
                         {
+                            value: '{id}'
+                        },
+                        {
                             value: [
-                                makeSpan({
-                                    value: '{id}'
+                                lrEle.makeSpan({
+                                    value: '{parentTitle}',
+                                }),
+                                lrEle.makeSpan({
+                                    value: lrEle.makeI({
+                                            'class': '{icon}',
+                                        }),
+                                    'class': 'btn btn-xs',
+                                }),
+                                lrEle.makeSpan({
+                                    value: '{title}',
                                 })
                             ]
                         },
                         {
-                            value: '{title}'
+                            value:  [
+                                lrEle.makeSpan({
+                                    value: lrEle.makeI({
+                                        'class': 'fa fa-list',
+                                        'title': 'openList',
+                                        '_id': '{id}',
+                                        click: function (o) {
+                                            filterPid(o._id);
+                                        }
+                                    }),
+                                    'class': 'btn btn-xs',
+                                }),
+                                lrEle.makeSpan({
+                                    value: '{total}',
+                                })
+                            ]
                         },
                         {
-                            value: '{auth_path}'
+                            value: '{name}'
                         },
                         {
-                            value: '<i class="{icon}"></i> <br />{icon}'
+                            value: '{weigh}'
                         },
                         {
-                            value: makeInput({
-                                width: '70px',
-                                size: 'sm',
-                                value: '{order}',
-                                url: editUrl + '{id}',
-                                post_name: 'row[order]',
-                                ajax: true,
-                                success_key: 'code',
-                                success_value: '1',
-                                success_func: function () {
-                                    msgTis('修改成功');
-                                    refreshRule();
-                                },
-                                err_func: function (res) {
-                                    msgTis('edit fail:'+ (res.msg||''));
-                                },
-                            })
+                            value: '{status}'
+                        },
+                        {
+                            value: '{ismenu}'
                         },
                         {
                             value: [
-                                makeBtn({
+                                lrEle.makeSpan({
+                                    value: lrEle.makeI({
+                                        'class': 'fa fa-pencil',
+                                    }),
+                                    '_id': '{id}',
+                                    click: function (o) {
+                                        lrBox.msgView('Edit Rule', '[url]'+  editUrl + o._id, 560, 0)
+                                    },
+                                    'title': 'Edit',
                                     'class': 'btn btn-xs btn-success',
-                                    value: '编辑',
-                                    click: "editRule('{id}')"
                                 }),
-                                makeBtn({
+                                lrEle.makeSpan({
+                                    'title': 'delete',
+                                    value: lrEle.makeI({
+                                        'class': 'fa fa-trash',
+                                    }),
+                                    '_id': '{id}',
+                                    click: function (o) {
+                                        lrBox.msgConfirm('Are you sure you want to delete this item  : '+ o._id + ' ?', 'Yes', 'No', function () {
+                                            lrBox.hideNewBox();
+                                            lrBox.loadingSvg(true);
+                                            lrEle.postAndDone({
+                                                url: deleteUrl + o._id,
+                                                postData: {
+                                                },
+                                                success_func: function (res) {
+                                                    getUrlData(false);
+                                                    lrBox.noLoading();
+                                                    lrBox.msgTisf(res.msg);
+                                                },
+                                            });
+                                        }, function () {
+                                            lrBox.hideNewBox();
+                                        });
+                                    },
+                                    style: 'margin-left: 5px;',
                                     'class': 'btn btn-xs btn-danger',
-                                    value: '删除',
-                                    margin_left: '5px',
-                                    click: "delRule('{id}')"
-                                })
+                                }),
                             ]
                         }
                     ]
@@ -200,191 +186,72 @@
             ],
             data_from: {
                 func: function (tableObj) {
-                    searchFormGo(topSearchForm, tableObj, pageObj);
+                    getUrlData(true);
                 }
             }
         });
-        $('#list_result').append(parentListTable).append(pageObj);
 
-        //刷新列表
-        function refreshRule() {
-            searchFormGo(topSearchForm, parentListTable, pageObj);
-        }
-        //删除权限
-        function delRule(id) {
-            msgConfirm('您是否确认要删除此权限？', '确定', '取消', function () {
-                hideNewBox();
-                postAndDone({
-                    url: delUrl + id,
-                    success_key: 'code',
-                    success_value: '1',
-                    success_func: function () {
-                        refreshRule();
-                        hideAllBox();
-                        msgTis('删除成功');
-                    },
-                    err_func: function (data) {
-                        msgTis(data.msg);
-                    }
-                })
+        var getUrlData = function(renewPageObj) {
+            var params = searchForm.serializeArray();
+            var datas = {};
+            params.map(function (n, v) {
+                datas[n.name] = n.value;
             });
-        }
+            lrEle.postAndDone({
+                url: indexUrl,
+                postData: datas,
+                success_func: function (responseData) {
+                    lrBox.noLoading();
+                    parentListTable['data'] = responseData['rows'];
+                    rulesBox.find('.ruleTotalNum').html(responseData['total']);
+                    if(renewPageObj) {
+                        var pageOpt = pageObj['options'];
+                        pageOpt['page'] = responseData['page'];
+                        pageOpt['pagesize'] = responseData['page_size'];
+                        pageOpt['total'] = responseData['total'];
+                        pageObj.renew(pageOpt);
+                    }
+                },
+            });
+        };
 
-        //添加编辑权限
-        function editRule(id) {
-            id = id || 0;
-            var dataFromObj = null;
-            if(id) {
-                dataFromObj = {
-                    url: getUrl + id,
-                    data_key: 'data'
-                };
+        searchForm.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            lrBox.loading();
+            searchForm.find(".page").val(1);
+            getUrlData(true);
+        });
+        addRuleBtn.on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            lrBox.hideNewBox();
+            lrBox.msgView('add',
+                '[url]'+ addUrl, 560, 0,
+                {bg: true}
+            );
+        });
+        //搜索权限的子权限
+        var filterPid = function (pid) {
+            searchForm.find(".pid").val(pid);
+            searchForm.find(".page").val(1);
+            getUrlData(true);
+        };
+
+        //分页框
+        var pageObj = lrEle.makePage({
+            goto: 'r',
+            show: '{{this.totalPage}>1}',
+            click: function (obj, newPage) {
+                lrBox.loading();
+                searchForm.find(".page").val(newPage);
+                getUrlData(false);
             }
-            var box = makeForm({
-                'type': 'post',
-                url: id > 0 ? editUrl + id : addUrl,
-                submit: function (obj, ev) {
-
-                },
-                success_key: 'code',
-                success_value: ['1'],
-                success_func: function (data) {
-                    hideNewBox();
-                    if(id > 0) {
-                        msgTis('修改成功');
-                    } else {
-                        msgTis('添加成功');
-                    }
-                    refreshRule();
-                },
-                err_func: function (data) {
-                    msg(data.msg);
-                },
-                value: makeTable({
-                    'class': 'edit_table',
-                    data_from: dataFromObj,
-                    tr_1: [
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: '所属权限'
-                                }, {
-                                    'class': 'td_main',
-                                    value: makeSelect({
-                                        name: 'row[pid]',
-                                        value: '{pid}',
-                                        'clear': true,
-                                        value_key: 'id',
-                                        title_key: 'title',
-                                        menu: {
-                                            data_from: {
-                                                url: '/admin/auth/rule/index/selectpage',
-                                                data_key: 'rows'
-                                            },
-                                        },
-                                        li: {
-                                            value: '{title}'
-                                        }
-                                    })
-                                }]
-                        },
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: '权限名'
-                                }, {
-                                    'class': 'td_main',
-                                    value: makeInput({
-                                        width: '100%',
-                                        name: 'row[title]',
-                                        value: '{title}',
-                                        null_func: function () {
-                                            msgTis('权限名不能为空');
-                                        }
-                                    })
-                                }]
-                        },
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: '权限路径'
-                                }, {
-                                    'class': 'td_main',
-                                    value: makeInput({
-                                        width: '100%',
-                                        name: 'row[auth_path]',
-                                        value: '{auth_path}',
-                                        null_func: function () {
-                                            msgTis('权限路径不能为空');
-                                        }
-                                    })
-                                }]
-                        },
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: '图标'
-                                }, {
-                                    'class': 'td_main',
-                                    value: makeInput({
-                                        width: '100%',
-                                        name: 'row[icon]',
-                                        value: '{icon}'
-                                    })
-                                }]
-                        },
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: '排序'
-                                }, {
-                                    'class': 'td_main',
-                                    value: makeInput({
-                                        width: '100%',
-                                        name: 'row[order]',
-                                        value: '{order}',
-                                        null_func: function () {
-                                            msgTis('越大越前');
-                                        }
-                                    })
-                                }]
-                        },
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: '是否菜单'
-                                }, {
-                                    'class': 'td_main',
-                                    value:  makeRadio({
-                                        name: 'row[ismenu]',
-                                        value: '{"{ismenu}" ? "{ismenu}":"1"}',
-                                        item_data: [{value: 1, text: '是'},{value: 0, text: '否'}]
-                                    })
-                                }]
-                        },
-                        {
-                            td: [
-                                {
-                                    'class': 'td_em',
-                                    value: ''
-                                }, {
-                                    'class': 'td_main',
-                                    value: makeBtn({
-                                        'class': 'btn btn-success',
-                                        'value': id>0 ? '编辑' : '添加',
-                                        'type': 'submit'
-                                    })
-                                }]
-                        }
-                    ]
-                })
-            });
-            msgWin(id >0 ? '编辑':'添加', box, 500, 100);
-        }
-    </script>
+        });
+        $('#resultList').append(parentListTable).append(pageObj);
+        window.setEditRuleCallBack  =function () {
+            getUrlData(false);
+        };
+        return {};
+    });
+</script>

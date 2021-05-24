@@ -1,5 +1,6 @@
 <?php
 
+use Symfony\Component\VarExporter\VarExporter;
 use think\App;
 use think\Cache;
 use think\Config;
@@ -341,6 +342,32 @@ function get_addon_instance($name)
 }
 
 /**
+ * 获取插件创建的表
+ * @param string $name 插件名
+ * @return array
+ */
+function get_addon_tables($name)
+{
+    $addonInfo = get_addon_info($name);
+    if (!$addonInfo) {
+        return [];
+    }
+    $regex = "/^CREATE\s+TABLE\s+(IF\s+NOT\s+EXISTS\s+)?`?([a-zA-Z_]+)`?/mi";
+    $sqlFile = ADDON_PATH . $name . DS . 'install.sql';
+    $tables = [];
+    if (is_file($sqlFile)) {
+        preg_match_all($regex, file_get_contents($sqlFile), $matches);
+        if ($matches && isset($matches[2]) && $matches[2]) {
+            $prefix = config('database.prefix');
+            $tables = array_map(function ($item) use ($prefix) {
+                return str_replace("__PREFIX__", $prefix, $item);
+            }, $matches[2]);
+        }
+    }
+    return $tables;
+}
+
+/**
  * 插件显示内容里生成访问插件的url
  * @param string      $url    地址 格式：插件名/控制器/方法
  * @param array       $vars   变量参数
@@ -412,7 +439,7 @@ function addon_url($url, $vars = [], $suffix = true, $domain = false)
  */
 function set_addon_info($name, $array)
 {
-    $file = ADDON_PATH . $name . DIRECTORY_SEPARATOR . 'info.ini';
+    $file = ADDON_PATH . $name . DS . 'info.ini';
     $addon = get_addon_instance($name);
     $array = $addon->setInfo($name, $array);
     if (!isset($array['name']) || !isset($array['title']) || !isset($array['version'])) {
@@ -476,12 +503,12 @@ function set_addon_config($name, $config, $writefile = true)
  */
 function set_addon_fullconfig($name, $array)
 {
-    $file = ADDON_PATH . $name . DIRECTORY_SEPARATOR . 'config.php';
+    $file = ADDON_PATH . $name . DS . 'config.php';
     if (!is_really_writable($file)) {
         throw new Exception("文件没有写入权限");
     }
     if ($handle = fopen($file, 'w')) {
-        fwrite($handle, "<?php\n\n" . "return " . var_export($array, true) . ";\n");
+        fwrite($handle, "<?php\n\n" . "return " . VarExporter::export($array) . ";\n");
         fclose($handle);
     } else {
         throw new Exception("文件没有写入权限");

@@ -1,15 +1,34 @@
-/.idea
-/.svn
-/runtime/temp
-/runtime/log
-/runtime/cache
+# Build and Release Folders
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+
+# Other files and folders
+.settings/
+
+# Executables
+*.swf
+*.air
+*.ipa
+*.apk
+
+# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
+# should NOT be excluded as they contain compiler settings and other important
+# information for Eclipse / Flash Builder.
+/nbproject/
+/runtime/*
+/public/uploads/*
+.idea
+composer.lock
+*.log
+*.css.map
+!.gitkeep
+.env
+.svn
+.vscode
+/application/config.php
 /application/database.php
-/runtime/schema
-/install/install.lock
-/assets/wap/img/Thumbs.db
-/.user.ini
-/application/admin/addon/*/config.php
-/sql
-/runtime/cached/*.txt
+404.html
 .user.ini
-/error
+/articleFile

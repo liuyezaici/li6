@@ -1,0 +1,222 @@
+#indexPage {
+    width: 100%;
+    padding: 0;
+}
+
+.header {
+    height: 62px;
+    overflow: hidden;
+    zoom: 1;
+    border-bottom: 1px solid #d6dfea;
+    background: #eff4fa;
+}
+
+.header .header_logo {
+    float: left;
+    _display: inline;
+    margin-top: 16px;
+    margin-left: 6%;
+    height: 35px;
+    text-indent: 45px;
+    line-height: 50px;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACwUlEQVRoge2aL2gbURzHn4jIoLAwOijMZDAxsbmKioqIyMiJqVE5MTE5UZgso4PCJjIYa0TnIraK8PJ+31/2IxlkYoOIiorKioqJisIqIm6i77rLNX/uLrd7CdwXfube+yXfD+8d9+73O6VCArDBzA0ARwC8jOMSwJ6IrIZ9zZSIFAC8BzB0YDwcx61Way0WAIDtwA+cAagT0XMi2soimPljYgitddkunwdAi0gp9hLOKSLaGrMSRyKyMjMZwEubcJFo/6WgCQAegO8zIQB8spMPM/J7Q1MAPACfu93u/YnJAASAx8yNDD2PaAaAB2C/0+ncG5u8JAAeEX3o9Xp3byQvC4CNdwBujyQvGYBHRG/7/f6thQIAsBHnYWeMebJQANbHz6gAzNwMJi4EgIgUjDE1AK+nxMBCyHXiogBEEYA9CzAIXswBslIO4Fo5gGvlAK6VA7hWDuBaOYBrxQJg5ioAbccnBQBsikjB1lTHzamLSNEFQDPiG9IrY8yjKeOXsWudaQCISBFAJRDnNrnuXyOidX++MeZhaH4FQEVrXU7DfGyAoNrt9h1m/mOTn6VlKK4SAwB47G8JZq5m4na8j8QAFR9Aa10WkZIx5mmU0jmATecAwcKTUkox80HEG9wD4LXb7QdOAWAbIMx8qpRSxpgaMzeiBIAdESk4BSCiuk38loaRpJpnBQ7tnINMnE72kXgFfuGqsPomE6cTNM8KXNjEFyJSwr8SX5T4kVbfbR6AAYCzVqu1RkTriNGOZebTtHpviQHCEpFVrXU5SkTqNM4JsG8vfk3rj/6X/OcPEY2U1/0267mLHnFUicgKgN/W6/b1gD1FDu02aqZ1dk9TIlIMPP2HwVOwUkopXDUP/BvvGMBuVp8ZRDhL7VhPvr/dcYT+xx6RzzcugpkbU3cIM1ftm9iJa7OBOGHmL8aYWtjvX8yLhCQMXCGZAAAAAElFTkSuQmCC) transparent no-repeat 0 0/35px 35px;
+}
+
+.header .header_link {
+    overflow: hidden;
+    margin-top: 16px;
+    padding-right: 17px;
+    line-height: 30px;
+    text-align: right;
+    color: #b6b6b6;
+}
+
+.content {
+    max-width: 960px;
+    margin: 32px auto;
+    padding: 0 24px;
+}
+
+.login_msg {
+    padding: 18px 5px;
+    color: #7e4f01;
+    line-height: 18px;
+    background: none;
+    border-bottom: 2px solid #dcdcdc;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.login_msg p {
+    font-size: 14px;
+    font-weight: bold;
+    color: #885429;
+}
+
+.login_pictures {
+    position: relative;
+    text-align: right;
+}
+
+.content_wrapper {
+    min-height: 372px;
+    margin: 40px 20px 60px 25px;
+    *zoom: 1;
+}
+
+.tool_container {
+    border: 1px solid #a0b1c4;
+    min-height: 336px;
+    _height: 371px;
+    background-color: #fff;
+    position: relative;
+    z-index: 12;
+    padding: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    visibility: visible;
+}
+
+.tool_container .loginTips {
+    font-size: 12px;
+    color: #ddd;
+    text-align: right;
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    right: 20px;
+}
+
+.tool_container .aboutBtn {
+    position: absolute;
+    left: 10px;
+}
+
+.toolList {
+    padding-top: 10px;
+}
+.toolList li {
+    position: relative;
+    margin-bottom: 5px;
+    list-style-type: cambodian;
+}
+.toolList li .btn {
+    margin-bottom: 5px;
+}
+.toolList a:hover {
+    color: #333;
+}
+
+
+a.btn-gray,
+.btn-gray {
+    color: #333;
+    background-color: #ccc;
+    border-color: #999;
+}
+.btn-gray:focus,
+.btn-gray.focus {
+    color: #222;
+    background-color: #aaa;
+    border-color: #777;
+}
+a.btn-gray:hover,
+.btn-gray:hover {
+    color: #222;
+    background-color: #bbb;
+    border-color: #666;
+}
+.btn-gray:active,
+.btn-gray.active,
+.open > .dropdown-toggle.btn-gray {
+    color: #222;
+    background-color: #bbb;
+    border-color: #666;
+}
+.btn-gray:active:hover,
+.btn-gray.active:hover,
+.open > .dropdown-toggle.btn-gray:hover,
+.btn-gray:active:focus,
+.btn-gray.active:focus,
+.open > .dropdown-toggle.btn-gray:focus,
+.btn-gray:active.focus,
+.btn-gray.active.focus,
+.open > .dropdown-toggle.btn-gray.focus {
+    color: #222;
+    background-color: #bbb;
+    border-color: #666;
+}
+.btn-gray:active,
+.btn-gray.active,
+.open > .dropdown-toggle.btn-gray {
+    background-image: none;
+}
+.btn-gray.disabled:hover,
+.btn-gray[disabled]:hover,
+fieldset[disabled] .btn-gray:hover,
+.btn-gray.disabled:focus,
+.btn-gray[disabled]:focus,
+fieldset[disabled] .btn-gray:focus,
+.btn-gray.disabled.focus,
+.btn-gray[disabled].focus,
+fieldset[disabled] .btn-gray.focus {
+    background-color: #bbb;
+    border-color: #666;
+}
+
+
+a.btn-black,
+.btn-black {
+    color: #fff;
+    background-color: #666;
+    border-color: #333;
+}
+.btn-black:focus,
+.btn-black.focus {
+    color: #fff;
+    background-color: #444;
+    border-color: #222;
+}
+a.btn-black:hover,
+.btn-black:hover {
+    color: #fff;
+    background-color: #333;
+    border-color: #111;
+}
+.btn-black:active,
+.btn-black.active,
+.open > .dropdown-toggle.btn-black {
+    color: #fff;
+    background-color: #444;
+    border-color: #222;
+}
+.btn-black:active:hover,
+.btn-black.active:hover,
+.open > .dropdown-toggle.btn-black:hover,
+.btn-black:active:focus,
+.btn-black.active:focus,
+.open > .dropdown-toggle.btn-black:focus,
+.btn-black:active.focus,
+.btn-black.active.focus,
+.open > .dropdown-toggle.btn-black.focus {
+    color: #fff;
+    background-color: #444;
+    border-color: #222;
+}
+.btn-black:active,
+.btn-black.active,
+.open > .dropdown-toggle.btn-black {
+    background-image: none;
+}
+.btn-black.disabled:hover,
+.btn-black[disabled]:hover,
+fieldset[disabled] .btn-black:hover,
+.btn-black.disabled:focus,
+.btn-black[disabled]:focus,
+fieldset[disabled] .btn-black:focus,
+.btn-black.disabled.focus,
+.btn-black[disabled].focus,
+fieldset[disabled] .btn-black.focus {
+    background-color: #444;
+    border-color: #222;
+}

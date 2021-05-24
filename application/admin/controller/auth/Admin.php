@@ -3,14 +3,13 @@
 namespace app\admin\controller\auth;
 
 use app\admin\model\AuthGroup;
-use app\common\model\Users as userModel;
+use app\admin\model\AuthGroupAccess;
 use app\common\controller\Backend;
+use fast\Date;
 use fast\Random;
-use fast\Addon;
-use think\Config;
 use fast\Tree;
+use think\Validate;
 use think\Db;
-use think\Exception;
 
 /**
  * 管理员管理
@@ -21,107 +20,175 @@ use think\Exception;
 class Admin extends Backend
 {
 
+    /**
+     * @var \app\admin\model\Admin
+     */
     protected $model = null;
+    protected $selectpageFields = 'id,username,nickname,avatar';
+    protected $searchFields = 'id,username,nickname';
     protected $childrenGroupIds = [];
-    protected $noNeedRight = ['get_my_info', 'edit_my_info']; //自己的信息不需要分配权限
+    protected $childrenAdminIds = [];
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->model = new userModel();
+        $this->model = model('Admin');
 
-        $this->childrenGroupIds = $this->auth->getChildrenGroupIds();
-//
-//        print_r('userModel');
-//        print_r($this->model);
-//        exit;
+        $this->childrenAdminIds = $this->auth->getChildrenAdminIds(true);
+        $this->childrenGroupIds = $this->auth->getChildrenGroupIds(true);
+
         $groupList = collection(AuthGroup::where('id', 'in', $this->childrenGroupIds)->select())->toArray();
-//        print_r('$groupList');
-//        print_r($groupList);
-//        exit;
+
         Tree::instance()->init($groupList);
         $groupdata = [];
-        $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0), 'title');
-//        print_r('$result');
-//        print_r($result);
-//        exit;
-        foreach ($result as $k => $v)
-        {
-            $groupdata[$v['id']] = $v['title'];
+        if ($this->auth->isSuperAdmin()) {
+            $result = Tree::instance()->getTreeList(Tree::instance()->getTreeArray(0));
+            foreach ($result as $k => $v) {
+                $groupdata[$v['id']] = $v['name'];
+            }
+        } else {
+            $result = [];
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $childlist = Tree::instance()->getTreeList(Tree::instance()->getTreeArray($n['id']));
+                $temp = [];
+                foreach ($childlist as $k => $v) {
+                    $temp[$v['id']] = $v['name'];
+                }
+                $result[__($n['name'])] = $temp;
+            }
+            $groupdata = $result;
         }
 
         $this->view->assign('groupdata', $groupdata);
         $this->assignconfig("admin", ['id' => $this->auth->id]);
     }
 
-    //搜索管理/用户 只能输出3个字段 id,username,nickname
-    public function searchusername() {
-        $username = input('post.username');
-        if(!$username) $this->error('$username不能为空');
-        $userList = userModel::where([
-            'username' => ['like', '%'. $username .'%']
-        ])->whereOr([
-            'nickname' => ['like', '%'. $username .'%']
-        ])->field('id,username,nickname')->limit(10)->select();
-        return json(['code'=>1, 'rows' => $userList]);
-    }
-
-    //获取个人信息
-    public function get_my_info() {
-        $row = $this->model->get($this->auth->id);
-        unset($row['password']);
-        unset($row['salt']);
-        $this->result($row);
-    }
-    //修改个人信息
-    public function edit_my_info() {
-        $id = $this->auth->id;
-        $row = userModel::get(['id' => $id]);
-        if (!$row) $this->error('找不到记录:'. $id);
-        if ($this->request->isPost())
-        {
-            $params = $this->request->post("row/a");
-            $avatar = $params['avatar'];//头像单独获取
-            if ($params)
-            {
-                $params['avatar'] = $avatar;
-                if ($params['password'])
-                {
-                    $params['salt'] = Random::alnum();
-                    $params['password'] = userModel::encryptPassword($params['password'], $params['salt']);
-                }
-                else
-                {
-                    unset($params['password'], $params['salt']);
-                }
-                Db::startTrans();
-                try {
-                    //这里需要针对username和email做唯一验证
-                    $adminValidate = \think\Loader::validate('Users');
-                    $adminValidate->rule([
-                        'username' => 'max:50|unique:Users,username,' . $row->id,
-                        'email'    => 'email|unique:Users,email,' . $row->id
-                    ]);
-                    $result = $row->validate('Users.edit')->save($params);
-                    Db::commit();
-                } catch (\Exception $e) {
-                    Db::rollback();
-                    return $this->error($e->getMessage());
-                }
-                if ($result === false)
-                {
-                    $this->error($row->getError());
-                }
-                //附件更新sid
-                if($avatar) {
-                    $fujianModel = Addon::getModel('fujian');
-                    if(!$fujianModel) $this->error('未安装fujian组件');
-                    $fujianModel->updateSid($id, [$avatar]);
-                }
-                $this->success();
-            }
-            $this->error('未提交参数');
+    /* 设备列表 查找邮箱 */
+    public function findemail() {
+        $where  = [
+        ];
+        if($email = input('post.email', '', 'trim')) {
+            $where['email'] = ['like', "{$email}%"];
         }
+        $list = $this->model
+            ->where($where)
+            ->where('id', 'in', $this->childrenAdminIds)
+            ->field(['id', 'email'])
+            ->order('id', 'desc')
+            ->paginate(10);
+        unset($v);
+        $result = array("total" => $list->total(), "rows" => $list->items());
+        return $this->success('success', '', $result);
+    }
+    /**
+     * 新版列表
+     */
+    public function newIndex()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isPost()) {
+            $where  = [
+            ];
+            if($email = input('post.email', '', 'trim')) {
+                $where['email'] = ['like', "{$email}%"];
+            }
+            if($account = input('post.account', '', 'trim')) {
+                $where['username'] = ['like', "{$account}%"];
+            }
+            $childrenGroupIds = $this->childrenGroupIds;
+            $groupName = AuthGroup::where('id', 'in', $childrenGroupIds)
+                ->column('id,name');
+            $authGroupList = AuthGroupAccess::where('group_id', 'in', $childrenGroupIds)
+                ->field('uid,group_id')
+                ->select();
+
+            $adminGroupName = [];
+            foreach ($authGroupList as $k => $v) {
+                if (isset($groupName[$v['group_id']])) {
+                    $adminGroupName[$v['uid']][$v['group_id']] = $groupName[$v['group_id']];
+                }
+            }
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $adminGroupName[$this->auth->id][$n['id']] = $n['name'];
+            }
+
+            $list = $this->model
+                ->where($where)
+                ->where('id', 'in', $this->childrenAdminIds)
+                ->field(['password', 'salt', 'token'], true)
+                ->order('id', 'desc')
+                ->paginate(10);
+
+            foreach ($list as $k => &$v) {
+                $groups = isset($adminGroupName[$v['id']]) ? $adminGroupName[$v['id']] : [];
+                $v['groups'] = implode(',', array_values($groups));
+                if($v['logintime']) {
+                    $v['loginTime'] = Date::toYMDS($v['logintime']);
+                } else {
+                    $v['loginTime'] = '-';
+                }
+            }
+            unset($v);
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
+            return json($result);
+        }
+        $this->view->engine->layout(false);
+        print_r($this->view->fetch());
+    }
+    /**
+     * 查看
+     */
+    public function index()
+    {
+        //设置过滤方法
+        $this->request->filter(['strip_tags', 'trim']);
+        if ($this->request->isPost()) {
+            //如果发送的来源是Selectpage，则转发到Selectpage
+            if ($this->request->request('keyField')) {
+                return $this->selectpage();
+            }
+            $childrenGroupIds = $this->childrenGroupIds;
+            $groupName = AuthGroup::where('id', 'in', $childrenGroupIds)
+                ->column('id,name');
+            $authGroupList = AuthGroupAccess::where('group_id', 'in', $childrenGroupIds)
+                ->field('uid,group_id')
+                ->select();
+
+            $adminGroupName = [];
+            foreach ($authGroupList as $k => $v) {
+                if (isset($groupName[$v['group_id']])) {
+                    $adminGroupName[$v['uid']][$v['group_id']] = $groupName[$v['group_id']];
+                }
+            }
+            $groups = $this->auth->getGroups();
+            foreach ($groups as $m => $n) {
+                $adminGroupName[$this->auth->id][$n['id']] = $n['name'];
+            }
+            list($where, $sort, $order, $offset, $limit) = $this->buildparams();
+
+            $list = $this->model
+                ->where($where)
+                ->where('id', 'in', $this->childrenAdminIds)
+                ->field(['password', 'salt', 'token'], true)
+                ->order($sort, $order)
+                ->paginate($limit);
+
+            foreach ($list as $k => &$v) {
+                $groups = isset($adminGroupName[$v['id']]) ? $adminGroupName[$v['id']] : [];
+                $v['groups'] = implode(',', array_keys($groups));
+                $v['groups_text'] = implode(',', array_values($groups));
+            }
+            unset($v);
+            $result = array("total" => $list->total(), "rows" => $list->items());
+
+            return json($result);
+        }
+        $this->view->engine->layout(false);
+        print_r($this->view->fetch());
     }
 
     /**
@@ -129,168 +196,216 @@ class Admin extends Backend
      */
     public function add()
     {
-        if ($this->request->isPost())
-        {
+        if ($this->request->isPost()) {
+            $this->token();
             $params = $this->request->post("row/a");
-            if ($params)
-            {
-                if(!$params['username']) $this->error('username不能为空');
-                if(!$params['password']) $this->error('密码不能为空');
-                if(!$params['groupid']) $this->error('分组不能为空');
-                //获取分组所在的utype
-                $utype = AuthGroup::getfieldbyid($params['groupid'], 'utype');
-                $params['utype'] = $utype;
-                $newUid = userModel::createAdmin($params);
-                if(!is_numeric($newUid))  $this->error('创建失败：'. $newUid);
-                $this->success();
+            if ($params) {
+                if (!Validate::is($params['password'], '\S{6,16}')) {
+                    $this->error(__("Please input correct password"));
+                }
+                $params['salt'] = Random::alnum();
+                $params['password'] = base64_encode(hash("sha256", $params['password'],true));
+                //写入用户旧表
+                $oldUserDbData = []; //修改旧表数据
+                $oldUserDbData['userName'] =  $params['username'];
+                $oldUserDbData['userEmail'] =  $params['email'];
+                if (!$params['nickname']) {
+                    $oldUserDbData['Name'] =  $params['username'];
+                }
+                $oldUserDbData['userPwd'] = $params['password'];
+                $oldUserDbData['Birthdate'] = '';
+                $oldId = Db::table('user')->insertGetId($oldUserDbData);
+//                $params['password'] = md5(md5($params['password']) . $params['salt']);
+                $params['id'] = $oldId; //设置新的uid
+                $params['avatar'] = '/public/assets/img/avatar.png'; //设置新管理员默认头像。
+                $result = $this->model->validate('Admin.add')->save($params);
+                if ($result === false) {
+                    $this->error($this->model->getError());
+                }
+                $group = $this->request->post("group/a");
+
+                //过滤不允许的组别,避免越权
+                $group = array_intersect($this->childrenGroupIds, $group);
+                $dataset = [];
+                foreach ($group as $value) {
+                    $dataset[] = ['uid' => $this->model->id, 'group_id' => $value];
+                }
+                model('AuthGroupAccess')->saveAll($dataset);
+                $this->success('success');
             }
-            $this->error('no params');
+            $this->error();
         }
+        return $this->view->fetch();
     }
 
     /**
      * 编辑
      */
-    public function edit($id = NULL)
+    public function edit($ids = null)
     {
-        $row = userModel::get(['id' => $id]);
-        if (!$row) $this->error('找不到记录:'. $id);
-        if ($this->request->isPost())
-        {
+        $row = $this->model->get(['id' => $ids]);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if (!in_array($row->id, $this->childrenAdminIds)) {
+            $this->error(__('You have no permission'));
+        }
+        if ($this->request->isPost()) {
+//            $this->token();
             $params = $this->request->post("row/a");
-            if ($params)
-            {
-                if ($params['password'])
-                {
-                    $params['salt'] = Random::alnum();
-                    $params['password'] = userModel::encryptPassword($params['password'], $params['salt']);
+            $oldUserDbData = []; //修改旧表数据
+            if ($params) {
+                $oldUserDbData['userName'] =  $params['username'];
+                $oldUserDbData['userEmail'] =  $params['email'];
+                if ($params['nickname']) {
+                    $oldUserDbData['Name'] =  $params['nickname'];
                 }
-                else
-                {
+                if ($params['password']) {
+//                    if (!Validate::is($params['password'], '\S{6,16}')) {
+//                        $this->error(__("Please input correct password"));
+//                    }
+                    $params['salt'] = Random::alnum();
+
+                    $params['password'] =  base64_encode(hash("sha256", $params['password'],true));
+                    $oldUserDbData['userPwd'] =  $params['password'];
+
+//                    $params['password'] = md5(md5($params['password']) . $params['salt']);
+                } else {
                     unset($params['password'], $params['salt']);
                 }
-
-                if(!$params['groupid']) $this->error('分组不能为空');
-                if(!$params['status'] || userModel::isWrongStatus($params['status'])) {
-                    $params['status'] = userModel::getAdminDefaultStatus();
-                };
-                Db::startTrans();
-                try {
-                    //这里需要针对username和email做唯一验证
-                    $adminValidate = \think\Loader::validate('Users');
-                    $adminValidate->rule([
-                        'username' => 'require|max:50|unique:admin,username,' . $row->id,
-                        'email'    => 'email|unique:admin,email,' . $row->id
-                    ]);
-                    $result = $row->validate('Admin.edit')->save($params);
-                    Db::commit();
-                } catch (\Exception $e) {
-                    Db::rollback();
-                    return $this->error($e->getMessage());
+                //这里需要针对username和email做唯一验证
+                $adminValidate = \think\Loader::validate('Admin');
+                $adminValidate->rule([
+                    'username' => 'require|regex:\w{3,12}|unique:admin,username,' . $row->id,
+                    'email'    => 'require|email|unique:admin,email,' . $row->id,
+//                    'password' => 'regex:\S{32}',
+                ]);
+                $group = $this->request->post("group/a");
+                if($group) {
+                    $groupId = $group[0];
+                    $params['groupId'] = $groupId;
                 }
-                if ($result === false)
-                {
+                $result = $row->validate('Admin.edit')->save($params);
+                if ($result === false) {
                     $this->error($row->getError());
                 }
-                $this->success();
+
+                // 先移除所有权限
+                model('AuthGroupAccess')->where('uid', $row->id)->delete();
+                Db::table('user')->where('userId', $row->id)->update($oldUserDbData);
+
+                if($group) {
+                    // 过滤不允许的组别,避免越权
+                    $group = array_intersect($this->childrenGroupIds, $group);
+
+                    $dataset = [];
+                    foreach ($group as $value) {
+                        $dataset[] = ['uid' => $row->id, 'group_id' => $value];
+                    }
+                    model('AuthGroupAccess')->saveAll($dataset);
+                }
+                $this->success('success');
             }
-            $this->error('未提交参数');
+            $this->error();
         }
+        $grouplist = $this->auth->getGroups($row['id']);
+        $groupids = [];
+        foreach ($grouplist as $k => $v) {
+            $groupids[] = $v['id'];
+        }
+        $this->view->assign("row", $row);
+        $this->view->assign("groupids", $groupids);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 编辑-新版弹窗
+     */
+    public function editnew($id = null)
+    {
+        $row = $this->model->get(['id' => $id]);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if (!in_array($row->id, $this->childrenAdminIds)) {
+            $this->error(__('You have no permission'));
+        }
+        $this->view->engine->layout(false);
+        $this->view->assign("row", $row);
+        $groupids = [];
+        $grouplist = $this->auth->getGroups($row['id']);
+        foreach ($grouplist as $k => $v) {
+            $groupids[] = $v['id'];
+        }
+        $this->view->assign("groupids", $groupids);
+        print_r($this->view->fetch('editNew'));
+        exit;
+    }
+    /**
+     * 编辑-新版弹窗
+     */
+    public function addnew()
+    {
+        $this->view->engine->layout(false);
+        $groupids = [];
+        $grouplist = $this->auth->getGroups(0);
+        foreach ($grouplist as $k => $v) {
+            $groupids[] = $v['id'];
+        }
+        $this->view->assign("groupids", $groupids);
+        print_r($this->view->fetch('addNew'));
+        exit;
     }
 
     /**
      * 删除
      */
-    public function del($id = "")
+    public function del($ids = "")
     {
-        if ($id)
-        {
+        if (!$this->request->isPost()) {
+            $this->error(__("Invalid parameters"));
+        }
+        $ids = $ids ? $ids : $this->request->post("ids");
+        if ($ids) {
+            $ids = array_intersect($this->childrenAdminIds, array_filter(explode(',', $ids)));
             // 避免越权删除管理员
             $childrenGroupIds = $this->childrenGroupIds;
-            $adminList = $this->model
-                ->where('id', 'in', $id)
-                ->where('groupid', 'in', $childrenGroupIds)
-                ->field('id')->select();
-
-            if ($adminList)
-            {
+            $adminList = $this->model->where('id', 'in', $ids)->where('id', 'in', function ($query) use ($childrenGroupIds) {
+                $query->name('auth_group_access')->where('group_id', 'in', $childrenGroupIds)->field('uid');
+            })->select();
+            if ($adminList) {
                 $deleteIds = [];
-                foreach ($adminList as $k => $v)
-                {
-                    if(Config::get('adminid') == $v->id) {
-                        $this->error('不能删除系统管理员');
-                    }
+                foreach ($adminList as $k => $v) {
                     $deleteIds[] = $v->id;
                 }
-                $deleteIds = array_diff($deleteIds, [$this->auth->id]);
-                if ($deleteIds)
-                {
+                $deleteIds = array_values(array_diff($deleteIds, [$this->auth->id]));
+                if ($deleteIds) {
                     $this->model->destroy($deleteIds);
+                    model('AuthGroupAccess')->where('uid', 'in', $deleteIds)->delete();
                     $this->success();
                 }
             }
         }
-        $this->error('no id');
+        $this->error(__('You have no permission'));
     }
 
+    /**
+     * 批量更新
+     * @internal
+     */
+    public function multi($ids = "")
+    {
+        // 管理员禁止批量操作
+        $this->error();
+    }
 
     /**
-     * 查看
+     * 下拉搜索
      */
-    public function index()
+    public function selectpage()
     {
-        if ($this->request->isPost())
-        {
-            //如果发送的来源是Selectpage，则转发到Selectpage
-            if ($this->request->request('get_select'))
-            {
-                $this->dataLimit = 'auth';
-                $this->dataLimitField = 'id';
-                return parent::selectpage();
-            }
-            list($whereMore, $sort, $order) = $this->buildparams();
-            $where  = [];
-            $page = input('page', 1, 'int');
-            $pageSize = input('page_size', 10, 'int');
-            if($id = input('id/d'))  $where['id'] = $id;
-            if($username = input('username/s'))  $where['username'] = trim($username);
-            if($usernick = input('nickname/s'))  $where['nickname'] = trim($usernick);
-
-            //除非超级管理员 否则只能查看自己分组下的管理员
-            if(!$this->auth->isSuperAdmin()) {
-                $where['groupid'] = ['in', $this->childrenGroupIds];
-            }
-//            print_r(json_encode($where));exit;
-//            if($whereMore) $where = array_merge($where, $whereMore);
-            $total = $this->model
-                ->where($where)
-                ->where('utype', $this->auth->getIdentNormalAdmin())
-                ->count();
-//            print_r($this->model->getlastsql());
-
-            $list = $this->model
-                ->where($where)
-                ->where('utype', $this->auth->getIdentNormalAdmin())
-                ->field(['password', 'salt', 'token'], true)
-                ->order($sort, $order)
-                ->page($page, $pageSize)
-                ->select();
-            foreach ($list as $k => &$v)
-            {
-                if($v['groupid']) {
-                    $v['group_name'] = AuthGroup::getfieldbyid($v['groupid'], 'title');
-                } else {
-                    $v['group_name'] = $v['groupid'];
-                }
-                $v['status_name'] = userModel::getAdminStatusName($v['status']);
-
-            }
-            unset($v);
-            $result = array("total" => $total, "page_size" => $pageSize, "page" => $page, "rows" => $list);
-
-            return json($result);
-        }
-        $this->view->assign('allStatus', json_encode(userModel::getAdminAllStatusForRadio()));
-       print_r($this->view->fetch());
+        $this->dataLimit = 'auth';
+        $this->dataLimitField = 'id';
+        return parent::selectpage();
     }
 }

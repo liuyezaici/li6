@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>li6找图</title>
+    <meta charset="utf-8">
+    <meta name="description" content="可以通过关键字找图的网站"/>
+    <meta name="keywords" content="关键字找图,找图网站"/>
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.css" rel="stylesheet" media="all"/>
+    <link href="https://js.li6.cc/assets/libs/lr/lrBox.css" rel="stylesheet" media="all"/>
+    <link href="/assets/index/search.css" rel="stylesheet" media="all"/>
+    <script type="text/javascript" src="/assets/js/require.min.js" data-main="/assets/index/search"></script>
+    <div class="container" id="indexPage">
+        <div class="header">
+            <a class="header_logo" href="/" target="li6找图)">li6找图</a>
+            <div class="header_link"><a href="/" target="_parent">回首页</a>&nbsp; </div>
+        </div>
+        <div class="content">
+            <form class="topSearchForm"  action="/index/search" method="get">
+                <h2 class="title">
+                    <span class="login_msg_warning"></span>查找关键词：
+                    <button type="submit" class="btn btn-sm btn-success">搜索</button>
+                </h2>
+                <textarea class="form-control" name="keyword" placeholder="小学生，惊讶，红领巾，小朋友"><?=$keyword;?></textarea>
+            </form>
+
+        </div>
+    </div>
+
+<?=$footer;?>

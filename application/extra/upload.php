@@ -1,7 +1,7 @@
 <?php
 
 //上传配置
-$upload = [
+return [
     /**
      * 上传地址,默认是本地上传
      */
@@ -21,13 +21,17 @@ $upload = [
     /**
      * 可上传的文件类型
      */
-    'mimetype'  => '*',
+    'mimetype'  => 'jpg,png,bmp,jpeg,gif,zip,rar,xls,xlsx',
     /**
      * 是否支持批量上传
      */
     'multiple'  => false,
+    /**
+     * 是否支持分片上传
+     */
+    'chunking'  => false,
+    /**
+     * 默认分片大小
+     */
+    'chunksize' => 2097152,
 ];
-
-
-
-return $upload;

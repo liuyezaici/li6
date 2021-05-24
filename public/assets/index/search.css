@@ -1,0 +1,59 @@
+#indexPage {
+    width: 100%;
+    padding: 0;
+}
+
+.header {
+    height: 62px;
+    overflow: hidden;
+    zoom: 1;
+    border-bottom: 1px solid #d6dfea;
+    background: #eff4fa;
+}
+
+.header .header_logo {
+    float: left;
+    _display: inline;
+    margin-top: 16px;
+    margin-left: 6%;
+    height: 35px;
+    text-indent: 45px;
+    line-height: 50px;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAACwUlEQVRoge2aL2gbURzHn4jIoLAwOijMZDAxsbmKioqIyMiJqVE5MTE5UZgso4PCJjIYa0TnIraK8PJ+31/2IxlkYoOIiorKioqJisIqIm6i77rLNX/uLrd7CdwXfube+yXfD+8d9+73O6VCArDBzA0ARwC8jOMSwJ6IrIZ9zZSIFAC8BzB0YDwcx61Way0WAIDtwA+cAagT0XMi2soimPljYgitddkunwdAi0gp9hLOKSLaGrMSRyKyMjMZwEubcJFo/6WgCQAegO8zIQB8spMPM/J7Q1MAPACfu93u/YnJAASAx8yNDD2PaAaAB2C/0+ncG5u8JAAeEX3o9Xp3byQvC4CNdwBujyQvGYBHRG/7/f6thQIAsBHnYWeMebJQANbHz6gAzNwMJi4EgIgUjDE1AK+nxMBCyHXiogBEEYA9CzAIXswBslIO4Fo5gGvlAK6VA7hWDuBaOYBrxQJg5ioAbccnBQBsikjB1lTHzamLSNEFQDPiG9IrY8yjKeOXsWudaQCISBFAJRDnNrnuXyOidX++MeZhaH4FQEVrXU7DfGyAoNrt9h1m/mOTn6VlKK4SAwB47G8JZq5m4na8j8QAFR9Aa10WkZIx5mmU0jmATecAwcKTUkox80HEG9wD4LXb7QdOAWAbIMx8qpRSxpgaMzeiBIAdESk4BSCiuk38loaRpJpnBQ7tnINMnE72kXgFfuGqsPomE6cTNM8KXNjEFyJSwr8SX5T4kVbfbR6AAYCzVqu1RkTriNGOZebTtHpviQHCEpFVrXU5SkTqNM4JsG8vfk3rj/6X/OcPEY2U1/0267mLHnFUicgKgN/W6/b1gD1FDu02aqZ1dk9TIlIMPP2HwVOwUkopXDUP/BvvGMBuVp8ZRDhL7VhPvr/dcYT+xx6RzzcugpkbU3cIM1ftm9iJa7OBOGHmL8aYWtjvX8yLhCQMXCGZAAAAAElFTkSuQmCC) transparent no-repeat 0 0/35px 35px;
+}
+
+.header .header_link {
+    overflow: hidden;
+    margin-top: 16px;
+    padding-right: 17px;
+    line-height: 30px;
+    text-align: right;
+    color: #b6b6b6;
+}
+
+.content {
+    max-width: 960px;
+    margin: 32px auto;
+    padding: 0 24px;
+}
+
+.topSearchForm {
+    line-height: 18px;
+}
+
+.topSearchForm .title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #3e5fbf;
+    position: relative;
+    height: 35px;
+}
+.topSearchForm .title .btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+.topSearchForm .form-control {
+    height: 100px;
+    resize: none;
+}

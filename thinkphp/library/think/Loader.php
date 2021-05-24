@@ -637,42 +637,10 @@ class Loader
         $class = self::parseName(array_pop($array), 1);
         $class = $class . (App::$suffix || $appendSuffix ? ucfirst($layer) : '');
         $path  = $array ? implode('\\', $array) . '\\' : '';
-		
-		/*$result = App::$namespace . '\\' .
-				($module ? $module . '\\' : '') .
-				($path ? $path . $class . '\\' . $layer :  $layer . '\\' . $class). '\\' .$class; 
-		if(!class_exists($result)){
-			$result = App::$namespace . '\\' .
-				($module ? $module . '\\' : '') .
-				($path ? $path . $layer . '\\' . $class :  $class . '\\' . $layer). '\\' .$class;
-		}
-		if(!class_exists($result)){
-			$result = App::$namespace . '\\' .
-				($module ? $module . '\\' : '') .
-				($path ? $path . $layer . '\\' . $class :  $class . '\\' . $layer);
-		}
-		if(!class_exists($result)){
-			$result = App::$namespace . '\\' .
-				($module ? $module . '\\' : '') .
-				$layer . '\\' . $path . $class;
-		}
-		if(!class_exists($result)){*/	 
-			$temp = explode('\\', $path);
-			for($i = 0; $i < count($temp); $i ++){
-				$temp = explode('\\', trim($path, '\\'));
-				array_splice($temp, $i, 0, $layer);
-				$temp = array_filter($temp);
-				
-				$result = App::$namespace . '\\' .
-					($module ? $module . '\\' : '') .
-					implode('\\', $temp). '\\' .$class; 
 
-				if(class_exists($result)){
-					return $result;
-				}
-			}
-		//}
-		return $result;
+        return App::$namespace . '\\' .
+            ($module ? $module . '\\' : '') .
+            $layer . '\\' . $path . $class;
     }
 
     /**

@@ -1,0 +1,192 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+    <style>
+        .tab-content .input-group {
+            margin-bottom: 5px;
+        }
+        .actionBtn a {
+            color: #c1c9f1;
+            cursor: pointer;
+        }
+        .actionBtn a + a {
+            margin-left: 2px;
+        }
+
+        .msg_box.msg_box_faq_tails {
+            border: 0;
+            color: #ffeccc;
+        }
+        .msg_box.msg_box_faq_tails .lr_box_top_bar {
+            background-color: #242937;
+            border: 1px solid #010101;
+            font-weight: bold;
+            text-align: left;
+            padding: 6px 9px 6px 15px;
+            overflow: hidden;
+            display: block;
+            color: #888;
+            font-size: 12px;
+        }
+        .msg_box.msg_box_faq_tails .faqDetailsBox {
+            width: 100%;
+            background-color: #242937;
+            border-top: 1px solid #3f4451;
+        }
+        .msg_box.msg_box_faq_tails .lr_content {
+            background-color: #242937;
+            border-left: 1px solid #000;
+        }
+
+
+    </style>
+    <div class="panel-body" id="membersBox">
+        <div class="tab-content">
+            <form class="form-inline" id="search_member_form">
+                <input name="page" class="page" type="hidden" value="1" />
+                <div class="input-group">
+                    <input type="text" class="form-control"  name="email" placeholder="email" value="">
+                </div>
+                <button type="submit" style="vertical-align: top;" class="btn btn-success">
+                    Search
+                </button>
+            </form>
+        </div>
+        <div class="row" style="margin: 10px 0;">
+            <div class="box box-info">
+                <div class="box-header ui-sortable-handle">
+                    <h3 class="box-title">
+                        Total: <span class="totalNum">0</span>
+                    </h3>
+                </div>
+                <div class="box-body" id="resultList">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    require(['jquery','lrBox', 'lrEle'], function ($, lrBox, lrEle) {
+        var groupId = parseInt('<?=$groupId?>');
+        var indexUrl = '/auth/group/members/ids/'+ groupId;
+        var editMemberUrl = '/auth/admin/editnew/id/';
+        var membersBox = $('#membersBox');
+        var searchForm = membersBox.find('#search_member_form');
+        var parentListTable = lrEle.makeTable({
+            'class': 'table table-hover',
+            tr_top: [
+                {
+                    th: [
+                        { value: 'id'},
+                        { value: 'email'},
+                        { value: 'Action'}
+                    ]
+                }
+            ],
+            tr_default: [
+                {
+                    show: '{!this.data}',
+                    td: [
+                        {
+                            colspan: '3',
+                            value: 'No Data'
+                        }
+                    ]
+                }
+            ],
+            tr: [
+                {
+                    show: '{this.data}',
+                    id_: '{id}',
+                    td: [
+                        {
+                            value: [
+                                lrEle.makeSpan({
+                                    value: '{id}'
+                                })
+                            ]
+                        },
+                        { value: '{email}'},
+                        {
+                            'class': 'btn-group',
+                            value: [
+                                lrEle.makeA({
+                                    value: '<i class="fa fa-edit text-info"></i>',
+                                    'class': 'btn btn-xs',
+                                    id_: '{id}',
+                                    title: ('remove'),
+                                    click: function (o) {
+                                        var thisId  = o.id_;
+                                        lrBox.msgView(__('edit'),
+                                            '[url]'+ editMemberUrl + thisId, 720, 60,
+                                            { isRound: false, bg: true}
+                                        );
+                                        window.setEditCallBack = function () {
+                                            refreshResult();
+                                        }
+                                    }
+                                })
+                            ]
+                        }
+                    ]
+                }
+            ],
+            data_from: {
+                func: function (tableObj) {
+                    getUrlData(true);
+                }
+            }
+        });
+
+        var getUrlData = function(renewPageObj) {
+            var params = searchForm.serializeArray();
+            var datas = {};
+            params.map(function (n, v) {
+                datas[n.name] = n.value;
+            });
+            lrEle.postAndDone({
+                url: indexUrl,
+                postData: datas,
+                success_func: function (responseData) {
+                    lrBox.noLoading();
+                    parentListTable['data'] = responseData['rows'];
+                    membersBox.find('.totalNum').html(responseData['total']);
+                    if(renewPageObj) {
+                        var pageOpt = pageObj['options'];
+                        pageOpt['page'] = responseData['page'];
+                        pageOpt['pagesize'] = responseData['page_size'];
+                        pageOpt['total'] = responseData['total'];
+                        pageObj.renew(pageOpt);
+                    }
+                },
+            });
+        };
+
+        searchForm.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            lrBox.loading();
+            searchForm.find(".page").val(1);
+            getUrlData(true);
+        });
+        //分页框
+        var pageObj = lrEle.makePage({
+            goto: 'r',
+            show: '{{this.totalPage}>1}',
+            click: function (obj, newPage) {
+                lrBox.loading();
+                searchForm.find(".page").val(newPage);
+                getUrlData(false);
+            }
+        });
+        $('#resultList').append(parentListTable).append(pageObj);
+        //刷新列表
+        function refreshResult() {
+            getUrlData(true);
+        }
+        window.setEditMemberCallBack = function() {
+            getUrlData(false);
+        };
+        return {};
+    });
+</script>

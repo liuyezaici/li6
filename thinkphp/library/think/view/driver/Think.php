@@ -12,7 +12,6 @@
 namespace think\view\driver;
 
 use think\App;
-use think\Exception;
 use think\exception\TemplateNotFoundException;
 use think\Loader;
 use think\Log;
@@ -29,24 +28,21 @@ class Think
         'view_base'   => '',
         // 模板起始路径
         'view_path'   => '',
-        'view_path2'   => '',
         // 模板文件后缀
         'view_suffix' => 'html',
         // 模板文件名分隔符
         'view_depr'   => DS,
         // 是否开启模板编译缓存,设为false则每次都会重新编译
-        'tpl_cache'   => false,
+        'tpl_cache'   => true,
         // 默认模板渲染规则 1 解析为小写+下划线 2 全部转换小写
         'auto_rule'   => 1,
     ];
 
     public function __construct($config = [])
     {
-        if(!$config) $config = [];
         $this->config = array_merge($this->config, $config);
         if (empty($this->config['view_path'])) {
             $this->config['view_path'] = App::$modulePath . 'view' . DS;
-            $this->config['view_path2'] = App::$modulePath;
         }
 
         $this->template = new Template($this->config);
@@ -122,28 +118,11 @@ class Think
             // 基础视图目录
             $module = isset($module) ? $module : $request->module();
             $path   = $this->config['view_base'] . ($module ? $module . DS : '');
-			$path2 = $path;
         } else {
             $path = isset($module) ? APP_PATH . $module . DS . 'view' . DS : $this->config['view_path'];
-            $path2 = isset($module) ? APP_PATH . $module . DS : $this->config['view_path2'];
         }
-		$template2 = $template;
 
         $depr = $this->config['view_depr'];
-		if (0 !== strpos($template2, '/')) {			
-			$template2   = str_replace(['/', ':'], $depr, $template2);
-			$controller = Loader::parseName($request->controller());
-			if ($controller) {
-				if ('' == $template2) {
-					// 如果模板文件名为空 按照默认规则定位
-					$template2 = str_replace('.', DS, $controller) . $depr . $request->action();
-				} elseif (false === strpos($template2, $depr)) {
-					$template2 = str_replace('.', DS, $controller) . $depr . $template2;
-				}
-			}
-			$result = file_path($path2, $template2, '.' . ltrim($this->config['view_suffix'], '.'), 'view');
-		}
-		if(!is_file($result)){
         if (0 !== strpos($template, '/')) {
             $template   = str_replace(['/', ':'], $depr, $template);
             $controller = Loader::parseName($request->controller());
@@ -158,10 +137,7 @@ class Think
         } else {
             $template = str_replace(['/', ':'], $depr, substr($template, 1));
         }
-            $result = file_path($path, $template, '.' . ltrim($this->config['view_suffix'], '.'), 'view');
-//            return $path . ltrim($template, '/') . '.' . ltrim($this->config['view_suffix'], '.');
-		}
-		return $result;
+        return $path . ltrim($template, '/') . '.' . ltrim($this->config['view_suffix'], '.');
     }
 
     /**

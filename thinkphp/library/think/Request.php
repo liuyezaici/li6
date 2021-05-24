@@ -11,7 +11,6 @@
 
 namespace think;
 
-use fast\Addon;
 class Request
 {
     /**
@@ -154,7 +153,7 @@ class Request
             array_unshift($args, $this);
             return call_user_func_array(self::$hook[$method], $args);
         } else {
-            throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
+            throw new Exception('method2 not exists:' . __CLASS__ . '->' . $method);
         }
     }
 
@@ -401,6 +400,7 @@ class Request
      */
     public function pathinfo()
     {
+
         if (is_null($this->pathinfo)) {
             if (isset($_GET[Config::get('var_pathinfo')])) {
                 // 判断URL里面是否有兼容模式参数
@@ -447,8 +447,7 @@ class Request
                 $this->path = preg_replace('/\.' . $this->ext() . '$/i', '', $pathinfo);
             }
         }
-//        return $this->path;
-        return Addon::uriToRouter($this->path);
+        return $this->path;
     }
 
     /**
@@ -1689,6 +1688,4 @@ class Request
     {
         return isset($this->bind[$name]);
     }
-
-
 }

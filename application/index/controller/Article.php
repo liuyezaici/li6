@@ -1,31 +1,27 @@
 <?php
-
 namespace app\index\controller;
 
-use app\admin\addon\fujian\model\Fujian;
+use app\admin\controller\addons\article\model\Article as ArticleModel;
+use app\admin\controller\addons\article\model\Types;
 use app\common\controller\Frontend;
-use app\common\model\Users;
-use fast\File;
-use fast\Date;
-use fast\Addon;
-use \app\admin\addon\article\model\Article as ArticleModel;
-use \app\admin\addon\article\model\ArticleTypes as ArticleTypesModel;
 
 class Article extends Frontend
 {
-
-    protected $noNeedLogin = ['details', 'index'];
-    protected $noNeedRight = '*';
-    protected $layout = '';
-    protected $keyword = '';
-    protected $allTypes = [];
+    protected $layout = true;
 
     public function _initialize()
     {
         parent::_initialize();
-        $this->allTypes = ArticleTypesModel::select();
-        $this->keyword = input('keyword', '', 'trim');
+        //移除HTML标签
+        $this->request->filter('trim,strip_tags,htmlspecialchars');
     }
+
+
+    protected $noNeedLogin = ['*'];
+    protected $noNeedRight = '*';
+    protected $keyword = '';
+
+
 
     //文章详情
     public function details($id=NULL){
@@ -38,7 +34,7 @@ class Article extends Frontend
             $this->error('数据不存在');
         }
         ArticleModel::updateRq($id);
-        $info['typeName'] = $info['typeid'] ? ArticleTypesModel::getFieldById($info['typeid'], 'title') : '';
+        $info['typeName'] = $info['typeid'] ? Types::getFieldById($info['typeid'], 'title') : '';
         //markdown
         include_once(ROOT_PATH . 'assets/libs/markdown/Markdown.php');
         include_once(ROOT_PATH . 'assets/libs/markdown/MarkdownExtra.php');
@@ -63,5 +59,4 @@ class Article extends Frontend
         ]);
         print_r($rightHtml);
     }
-
 }

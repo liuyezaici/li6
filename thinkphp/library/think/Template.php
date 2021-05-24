@@ -35,7 +35,7 @@ class Template
         'tpl_begin'          => '{', // 模板引擎普通标签开始标记
         'tpl_end'            => '}', // 模板引擎普通标签结束标记
         'strip_space'        => false, // 是否去除模板文件里面的html空格与换行
-        'tpl_cache'          => false, // 是否开启模板编译缓存,设为false则每次都会重新编译
+        'tpl_cache'          => true, // 是否开启模板编译缓存,设为false则每次都会重新编译
         'compile_type'       => 'file', // 模板编译类型
         'cache_prefix'       => '', // 模板缓存前缀标识，可以动态改变
         'cache_time'         => 0, // 模板缓存有效期 0 为永久，(以数字为值，单位:秒)
@@ -165,9 +165,6 @@ class Template
         if ($config) {
             $this->config($config);
         }
-//        print_r('$config');
-//        print_r($this->config);
-//        exit;
         if (!empty($this->config['cache_id']) && $this->config['display_cache']) {
             // 读取渲染缓存
             $cacheContent = Cache::get($this->config['cache_id']);
@@ -233,16 +230,12 @@ class Template
      */
     public function layout($name, $replace = '')
     {
-
-//        print_r('layout:'. $name."\n");
         if (false === $name) {
             // 关闭布局
             $this->config['layout_on'] = false;
-//            print_r('set_____false:'. $name."\n");
         } else {
             // 开启布局
             $this->config['layout_on'] = true;
-//            print_r('set_____true:'. $name."\n");
             // 名称必须为字符串
             if (is_string($name)) {
                 $this->config['layout_name'] = $name;
@@ -320,17 +313,12 @@ class Template
     private function compiler(&$content, $cacheFile)
     {
         // 判断是否启用布局
-//        print_r('layout_on:'. $this->config['layout_on']);
-//        exit;
         if ($this->config['layout_on']) {
-
             if (false !== strpos($content, '{__NOLAYOUT__}')) {
                 // 可以单独定义不使用布局
                 $content = str_replace('{__NOLAYOUT__}', '', $content);
             } else {
                 // 读取布局模板
-//                print_r('读取布局模板');
-//                exit;
                 $layoutFile = $this->parseTemplateFile($this->config['layout_name']);
                 if ($layoutFile) {
                     // 替换布局的主体内容
@@ -338,8 +326,6 @@ class Template
                 }
             }
         } else {
-//            print_r('layout_off:'.$cacheFile);
-//            exit;
             $content = str_replace('{__NOLAYOUT__}', '', $content);
         }
 
@@ -1085,7 +1071,7 @@ class Template
             $this->includeFile[$template] = filemtime($template);
             return $template;
         } else {
-            throw new TemplateNotFoundException('template not exists:' . $template, $template);
+            //throw new TemplateNotFoundException('template not exists:' . $template, $template);
         }
     }
 

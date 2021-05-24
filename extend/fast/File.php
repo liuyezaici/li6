@@ -132,8 +132,8 @@ class File
     }
     //有些地方post的数据要转url
     public static function post_nr_str($url, $ref, $post_data = array()){
-        $postBodyString = "";
         if (is_array ( $post_data ) && 0 < count ( $post_data )) {
+            $postBodyString = "";
             foreach ( $post_data as $k => $v ) {
                 if(is_string($v)) {
                     $v = urlencode ($v);
@@ -416,8 +416,12 @@ class File
         return join('.', $arr_);
     }
 
-    //判断文件格式是不是图片
-    public static function isImg($geshi='') {
-        return in_array($geshi, ['jpg', 'jpeg', 'png', 'gif']);
+
+    //base64图片提取文件内容
+    public static function gertBase64File($fileBase64='base64:://') {
+        $str4 = ';base64,';
+        $imgContent = explode($str4, $fileBase64)[1];
+        $imgContent = base64_decode($imgContent);
+        return $imgContent;
     }
 }

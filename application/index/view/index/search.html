@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>li6找图</title>
+    <meta charset="utf-8">
+    <meta name="description" content="可以通过关键字找图的网站"/>
+    <meta name="keywords" content="关键字找图,找图网站"/>
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.css" rel="stylesheet" media="all"/>
+    <link href="https://js.li6.cc/assets/libs/lr/lrBox.css" rel="stylesheet" media="all"/>
+    <link href="/assets/index/index.css" rel="stylesheet" media="all"/>
+    <script type="text/javascript" src="/assets/js/require.min.js" data-main="/assets/index/index"></script>
+    <div class="container" id="indexPage">
+        <div class="header">
+            <a class="header_logo" href="/" target="li6找图)">li6找图</a>
+            <div class="header_link"><a href="/" target="_parent">回首页</a>&nbsp; </div>
+        </div>
+        <div class="content">
+            <div id="returnMsg" class="login_msg">
+                <p>
+                    <span class="login_msg_warning"></span>你已经退出登录，可能由于以下原因：</p>
+                <ul>
+                    <li>你长时间未对页面进行操作。</li>
+                    <li>Cookie 异常，你可以尝试<a href="javascript:;" class="delCookiesBtn">删除Cookie</a>，然后重新登入。
+                    </li>
+                </ul>
+            </div>
+
+            <div class="content_wrapper">
+                <div class="row">
+                    <div class="col-md-7 col-sm-7 col-xs-12">
+                        <div class="login_pictures">
+                            <img />
+                        </div>
+                    </div>
+                    <div class="col-md-5 col-sm-5 col-xs-12">
+                        <form class="login_container" id="indexSearchForm" action="/index/search" method="get">
+                            <div class="panel panel-default" style="height: 100%;border: 0; ">
+                                <div class="panel-heading">
+                                    输入关键字 (<a href="#" class="aboutMyTool" target="_blank"
+                                              data-title="多个关键字用,或，或|或空格分割 <br/> 举例: 小学生,惊讶,红领巾 <br/> 举例: 绿色|虫子|眩晕">？</a>)
+                                </div>
+                                <div class="panel-body">
+                                    <div  style="margin: 10px 5px;">
+                                        <textarea name="keyword" class="form-control" id="keyword" placeholder="小学生，惊讶，红领巾，小朋友" style="width: 100%;height: 160px;"></textarea>
+                                        <button type="submit" class="btn btn-primary btn-block" style="border-radius: 0; margin-top: 8px;">开始查找</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="loginTips">
+                                <a href="#" class="aboutBtn" target="_blank">本站的意义</a>
+                                <div class="hidden">
+                                    1.我喜欢收藏一些经典的图片，下次想看了找起来也很快捷； <br/>
+                                    2.之前丢过一些图片，发现网上再也找不到了，很是可惜； <br/>
+                                    3.希望做一个有意义的图库，让经典的好玩的图片永不丢失；<br/>
+                                </div>
+                                &copy; lirui 2021/5/21
+                            </div>
+                        </form>
+
+                        <div class="input-group" style="margin-top: 8px;text-align: right;">
+                            <div class="input-group-btn">
+                                    <a type="button" class="btn btn-info joinBtn" data-link="/index/?user/login">登录-分享图片</a>
+                                    <a type="button" class="btn btn-success joinBtn" href="javascript: void(0);" data-link="/index/user/register">注册</a>
+                                    <a type="button" class="btn btn-warning joinBtn" href="javascript: void(0);" data-link="/index/user/forget">找回密码</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+<?=$footer;?>

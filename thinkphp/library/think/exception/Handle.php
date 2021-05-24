@@ -173,7 +173,6 @@ class Handle
 
         $data['echo'] = ob_get_clean();
 
-//       print_r($data);exit;  //errHandel
         ob_start();
         extract($data);
         include Config::get('exception_tmpl');

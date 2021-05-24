@@ -1,0 +1,119 @@
+<style>
+    #articleList  {
+      position: relative;
+  }
+
+</style>
+<div class="panel panel-info" id="articleList">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <form class="form-group form-inline topForm" style="margin: 0;" role="form">
+                <label>管理文章</label>
+                <div class="set_typeid input-group" ></div>
+                <div class="input-group" style="margin-left: 15px;">
+                    <input placeholder="标题" class="form-control" name="title" value="<?=$title;?>" />
+                    <span class="input-group-btn"><button type="submit" class="btn btn-info">搜索</button></span>
+                </div>
+                <button type="button" class="btn btn-default addBtn">发布</button>
+            </form>
+        </h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-condensed table-striped">
+            <tr>
+                <th> ID </th>
+                <th> 分类 </th>
+                <th>  标题 </th>
+                <th>  上传时间 </th>
+                <th>  操作 </th>
+            </tr>
+            <?php
+            foreach($list as $v) {
+            ?>
+            <tr>
+                <td>
+                    <?=$v['id'];?>
+                </td>
+                <td> <?=$v['typeName'];?>   </td>
+                <td> <a href="/article/read/<?=$v['id'];?>.html"><?=$v['title'];?></a>  </td>
+                <td> <?=$v['ctime'];?> </td>
+                <td data-id="<?=$v['id'];?>">
+                    <a href="javascript: void(0);" class="btn btn-xs btn-info editBtn">编辑</a>
+                    <a href="javascript: void(0)" class="btn btn-xs btn-danger delBtn">删除</a>
+                </td>
+            </tr>
+            <?php
+            }
+            ?>
+        </table>
+    </div>
+</div>
+<script>
+    (function () {
+        'use strict';
+        require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
+            var articleList = $("#articleList");
+            var typeid = parseInt("<?=$typeid?>");
+            var topForm = articleList.find(".topForm");
+            var selectBox = topForm.find(".set_typeid");
+            function getTypes() {
+                selectBox.html('').load('/my/type/getMyTypes?id1='+ typeid, function () {
+                    var addTypeBtn = selectBox.find(".addTypeBtn");
+                    addTypeBtn.click(function () {
+                        lrBox.closeAllBox();
+                        lrBox.msgt('添加分类', '[url]/my/type/add', '400px', {fadein: 1, fd: 1,move: {fx:'d', sd: 100,jl: '20%'}});
+                        //更新分类的方法
+                        window.renewEditArticleType= function () {
+                            getTypes();
+                        };
+                    });
+                });
+            }
+            getTypes();
+
+            topForm.find(".addBtn").click(function () {
+                lrBox.msgHalf({content: '[url]/my/article/add/', move: {dir: 'l', 'jl': '90%'}});
+            });
+
+            articleList.find(".editBtn").click(function (e) {
+                e.preventDefault();
+                var id = $(this).parent().attr('data-id');
+                lrBox.msgHalf({content: '[url]/my/article/edit/id/'+ id, move: {dir: 'l', 'jl': '90%'}});
+            });
+
+            topForm.submit(function (e) {
+                e.preventDefault();
+                var uri = $(this).serialize();
+                var url = window.location.toString();
+                url = url.replace(/\?.+/, '');
+                window.location.href = url + '?' + uri;
+            });
+
+            articleList.find(".delBtn").click(function (e) {
+                e.preventDefault();
+                var id = $(this).parent().attr('data-id');
+                if(!id) {
+                    lrBox.msgTsf('缺少id');
+                    return;
+                }
+                lrBox.msgConfirm('确认删除此文章吗?', '确认', '取消', function () {
+                    lrBox.hideAllBox();
+                    front.postAndDone({
+                        url: '/my/article/del/id/'+ id,
+                        successFunc: function (res) {
+                            lrBox.msgTsf(res.msg);
+                            window.location.reload();
+                        },
+                        errFunc: function (res) {
+                            lrBox.msgTsf(res.msg);
+                        }
+                    });
+                }, function () {
+                    lrBox.hideAllBox();
+                });
+            });
+            return {};
+        });
+    })();
+
+</script>

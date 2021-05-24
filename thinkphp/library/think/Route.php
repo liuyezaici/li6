@@ -644,6 +644,7 @@ class Route
         if (is_array($rule)) {
             self::$rules['alias'] = array_merge(self::$rules['alias'], $rule);
         } else {
+            $rule = strtolower($rule);  // 2021/4/23 强制不区分路由大小写
             self::$rules['alias'][$rule] = $option ? [$route, $option] : $route;
         }
     }
@@ -846,6 +847,7 @@ class Route
 
         // 分隔符替换 确保路由定义使用统一的分隔符
         $url = str_replace($depr, '|', $url);
+        $url = strtolower($url);// 2021/4/23 强制不区分路由大小写
 
         if (isset(self::$rules['alias'][$url]) || isset(self::$rules['alias'][strstr($url, '|', true)])) {
             // 检测路由别名
@@ -857,6 +859,7 @@ class Route
         $method = strtolower($request->method());
         // 获取当前请求类型的路由规则
         $rules = isset(self::$rules[$method]) ? self::$rules[$method] : [];
+
         // 检测域名部署
         if ($checkDomain) {
             self::checkDomain($request, $rules, $method);
@@ -1129,12 +1132,7 @@ class Route
         if (!empty($array[1])) {
             self::parseUrlParams($array[1]);
         }
-		$module  = $controller . '/' . $action;
-		//LAEL
-		if(!class_exists(App::$namespace.Request::instance()->module().'\\'.str_replace($depr, '\\', $module))){
-			return Route::parseUrl($controller.$depr.$url, $depr, Config::get('controller_auto_search'));
-		}
-        return ['type' => 'module', 'module' => $module];
+        return ['type' => 'module', 'module' => $controller . '/' . $action];
     }
 
     /**
@@ -1148,16 +1146,16 @@ class Route
     {
         if ((isset($option['method']) && is_string($option['method']) && false === stripos($option['method'], $request->method()))
             || (isset($option['ajax']) && $option['ajax'] && !$request->isAjax()) // Ajax检测
-             || (isset($option['ajax']) && !$option['ajax'] && $request->isAjax()) // 非Ajax检测
-             || (isset($option['pjax']) && $option['pjax'] && !$request->isPjax()) // Pjax检测
-             || (isset($option['pjax']) && !$option['pjax'] && $request->isPjax()) // 非Pjax检测
-             || (isset($option['ext']) && false === stripos('|' . $option['ext'] . '|', '|' . $request->ext() . '|')) // 伪静态后缀检测
-             || (isset($option['deny_ext']) && false !== stripos('|' . $option['deny_ext'] . '|', '|' . $request->ext() . '|'))
+            || (isset($option['ajax']) && !$option['ajax'] && $request->isAjax()) // 非Ajax检测
+            || (isset($option['pjax']) && $option['pjax'] && !$request->isPjax()) // Pjax检测
+            || (isset($option['pjax']) && !$option['pjax'] && $request->isPjax()) // 非Pjax检测
+            || (isset($option['ext']) && false === stripos('|' . $option['ext'] . '|', '|' . $request->ext() . '|')) // 伪静态后缀检测
+            || (isset($option['deny_ext']) && false !== stripos('|' . $option['deny_ext'] . '|', '|' . $request->ext() . '|'))
             || (isset($option['domain']) && !in_array($option['domain'], [$_SERVER['HTTP_HOST'], self::$subDomain])) // 域名检测
-             || (isset($option['https']) && $option['https'] && !$request->isSsl()) // https检测
-             || (isset($option['https']) && !$option['https'] && $request->isSsl()) // https检测
-             || (!empty($option['before_behavior']) && false === Hook::exec($option['before_behavior'])) // 行为检测
-             || (!empty($option['callback']) && is_callable($option['callback']) && false === call_user_func($option['callback'])) // 自定义检测
+            || (isset($option['https']) && $option['https'] && !$request->isSsl()) // https检测
+            || (isset($option['https']) && !$option['https'] && $request->isSsl()) // https检测
+            || (!empty($option['before_behavior']) && false === Hook::exec($option['before_behavior'])) // 行为检测
+            || (!empty($option['callback']) && is_callable($option['callback']) && false === call_user_func($option['callback'])) // 自定义检测
         ) {
             return false;
         }
@@ -1235,47 +1233,22 @@ class Route
             $module = Config::get('app_multi_module') ? array_shift($path) : null;
             if ($autoSearch) {
                 // 自动搜索控制器
-                //$dir    = APP_PATH . ($module ? $module . DS : '') . Config::get('url_controller_layer');
-				//$dir2 	= rtrim(APP_PATH . ($module ? $module . DS : ''), DS);
+                $dir    = APP_PATH . ($module ? $module . DS : '') . Config::get('url_controller_layer');
                 $suffix = App::$suffix || Config::get('controller_suffix') ? ucfirst(Config::get('url_controller_layer')) : '';
                 $item   = [];
                 $find   = false;
-                /*foreach ($path as $val) {
+                foreach ($path as $val) {
                     $item[] = $val;
-                    $file   = $dir . DS . str_replace('.', DS, $val) . $suffix . EXT; 
-                    $file   = pathinfo($file, PATHINFO_DIRNAME) . DS . Loader::parseName(pathinfo($file, PATHINFO_FILENAME), 1) . EXT; 
-					if(!is_file($file)){
-						$file   = $dir2 . DS . Config::get('url_controller_layer') . DS . str_replace('.', DS, $val) . $suffix . EXT;
-						$file   = pathinfo($file, PATHINFO_DIRNAME) . DS . Loader::parseName(pathinfo($file, PATHINFO_FILENAME), 1) . EXT; 	
-					}
+                    $file   = $dir . DS . str_replace('.', DS, $val) . $suffix . EXT;
+                    $file   = pathinfo($file, PATHINFO_DIRNAME) . DS . Loader::parseName(pathinfo($file, PATHINFO_FILENAME), 1) . EXT;
+
                     if (is_file($file)) {
                         $find = true;
                         break;
                     } else {
                         $dir .= DS . Loader::parseName($val);
-                        $dir2 .= DS . Loader::parseName($val);
                     }
                 }
-				if(!$find){
-					$item = [];*/							
-					$newpath = $path;
-					while(count($newpath) > 0){						
-						$c = count($newpath);		
-						for($i = 0; $i <= $c; $i ++){
-							$temp = $newpath;
-							array_splice($temp, $i, 0, Config::get('url_controller_layer'));
-							$temp = array_filter($temp);
-							$file = rtrim(APP_PATH . ($module ? $module . DS : ''), DS). DS. implode(DS, $temp) . $suffix . EXT;
-							$file   = pathinfo($file, PATHINFO_DIRNAME) . DS . Loader::parseName(pathinfo($file, PATHINFO_FILENAME), 1) . EXT; 	
-							if (is_file($file)) {
-								$item = $newpath;
-								$find = true;
-								break 2;
-							}
-						}
-						array_pop($newpath);
-					}
-				//}
                 if ($find) {
                     $controller = implode('.', $item);
                     $path       = array_slice($path, count($item));

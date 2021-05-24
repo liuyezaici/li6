@@ -3,8 +3,7 @@
     "description": "addons package for fastadmin",
     "homepage": "https://github.com/karsonzhang/fastadmin-addons",
     "license": "Apache-2.0",
-    "minimum-stability": "dev",
-    "version": "1.2.0",
+    "version": "1.2.10",
     "authors": [
         {
             "name": "Karson",
@@ -19,7 +18,9 @@
         "issues": "https://github.com/karsonzhang/fastadmin-addons/issues"
     },
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=7.0.0",
+        "nelexa/zip": "^3.3",
+        "symfony/var-exporter": "^4.4.13"
     },
     "autoload": {
         "psr-4": {

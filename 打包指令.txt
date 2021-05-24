@@ -1,0 +1,18 @@
+//一键压缩打包前后台的JS和CSS
+php think min -m all -r all
+
+//一键压缩打包后台的JS和CSS
+php think min -m backend -r all
+
+//一键压缩打包前后台的JS
+php think min -m frontend -r js
+ 
+//一键压缩打包前台的CSS
+php think min -m frontend -r css
+//一键压缩打包后台的CSS
+php think min -m backend -r css
+
+//使用uglify进行一键压缩打包后台的JS文件 【推荐】
+php think min -m backend -r js -o uglify
+
+https://doc.fastadmin.net/doc/162.html

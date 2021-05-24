@@ -16,7 +16,7 @@ class AuthRule extends Validate
      * 验证规则
      */
     protected $rule = [
-        'auth_path'  => 'require|format|unique:AuthRule',
+        'name'  => 'require|format|unique:AuthRule',
         'title' => 'require',
     ];
 

@@ -2,14 +2,17 @@
 
 namespace app\common\controller;
 
-use app\admin\library\Auth;
+use app\common\library\Auth;
 use think\Config;
 use think\exception\HttpResponseException;
 use think\exception\ValidateException;
+use think\Hook;
 use think\Lang;
 use think\Loader;
 use think\Request;
 use think\Response;
+use think\Route;
+use think\Validate;
 
 /**
  * API控制器基类
@@ -51,13 +54,13 @@ class Api
 
     /**
      * 权限Auth
-     * @var Auth 
+     * @var Auth
      */
     protected $auth = null;
 
     /**
      * 默认响应输出类型,支持json/xml
-     * @var string 
+     * @var string
      */
     protected $responseType = 'json';
 
@@ -74,13 +77,11 @@ class Api
         $this->_initialize();
 
         // 前置操作方法
-        if ($this->beforeActionList)
-        {
-            foreach ($this->beforeActionList as $method => $options)
-            {
+        if ($this->beforeActionList) {
+            foreach ($this->beforeActionList as $method => $options) {
                 is_numeric($method) ?
-                                $this->beforeAction($options) :
-                                $this->beforeAction($method, $options);
+                    $this->beforeAction($options) :
+                    $this->beforeAction($method, $options);
             }
         }
     }
@@ -91,11 +92,16 @@ class Api
      */
     protected function _initialize()
     {
+        //跨域请求检测
+        check_cors_request();
+
+        //移除HTML标签
+        $this->request->filter('trim,strip_tags,htmlspecialchars');
+
         $this->auth = Auth::instance();
 
         $modulename = $this->request->module();
-        // 判断是否需要验证权限
-        $controllername = strtolower($this->request->controller());
+        $controllername = Loader::parseName($this->request->controller());
         $actionname = strtolower($this->request->action());
 
         // token
@@ -105,34 +111,34 @@ class Api
         // 设置当前请求的URI
         $this->auth->setRequestUri($path);
         // 检测是否需要验证登录
-        if (!$this->auth->match($this->noNeedLogin))
-        {
-
+        if (!$this->auth->match($this->noNeedLogin)) {
             //初始化
-            if($token) $this->auth->init($token);
+            $this->auth->init($token);
             //检测是否登录
-            if (!$this->auth->isLogin())
-            {
-                $this->error('请先登录,token:'. \think\Session::get('user_token'), [], Config::get('loginTimeOutCode'));
+            if (!$this->auth->isLogin()) {
+                $this->error(__('Please login first'), null, 401);
             }
             // 判断是否需要验证权限
-//            print_r('$this->noNeedRight');
-//            print_r($this->noNeedRight);
-//            exit;
-            if (!$this->auth->match($this->noNeedRight))
-            {
+            if (!$this->auth->match($this->noNeedRight)) {
                 // 判断控制器和方法判断是否有对应权限
-                if (!$this->auth->checkAuth($path))
-                {
-                    $this->error(__('You have no permission'), [], Config::get('norightCode'));
+                if (!$this->auth->check($path)) {
+                    $this->error(__('You have no permission'), null, 403);
                 }
             }
-        }
-        else
-        {
+        } else {
             // 如果有传递token才验证是否登录状态
-            if($token) $this->auth->init($token);
+            if ($token) {
+                $this->auth->init($token);
+            }
         }
+
+        $upload = \app\common\model\Config::upload();
+
+        // 上传信息配置后
+        Hook::listen("upload_config_init", $upload);
+
+        Config::set('upload', array_merge(Config::get('upload'), $upload));
+
         // 加载当前控制器语言包
         $this->loadlang($controllername);
     }
@@ -141,55 +147,50 @@ class Api
      * 加载语言文件
      * @param string $name
      */
-    protected function loadlang($name, $module = '')
+    protected function loadlang($name)
     {
-		$file = file_path(APP_PATH . ($module ? : $this->request->module()), $name, '.php', 'lang/'.Lang::detect());	
-		if($file)Lang::load($file);
-		/*$temp1 = array_pop($temp);		
-		$temp0 = implode('/', $temp);
-		$file = APP_PATH . $this->request->module() . '/' . $temp0 . '/lang/' . Lang::detect() . '/' . $temp1 . '.php';
-		if(!is_file($file))$file = APP_PATH . $this->request->module() . '/lang/' . Lang::detect() . '/' . str_replace('.', '/', $name) . '.php';
-        Lang::load($file);*/
+        $name = Loader::parseName($name);
+        Lang::load(APP_PATH . $this->request->module() . '/lang/' . $this->request->langset() . '/' . str_replace('.', '/', $name) . '.php');
     }
 
     /**
      * 操作成功返回的数据
-     * @param string $msg   提示信息
-     * @param mixed $data   要返回的数据
-     * @param int   $code   错误码，默认为1
-     * @param string $type  输出类型
-     * @param array $header 发送的 Header 信息
+     * @param string $msg    提示信息
+     * @param mixed  $data   要返回的数据
+     * @param int    $code   错误码，默认为1
+     * @param string $type   输出类型
+     * @param array  $header 发送的 Header 信息
      */
-    protected function success($msg = '', $data = [], $code = 1, $type = null, array $header = [])
+    protected function success($msg = '', $data = null, $code = 1, $type = null, array $header = [])
     {
-        $this->result($data, $code, $msg, $type, $header);
+        $this->result($msg, $data, $code, $type, $header);
     }
 
     /**
      * 操作失败返回的数据
-     * @param string $msg   提示信息
-     * @param mixed $data   要返回的数据
-     * @param int   $code   错误码，默认为0
-     * @param string $type  输出类型
-     * @param array $header 发送的 Header 信息
+     * @param string $msg    提示信息
+     * @param mixed  $data   要返回的数据
+     * @param int    $code   错误码，默认为0
+     * @param string $type   输出类型
+     * @param array  $header 发送的 Header 信息
      */
-    protected function error($msg = '', $data = [], $code = 0, $type = null, array $header = [])
+    protected function error($msg = '', $data = null, $code = 0, $type = null, array $header = [])
     {
-        $this->result($data, $code, $msg, $type, $header);
+        $this->result($msg, $data, $code, $type, $header);
     }
 
     /**
      * 返回封装后的 API 数据到客户端
      * @access protected
+     * @param mixed  $msg    提示信息
      * @param mixed  $data   要返回的数据
      * @param int    $code   错误码，默认为0
-     * @param mixed  $msg    提示信息
      * @param string $type   输出类型，支持json/xml/jsonp
      * @param array  $header 发送的 Header 信息
      * @return void
      * @throws HttpResponseException
      */
-    protected function result($data = null, $code = 0, $msg = '', $type = null, array $header = [])
+    protected function result($msg, $data = null, $code = 0, $type = null, array $header = [])
     {
         $result = [
             'code' => $code,
@@ -200,51 +201,40 @@ class Api
         // 如果未设置类型则自动判断
         $type = $type ? $type : ($this->request->param(config('var_jsonp_handler')) ? 'jsonp' : $this->responseType);
 
-        if (isset($header['statuscode']))
-        {
+        if (isset($header['statuscode'])) {
             $code = $header['statuscode'];
             unset($header['statuscode']);
-        }
-        else
-        {
+        } else {
             //未设置状态码,根据code值判断
             $code = $code >= 1000 || $code < 200 ? 200 : $code;
         }
         $response = Response::create($result, $type, $code)->header($header);
         throw new HttpResponseException($response);
-		exit;
     }
 
     /**
      * 前置操作
      * @access protected
-     * @param  string $method  前置操作方法名
-     * @param  array  $options 调用参数 ['only'=>[...]] 或者 ['except'=>[...]]
+     * @param string $method  前置操作方法名
+     * @param array  $options 调用参数 ['only'=>[...]] 或者 ['except'=>[...]]
      * @return void
      */
     protected function beforeAction($method, $options = [])
     {
-        if (isset($options['only']))
-        {
-            if (is_string($options['only']))
-            {
+        if (isset($options['only'])) {
+            if (is_string($options['only'])) {
                 $options['only'] = explode(',', $options['only']);
             }
 
-            if (!in_array($this->request->action(), $options['only']))
-            {
+            if (!in_array($this->request->action(), $options['only'])) {
                 return;
             }
-        }
-        elseif (isset($options['except']))
-        {
-            if (is_string($options['except']))
-            {
+        } elseif (isset($options['except'])) {
+            if (is_string($options['except'])) {
                 $options['except'] = explode(',', $options['except']);
             }
 
-            if (in_array($this->request->action(), $options['except']))
-            {
+            if (in_array($this->request->action(), $options['except'])) {
                 return;
             }
         }
@@ -268,59 +258,45 @@ class Api
     /**
      * 验证数据
      * @access protected
-     * @param  array        $data     数据
-     * @param  string|array $validate 验证器名或者验证规则数组
-     * @param  array        $message  提示信息
-     * @param  bool         $batch    是否批量验证
-     * @param  mixed        $callback 回调方法（闭包）
+     * @param array        $data     数据
+     * @param string|array $validate 验证器名或者验证规则数组
+     * @param array        $message  提示信息
+     * @param bool         $batch    是否批量验证
+     * @param mixed        $callback 回调方法（闭包）
      * @return array|string|true
      * @throws ValidateException
      */
     protected function validate($data, $validate, $message = [], $batch = false, $callback = null)
     {
-        if (is_array($validate))
-        {
-            $v = Loader::validate(isset($validate['class']) ? $validate['class'] : '');
-			unset($validate['class']);
+        if (is_array($validate)) {
+            $v = Loader::validate();
             $v->rule($validate);
-        }
-        else
-        {
+        } else {
             // 支持场景
-            if (!preg_match("/^v\d+\.(.*?)$/", $validate) && strpos($validate, '.'))
-            {
+            if (strpos($validate, '.')) {
                 list($validate, $scene) = explode('.', $validate);
-            }elseif (preg_match("/^v\d+\.(.*?)$/", $validate) && strpos($validate, '.')) {
-				$temp = explode('.', $validate);
-				$scene = array_pop($temp);
-				list($module, $class) = Loader::getModuleAndClass($validate, 'validate', false);
-				if(!class_exists($class)){
-					$validate = implode('.', $temp);	
-				}else{
-					$scene = null;
-				}
-			}
+            }
 
             $v = Loader::validate($validate);
+
             !empty($scene) && $v->scene($scene);
         }
 
         // 批量验证
-        if ($batch || $this->batchValidate)
+        if ($batch || $this->batchValidate) {
             $v->batch(true);
+        }
         // 设置错误信息
-        if (is_array($message))
+        if (is_array($message)) {
             $v->message($message);
+        }
         // 使用回调验证
-        if ($callback && is_callable($callback))
-        {
+        if ($callback && is_callable($callback)) {
             call_user_func_array($callback, [$v, &$data]);
         }
 
-        if (!$v->check($data))
-        {
-            if ($this->failException)
-            {
+        if (!$v->check($data)) {
+            if ($this->failException) {
                 throw new ValidateException($v->getError());
             }
 
@@ -329,11 +305,20 @@ class Api
 
         return true;
     }
-    //生成的二维码
-	public function qrcode($url = '', $label = '', $view = true){
-		$url = input('url') ? urldecode(input('url')) : $url;
-		$label = input('label') ? : $label;
-		$view = input('view') ? : $view;
-		return create_qrcode($url, $label, $view);
-	}
+
+    /**
+     * 刷新Token
+     */
+    protected function token()
+    {
+        $token = $this->request->param('__token__');
+
+        //验证Token
+        if (!Validate::make()->check(['__token__' => $token], ['__token__' => 'require|token'])) {
+            $this->error(__('Token verification error'), ['__token__' => $this->request->token()]);
+        }
+
+        //刷新Token
+        $this->request->token();
+    }
 }

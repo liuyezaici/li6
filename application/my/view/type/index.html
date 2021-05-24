@@ -1,0 +1,136 @@
+<style>
+    #typeList .sons .sonItem {
+      position: relative;
+        border-radius: 4px;
+        padding: 0 5px;
+  }
+    #typeList .sons .sonItem:hover {
+        background-color: #f0eade;
+  }
+  #typeList .sons .sonItem .btns {
+      position: absolute;
+      right: 0;
+  }
+  #typeList .lock {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAArUlEQVQYlW2PsQ3CQAxFPQJ2hERJScEAFCkpMkJKyoyQjjJFihSns4sUGYUpELqzh6FAnByIpS/5y+/LNoAr5Nwh6+Oj3MFWYUx1JTp8fSU6EOtlA9R+H5+HAoZ0wqj9H0isM4nei1gnYp1/IBtRUruT19ELJbX+HCC2sfTRGorW+E2r+3yIWKfixZYCrp6I+bYKehDFguvPGFO9NQOK1qBYILHFC8VCxfkKAPAGO3NhLykUQ5sAAAAASUVORK5CYII=) transparent no-repeat 0 0;
+  }
+</style>
+<div class="panel panel-info" id="typeList">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <form class="form-group form-inline topForm" style="margin: 0;" role="form">
+                <label>管理分类</label>
+                <div class="input-group" style="margin-left: 15px;">
+                    <input placeholder="关键词" class="form-control" name="keyword" value="<?=$keyword;?>" />
+                    <span class="input-group-btn"><button type="submit" class="btn btn-info">搜索</button></span>
+                </div>
+                <button type="button" class="btn btn-default addTypeBtn" style="margin-left: 15px;">添加</button>
+            </form>
+        </h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-condensed table-striped">
+            <tr>
+                <th> 一级分类 </th>
+                <th>  子分类 </th>
+                <th>  操作 </th>
+            </tr>
+            <?php
+            foreach($list as $v) {
+            ?>
+            <tr>
+                <td> <?=$v['title'];?>
+                </td>
+                <td>
+                    <div class="sons">
+                        <?php
+                        foreach($v['sonList'] as $v2) {
+                        ?>
+                        <div class="sonItem">
+                            <?=$v2['title'];?>
+                            <span class="btns" data-id="<?=$v2['id'];?>">
+                                <a href="#" class="btn btn-xs text-info editBtn">编辑</a>
+                                <a href="#" class="btn btn-xs text-danger delBtn">删除</a>
+                            </span>
+                        </div>
+                        <?php
+                        }
+                        ?>
+                    </div>
+                </td>
+                <td data-id="<?=$v['id'];?>">
+                    <a href="#" class="btn btn-xs btn-info editBtn">编辑</a>
+                    <a href="#" class="btn btn-xs btn-danger delBtn">删除</a>
+                </td>
+            </tr>
+            <?php
+            }
+            ?>
+        </table>
+    </div>
+</div>
+<script>
+    (function () {
+        'use strict';
+        require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
+            var typeList = $("#typeList");
+            var topForm = typeList.find(".topForm");
+            var addTypeBtn = typeList.find(".addTypeBtn");
+            addTypeBtn.click(function () {
+                lrBox.closeAllBox();
+                lrBox.msgt('添加分类', '[url]/my/type/add', '480px', {fadein: 1, fd: 1,move: {fx:'d', sd: 100,jl: '20%'}});
+                //更新分类的方法 添加不需要刷新
+                window.renewEditArticleType = null;
+            });
+            topForm.submit(function (e) {
+                e.preventDefault();
+                var uri = $(this).serialize();
+                var url = window.location.toString();
+                url = url.replace(/\?.+/, '');
+                window.location.href = url + '?' + uri;
+            });
+            typeList.find(".editBtn").click(function (e) {
+                e.preventDefault();
+                var id = $(this).parent().attr('data-id');
+                if(!id) {
+                    lrBox.msgTsf('缺少id');
+                    return;
+                }
+                lrBox.hideAllBox();
+                lrBox.msgt('编辑分类', '[url]/my/type/edit/id/'+ id, '480px', {fadein: 1, fd: 1,move: {fx:'d', sd: 100,jl: '20%'}});
+                //更新分类的方法
+                window.renewEditArticleType = function () {
+                    window.location.reload();
+                };
+            });
+            typeList.find(".delBtn").click(function (e) {
+                e.preventDefault();
+                var id = $(this).parent().attr('data-id');
+                if(!id) {
+                    lrBox.msgTsf('缺少id');
+                    return;
+                }
+                lrBox.msgConfirm('确认删除?', '确认', '取消', function () {
+                    lrBox.hideAllBox();
+                    front.postAndDone({
+                        url: '/type/del/id/'+ id,
+                        successFunc: function (res) {
+                            lrBox.msgTsf(res.msg);
+                            window.location.reload();
+                        },
+                        errFunc: function (res) {
+                            lrBox.msgTsf(res.msg);
+                        }
+                    });
+                }, function () {
+                    lrBox.hideAllBox();
+                });
+            });
+            return {};
+        });
+    })();
+
+</script>

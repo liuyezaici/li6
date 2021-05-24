@@ -1,27 +1,29 @@
 <?php
 $cdnurl = function_exists('config') ? config('view_replace_str.__CDN__') : '';
-$publicurl = function_exists('config') ? config('view_replace_str.__PUBLIC__') : '/';
+$publicurl = function_exists('config') ? (config('view_replace_str.__PUBLIC__')?:'/') : '/';
+$debug = function_exists('config') ? config('app_debug') : false;
 
 $lang = [
     'An error occurred' => '发生错误',
-'Home' => '返回主页',
-'Feedback' => '反馈错误',
-'The page you are looking for is temporarily unavailable' => '你所浏览的页面暂时无法访问',
-'You can return to the previous page and try again' => '你可以返回上一页重试，或直接向我们反馈错误报告'
+    'Home' => '返回主页',
+    'Feedback' => '反馈错误',
+    'The page you are looking for is temporarily unavailable' => '你所浏览的页面暂时无法访问',
+    'You can return to the previous page and try again' => '你可以返回上一页重试，或直接向我们反馈错误报告'
 ];
 
 $langSet = '';
 
 if (isset($_GET['lang'])) {
-$langSet = strtolower($_GET['lang']);
+    $langSet = strtolower($_GET['lang']);
 } elseif (isset($_COOKIE['think_var'])) {
-$langSet = strtolower($_COOKIE['think_var']);
+    $langSet = strtolower($_COOKIE['think_var']);
 } elseif (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
 preg_match('/^([a-z\d\-]+)/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $matches);
-$langSet     = strtolower($matches[1]);
+    $langSet     = strtolower($matches[1]);
 }
 $langSet = $langSet && in_array($langSet, ['zh-cn', 'en']) ? $langSet : 'zh-cn';
 $langSet == 'en' && $lang = array_combine(array_keys($lang), array_keys($lang));
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -42,7 +44,7 @@ $langSet == 'en' && $lang = array_combine(array_keys($lang), array_keys($lang));
         .clearfix:before,.clearfix:after {content:"\0020";display:block;height:0;visibility:hidden;}
         .clearfix:after {clear:both;}
         body.error-page-wrapper,.error-page-wrapper.preview {background-position:center center;background-repeat:no-repeat;background-size:cover;position:relative;}
-        .error-page-wrapper .content-container {border-radius:2px;text-align:center;box-shadow:1px 1px 1px rgba(99,99,99,0.1);padding:50px;background-color:#fff;width:100%;max-width:560px;position:absolute;left:50%;top:50%;margin-top:-220px;margin-left:-280px;}
+        .error-page-wrapper .content-container {border-radius:2px;text-align:center;box-shadow:0 0 30px rgba(99,99,99,0.06);padding:50px;background-color:#fff;width:100%;max-width:560px;position:absolute;left:50%;top:50%;margin-top:-220px;margin-left:-280px;}
         .error-page-wrapper .content-container.in {left:0px;opacity:1;}
         .error-page-wrapper .head-line {transition:color .2s linear;font-size:40px;line-height:60px;letter-spacing:-1px;margin-bottom:20px;color:#777;}
         .error-page-wrapper .subheader {transition:color .2s linear;font-size:32px;line-height:46px;color:#494949;}
@@ -80,19 +82,11 @@ $langSet == 'en' && $lang = array_combine(array_keys($lang), array_keys($lang));
         <img src="<?=$cdnurl?>/assets/img/error.svg" alt="" width="120"/>
     </div>
     <div class="subheader">
-        <?=$lang['The page you are looking for is temporarily unavailable']?>
+        <?=$debug?$message:$lang['The page you are looking for is temporarily unavailable']?>
     </div>
     <div class="hr"></div>
     <div class="context">
 
-        <p>
-            <?php
-                    foreach($data as $key=> $msg_) {
-            print_r($msg_);
-            echo '<br/>';
-            }
-            ?>
-        </p>
         <p>
             <?=$lang['You can return to the previous page and try again']?>
         </p>

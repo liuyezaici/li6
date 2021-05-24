@@ -2,15 +2,13 @@
 
 namespace fast;
 
-use think\Config;
-use fast\File;
-
 /**
- * 通用的字符串处理类
- * @author LR <rui6ye@163.com>
+ * 字符串类
  */
 class Str
 {
+
+
 //unicode加密
     public static function unicodeEncode($c) {
         $scill = '';
@@ -869,32 +867,8 @@ class Str
         if($rightStr == $removeStr ) $mainstr = substr($mainstr, 0, strlen($mainstr) - strlen($removeStr) );//移除右边
         return $mainstr;
     }
-    //检测数字组是否正确 1,2,3
-    public static function checkIds($ids='') {
-        if(!strstr($ids, ',')) return true;
-        $idArray = explode(',', $ids);
-        foreach ($idArray as $tmpId) {
-            if(!is_numeric($tmpId)) return false;
-        }
-        return true;
-    }
 
-    //创建性别option的下拉内容
-    public static function makeSexOption($sex=0) {
-        $sexHtml = '<option value="1">男</option><option value="0">女</option><option value="2">不详</option>';
-        return str_replace('<option value="'. $sex .'">', '<option value="'. $sex .'" selected >', $sexHtml);
-    }
-    //创建性别下拉菜单内容
 
-    //创建性别数组
-    public static function makeSexArray() {
-        $sexArray = [
-            [ 'value'=> 1,  'title'=> '男'],
-            [ 'value'=> 0,  'title'=> '女'],
-            [ 'value'=> 2,  'title'=> '不详'],
-        ];
-        return $sexArray;
-    }
     //转换行符
     public static function toBr($str='', $spilt='<br/>') {
         if(!$str) return $str;
@@ -936,200 +910,35 @@ class Str
         if($maxWidth) $maxWidthHtml = " onload='if(this.width>{$maxWidth}) this.width={$maxWidth}'";
         return preg_replace("/<img([^\"]+)src=\"([^\"]+)\"([^\>]+)>/is", "<a href='\\2' class='lightBox'><img class='lazy' data-original=\"\\2\" {$maxWidthHtml} /></a>", $content);
     }
-    //过滤内容中的图片 上传到远程
-    public static function filterImages($s_content, $userId=0, $savePath='', $s_id=0, $flag='article') {
-        $mytime = timer::now();
-        $s_content = str::tohtml($s_content);
-        $s_content = strip_tags($s_content, '<br><a><p><img><pre>');
-        $pattern='/<img[^>]*[\s]src=[\'|"]?([^>\'"\s]*)[\'|"]?[^>]*>/i';
-        preg_match_all($pattern, $s_content, $contentFileImageMatch);
-        if(isset($contentFileImageMatch[1])) {
-            foreach ($contentFileImageMatch[1] as $tmpUrl) {
-                //引用链接要截取，如百度图片的url
-                if(strstr($tmpUrl, 'src=http')) {
-                    $realUrl = 'http'.explode('src=http', $tmpUrl)[1];
-                } else {
-                    $realUrl = $tmpUrl;
-                }
-                //外网转内网
-                if(!strstr($realUrl, 'li6.cc')) {
-                    $left5 = strtolower(substr($realUrl, 0, 5));
-                    if($left5 == 'https') {//下载https的图片
-                        $tmpImages = File::get_https($realUrl);
-                        $geshi = File::getGeshi($realUrl);
-                        $fileName = File::fileName($realUrl);
-                    } else if($left5 == 'data:') {//截图
-                        $tmpImages=base64_decode(substr($realUrl,strpos($realUrl,'base64,')+7));
-                        $geshi = 'png';
-                        $fileName = str::getRam(15) .'.'. $geshi;
-                    } else if(strtolower(substr($realUrl, 0, 1)) != 'h') {//本地图片
-                        continue;
-                    }  else if(strtolower(substr($realUrl, 0, 7)) == 'http://') { //普通 http图片
-                        $domain = strtolower(substr($realUrl, 7));
-                        $domain = explode('/', $domain)[0];
-                        if($domain == $_SERVER['SERVER_NAME']) continue; //本地域名 http://sasasui.com/的图片
-                        $tmpImages = File::get_nr($realUrl);
-                        $geshi = File::getGeshi($realUrl);
-                        $fileName = File::fileName($realUrl);
-                    }
-                    $localUrl = ROOT_PATH. 'upload/'. $userId .'tmp_.'.$geshi;
-                    File::creatdir(dirname($localUrl));
-                    file_put_contents($localUrl, $tmpImages);
-                    $newUrl = $savePath."/{$fileName}";
-                    $result = File::uploadToHttpOss($localUrl, $newUrl);
-                    if($result['id']=='0364') {
-                        unlink($localUrl);
-                        $newHttpUrl = $result['msg'];
-                        //取出文件名 无格式后缀
-                        $fileNameRightGeshiArray = explode('.', $fileName);
-                        array_pop($fileNameRightGeshiArray);
-                        $fileNameRight = join($fileNameRightGeshiArray, '.');
-                        if($flag == 'article') {
-//                            article::addArticleFujian($s_id, $userId, $fileNameRight, $newUrl, strlen($tmpImages), $geshi, $mytime); //更新文件索引
-                        }
-                        $s_content = str_replace($tmpUrl, $newHttpUrl, $s_content);
-                    } else {
-                        return $result;
-                    }
-                }
-            }
-        }
-        $s_content = str_replace("\"", "&#34;", $s_content);
-        $s_content = str_replace("'", "&#39;", $s_content);
-        $s_content = str_replace("<", "&#60;", $s_content);
-        $s_content = str_replace(">", "&#62;", $s_content);
-        return $s_content;
+
+    /**
+     * 返回经htmlspecialchars处理过的字符串或数组
+     * @param $obj 需要处理的字符串或数组
+     * @return mixed
+     */
+    public static function new_html_special_chars($string) {
+        $encoding = 'utf-8';
+//        if(strtolower(CHARSET)=='gbk') $encoding = 'ISO-8859-15';
+        if(!is_array($string)) return htmlspecialchars($string,ENT_QUOTES,$encoding);
+        foreach($string as $key => $val) $string[$key] = self::new_html_special_chars($val);
+        return $string;
     }
-    //判断是不是邮箱格式
-    public static function isEmail($u_email){
-        $pattern = "/^([0-9A-Za-z\\-_\\.]+)@([0-9a-z]+\\.[a-z]{2,3}(\\.[a-z]{2})?)$/i";
-        if (!preg_match($pattern, $u_email)) {
-            return  false;
-        } else {
-            return true;
-        }
-        // return  preg_match("/^[\\w\\-\\.]+@[\\w\\-\\.]+(\\.\\w+)+$/", $n);
-    }
-    //检测手机号
-    public static function checkPhone($phoneStr) {
-        $exp = "/^13[0-9]{1}[0-9]{8}$|14[0-9]{1}[0-9]{8}$|15[0123456789]{1}[0-9]{8}$|17[0123456789]{1}[0-9]{8}$|18[0123456789]{1}[0-9]{8}$/";
-        return preg_match($exp, $phoneStr);
-    }
-    // 座机验证
-    public static function checkZuoji($phone){
-        $isTel="/^([0-9]{3,4}-)?[0-9]{7,8}$/";
-        return preg_match($isTel, $phone);
+
+    public static function new_html_entity_decode($string) {
+        $encoding = 'utf-8';
+//        if(strtolower(CHARSET)=='gbk') $encoding = 'ISO-8859-15';
+        return html_entity_decode($string,ENT_QUOTES,$encoding);
     }
 
 
-
-    //保留内容中的代码
-    public static function keepCode($s_content) {
-        $pattern='/<pre[^\>\<]*>([^\>\<]*)<\/pre>/i';
-        preg_match_all($pattern, $s_content, $contentFileImageMatch);
-        if(isset($contentFileImageMatch[1])) {
-            foreach ($contentFileImageMatch[1] as &$tmpCode) {
-                $s_content = str_replace($tmpCode, self::unicodeEncode($tmpCode), $s_content);
-            }
-        }
-        return $s_content;
-    }
-    //取随机数
-    public static function makeRadomNum($fromNum=0, $maxNum=10) {
-        $radomArray = [];
-        for($i=0;$i<200; $i++) {
-            $radomArray[] = mt_rand($fromNum, $maxNum);
-        }
-        $radomArray=array_count_values($radomArray);
-        arsort($radomArray);//倒序
-        $radomArray = array_flip($radomArray);
-        return reset($radomArray);
-    }
-
-    //从数组中取中间的数
-    public static function getMiddleNumbers($ay=[], $getNum=3, $getTotalNum=10 ) {
-        $totalNum = count($ay);
-        $halfNum = bcdiv($totalNum, 2);
-        $getHalfNum = bcdiv($getTotalNum, 2);
-        if($halfNum < $getNum) $halfNum = $getNum;
-        if($getNum + 5 > $totalNum) {//剩余位数和要取的数相差不到5个时 直接现取
-            $middleArray = $ay;
-        } else {
-            $middleArray =  array_slice($ay, -($halfNum+$getHalfNum), $halfNum);
-        }
-        print_r($middleArray);
-        $radomIndexArray = [];//随机的下标
-        $backNumberArray = [];
-        function getRadomNum($maxNum, &$radomIndexArray) {
-            $newIndex = mt_rand(0, $maxNum-1);
-            if(in_array($newIndex, $radomIndexArray)
-                || (count($radomIndexArray)-3> $maxNum && in_array($newIndex-1, $radomIndexArray)) //剩余位置还有3个时，如有连号要重新生成
-                || (count($radomIndexArray)-3> $maxNum && in_array($newIndex+1, $radomIndexArray)) //剩余位置还有3个时，如有连号要重新生成
-            ) return getRadomNum($maxNum, $radomIndexArray);
-            array_push($radomIndexArray, $newIndex);
-            echo $newIndex.'|';
-            return $newIndex;
-        }
-        for($i=0;$i<$getNum; $i++) {
-            $radomIndex = getRadomNum(count($middleArray), $radomIndexArray);
-            $backNumberArray[] = $middleArray[$radomIndex];
-        }
-        sort($backNumberArray);
-        return $backNumberArray;
-    }
-    //分割字符串文字
-    public static function splitStr($str){
-        return preg_split('/(?<!^)(?!$)/u', $str );
-    }
-
-    //根据数量分页
-    public static function makeNumPage($url, $currentPage=1, $totalPage=1, $pageShowNum=5, $activerCss='current') {
-        $fromPage = $currentPage - intval($pageShowNum/2);
-        if($fromPage<1)  {
-            $fromPage = 1;
-            $toPage = $fromPage + $pageShowNum;
-        } else {
-            $toPage = $fromPage + $pageShowNum ;
-        }
-        if($fromPage < 1) $fromPage = 1;
-        if($toPage>$totalPage) $toPage = $totalPage;
-        if($toPage == $totalPage) $toPage = $totalPage+1; //到达尾部 直接显示全部页码
-        if($fromPage == $toPage) {
-            $fromPage = 1;
-        }
-        if($currentPage > $toPage) {
-            $fromPage = $currentPage-1;
-            $toPage = $toPage + $pageShowNum;
-            if($fromPage < 1) $fromPage = 1;
-            if($toPage > $totalPage) $toPage = $totalPage;
-        }
-        $repeatNum = 0;
-        $li = '<ul class="pagination">';
-        $prePage = $currentPage-1;
-        if($prePage >0) {
-            $url_ = str_replace('{page}', ($prePage), $url);
-            $li .= "<li><a href=\"{$url_}\" target=\"_self\"><span>&laquo;</span></a></li>";
-        }
-        for($i = $fromPage; $i < $toPage; $i++) {
-            $url_ = str_replace('{page}', $i, $url);
-            if($repeatNum >= $pageShowNum) break;//break;
-            $tmpActiverCss = '';
-            if($currentPage == $i) $tmpActiverCss = " class='{$activerCss}'";
-            $li .= "<li{$tmpActiverCss}><a href=\"{$url_}\" target=\"_self\"><span>{$i}</span></a></li>";
-            $repeatNum ++;
-        }
-        $nextPage = $currentPage+1;
-        if($nextPage < $totalPage) {
-            $url_ = str_replace('{page}', $nextPage, $url);
-            $li .= "<li><a href=\"{$url_}\" target=\"_self\"><span>&raquo;</span></a></li>";
-        }
-        $li .= '</ul>';
-        return $li;
-    }
-
-
-    //上传文件目录加安全校验
-    public static function makeSafeUploadCode($pathUrl, $uid_) {
-        return self::getMD5($pathUrl."[save_hash_lr]".$uid_);
+    /**
+     * 返回经stripslashes处理过的字符串或数组
+     * @param $string
+     * @return mixed
+     */
+    public static function new_stripslashes($string) {
+        if(!is_array($string)) return stripslashes($string);
+        foreach($string as $key => $val) $string[$key] = self::new_stripslashes($val);
+        return $string;
     }
 }

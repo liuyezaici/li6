@@ -649,10 +649,6 @@ class Validate
                 // 是否为邮箱地址
                 $result = $this->filter($value, FILTER_VALIDATE_EMAIL);
                 break;
-            case 'mobile':
-                // 是否为手机
-                $result = $this->regex($value, '/^1(3|4|5|7|8)[0-9]\d{8}$/u');
-                break;
             case 'boolean':
                 // 是否为布尔值
                 $result = in_array($value, [true, false, 0, 1, '0', '1'], true);
