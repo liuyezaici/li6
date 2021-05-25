@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>wangEditor富文本编辑器demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+ <script src="jquery-1.10.2.js"></script>
+ <script src="bootstrap.min.js"></script>
+ <script src="wangEditor.min.js"></script>
+</head>
+<body>
+<h1>wangEditor<span class="sub">V4</span></h1>
+<p>
+ Typescript 开发的 Web 富文本编辑器，
+ 轻量、简洁、易用、开源免费
+</p>
+<div id="div-demo">
+    <blockquote>争做国内使用体验Z好的开源 Web 富文本编辑器！</blockquote>
+    <h1>为何选择 wangEditor</h1>
+    <ul>
+        <li>简洁、轻量级、<a href="/doc/">文档</a>齐全</li>
+        <li>万星项目 <a href="https://github.com/wangeditor-team/wangEditor/releases">Github Star 1w+</a></li>
+        <li>npm 周下载量 1w+</li>
+        <li>CDN 月下载量百万+（来自 <a href="https://www.jsdelivr.com/package/npm/wangeditor">jsdelivr</a>）</li>
+        <li>QQ 群及时答疑</li>
+        <li><a href="/doc/#开发人员">开源团队</a>维护，非个人单兵作战</li>
+    </ul>
+    <h1>初见</h1>
+    <p>npm 安装 <code>npm i wangeditor --save</code> ，几行代码即可创建一个编辑器。</p>
+    <pre type="JavaScript">
+     <code>import E from 'wangeditor'
+const editor = new E('#div1')
+editor.create()</code></pre>
+    <p>更多使用配置，请阅读<a href="/doc/">使用文档</a>。</p>
+    <h1>demo</h1>
+    <p>在线体验 demo 可到 <a href="https://codepen.io/collection/DNmPQV">codepen.io/collection/DNmPQV</a> 。</p>
+    <p>注意，如果打不开，可以去查看 <a href="https://github.com/wangeditor-team/wangEditor/tree/master/examples">github examples</a>
+        的源码。</p>
+    <h1>浏览器兼容性</h1>
+    <ul>
+        <li>兼容主流 PC 浏览器，IE11+</li>
+        <li>不支持移动端和 ipad</li>
+    </ul>
+    <h1>遇到问题</h1>
+    <ul>
+        <li>加入 QQ 群：164999061(人已满)，710646022(人已满)，901247714</li>
+        <li>
+            <a href="https://github.com/wangeditor-team/wangEditor/issues" target="_blank">
+                提交问题和建议
+            </a>
+        </li>
+    </ul>
+    <h1>贡献代码</h1>
+    <p>欢迎非团队成员贡献代码，提交 Pull Request，请一定参考<a
+            href="https://github.com/wangeditor-team/wangEditor/blob/master/docs/contribution.md"
+            target="_blank">贡献代码流程</a>。</p>
+    <h1>谁在维护</h1>
+    <p>wangEditor 现有一个开源团队在维护，团队可以保证答疑、bug 修复和迭代效率。</p>
+    <p><a href="/doc/#开发人员">查看开发团队，或想加入开发团队</a></p>
+    <h1>为我们点赞</h1>
+    <p>如果你感觉有收获，欢迎给我打赏，以激励我们更多输出优质开源内容。</p>
+    <p>
+        <img width="240" src="./imgs/ali-pay.jpeg"/>
+        <img width="240" src="./imgs/wechat-pay.jpeg"/>
+    </p>
+</div>
+<script>
+    $(function () {
+        var E = window.wangEditor;
+        if (document.getElementById('div-demo')) {
+            var editor = new E('#div-demo');
+
+            editor.config.uploadImgShowBase64 = true;
+            editor.config.height = 800;
+
+            editor.create();
+        }
+
+        if (document.getElementById('div-demo1')) {
+            var editor_en = new E('#div-demo1');
+
+            editor_en.config.uploadImgShowBase64 = true;
+            editor_en.config.height = 800;
+
+            editor_en.config.lang = 'en';
+            editor_en.i18next = window.i18next;
+
+            editor_en.create();
+        }
+    });
+</script>
+<h4>
+    https://www.tiny.cloud/docs/release-notes/release-notes514/ <br/>
+    https://labs.bishopfox.com/advisories/tinymce-version-5.2.1
+</h4>
+</body>
+</html>
