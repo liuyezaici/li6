@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Getting statistics.</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+	<script type="text/javascript" src="../../codebase/richtext.js?v=1.1.2"></script>
+	<link rel="stylesheet" href="../../codebase/richtext.css?v=1.1.2">
+	<link rel="stylesheet" href="../common/index.css?v=1.1.2">
+	<style>
+		.dhx_sample-container__sidebar ul {
+			padding: 0;
+			margin: 0;
+			list-style: none;
+		}
+		.dhx_sample-container__sidebar ul li {
+			margin-bottom: 1em;
+		}
+		.dhx_sample-container__sidebar span {
+			font-weight: bold;
+			display: inline-block;
+		}
+	</style>
+</head>
+
+<body>
+<header class="dhx_sample-header">
+<div class="dhx_sample-header__main">
+	<nav class="dhx_sample-header__breadcrumbs">
+		<ul class="dhx_sample-header-breadcrumbs">
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="../" class="dhx_sample-header-breadcrumbs__link">RichText samples</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="./" class="dhx_sample-header-breadcrumbs__link">usage</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<span class="dhx_sample-header-breadcrumbs__link">get stats</span>
+			</li>
+		</ul>
+	</nav>
+	<h1 class="dhx_sample-header__title">
+		Getting statistics.
+		Check documentation:
+		<a href="https://docs.dhtmlx.com/richtext/working_with_richtext.html#statistics" target="_blank" class="dhx_sample-header-link">Getting statistics</a>
+	</h1>
+</div>
+</header>
+	<section class="dhx_sample-controls">
+		<button class="dhx_sample-btn dhx_sample-btn--flat" onclick="getStats()">Get Statistics</button>
+	</section>
+	<section class="dhx_sample-container">
+		<div class="dhx_sample-container__widget" id="richtext"></div>
+		<div class="dhx_sample-container__sidebar">
+			<ul>
+				<li>Characters: <span id="chars-amount"></span><br/></li>
+				<li>Characters without spaces: <span id="charsExlSpace-amount"></span><br/></li>
+				<li>Words: <span id="words-amount"></span></li>
+			</ul>
+		<div>
+	</section>
+
+	<script>
+		var richtext = new dhx.Richtext("richtext");
+		function getStats() {
+			document.getElementById("chars-amount").innerText = richtext.getStats().chars
+			document.getElementById("charsExlSpace-amount").innerText = richtext.getStats().charsExlSpace
+			document.getElementById("words-amount").innerText = richtext.getStats().words
+		}
+	</script>
+
+</body>
+
+</html>

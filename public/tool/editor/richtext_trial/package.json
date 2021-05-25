@@ -1,0 +1,13 @@
+{
+  "name": "dhx-richtext-package",
+  "version": "1.1.2",
+  "description": "dhtmlxRichtext widget",
+  "homepage": "https://docs.dhtmlx.com/richtext",
+  "private": true,
+  "bugs": {
+    "url": "https://forum.dhtmlx.com",
+    "email": "support@dhtmlx.com"
+  },
+  "main": "codebase/richtext.js",
+  "types": "codebase/richtext.d.ts"
+}

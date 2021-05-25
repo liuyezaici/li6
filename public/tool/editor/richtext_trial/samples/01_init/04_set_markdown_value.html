@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Setting Markdown content.</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+	<script type="text/javascript" src="../../codebase/richtext.js?v=1.1.2"></script>
+	<link rel="stylesheet" href="../../codebase/richtext.css?v=1.1.2">
+	<link rel="stylesheet" href="../common/index.css?v=1.1.2">
+
+</head>
+
+<body>
+	<header class="dhx_sample-header">
+<div class="dhx_sample-header__main">
+	<nav class="dhx_sample-header__breadcrumbs">
+		<ul class="dhx_sample-header-breadcrumbs">
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="../" class="dhx_sample-header-breadcrumbs__link">RichText samples</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="./" class="dhx_sample-header-breadcrumbs__link">init</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<span class="dhx_sample-header-breadcrumbs__link">set markdown value</span>
+			</li>
+		</ul>
+	</nav>
+	<h1 class="dhx_sample-header__title">
+		Setting Markdown content.
+		Check documentation:
+		<a href="https://docs.dhtmlx.com/richtext/loading_data.html#formatofcontent" target="_blank" class="dhx_sample-header-link">Format of content</a>
+		<a href="https://docs.dhtmlx.com/richtext/loading_data.html#addingcontentintoeditor" target="_blank" class="dhx_sample-header-link">Adding content into editor</a>
+	</h1>
+</div>
+</header>
+	<section class="dhx_sample-controls">
+		<button class="dhx_sample-btn dhx_sample-btn--flat" onclick="handleSetValue()">Set HTML Value</button>
+	</section>
+	<section class="dhx_sample-container">
+		<div class="dhx_sample-container__widget" id="richtext"></div>
+		<div class="dhx_sample-container__sidebar">
+<textarea id="content-to-parse" placeholder="Paste here Markdown" class="dhx_textarea">
+# Meet DHTMLX Rich Text Editor!
+
+This JavaScript rich text editor is highly customizable. It makes text editing quick and comfortable due to the inbuilt
+set of handy formatting tools.
+
+Besides, it will convert your text into HTML or Markdown in the blink of an eye. Another bonus of DHTMLX Rich Text is
+its flexible configuration settings which allow you to fine-tune the look and feel of the editor without effort.
+
+To learn more, read our [documentation](https://docs.dhtmlx.com/richtext/index.html) and check the [samples](https://docs.dhtmlx.com/richtext/samples/).
+</textarea>
+			<div>
+	</section>
+
+	<script>
+		var richtext = new dhx.Richtext("richtext");
+		function handleSetValue() {
+			var contentToParse = document.getElementById("content-to-parse").value;
+			contentToParse && richtext.setValue(contentToParse, 'markdown');
+		}
+	</script>
+
+</body>
+
+</html>

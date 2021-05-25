@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Getting selection.</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+	<script type="text/javascript" src="../../codebase/richtext.js?v=1.1.2"></script>
+	<link rel="stylesheet" href="../../codebase/richtext.css?v=1.1.2">
+	<link rel="stylesheet" href="../common/index.css?v=1.1.2">
+	
+</head>
+
+<body>
+<header class="dhx_sample-header">
+<div class="dhx_sample-header__main">
+	<nav class="dhx_sample-header__breadcrumbs">
+		<ul class="dhx_sample-header-breadcrumbs">
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="../" class="dhx_sample-header-breadcrumbs__link">RichText samples</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="./" class="dhx_sample-header-breadcrumbs__link">editor api</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<span class="dhx_sample-header-breadcrumbs__link">get selection</span>
+			</li>
+		</ul>
+	</nav>
+	<h1 class="dhx_sample-header__title">
+		Getting selection.
+		Check documentation:
+		<a href="https://docs.dhtmlx.com/richtext/api__editor_api__getselection.html" target="_blank" class="dhx_sample-header-link">getSelection() method</a>
+	</h1>
+</div>
+</header>
+	<section class="dhx_sample-controls">
+		<button class="dhx_sample-btn dhx_sample-btn--flat" onclick="update()">Get selection</button>
+	</section>
+	<section class="dhx_sample-container">
+		<div class="dhx_sample-container__widget" id="richtext"></div>
+		<div class="dhx_sample-container__sidebar">
+			<textarea readonly id="data" placeholder="Information about text selection will be here" class="dhx_textarea"></textarea>
+		 <div>
+	</section>
+
+	<script>
+		var richtext = new dhx.Richtext("richtext");
+		var api = richtext.getEditorAPI();
+		var dataArea = document.getElementById("data");
+
+		function update() {
+				var selection = api.getSelection();
+				dataArea.value = JSON.stringify(selection, null, 4);
+		}
+	</script>
+
+</body>
+
+</html>

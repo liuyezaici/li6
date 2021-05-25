@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Configuration of toolbar blocks.</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+	<script type="text/javascript" src="../../codebase/richtext.js?v=1.1.2"></script>
+	<link rel="stylesheet" href="../../codebase/richtext.css?v=1.1.2">
+	<link rel="stylesheet" href="../common/index.css?v=1.1.2">
+	<style>
+		.dhx_sample-toolbar-blocks {
+			display: flex;
+		}
+		.dhx_checkbox:not(:last-child) {
+			margin-right: 8px;
+		}
+	</style>
+</head>
+
+<body>
+<header class="dhx_sample-header">
+<div class="dhx_sample-header__main">
+	<nav class="dhx_sample-header__breadcrumbs">
+		<ul class="dhx_sample-header-breadcrumbs">
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="../" class="dhx_sample-header-breadcrumbs__link">RichText samples</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="./" class="dhx_sample-header-breadcrumbs__link">configuration</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<span class="dhx_sample-header-breadcrumbs__link">toolbar blocks</span>
+			</li>
+		</ul>
+	</nav>
+	<h1 class="dhx_sample-header__title">
+		Configuration of toolbar blocks.
+		Check documentation:
+		<a href="https://docs.dhtmlx.com/richtext/configuration.html#toolbar" target="_blank" class="dhx_sample-header-link">Toolbar</a>
+	</h1>
+</div>
+</header>
+	<section class="dhx_sample-controls">
+			<form class="dhx_sample-toolbar-blocks" id="toolbar-blocks">
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="undo" checked class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">undo</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="style" checked class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">style</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="decoration" checked class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">decoration</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="colors" checked class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">colors</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="align" checked class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">align</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="link" checked class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">link</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="clear" class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">clear</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="fullscreen" class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">fullscreen</span>  
+					</label>
+					<label class="dhx_form-group dhx_checkbox dhx_checkbox--inline">
+						<input type="checkbox" id="stats" class="dhx_checkbox__input">
+						<span class="dhx_checkbox__visual-input"></span>
+						<span class="dhx_label">stats</span>  
+					</label>
+			</form>
+	</section>
+	<section class="dhx_sample-container">
+		<div class="dhx_sample-container__widget" id="richtext"></div>
+		
+	</section>
+
+	<script>
+		var richtext = new dhx.Richtext("richtext");
+		var initialValue = '<p style="font-size: 18px; text-align: center;">Note that newly set blocks are added to the end of the toolbar.</p> <p style="font-size: 18px; text-align: center;">Use the checkboxes to hide/show related toolbar blocks.</p>'
+            
+		richtext.setValue(initialValue, 'html');
+		var toolbarBlocks = [
+				"undo",
+				"style",
+				"decoration",
+				"colors",
+				"align",
+				"link",
+		];
+		document.getElementById("toolbar-blocks").addEventListener("change", function(e) {
+				if (e.target.checked) {
+						toolbarBlocks.push(e.target.id);
+				} else {
+						var filtered = [];
+						for (var i=0; i<toolbarBlocks.length; i++) {
+								if (toolbarBlocks[i] != e.target.id) {
+										filtered.push(toolbarBlocks[i]);
+								}
+						}
+						toolbarBlocks = filtered;
+				}
+				var value = richtext.getValue();
+				richtext.destructor();
+				richtext = new dhx.Richtext("richtext", {
+						toolbarBlocks: toolbarBlocks
+				});
+				richtext.setValue(value, 'html');
+		});
+	</script>
+
+</body>
+
+</html>

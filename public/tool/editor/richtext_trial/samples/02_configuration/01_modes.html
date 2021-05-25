@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>RichText Editor modes.</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" charset="utf-8">
+	<script type="text/javascript" src="../../codebase/richtext.js?v=1.1.2"></script>
+	<link rel="stylesheet" href="../../codebase/richtext.css?v=1.1.2">
+	<link rel="stylesheet" href="../common/index.css?v=1.1.2">
+	
+</head>
+
+<body>
+<header class="dhx_sample-header">
+<div class="dhx_sample-header__main">
+	<nav class="dhx_sample-header__breadcrumbs">
+		<ul class="dhx_sample-header-breadcrumbs">
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="../" class="dhx_sample-header-breadcrumbs__link">RichText samples</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<a href="./" class="dhx_sample-header-breadcrumbs__link">configuration</a>
+			</li>
+			<li class="dhx_sample-header-breadcrumbs__item">
+				<span class="dhx_sample-header-breadcrumbs__link">modes</span>
+			</li>
+		</ul>
+	</nav>
+	<h1 class="dhx_sample-header__title">
+		RichText Editor modes.
+		Check documentation:
+		<a href="https://docs.dhtmlx.com/richtext/configuration.html#workingmodes" target="_blank" class="dhx_sample-header-link">Working modes</a>
+	</h1>
+</div>
+</header>
+<section class="dhx_sample-controls">
+	<div class="dhx_sample-input__wrapper dhx_sample-input__wrapper--pl-16">
+		<input checked name="mode" value="classic" id="classic" onchange="handleChange(this.value)" type="radio" class="dhx_sample-radio__input">
+		<label for="classic" class="dhx_sample-radio__label">Classic mode</label>
+	</div>
+	<div class="dhx_sample-input__wrapper dhx_sample-input__wrapper--pl-16">
+		<input name="mode" value="document" id="document" onchange="handleChange(this.value)" type="radio" class="dhx_sample-radio__input">
+		<label for="document" class="dhx_sample-radio__label">Document mode</label>
+	</div>
+</section>
+	<section class="dhx_sample-container">
+		<div class="dhx_sample-container__widget" id="richtext"></div>
+	</section>
+
+	<script>
+		var richtext = new dhx.Richtext("richtext");
+		function handleChange(mode) {
+			richtext.destructor();
+			richtext = new dhx.Richtext("richtext", { mode: mode });
+		}
+	</script>
+
+</body>
+
+</html>

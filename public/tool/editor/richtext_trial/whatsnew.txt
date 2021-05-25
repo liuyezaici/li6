@@ -1,0 +1,49 @@
+The full What's new list is given at https://docs.dhtmlx.com/richtext/whats_new.html.
+
+Version 1.1.2 (February 13, 2020)
+------------------------------
+
+### Fixes
+
+- Issues with interaction between the HTML form and controls of Toolbar
+
+Version 1.1.1 (March 6, 2019)
+------------------------------
+
+### Fixes
+
+- Fix the bug with Toolbar items
+- Fix z-index for the full screen mode
+
+Version 1.1 (February 27, 2019)
+--------------------------------
+
+### New functionality
+
+- API for working with text in the editor
+- Advanced statistics
+- Ability to show custom statistics
+- Block quote and Statistics toolbar controls
+
+Check the full list of changes at https://docs.dhtmlx.com/richtext/whats_new.html#version11
+
+Version 1.0.1 (December 19, 2018)
+----------------------------
+
+### Fixes
+
+- Incorrect undo behavior with the setValue method
+- Issue with the link background on switching between links
+- Issue with toolbar modifiers after removing a letter
+
+Version 1.0 (December 13, 2018)
+----------------------------
+
+### Initial functionality
+
+- Basic operations for real-time text editing
+- Two working modes: "classic" and "document"
+- Data parsing and serialization in HTML and Markdown formats
+- Full screen mode
+- Cross browser compatibility
+- IE11+ support
