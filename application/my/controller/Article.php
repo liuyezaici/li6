@@ -28,23 +28,26 @@ class Article extends Backend
         $myUid = $this->auth->id;
         if($myUid != $info['cuid']) $this->error('身份已经切换:'.$myUid . '!='. $info['cuid']);
         if($this->request->isPost()) {
-            $rows = input('post.rows/a');
-            if(!$rows) {
-                $this->error('no rows');
-            }
-            $title = isset($rows['title']) ? trim($rows['title']) : '';
-            $content = isset($rows['content']) ? trim($rows['content']) : '';
-            $typeId = isset($rows['typeid']) ? intval($rows['typeid']) : 0;
+            $title = input('post.title','', 'trim');
+            $editorType = input('post.editorType','', 'trim');
+            $content = input('post.content','', 'trim');
+            $typeId = input('post.typeid',0, 'intval');
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
+            if(!$editorType) $this->error('未选择编辑器类型');
             if(!$content) $this->error('请输入内容');
-            $info['content'] = html_entity_decode($info['content']);
+            $rows = [
+                'title' => $title,
+                'content' => $content,
+                'typeid' => $typeId,
+                'editorType' => $editorType,
+            ];
             ArticleModel::where('id', $id)->update($rows);
             $this->success('编辑成功');
         }
         $allTypeList = Types::field('id,title')->select();
         $mainHtml = $this->view->fetch('modify', [
-            'topTitle' => '编辑文章',
+            'topTitle' => '编辑文章:'.$id,
             'id' =>  $id,
             'row' =>  $info,
             'allTypeList' =>  $allTypeList,
@@ -57,17 +60,20 @@ class Article extends Backend
     public function add() {
         $myUid = $this->auth->id;
         if($this->request->isPost()) {
-            $rows = input('post.rows/a');
-            if(!$rows) {
-                $this->error('no rows');
-            }
-            $title = isset($rows['title']) ? trim($rows['title']) : '';
-            $content = isset($rows['content']) ? trim($rows['content']) : '';
-            $typeId = isset($rows['typeid']) ? intval($rows['typeid']) : 0;
+            $title = input('post.title','', 'trim');
+            $editorType = input('post.editorType','', 'trim');
+            $content = input('post.content','', 'trim');
+            $typeId = input('post.typeid',0, 'intval');
             if(!$typeId) $this->error('请选择分类');
             if(!$title) $this->error('请输入标题');
+            if(!$editorType) $this->error('未选择编辑器类型');
             if(!$content) $this->error('请输入内容');
-            //过滤内容的附件
+            $rows = [
+                'title' => $title,
+                'content' => $content,
+                'typeid' => $typeId,
+                'editorType' => $editorType,
+            ];
             $rows['cuid'] = $myUid;
             $rows['ctime'] = Date::toYMDS();
             $sid = articleModel::insertGetId($rows);

@@ -39,7 +39,6 @@
                 <td> <?=$v['ctime'];?> </td>
                 <td data-id="<?=$v['id'];?>">
                     <a href="javascript: void(0);" class="btn btn-xs btn-info editBtn">编辑</a>
-                    <a href="javascript: void(0)" class="btn btn-xs btn-danger delBtn">删除</a>
                 </td>
             </tr>
             <?php
@@ -89,29 +88,7 @@
                 window.location.href = url + '?' + uri;
             });
 
-            articleList.find(".delBtn").click(function (e) {
-                e.preventDefault();
-                var id = $(this).parent().attr('data-id');
-                if(!id) {
-                    lrBox.msgTsf('缺少id');
-                    return;
-                }
-                lrBox.msgConfirm('确认删除此文章吗?', '确认', '取消', function () {
-                    lrBox.hideAllBox();
-                    front.postAndDone({
-                        url: '/my/article/del/id/'+ id,
-                        successFunc: function (res) {
-                            lrBox.msgTsf(res.msg);
-                            window.location.reload();
-                        },
-                        errFunc: function (res) {
-                            lrBox.msgTsf(res.msg);
-                        }
-                    });
-                }, function () {
-                    lrBox.hideAllBox();
-                });
-            });
+
             return {};
         });
     })();

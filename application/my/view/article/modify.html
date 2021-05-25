@@ -78,25 +78,28 @@
         require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
             var editorTypeCache = 'editorType';
             var submitUrl = '<?=$submitUrl;?>';
+            var typeid = "<?=$row['typeid'];?>";
             var writeBox = $("#writeBox");
             var writeForm = writeBox.find("#writeForm");
             var selectBox = writeBox.find("#set_typeid");
             var editorTypes = writeBox.find(".editorType");
             var showEditor = writeBox.find("#showEditor");
             var defaultContent = writeBox.find("#defaultContent");
-            function getTypes() {
-                selectBox.html('').load('/my/type/getMyTypes', function () {
+            var autoVal =  defaultContent.val();
+            var autoHasContent = false;
+            function getTypes(typeid) {
+                selectBox.html('').load('/my/type/getMyTypes?id1='+ typeid, function () {
                     var addTypeBtn = selectBox.find(".addTypeBtn");
                     addTypeBtn.click(function () {
                         lrBox.msgt('添加分类', '[url]/my/type/add', '400px', {fadein: 1, fd: 1,move: {fx:'d', sd: 100,jl: '20%'}});
                         //更新分类的方法
                         window.renewEditArticleType= function () {
-                            getTypes();
+                            getTypes(typeid);
                         };
                     });
                 });
             }
-            getTypes();
+            getTypes(typeid);
             //切换编辑器类型
             //当前编辑器value的get/set方法
             var currentGetEditorValFunc = function () {
@@ -129,6 +132,10 @@
                 currentEditorValFunc = function (newVal) {
                     newContentObj.val(newVal);
                 };
+                if(!autoHasContent) {
+                    autoHasContent = true;
+                    currentEditorValFunc(autoVal);
+                }
             }
 
             function createHtmlEditor(lastVal) {
@@ -153,6 +160,10 @@
                 currentEditorValFunc = function (newVal) {
                     thisEditorObj.text(newVal);
                 };
+                if(!autoHasContent) {
+                    autoHasContent = true;
+                    currentEditorValFunc(autoVal);
+                }
             }
 
             //http://editor.md.ipandao.com/examples/use-requirejs.html
@@ -168,15 +179,17 @@
                     currentEditorValFunc = function (newVal) {
                         window.mdEditorSetContent(newVal);
                     };
+                    console.log('auto', autoVal);
+                    if(!autoHasContent) {
+                        autoHasContent = true;
+                        currentEditorValFunc(autoVal);
+                    }
                 });
             }
 
             editorTypes.click(function (e) {
                 var type_ = $(this).find('input').val();
-                var lastVal = '';
-                if(editorObj) {
-                    lastVal = editorObj.value;
-                }
+                var lastVal =  editorObj.value;
                 front.cacheObj.setCache(editorTypeCache, type_);
                 switch (type_) {
                     case 'txt':
@@ -196,7 +209,7 @@
 
             var lastType = front.cacheObj.getCache(editorTypeCache);
             if(!lastType) {
-                createTextEditor('');
+                createTextEditor();
             } else {
                 writeBox.find(".editorType input[value='"+ lastType +"']").trigger('click');
             }
@@ -217,13 +230,7 @@
                         pData[v.name] = v.value;
                     }
                 });
-                var content = editorObj.value;
-                //将content单独分割保存于服务器再提交发布
-                if(content) {
-                    content = front.aesEncode(content);
-                }
-                console.log('content', content);
-                delete pData['content'];
+                pData['content'] = editorObj.value;
                 lrBox.loading(true);
                 //提交发布
                 front.postAndDone({

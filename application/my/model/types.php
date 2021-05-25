@@ -21,11 +21,15 @@ class types extends Model
         return self::field('id,title')->select();
     }
     //搜索分类
-    public static function searchUserRootTypes($uid=0, $like='') {
-        return self::field('id,title')->where([
-            'cuid'=> $uid,
-            'title' => ['like', "%{$like}%"]
-        ])->select();
+    public static function searchUserRootTypes($like='') {
+        if($like) {
+            $where_ = [
+                'title' => ['like', "%{$like}%"]
+            ];
+        } else {
+            $where_ = [];
+        }
+        return self::field('id,title')->where($where_)->select();
     }
     //搜索分类
     public static function getTypeTitle($id1=0, $id2=0, $join=',') {

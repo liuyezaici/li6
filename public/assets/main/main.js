@@ -52,12 +52,14 @@
             borderRadius: '7px', //滚动条圆角
             railBorderRadius: '7px' //轨道圆角
         });
+        var bg = $('#user_center_box');
 
         leftBar.find('.cmdBtn').click(function (e) {
             e.preventDefault();
             var btn = $(this);
             var cmd = btn.attr('data-cmd');
             hashChangeFromUs = true;
+            bg.hide();
             front.loadPage(cmd, btn, function () {
                 hashChangeFromUs = false;
             });
@@ -67,6 +69,7 @@
         if(winHash) {
             winHash = gethash();
             if(winHash) {
+                bg.hide();
                 front.loadPage(winHash);
             }
         }
@@ -87,6 +90,105 @@
             front.loadPage(lastUrl);
         };
 
+
+//后台首页云层特效
+        var mouseWasOnBg = false;
+        function cloudEven() {
+            var eventX, objLeft, downPosX, changePosX,bgPosX;
+            var imgWidth = 3000;
+            var bg = $('#user_center_box');
+            objLeft = bg.offset().left;
+            var savePos = function (pos) {
+                front.postAndDone({
+                    url:  '/index/main/save_bg_pos',
+                   postData: {bg_x: bgPosX} ,
+                    successFunc: function  (res) {
+                        if(res.msg) {
+                            lrBox.msgTisf(res.msg);
+                        }
+                    }
+                });
+            };
+            if(!lrBox.isPc()) {//wap端
+                bg[0].addEventListener('touchstart', function (e) {
+                    mouseWasOnBg = true;
+                    e = e.touches[0];
+                    downPosX = e.clientX - objLeft;
+                    var imgWrapWidth = bg.width();
+                    var masPosX = imgWidth - imgWrapWidth;
+                    bgPosX = parseFloat(bg.css('background-position-x'));
+                    $(document)[0].addEventListener('touchmove', function (evt) {
+                        var touch = evt.touches[0];
+                        if(!mouseWasOnBg) return;
+                        eventX = touch.clientX - objLeft;
+                        changePosX = (eventX - downPosX);
+                        downPosX += changePosX;//开始的x位置也要随着背景移动而释放  否则会移动越来越快
+                        bgPosX += changePosX;
+                        if(bgPosX < -masPosX) bgPosX = -masPosX; //图片宽度3000 - 页面宽1000 +30 padding
+                        if(bgPosX > 0) bgPosX = 0;
+                        bg.css('background-position-x', bgPosX);
+
+                    });
+                    $(document)[0].addEventListener('touchend', function () {
+                        if(mouseWasOnBg) {
+                            mouseWasOnBg = false;
+                            downPosX = 0;
+                            bg.removeClass('move');
+                            savePos(bgPosX);
+                        }
+                    });
+                });
+
+            } else {
+                var imgWrapWidth = bg.width();
+                var masPosX = imgWidth - imgWrapWidth;
+                bg.off().on({
+                    'mousedown': function (event) {
+                        mouseWasOnBg = true;
+                        downPosX = event.clientX - objLeft;
+                        bg.addClass('move');
+                        imgWrapWidth = bg.width();
+                        masPosX = imgWidth - imgWrapWidth;
+                        bgPosX = parseFloat(bg.css('background-position-x'));
+                    },
+                    'mouseup': function (event) {
+                        if(mouseWasOnBg) {
+                            mouseWasOnBg = false;
+                            downPosX = 0;
+                            bg.removeClass('move');
+                            savePos(bgPosX);
+                        }
+                    },
+                    'mouseout': function (event) {
+                        mouseWasOnBg = false;
+                        downPosX = 0;
+                        bg.removeClass('move');
+                    },
+                    'mousemove': function (event) {
+                        if(!mouseWasOnBg) return;
+                        eventX = event.clientX - objLeft;
+                        changePosX = (eventX - downPosX);
+                        downPosX += changePosX;//开始的x位置也要随着背景移动而释放  否则会移动越来越快
+                        bgPosX += changePosX;
+                        if(bgPosX < -masPosX) bgPosX = -masPosX; //图片宽度3000 - 页面宽1000 +30 padding
+                        if(bgPosX > 0) bgPosX = 0;
+                        bg.css('background-position-x', bgPosX);
+                    }
+                });
+            }
+            $(window).resize(function () {
+                var imgWrapWidth = bg.width();
+                var masPosX = imgWidth - imgWrapWidth;
+                var posX = bg.css('background-position-x');
+                posX = Math.abs(parseFloat(posX));
+                if(posX > masPosX) {
+                    posX = -masPosX;
+                    bg.css('background-position-x', posX);
+                }
+            });
+        }
+
+        cloudEven();////后台首页云层特效
         return {};
     });
 })(this);

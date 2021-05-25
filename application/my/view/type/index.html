@@ -35,7 +35,6 @@
         <table class="table table-condensed table-striped">
             <tr>
                 <th> 一级分类 </th>
-                <th>  子分类 </th>
                 <th>  操作 </th>
             </tr>
             <?php
@@ -44,26 +43,9 @@
             <tr>
                 <td> <?=$v['title'];?>
                 </td>
-                <td>
-                    <div class="sons">
-                        <?php
-                        foreach($v['sonList'] as $v2) {
-                        ?>
-                        <div class="sonItem">
-                            <?=$v2['title'];?>
-                            <span class="btns" data-id="<?=$v2['id'];?>">
-                                <a href="#" class="btn btn-xs text-info editBtn">编辑</a>
-                                <a href="#" class="btn btn-xs text-danger delBtn">删除</a>
-                            </span>
-                        </div>
-                        <?php
-                        }
-                        ?>
-                    </div>
-                </td>
                 <td data-id="<?=$v['id'];?>">
                     <a href="#" class="btn btn-xs btn-info editBtn">编辑</a>
-                    <a href="#" class="btn btn-xs btn-danger delBtn">删除</a>
+<!--                    <a href="#" class="btn btn-xs btn-danger delBtn">删除</a>-->
                 </td>
             </tr>
             <?php

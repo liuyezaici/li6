@@ -128,12 +128,11 @@
     margin: 4px;
     background-color: #fff;
     border-radius: 4px;
-    padding: 5px 0 5px 5px;
+    padding: 5px 0 5px 15px;
 }
 .mainBody .leftBar .item .cmdBtn {
     cursor: pointer;
     position: relative;
-    padding-left: 4px;
     margin-right: 5px;
 }
 .mainBody .leftBar .item svg {
@@ -181,4 +180,15 @@
     right: 0;
     top: 0;
     bottom: 0;
+}
+
+.mainFrameContainer #user_center_box {
+    height: 807px;
+    background: url("/assets/main/ucenter_bg.jpg") no-repeat -1000px bottom;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+.mainFrameContainer #user_center_box.move {
+    cursor: move;
 }

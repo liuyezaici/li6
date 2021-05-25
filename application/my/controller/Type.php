@@ -137,9 +137,9 @@ class Type extends Backend
 //            exit;
         }
         if($keyword) {
-            $allTypes = types::searchUserRootTypes($this->auth->id, $keyword);
+            $allTypes = types::searchUserRootTypes($keyword);
         } else {
-            $allTypes = types::getUserRootTypes($this->auth->id);
+            $allTypes = types::getUserRootTypes();
         }
         unset($v);
         print_r($this->fetch('', ['list' => $allTypes, 'keyword' => $keyword]));
