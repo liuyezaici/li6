@@ -49,6 +49,7 @@
         resize: none;
         background-color: transparent;
         border: 0;
+        outline: none;
     }
 </style>
 <link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
@@ -62,6 +63,9 @@
                 <div class="well well-sm list">
                     <ul>
                         <?php
+                        if(!$list) {
+                            echo '<li>没有附件</li>';
+                        }
                         foreach ($list as $v) {
                             ?>
                             <li class="item" title="<?=$v['filename']?>&#13;Size:<?=$v['filesize']?> &#13;<?=$v['addtime']?>">
@@ -73,7 +77,7 @@
                             <?php
                             } else {
                             ?>
-                                <textarea class="filename"><?=$v['filename']?> </textarea>
+                                <textarea class="filename" readonly><?=$v['filename']?> </textarea>
                             <?php
                             }?>
                                 <div class="input-group-btn">
@@ -113,27 +117,27 @@
             fileList.find('.delBtn').click(function () {
                 let id = $(this).attr('data-id');
                 let item = $(this).closest('.item');
-                lrBox.msgConfirm('Delete？', 'Yes', 'No', function () {
-                    $.post('/tool/addonfile/del/id/'+id,
-                        {
-                            table: table_,
-                        },
-                        function (res) {
-                            lrBox.removeNewBox();
-                            lrBox.msgTisf(res.msg);
-                            if(res.code == 1) {
-                                item.remove();
-                            }
-                        },
-                        'json');
-                }, function () {
-                    lrBox.removeNewBox();
-                });
-
+                // lrBox.msgConfirm('Delete？', 'Yes', 'No', function () {
+                //
+                // }, function () {
+                //     lrBox.removeNewBox();
+                // });
+                $.post('/tool/addonfile/del/id/'+id,
+                    {
+                        table: table_,
+                    },
+                    function (res) {
+                        lrBox.removeNewBox();
+                        lrBox.msgTisf(res.msg);
+                        if(res.code == 1) {
+                            item.remove();
+                        }
+                    },
+                    'json');
             });
-
 
         });
     </script>
 
+<!-- 引入方式 <iframe style="width: 100%; height: 600px;border: 0;overflow:hidden;" src="/tool/AddonFile?addonKey=addon&addonVal=article&sidKey=sid&sidVal=123&page=5&page_size=24&table=lr_article_fujian"></iframe>  -->
 </body>

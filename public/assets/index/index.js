@@ -33,10 +33,11 @@
         indexPage.find('.joinBtn').click(function (e) {
             e.preventDefault();
             lrBox.closeAllBox();
-            var title = $(this).html();
-            var url = $(this).attr('data-link');
+            var btn = $(this);
+            var title = btn.html();
+            var url = btn.attr('data-link');
             lrBox.msgT(title, '[url]'+ url,
-                {fd:true, move: {dir: 'd', jl: '2%'}, width: '500px'}
+                {fd:true, move: {dir: 'd', jl: '15%', from: btn, time: 500}, width: '400px'}
             );
         });
         var indexUrls = [

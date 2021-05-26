@@ -196,8 +196,9 @@ class Pagetyle1 extends Paginator
                 cursor:pointer
             }
             .pagination{
-                height:40px;
-                padding:20px 0px;
+                height: 40px;
+                padding: 10px 0px;
+                margin: 0;
             }
             .pagination a{
                 display:block;

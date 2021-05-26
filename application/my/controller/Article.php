@@ -134,18 +134,28 @@ class Article extends Backend
         ];
         $page = input('page', 1, 'int');
         $typeid = input('typeid', 0, 'intval');
+        $pageSize = input('page_size', 20, 'int');
+        $pathArray = [
+            'page' => $page,
+            'page_size' => $pageSize,
+            'typeid' => $typeid,
+        ];
         if($typeid) {
             $where['typeid'] = $typeid;
         }
-
        // id,typeid,title,cuid,ctime,rq,fileids,content,status
-        $pageSize = input('page_size', 10, 'int');
         if($title = input('title/s', '', 'trim'))  $where['title'] = ['like', "%{$title}%"];
         $total = articleModel::where($where)->count();
-        $list = articleModel::field('id,title,typeid,ctime')->where($where)
+        $result = articleModel::field('id,title,typeid,ctime')->where($where)
             ->order('id', 'desc')
-            ->page($page, $pageSize)
-            ->select();
+            ->paginate($pageSize,false, [
+                'page' => $page,
+                'type'      => 'page\Pagetyle1',
+                'query' => $pathArray,
+            ]);
+        $total = $result->total();
+        $menu = $result->render();
+        $list = $result->items();
         foreach ($list as &$v) {
             $v['typeName'] = types::getTypeTitle($v['typeid'], '-');
         }
@@ -154,6 +164,7 @@ class Article extends Backend
         print_r($this->fetch('', [
             'total' => $total,
             'list' => $list,
+            'menu' => $menu,
             'typeid' => $typeid,
             'pageSize' => $pageSize,
             'title' => $title,
