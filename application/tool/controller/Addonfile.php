@@ -8,9 +8,6 @@ use think\Config;
 use think\Db;
 use fast\Addon;
 use app\admin\library\Auth;
-use app\common\model\Users;
-use app\admin\addon\usercenter\model\Third;
-use OSS\OssClient;
 class Addonfile extends Frontend
 {
 
@@ -26,6 +23,27 @@ class Addonfile extends Frontend
         header("Access-Control-Allow-Headers:DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type, Accept-Language, Origin, Accept-Encoding");
     }
 
+    //删除附件
+    public function del($id=null) {
+        $id=intval($id);
+        if(!$id) {
+            $this->error('no id');
+        }
+        $table = input('table', '', 'trim');
+        if(!$table) {
+            $this->error('enter table');
+        }
+        $info =  Db::table($table)->where('id', $id)->find();
+        if(!$info) {
+            $this->error('file No find');
+        }
+        $url = $info['fileurl'];
+        if($url && file_exists(ROOT_PATH.$url)) {
+            unlink(ROOT_PATH.$url);
+        }
+        Db::table($table)->where('id', $id)->delete();
+        $this->success('success');
+    }
     //附件列表
     public function index(){
         $table = input('table', '', 'trim');
@@ -58,6 +76,7 @@ class Addonfile extends Frontend
         $result = Db::table($table)->where($where_)
             ->paginate($pageSize,false, [
                 'page' => $page,
+                'type'      => 'page\Pagetyle1',
                 'query' => $pathArray,
             ]);
         $total = $result->total();
@@ -70,6 +89,7 @@ class Addonfile extends Frontend
         $this->view->engine->layout(false);
         print_r($this->fetch(APP_PATH .'tool/view/addonfile/index.php', [
             'total' => $total,
+            'table' => $table,
             'list' => $list,
             'menu' => $menu,
         ]));

@@ -22,6 +22,18 @@
         padding: 8px 5px;
         min-height: 100px;
         overflow: hidden;
+        position: relative;
+    }
+    .addonFileList  .list ul li .num {
+        position: absolute;
+        right: 0;
+        top: 0;
+        display: inline-block;
+        background-color: #dedede;
+        border-radius: 4px;
+        padding: 2px 4px;
+        color: #aaa;
+        font-size: 12px;
     }
     .addonFileList  .list ul li:hover {
         border: 1px solid #dedede;
@@ -39,14 +51,13 @@
         border: 0;
     }
 </style>
-<link href="/assets/libs/bootstrap/dist/css/bootstrap.css" rel="stylesheet" media="all"/>
+<link href="/assets/libs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" media="all" />
+<link rel="stylesheet" href="https://js.li6.cc/assets/libs/lr/lrBox.css" />
+<script type="text/javascript" src="/assets/js/require.min.js"></script>
 <script src="/assets/libs/jquery/dist/jquery-2.2.1.min.js"></script>
 <body>
     <div class="addonFileList">
         <div class="panel panel-default">
-            <div class="panel-heading">
-                文件数量:<?=$total?>
-            </div>
             <div class="panel-body">
                 <div class="well well-sm list">
                     <ul>
@@ -54,6 +65,7 @@
                         foreach ($list as $v) {
                             ?>
                             <li class="item" title="<?=$v['filename']?>&#13;Size:<?=$v['filesize']?> &#13;<?=$v['addtime']?>">
+                                <span class="num"><?=$v['id']?></span>
                             <?php
                             if(in_array($v['geshi'], ['png', 'gif', 'jpeg', 'webp', 'jpg', 'bmp'])) {
                             ?>
@@ -66,7 +78,7 @@
                             }?>
                                 <div class="input-group-btn">
                                     <a href="javascript: void(0);" target="_self" class="btn btn-xs btn-info insetBtn" data-url="<?=$v['fileurl']?>">插入</a>
-                                    <a href="javascript: void(0);" target="_self" class="btn btn-xs btn-warning delBtn" data-id=""<?=$v['id']?>">删除</a>
+                                    <a href="javascript: void(0);" target="_self" class="btn btn-xs btn-warning delBtn" data-id="<?=$v['id']?>">删除</a>
                                 </div>
                             </li>
                             <?php
@@ -81,7 +93,16 @@
         </div>
     </div>
     <script>
-        $(document).ready(function () {
+
+
+        require.config({
+            paths: {
+                jquery: '/assets/libs/jquery/dist/jquery-2.2.1.min',
+                lrBox: 'https://js.li6.cc/assets/libs/lr/box.ver/lrBox.1.1',
+            }
+        });
+        require(['jquery', 'lrBox'], function ($, lrBox) {
+            let table_ = '<?=$table?>';
             let fileList = $('.addonFileList');
             fileList.find('.insetBtn').click(function () {
                 let url = $(this).attr('data-url');
@@ -91,8 +112,28 @@
             });
             fileList.find('.delBtn').click(function () {
                 let id = $(this).attr('data-id');
+                let item = $(this).closest('.item');
+                lrBox.msgConfirm('Delete？', 'Yes', 'No', function () {
+                    $.post('/tool/addonfile/del/id/'+id,
+                        {
+                            table: table_,
+                        },
+                        function (res) {
+                            lrBox.removeNewBox();
+                            lrBox.msgTisf(res.msg);
+                            if(res.code == 1) {
+                                item.remove();
+                            }
+                        },
+                        'json');
+                }, function () {
+                    lrBox.removeNewBox();
+                });
 
             });
+
+
         });
     </script>
+
 </body>
