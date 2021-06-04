@@ -85,6 +85,10 @@
                 var id = $(this).parent().attr('data-id');
                 lrBox.msgHalf({content: '[url]/my/article/edit/id/'+ id, move: {dir: 'l', 'jl': '90%'}});
             });
+            articleList.find("tr").dblclick(function (e) {
+                e.preventDefault();
+                $(this).find(".editBtn").trigger('click');
+            });
 
             topForm.submit(function (e) {
                 e.preventDefault();

@@ -45,22 +45,28 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label">编辑器</label>
                 <div class="col-sm-10">
-                    <label class="editorType">
+                    <div class="editorType">
                         <input type="radio" name="editorType" value="txt" <?=($row['editorType']=='txt' ? 'checked':'');?> /> txt
-                    </label>
-                    <label class="editorType">
+                    </div>
+                    <div class="editorType">
                         <input type="radio" name="editorType" value="html" <?=($row['editorType']=='html' ? 'checked':'');?> /> html
-                    </label>
-                    <label class="editorType">
+                    </div>
+                    <div class="editorType">
                         <input type="radio" name="editorType" value="markdown" <?=($row['editorType']=='markdown' ? 'checked':'');?> /> markdown
-                    </label>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-2 control-label">正文</label>
                 <div class="col-sm-10">
-                    <textarea class="form-control hidden" id="defaultContent" name="content" style="max-width: 1000px;height: 400px;"><?=$row['content'];?></textarea>
+                    <div contenteditable="true" class="form-control hidden" id="defaultContent" name="content" style="max-width: 1000px;height: 400px;"><?=$row['content'];?></div>
                     <div id="showEditor"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label  class="col-sm-2 control-label"> </label>
+                <div class="col-sm-10">
+                    <button type="submit" class="btn btn-primary" style="padding: 6px 35px;">保存</button>
                 </div>
             </div>
             <?php
@@ -70,13 +76,6 @@
             <?php
             }
             ?>
-
-            <div class="form-group">
-                <label  class="col-sm-2 control-label"> </label>
-                <div class="col-sm-10">
-                    <button type="submit" class="btn btn-primary" style="padding: 6px 35px;">保存</button>
-                </div>
-            </div>
         </form>
     </div>
 </div>
@@ -93,8 +92,7 @@
             var editorTypes = writeBox.find(".editorType");
             var showEditor = writeBox.find("#showEditor");
             var defaultContent = writeBox.find("#defaultContent");
-            var autoVal =  defaultContent.val();
-            var autoHasContent = false;
+            var autoVal =  defaultContent.html();
             function getTypes(typeid) {
                 selectBox.html('').load('/my/type/getMyTypes?id1='+ typeid, function () {
                     var addTypeBtn = selectBox.find(".addTypeBtn");
@@ -108,6 +106,54 @@
                 });
             }
             getTypes(typeid);
+            function insertTextToTextEditor(obj, insertText){
+                let editDom = obj[0];
+                let selection = getSelection();
+                // 判断选定对象范围是编辑框还是文本节点
+                if (selection.anchorNode.nodeName != '#text') {
+                    let insertNode;
+                        insertNode = document.createTextNode(insertText);
+                        if (editDom.childNodes.length > 0) {
+                            // 如果文本框的子元素大于0，则表示有其他元素，则按照位置插入表情节点
+                            for (let i = 0; i < editDom.childNodes.length; i++) {
+                                if (i == selection.anchorOffset) {
+                                    editDom.insertBefore(insertNode, editDom.childNodes[i])
+                                }
+                            }
+                        } else {
+                            // 否则直接插入一个表情元素
+                            editDom.appendChild(insertNode);
+                        }
+                        // 创建新的光标对象
+                        let range = document.createRange();
+                        // 光标对象的范围界定为新建的表情节点
+                        range.selectNodeContents(insertNode);
+                        // 光标位置定位在表情节点的最大长度
+                        range.setStart(insertNode, insertNode.length);
+                        // 使光标开始和光标结束重叠
+                        range.collapse(true);
+                        // 清除选定对象的所有光标对象
+                        selection.removeAllRanges();
+                        // 插入新的光标对象
+                        selection.addRange(range);
+                } else {
+                    let range = selection.getRangeAt(0);
+                    // 获取光标位置
+                    let rangeStartOffset = range.startOffset;
+                    // 获取光标对象的范围界定对象，一般就是textNode对象
+                    let textNode = range.startContainer;
+                    // 文本节点在光标位置处插入新的表情内容
+                    textNode.insertData(rangeStartOffset, insertText);
+                    // 光标移动到到原来的位置加上新内容的长度
+                    range.setStart(textNode, rangeStartOffset + insertText.length);
+                    // 光标开始和光标结束重叠
+                    range.collapse(true);
+                    // 清除选定对象的所有光标对象
+                    selection.removeAllRanges();
+                    // 插入新的光标对象
+                    selection.addRange(range);
+                }
+            }
             //切换编辑器类型
             //当前编辑器value的get/set方法
             var currentGetEditorValFunc = function () {
@@ -118,6 +164,7 @@
             };
             //定义value的公共对象
             var editorObj = {};
+            var newContentObj = {};
             Object.defineProperty(editorObj, 'value', {
                 get: function () {
                     return currentGetEditorValFunc();
@@ -129,21 +176,20 @@
                 var newContentObj = defaultContent.clone();
                 newContentObj.removeClass('hidden');
                 showEditor.html('').append(newContentObj);
-                newContentObj.val(lastVal);
+                newContentObj.html(lastVal);
                 return newContentObj;
             };
             function createTextEditor(lastVal) {
-                var newContentObj = pushNewEditor(lastVal);
+                newContentObj = pushNewEditor(lastVal);
                 currentGetEditorValFunc = function () {
-                    return  newContentObj.val();
+                    return  newContentObj.html();
                 };
                 currentEditorValFunc = function (newVal) {
-                    newContentObj.val(newVal);
+                    newContentObj.html(newVal);
                 };
-                if(!autoHasContent) {
-                    autoHasContent = true;
-                    currentEditorValFunc(autoVal);
-                }
+                window.editorInsertUrl = function (url) {
+                    insertTextToTextEditor(newContentObj, url);
+                };
             }
 
             function createHtmlEditor(lastVal) {
@@ -168,15 +214,13 @@
                 currentEditorValFunc = function (newVal) {
                     thisEditorObj.text(newVal);
                 };
-                if(!autoHasContent) {
-                    autoHasContent = true;
-                    currentEditorValFunc(autoVal);
-                }
+                window.editorInsertUrl = function (url) {
+                    thisEditorObj.insertHtml(url);
+                };
             }
 
             //http://editor.md.ipandao.com/examples/use-requirejs.html
             function createMdEditor(lastVal) {
-                //var newContentObj = pushNewEditor(lastVal);
                 window.currentPushingContent = lastVal;
                 var innerEditor = $('<iframe style="width: 100%; height: 600px;border: 0;overflow:hidden;" src="/article/markdown.html"></iframe>');
                 showEditor.html('').append(innerEditor);
@@ -187,17 +231,25 @@
                     currentEditorValFunc = function (newVal) {
                         window.mdEditorSetContent(newVal);
                     };
-                    console.log('auto', autoVal);
-                    if(!autoHasContent) {
-                        autoHasContent = true;
-                        currentEditorValFunc(autoVal);
-                    }
+
+                    window.editorInsertUrl = function (url) {
+                        window.mdEditorPushContent(url);
+                    };
                 });
             }
-
-            editorTypes.click(function (e) {
-                var type_ = $(this).find('input').val();
-                var lastVal =  editorObj.value;
+            editorTypes.on('click', function (e) {
+                console.log('click');
+                let input_ = $(this).find('input');
+                //强制移除上一个input的样式
+                input_.prop('checked', true);
+                var type_ = input_.val();
+                var lastVal;
+                if(autoVal !== null) {
+                    lastVal = autoVal;
+                    autoVal = null;
+                } else {
+                    lastVal =  editorObj.value;
+                }
                 front.cacheObj.setCache(editorTypeCache, type_);
                 switch (type_) {
                     case 'txt':
@@ -214,12 +266,12 @@
                 }
             });
             //初始化 txt 编辑器
-
             var lastType = front.cacheObj.getCache(editorTypeCache);
             if(!lastType) {
-                createTextEditor();
+                createTextEditor(autoVal);
             } else {
-                writeBox.find(".editorType input[value='"+ lastType +"']").trigger('click');
+                console.log(lastType, writeBox.find(".editorType input[value='"+ lastType +"']"));
+                writeBox.find(".editorType input[value='"+ lastType +"']").click();
             }
 
 

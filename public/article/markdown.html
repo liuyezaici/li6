@@ -59,8 +59,12 @@ overflow: hidden;">
                         //this.height(480);
                         //this.resize("100%", 640);
                         var this_ = this;
+                    console.log(this_);
                         parent.window.mdEditorGetContent = function () {
                                 return this_.getMarkdown();
+                        };
+                        parent.window.mdEditorPushContent = function (appendHtml) {
+                                return this_.insertValue(appendHtml);
                         };
                         parent.window.mdEditorSetContent = function (newVal) {
                                 return this_.setMarkdown(newVal);

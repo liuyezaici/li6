@@ -6560,6 +6560,75 @@ define(['jquery', 'lrBox'], function ($, lrBox) {
             btn.addClass('active');
             btn.find('svg path').css({ fill: "#6392c8" });
             backObj.lastShowBtn = btn;
+        },
+
+        // 获取文件二进制数据
+        getFileBlob: function (file, cb) {
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function (e) {
+                var base64Data = this.result;
+                let file_size = e.total;
+                let file_mine = base64Data.match(/^data\:([^;]+);/)[1];
+                if (typeof cb === "function") {
+                    cb.call(this, this.result, file_size, file_mine);
+                }
+            };
+        },
+        base64toBlob: function(base64) {
+            var arr = base64.split(',');
+            var mimeArray = arr[0].match(/:(.*?);/);
+            if(!mimeArray || !mimeArray[1]) {
+                console.log(mimeArray);
+                console.log('no find 1');
+                return;
+            }
+            var mime = arr[0].match(/:(.*?);/)[1],
+                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], {type: mime});
+        },
+        copyText: function (text, cb) {
+            cb = cb || null;
+            let removeCpDom = function () {
+                var doms = document.querySelectorAll('.copy_0831');
+                [].forEach.call(doms, x => {
+                    document.body.removeChild(x)
+                });
+            };
+            var dom = document.createElement('div');
+            dom.style = '-webkit-user-select: text;user-select: text;'
+            dom.innerHTML = text;
+            document.body.appendChild(dom);
+            var copyDOM = dom; // 要复制文字的节点
+            var range = document.createRange();
+            // 选中需要复制的节点
+            range.selectNode(copyDOM);
+            // 执行选中元素
+            window.getSelection().addRange(range);
+            // 执行 copy 操作
+            var successful = document.execCommand('Copy');
+            try {
+                if (successful) {
+                    // eslint-disable-next-line standard/no-callback-literal
+                    cb && cb(true);
+                } else {
+                    // eslint-disable-next-line standard/no-callback-literal
+                    cb && cb(false);
+                    console.log('复制失败');
+                }
+            } catch (err) {
+                // eslint-disable-next-line standard/no-callback-literal
+                cb && cb(false);
+                console.log('复制失败');
+            }
+            dom.className = 'copy_0831';
+            dom.style.display = 'none';
+            // 移除选中的元素
+            window.getSelection().removeAllRanges();
+            removeCpDom();
         }
     };
 
