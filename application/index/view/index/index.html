@@ -12,78 +12,99 @@
     <base target="_blank">
     <div class="container" id="indexPage">
         <div class="header">
-            <a class="header_logo" href="/" target="LR主页">LR主页</a>
+            <a class="header_logo" href="/" title="LR主页" target="_parent">LR主页</a>
             <div class="header_link"><a href="/" target="_parent">回首页</a>&nbsp; </div>
         </div>
         <div class="content">
-            <div id="returnMsg" class="login_msg">
-                <p>
-                    <span class="login_msg_warning"></span>你已经退出登录，可能由于以下原因：</p>
-                <ul>
-                    <li>你长时间未对页面进行操作。</li>
-                    <li>Cookie 异常，你可以尝试<a href="javascript:;" class="delCookiesBtn">删除Cookie</a>，然后重新登入。
-                    </li>
-                </ul>
-            </div>
-
             <div class="content_wrapper">
                 <div class="row">
                     <div class="col-md-7 col-sm-7 col-xs-12">
-                        <div class="login_pictures">
-                            <img />
+                        <div class="article_list">
+                            <ul>
+                                <?php
+                                        foreach($articleList as $v) {?>
+                                <li title="时间:<?=$v['ctime'];?>">
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-2 col-xs-2">
+                                            <span class="cate">『<a href="/?typeId=<?=$v['typeid'];?>" target="_self"> <?=$v['typeName'];?> </a>』</span>
+                                        </div>
+                                        <div class="col-md-10 col-sm-6 col-xs-10">
+                                                <span class="title">
+                                                    <a href="/index/article/details/id/<?=$v['id'];?>"> <?=$v['title'];?> </a> (<?=$v['rq'];?>)
+                                                </span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php
+                                        }?>
+                            </ul>
+                            <?=$pageMenu;?>
                         </div>
                     </div>
                     <div class="col-md-5 col-sm-5 col-xs-12">
-                        <div class="tool_container">
-                            <div class="panel panel-default" style="height: 100%;border: 0; ">
-                                <div class="panel-heading">
-                                    我的工具 (<a href="#" class="aboutMyTool" target="_blank"
-                                             data-title="因为我觉得..网上的很多工具做的很不银杏<br/>所以我干脆自己来一套 <br/>
-                                              我不要你觉得，我要我觉得<br />我就是喜欢重复造轮子">why？</a>)
+                        <div class="panel panel-success" style="border: 0; ">
+                            <div class="panel-heading">
+                                日志分类
+                            </div>
+                            <div class="panel-body">
+                                <div style="margin: 10px 5px;">
+                                    <ul class="cateList">
+                                        <li <?=($typeId==0 ?'class="active"':'');?>>
+                                        <a href="/" target="_parent" class="btn btn-xs">全部</a>
+                                        </li>
+                                        <?php
+                                        foreach($cateList as $v) {?>
+                                        <li <?=($typeId==$v['id'] ?'class="active"':'');?>>
+                                            <a href="/?typeId=<?=$v['id'];?>" target="_parent" class="btn btn-xs"><?=$v['title'];?></a>
+                                        </li>
+                                        <?php
+                                        }?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel panel-info" style="overflow:hidden;border: 0; ">
+                            <div class="panel-heading">
+                                我的工具 (<a href="#" class="aboutMyTool" target="_blank"
+                                         data-title="因为我觉得..网上的很多工具做的很不银杏<br/>所以我干脆自己来一套 <br/>
+                                          我不要你觉得，我要我觉得，我就是喜欢重复造轮子">why？</a>)
 
-                                    <a type="button" class="btn btn-xs btn-default joinBtn" data-link="/index/user/login" style="float:right;">登录管理</a>
-                                </div>
-                                <div class="panel-body">
-                                    <div  style="margin: 10px 5px;">
-                                        <ul class="toolList">
-                                            <li>
-                                                <a href="/tool/zz/" class="btn btn-sm btn-default">正则转换</a>
-                                                <a href="/tool/code.html" class="btn btn-sm btn-default">特殊符号</a>
-                                            </li>
-                                            <li>
-                                                <a href="/tool/img2base64/" class="btn btn-sm btn-default">图片转base64</a>
-                                                <a href="/tool/base64/" class="btn btn-sm btn-default">字符转base64</a>
-                                            </li>
-                                            <li>
-                                                <a href="/tool/world/" class="btn btn-sm btn-default">全球区域查询</a>
-                                                <a href="/tool/time/" class="btn btn-sm btn-default">时间戳转换</a>
-                                            </li>
-                                            <li>
-                                                <a href="/tool/color.html" class="btn btn-sm btn-default">颜色表</a>
-                                            </li>
-                                            <li>
-                                                <a href="/tool/emoji/" class="btn btn-sm btn-default">emoji转换</a>
-                                                <a href="/tool/mine/" class="btn btn-sm btn-default">mine-type</a>
-                                            </li>
-                                            <li>
-                                                <a href="/tool/editor/" class="btn btn-sm btn-default">Editor</a>
-                                                <a href="http://hadmin.li6.cc/" class="btn btn-sm btn-default">hadmin</a>
-                                            </li>
-                                            <li>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                <a type="button" class="btn btn-xs btn-default joinBtn" data-link="/index/user/login" style="float:right;">登录管理</a>
                             </div>
-                            <div class="loginTips">
-                                <a href="#" class="aboutBtn" target="_blank">本站的意义</a>
-                                <div class="hidden">
-                                    1.个人主页，证明自己在互联网上存在过的证据； <br/>
-                                    2.记录一些文字，心得； <br/>
-                                    3.希望做一个展现自己想法的网站；
-                                </div>
-                                &copy; lirui 2021/5/24
+                            <div class="panel-body">
+                                <img class="bgImage" />
+                                    <ul class="toolList">
+                                        <li>
+                                            <a href="/tool/zz/" class="btn btn-sm btn-default">正则转换</a>
+                                            <a href="/tool/code.html" class="btn btn-sm btn-default">特殊符号</a>
+                                        </li>
+                                        <li>
+                                            <a href="/tool/img2base64/" class="btn btn-sm btn-default">图片转base64</a>
+                                            <a href="/tool/base64/" class="btn btn-sm btn-default">字符转base64</a>
+                                        </li>
+                                        <li>
+                                            <a href="/tool/world/" class="btn btn-sm btn-default">全球区域查询</a>
+                                            <a href="/tool/time/" class="btn btn-sm btn-default">时间戳转换</a>
+                                        </li>
+                                        <li>
+                                            <a href="/tool/color.html" class="btn btn-sm btn-default">颜色表</a>
+                                        </li>
+                                        <li>
+                                            <a href="/tool/emoji/" class="btn btn-sm btn-default">emoji转换</a>
+                                            <a href="/tool/mine/" class="btn btn-sm btn-default">mine-type</a>
+                                        </li>
+                                        <li>
+                                            <a href="/tool/editor/" class="btn btn-sm btn-default">Editor</a>
+                                            <a href="http://hadmin.li6.cc/" class="btn btn-sm btn-default">hadmin</a>
+                                        </li>
+                                        <li>
+                                        </li>
+                                    </ul>
+
                             </div>
+                        </div>
+                        <div class="createdTime">
+                            &copy; lirui 2021/5/24
                         </div>
 
                         <div class="input-group" style="margin-top: 8px;text-align: right;">
@@ -101,3 +122,9 @@
 
         </div>
     </div>
+
+    <div class="hidden">
+            <script type="text/javascript">document.write(unescape("%3Cspan id='cnzz_stat_icon_1279380024'%3E%3C/span%3E%3Cscript src='https://s9.cnzz.com/stat.php%3Fid%3D1279380024%26show%3Dpic' type='text/javascript'%3E%3C/script%3E"));</script>
+    </div>
+    </body>
+</html>

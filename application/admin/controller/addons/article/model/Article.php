@@ -24,7 +24,7 @@ class Article extends Model
         }
     }
     //获取上一篇
-    public static function getPrevNextArticle($typeId=0, $id=0, $flag='</>') {
+    public static function getPrevNextArticle($typeId=0, $id=0, $flag='<') {
         return self::field('id,title')->where([
             'typeId' => $typeId,
             'id' => [$flag, $id],

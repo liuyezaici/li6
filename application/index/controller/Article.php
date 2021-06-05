@@ -35,25 +35,22 @@ class Article extends Frontend
         }
         ArticleModel::updateRq($id);
         $info['typeName'] = $info['typeid'] ? Types::getFieldById($info['typeid'], 'title') : '';
-        //markdown
-        include_once(ROOT_PATH . 'assets/libs/markdown/Markdown.php');
-        include_once(ROOT_PATH . 'assets/libs/markdown/MarkdownExtra.php');
-        $info['content'] = \MarkdownExtra::defaultTransform( $info['content']);
+        if($info['editorType'] =='markdown') {
+            //markdown
+            include_once(ROOT_PATH . 'public/assets/libs/editor/markdown/Markdown.php');
+            include_once(ROOT_PATH . 'public/assets/libs/editor/markdown/MarkdownExtra.php');
+            $info['content'] = \MarkdownExtra::defaultTransform( $info['content']);
+        }
 //        $info['content'] = preg_replace("/<img(.+)src=\"([^\"]+)\"(.+)>/", '<img class="lazy"$1data-original=\'$2\' src=\'/assets/img/loading2.gif\'$3>',$info['content']);
         //上一篇 下一篇
         $prevArticle = ArticleModel::getPrevNextArticle($info['typeid'], $id, '<');
         $nextArticle = ArticleModel::getPrevNextArticle($info['typeid'], $id, '>');
 
-        $myUid = $this->auth->id;
-        $showEdit = false;
-        if($myUid == $info['cuid']) {
-            $showEdit = true;
-        }
-        $info['author'] = Users::getfieldbyid($info['cuid'], 'nickname');
+
         $rightHtml = $this->view->fetch('', [
             'webTitle' =>  $info['title'],
             'info' =>  $info,
-            'showEdit' =>  $showEdit,
+            'footer' =>  $this->view->fetch('footer'),
             'prevArticle' =>  $prevArticle,
             'nextArticle' =>  $nextArticle,
         ]);

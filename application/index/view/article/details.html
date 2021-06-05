@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title><?=$info['title']?> - LR主页</title>
+    <meta name="keywords" content="LR个人主页">
+    <meta name="description" content="李大爷个人主页">
+    <link href="/assets/libs/bootstrap/dist/css/bootstrap.css" rel="stylesheet" media="all" /> <!--  首页 -->
+    <link href="/assets/article/article.css" rel="stylesheet" media="all" /> <!--  首页 -->
+    <link rel="stylesheet" href="/assets/libs/editor/markdown/markdown.css" />
+</head>
+<div class="container" id="indexPage">
+    <div class="header">
+        <a class="header_logo" href="/" target="_parent">LR主页</a>
+        <div class="header_link"><a href="/" target="_parent">回首页</a>&nbsp; </div>
+    </div>
+</div>
+<div class="article_body">
+    <div class="article_title">
+        <h2>
+            <?=$info['title']?>
+        </h2>
+    </div>
+    <div class="article_info">
+        <ul>
+            <li>
+                <em> 时间：</em> <?=$info['ctime']?>
+            </li>
+            <li>
+                <em> 分类：</em> <a href="/?typeId=<?=$info['typeid']?>"><?=$info['typeName']?></a>
+            </li>
+            <li>
+                <em> 浏览：</em> <?=$info['rq']?>
+            </li>
+        </ul>
+    </div>
+    <div id="article_content">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td valign="top">
+                    <p class="article_begin">正文开始</p>
+                    <div class="content_box">
+                        <div class="markdown-body"><?=$info['content']?></div>
+                    </div>
+                    <p class="article_end">正文结束</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <?php
+                 if($prevArticle) {
+                    echo "<a href='/index/article/details/id/". $prevArticle['id'] ."' target='_parent'>". $prevArticle['title'] ."</a>";
+                 } else {
+                    echo '没有上一篇';
+                } ?>
+            </td>
+            <td>
+                <?php
+                 if($nextArticle) {
+                    echo "<a href='/index/article/details/id/". $nextArticle['id'] ."' target='_parent'>". $nextArticle['title'] ."</a>";
+                } else {
+                echo '没有上一篇';
+                } ?>
+            </td>
+        </tr>
+    </table>
+</div>
+<?=$footer;?>

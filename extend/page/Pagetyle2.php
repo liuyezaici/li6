@@ -10,38 +10,38 @@ namespace page;
 // | Author: zhangyajun <448901948@qq.com>
 // +----------------------------------------------------------------------
 use think\Paginator;
-class Pagetyle1 extends Paginator
+class Pagetyle2 extends Paginator
 {
     //首页
     protected function home() {
         if ($this->currentPage() > 1) {
-            return "<a href='" . $this->url(1) . "' title='首页'>首页</a>";
+            return "<a href='" . $this->url(1) . "' title='首页' target=\"_parent\">首页</a>";
         } else {
-            return "<p>首页</p>";
+            return "";
         }
     }
     //上一页
     protected function prev() {
         if ($this->currentPage() > 1) {
-            return "<a href='" . $this->url($this->currentPage - 1) . "' title='上一页'>上一页</a>";
+            return "<a href='" . $this->url($this->currentPage - 1) . "' title='上一页' target=\"_parent\">上一页</a>";
         } else {
-            return "<p>上一页</p>";
+            return "";
         }
     }
     //下一页
     protected function next() {
         if ($this->hasMore) {
-            return "<a href='" . $this->url($this->currentPage + 1) . "' title='下一页'>下一页</a>";
+            return "<a href='" . $this->url($this->currentPage + 1) . "' title='下一页' target=\"_parent\">下一页</a>";
         } else {
-            return"<p>下一页</p>";
+            return"";
         }
     }
     //尾页
     protected function last() {
         if ($this->hasMore) {
-            return "<a href='" . $this->url($this->lastPage) . "' title='尾页'>尾页</a>";
+            return "<a href='" . $this->url($this->lastPage) . "' title='尾页' target=\"_parent\">尾页</a>";
         } else {
-            return "<p>尾页</p>";
+            return "";
         }
     }
     //统计信息
@@ -80,11 +80,9 @@ class Pagetyle1 extends Paginator
             $html .= $this->getUrlLinks($block['first']);
         }
         if (is_array($block['slider'])) {
-            $html .= $this->getDots();
             $html .= $this->getUrlLinks($block['slider']);
         }
         if (is_array($block['last'])) {
-            $html .= $this->getDots();
             $html .= $this->getUrlLinks($block['last']);
         }
         return $html;
@@ -127,7 +125,7 @@ class Pagetyle1 extends Paginator
      */
     protected function getAvailablePageWrapper($url, $page)
     {
-        return '<a href="' . htmlentities($url) . '" title="第'. $page .'页" >' . $page . '</a>';
+        return '<a href="' . htmlentities($url) . '" title="第'. $page .'页"  target="_parent">' . $page . '</a>';
     }
     /**
      * 生成一个禁用的按钮
@@ -147,7 +145,7 @@ class Pagetyle1 extends Paginator
      */
     protected function getActivePageWrapper($text)
     {
-        return '<a href="" class="cur">' . $text . '</a>';
+        return '<a href="" class="cur" target="_parent">' . $text . '</a>';
     }
     /**
      * 生成省略号按钮
@@ -195,28 +193,28 @@ class Pagetyle1 extends Paginator
                 margin:0;
                 cursor:pointer
             }
-            .pagination{
+            .pagination {
                 height: 40px;
                 padding: 10px 0px;
-                margin: 0;
+                margin: 0 -10px;
             }
-            .pagination a{
+            .pagination a {
                 display:block;
                 float:left;
                 margin-right:10px;
                 padding:2px 12px;
                 height:24px;
-                border:1px #cccccc solid;
-                background:#fff;
+                border: 1px solid #dedede;
+                border-radius: 5px;
                 text-decoration:none;
                 color:#808080;
                 font-size:12px;
                 line-height: 22px;
+                margin-bottom: 10px;
             }
             .pagination a:hover{
-                color:#077ee3;
-                background: white;
-                border:1px #077ee3 solid;
+                color: #077ee3;
+                background: #bdd1ff;
             }
             .pagination a.cur{
                 border:none;
@@ -225,14 +223,14 @@ class Pagetyle1 extends Paginator
             }
             .pagination p{
                 float:left;
-                padding: 2px 12px;
+                padding: 2px 5px;
                 font-size:12px;
                 height:24px;
                 line-height:22px;
                 color:#bbb;
-                border:1px #ccc solid;
                 background:#fcfcfc;
-                margin-right:8px;
+                margin-right:5px;
+                border: 0;
             }
             .pagination p.pageRemark{
                 border-style:none;

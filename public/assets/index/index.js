@@ -10,7 +10,7 @@
     });
     require(['jquery', 'lrBox', 'front'], function ($, lrBox, front) {
         var indexPage = $("#indexPage");
-        var indexImg = indexPage.find('.login_pictures img');
+        var indexImg = indexPage.find('.bgImage');
         indexPage.find('.delCookiesBtn').click(function () {
             front.deleteAllCookies();
         });
@@ -22,14 +22,7 @@
                 {fd:true, move: {dir: 'd', jl: '30%'}}
             );
         });
-        indexPage.find('.aboutBtn').click(function (e) {
-            e.preventDefault();
-            lrBox.closeAllBox();
-            var title = $(this).next().html();
-            lrBox.msg(title, '知道了',
-                {fd:true, move: {dir: 'd', jl: '20%'}}
-            );
-        });
+
         indexPage.find('.joinBtn').click(function (e) {
             e.preventDefault();
             lrBox.closeAllBox();
