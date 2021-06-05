@@ -68,6 +68,8 @@ class Index extends Frontend
         print_r($this->fetch('',
             [
                 'typeId' => $typeId,
+                'topTitle' => $keyword ? "搜索:{$keyword}": '最新文章',
+                'keyword' => $keyword,
                 'articleList' => $articleList,
                 'pageMenu' => $pageMenu,
                 'cateList' => $cateList,

@@ -10,15 +10,18 @@
     <link href="/assets/index/index.css" rel="stylesheet" media="all"/>
     <script type="text/javascript" src="/assets/js/require.min.js" data-main="/assets/index/index"></script>
     <base target="_blank">
-    <div class="container" id="indexPage">
+    <div id="indexPage">
         <div class="header">
-            <a class="header_logo" href="/" title="LR主页" target="_parent">LR主页</a>
-            <div class="header_link"><a href="/" target="_parent">回首页</a>&nbsp; </div>
+            <div class="container">
+                <a class="header_logo" href="/" title="LR主页" target="_parent">LR主页</a>
+                <div class="header_link"><a href="/" target="_parent">回首页</a>&nbsp; </div>
+            </div>
         </div>
         <div class="content">
             <div class="content_wrapper">
                 <div class="row">
                     <div class="col-md-7 col-sm-7 col-xs-12">
+                        <h4 class="topTitle"> <?=$topTitle;?> </h4>
                         <div class="article_list">
                             <ul>
                                 <?php
@@ -42,6 +45,13 @@
                         </div>
                     </div>
                     <div class="col-md-5 col-sm-5 col-xs-12">
+                        <form action="/" method="get" class="input-group searchForm" target="_self">
+                            <input name="typeId" type="hidden" value="<?=$typeId?>" />
+                            <input name="keyword" class="form-control kw_been" value="<?=$keyword?>" autocomplete="off" />
+                            <span class="input-group-btn">
+                               <button type="submit" class="btn btn-md btn-default">搜索</button>
+                           </span>
+                        </form>
                         <div class="panel panel-success" style="border: 0; ">
                             <div class="panel-heading">
                                 日志分类
@@ -63,7 +73,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="panel panel-info" style="overflow:hidden;border: 0; ">
+                        <div class="panel panel-info" style="overflow:hidden;border: 0;position: relative; ">
                             <div class="panel-heading">
                                 我的工具 (<a href="#" class="aboutMyTool" target="_blank"
                                          data-title="因为我觉得..网上的很多工具做的很不银杏<br/>所以我干脆自己来一套 <br/>

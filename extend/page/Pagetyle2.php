@@ -201,9 +201,9 @@ class Pagetyle2 extends Paginator
             .pagination a {
                 display:block;
                 float:left;
-                margin-right:10px;
-                padding:2px 12px;
-                height:24px;
+                margin-right: 8px;
+                padding: 0px 5px;
+                height: 22px;
                 border: 1px solid #dedede;
                 border-radius: 5px;
                 text-decoration:none;
@@ -213,8 +213,8 @@ class Pagetyle2 extends Paginator
                 margin-bottom: 10px;
             }
             .pagination a:hover{
-                color: #077ee3;
-                background: #bdd1ff;
+                color: #666;
+                background: #eee;
             }
             .pagination a.cur{
                 border:none;

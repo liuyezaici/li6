@@ -15,7 +15,7 @@
     float: left;
     _display: inline;
     margin-top: 16px;
-    margin-left: 6%;
+    margin-left: 3%;
     height: 35px;
     text-indent: 45px;
     line-height: 50px;
@@ -70,8 +70,6 @@
     vertical-align: bottom;
     color: #ccc;
     font-weight: bold;
-    margin-right: -15px;
-    margin-left: -15px;
     font-size: 12px;
 }
 .article_list ul li .cate a {
@@ -173,4 +171,21 @@
 }
 .pagination {
     width: 100%;
+}
+.topTitle {
+    border-bottom: 1px solid #dedede;
+    padding-bottom: 10px;
+    margin: 0;
+}
+.searchForm {
+    padding-bottom: 15px;
+}
+.searchForm .kw_been {
+    background-image: none;
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    background-size: 40px 35px;
+}
+.searchForm .kw_been:focus  {
+    background-image: url("been.gif");
 }
