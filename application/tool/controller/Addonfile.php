@@ -48,7 +48,7 @@ class Addonfile extends Frontend
         if(!$size) $this->error('no file size');
         if(!$type) $this->error('no file type');
         if(!$tmp_name) $this->error('no file tmp_name');
-        $savePath = ROOT_PATH . "\public\upload\post_files\\{$sidVal}";
+        $savePath = ROOT_PATH . "/public/upload/post_files/{$sidVal}";
         $visitUrl = "/upload/post_files/{$sidVal}/{$filename}";
         File::creatdir($savePath);
         $saveUrl = $savePath . "\\{$filename}";
