@@ -51,7 +51,7 @@ class Addonfile extends Frontend
         $savePath = ROOT_PATH . "/public/upload/post_files/{$sidVal}";
         $visitUrl = "/upload/post_files/{$sidVal}/{$filename}";
         File::creatdir($savePath);
-        $saveUrl = $savePath . "\\{$filename}";
+        $saveUrl = $savePath . "/{$filename}";
         rename($tmp_name, $saveUrl);
         $array_ = explode('.', $filename);
         $geshi = end($array_);
