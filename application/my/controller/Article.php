@@ -83,6 +83,7 @@ class Article extends Backend
             'topTitle' => '写一篇',
             'id' =>  0,
             'row' =>  [
+                'typeid' => 0,
                 'title' => '',
                 'editorType' => '',
                 'content' => '',
