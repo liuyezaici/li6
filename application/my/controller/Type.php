@@ -56,7 +56,7 @@ class Type extends Backend
     }
 
     //编辑分类-api
-    public function editApi($id=NULL) {
+    public function editapi($id=NULL) {
         $info = types::get($id);
         if(!$info) $this->error('分类不存在');
         if($info['uid'] != $this->auth->id) $this->error('身份已经切换');
@@ -108,7 +108,7 @@ class Type extends Backend
 
     }
     //添加分类
-    public function getMyTypes() {
+    public function getmytypes() {
         $id1 = input('id1', 0, 'intval');
         $allTypes = types::getUserRootTypes();
         foreach ($allTypes as $n => &$v) {

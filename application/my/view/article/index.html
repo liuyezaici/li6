@@ -58,7 +58,7 @@
             var selectBox = topForm.find(".set_typeid");
             var pagination = articleList.find(".pagination");
             function getTypes() {
-                selectBox.html('').load('/my/type/getMyTypes?id1='+ typeid, function () {
+                selectBox.html('').load('/my/type/getmytypes?id1='+ typeid, function () {
                     var addTypeBtn = selectBox.find(".addTypeBtn");
                     addTypeBtn.click(function () {
                         lrBox.closeAllBox();

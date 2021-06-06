@@ -94,7 +94,7 @@
             var defaultContent = writeBox.find("#defaultContent");
             var autoVal =  defaultContent.html();
             function getTypes(typeid) {
-                selectBox.html('').load('/my/type/getMyTypes?id1='+ typeid, function () {
+                selectBox.html('').load('/my/type/getmytypes?id1='+ typeid, function () {
                     var addTypeBtn = selectBox.find(".addTypeBtn");
                     addTypeBtn.click(function () {
                         lrBox.msgt('添加分类', '[url]/my/type/add', '400px', {fadein: 1, fd: 1,move: {fx:'d', sd: 100,jl: '20%'}});
