@@ -209,10 +209,10 @@
                 var thisEditorObj = KindEditor.create(newContentObj, defaultOpt);
 
                 currentGetEditorValFunc = function () {
-                    return  thisEditorObj.text();
+                    return  thisEditorObj.html();
                 };
                 currentEditorValFunc = function (newVal) {
-                    thisEditorObj.text(newVal);
+                    thisEditorObj.html(newVal);
                 };
                 window.editorInsertUrl = function (url) {
                     thisEditorObj.insertHtml(url);
