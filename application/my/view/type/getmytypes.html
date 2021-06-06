@@ -1,6 +1,6 @@
 <?php
 //因为多个页面可能一起加载分类：如列表头部搜索分类，然后打开添加文字 加载分类。所以这里的id必须随机
-$tmpSelectID = \Fast\Str::getRandChar(16);
+$tmpSelectID = \fast\Str::getRandChar(16);
 ?>
 <select class="form-control" id="myTypeSelect<?=$tmpSelectID;?>" name="typeid" >
     <option value="0">无</option>

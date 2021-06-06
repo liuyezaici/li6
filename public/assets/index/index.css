@@ -180,12 +180,12 @@
 .searchForm {
     padding-bottom: 15px;
 }
-.searchForm .kw_been {
+.searchForm .kw_bean {
     background-image: none;
     background-repeat: no-repeat;
     background-position: right bottom;
     background-size: 40px 35px;
 }
-.searchForm .kw_been:focus  {
-    background-image: url("been.gif");
+.searchForm .kw_bean:focus  {
+    background-image: url("bean.gif");
 }
