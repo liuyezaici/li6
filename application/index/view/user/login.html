@@ -41,9 +41,7 @@
                 successFunc: function (res) {
                     lrBox.closeAllBox();
                     lrBox.msgTisf(res.msg);
-                    setTimeout(function () {
-                        window.location = '/index/main';
-                    }, 1000);
+                    window.location = '/index/main';
                 },
                 errorFunc: function (res) {
                     lrBox.noLoading();
