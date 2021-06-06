@@ -92,11 +92,10 @@
 
             topForm.submit(function (e) {
                 e.preventDefault();
-                var uri = $(this).serialize();
+                var uri = $(this).serialize() +'&r_='+ Math.random();
                 var url = window.location.toString();
                 url = url.replace(/\?.+/, '');
                 window.location.href = url + '?' + uri;
-                window.location.reload();
             });
 
 
