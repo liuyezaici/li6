@@ -117,7 +117,7 @@ class Backend extends Controller
 
     public function _initialize()
     {
-        new RDS();
+//        new RDS();
         $modulename = $this->request->module();
         $controllername = Loader::parseName($this->request->controller());
         $actionname = strtolower($this->request->action());

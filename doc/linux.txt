@@ -274,6 +274,8 @@ lirui lirui
 linux ≥ı ºªØ’æµ„ 
 git init
 
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/havenchat.git
+git remote add origin https://liuyezaici:Ygmlxomlg6@github.com/liuyezaici/djshiyong.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6//mypc.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6//zhaotu.git
 git remote add origin https://li6:ygmlxomlg@gitee.com/li6//shiyong2021.git

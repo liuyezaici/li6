@@ -48,7 +48,7 @@ class Frontend extends Controller
 
     public function _initialize()
     {
-        new RDS();
+//        new RDS();
         //移除HTML标签
         $this->request->filter('trim,strip_tags,htmlspecialchars');
         $modulename = $this->request->module();
